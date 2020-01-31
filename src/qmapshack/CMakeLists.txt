@@ -155,6 +155,7 @@ set( SRCS
     gis/trk/CEnergyCycling.cpp
     gis/trk/CEnergyCyclingDialog.cpp
     gis/trk/CGisItemTrk.cpp
+    gis/trk/CHeartRateZonesDialog.cpp
     gis/trk/CInvalidTrk.cpp
     gis/trk/CKnownExtension.cpp
     gis/trk/CPropertyTrk.cpp
@@ -494,6 +495,7 @@ set( HDRS
     gis/trk/CEnergyCycling.h
     gis/trk/CEnergyCyclingDialog.h
     gis/trk/CGisItemTrk.h
+    gis/trk/CHeartRateZonesDialog.h
     gis/trk/CInvalidTrk.h
     gis/trk/CKnownExtension.h
     gis/trk/CPropertyTrk.h
@@ -742,6 +744,7 @@ set( UIS
     gis/trk/ICutTrk.ui
     gis/trk/IDetailsTrk.ui
     gis/trk/IEnergyCyclingDialog.ui
+    gis/trk/IHeartRateZonesDialog.ui
     gis/trk/IInvalidTrk.ui
     gis/trk/IScrOptTrk.ui
     gis/trk/ISelectActivityColor.ui

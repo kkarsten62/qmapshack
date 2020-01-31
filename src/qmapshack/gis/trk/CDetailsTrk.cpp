@@ -18,6 +18,7 @@
 
 #include "gis/trk/CDetailsTrk.h"
 #include "gis/trk/CEnergyCyclingDialog.h"
+#include "gis/trk/CHeartRateZonesDialog.h"
 #include "gis/trk/CKnownExtension.h"
 #include "gis/trk/CPropertyTrk.h"
 #include "gis/trk/filter/CFilterChangeStartPoint.h"
@@ -146,9 +147,9 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
     connect(toolLock,         &QToolButton::toggled,               this, &CDetailsTrk::slotChangeReadOnlyMode);
     connect(textCmtDesc,      &QTextBrowser::anchorClicked,        this, &CDetailsTrk::slotLinkActivated);
 
-    connect(pushSetActivities,    &QPushButton::clicked, this, &CDetailsTrk::slotSetActivities);
-    connect(toolSetEnergyCycling, &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
-
+    connect(pushSetActivities,      &QPushButton::clicked, this, &CDetailsTrk::slotSetActivities);
+    connect(toolSetEnergyCycling,   &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
+    connect(toolSetHeartRate,       &QPushButton::clicked, this, &CDetailsTrk::slotHeartRateZones);
     connect(lineName,         &QLineEdit::textEdited,              this, &CDetailsTrk::slotNameChanged);
     connect(lineName,         &QLineEdit::editingFinished,         this, &CDetailsTrk::slotNameChangeFinished);
 
@@ -726,6 +727,17 @@ void CDetailsTrk::slotSetEnergyCycling()
     {
         trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
     }
+}
+
+void CDetailsTrk::slotHeartRateZones()
+{
+    CHeartRateZonesDialog heartRateZonesDialog(this, trk);
+    qint32 ret = heartRateZonesDialog.exec();
+
+//    if(ret == QDialog::Accepted || ret == QDialog::Rejected)
+//    {
+//        trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
+//    }
 }
 
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)
