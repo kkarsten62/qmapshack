@@ -27,6 +27,16 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
 {
     setupUi(this);
 
+    for(const CTrackData::trkpt_t &pt : trk.getTrackData())
+    {
+        if(pt.isHidden())
+        {
+            continue;
+        }
+        qint32 hr = pt.extensions["gpxtpx:TrackPointExtension|gpxtpx:hr"].toInt();
+        qDebug() << "hr=" << hr;
+    }
+
     SETTINGS;
     maxHeartRate = cfg.value("TrackDetails/HeartRateZones/maxHeartRate", 180).toInt();
 
@@ -41,11 +51,29 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
     CPercentBar *percentBar5 = new CPercentBar(columnType_e::eIsPercent, colorList["warning"], this);
 
 //    gridLayout->itemAtPosition(2, 5)->setGeometry(QRect(0, 0, 200, 50));
-    gridLayout->addWidget(percentBar1, 2, 5, 1, 1);
-    gridLayout->addWidget(percentBar2, 4, 5, 1, 1);
-    gridLayout->addWidget(percentBar3, 6, 5, 1, 1);
-    gridLayout->addWidget(percentBar4, 8, 5, 1, 1);
-    gridLayout->addWidget(percentBar5, 10, 5, 1, 1);
+    gridLayout->addWidget(percentBar1,  2, 3, 1, 1);
+    gridLayout->addWidget(percentBar2,  2, 4, 1, 1);
+    gridLayout->addWidget(percentBar3,  2, 5, 1, 1);
+    gridLayout->addWidget(percentBar4,  2, 6, 1, 1);
+    gridLayout->addWidget(percentBar5, 10, 6, 1, 1);
+
+    for (qint32 i = 0; i < gridRows.size(); i++)
+    {
+        struct gridRow &gridRow = gridRows[i];
+
+        qint32 minBpm = qRound(gridRow.minPercent * maxHeartRate / 100.0);
+        qint32 maxBpm;
+        if (i == (gridRows.size() - 1))
+        {
+            maxBpm = 220;
+        }
+        else
+        {
+            maxBpm = qRound(gridRow.maxPercent * maxHeartRate / 100.0);
+        }
+        QString label = QString("%1").arg(minBpm) + tr("bpm") + " - " + QString("%1").arg(maxBpm) + tr("bpm");
+        static_cast<QLabel *>(gridLayout->itemAtPosition(i * 2 + 2, 2)->widget())->setText(label);
+    }
 
     connect(spinMaxHeartRate, SIGNAL(valueChanged(qint32)), this, SLOT(slotSetMaxHeartRate(qint32)));
     connect(toolButtonApply, SIGNAL(clicked(bool)), this, SLOT(slotApply(bool)));
@@ -60,6 +88,23 @@ CHeartRateZonesDialog::~CHeartRateZonesDialog()
 void CHeartRateZonesDialog::slotSetMaxHeartRate(qint32 maxHeartRate)
 {
     this->maxHeartRate = maxHeartRate;
+    //    labelZone00->setText("0bpm" + " - " + "112bpm");
+
+    QString hr60 = QString("%1").arg(qRound(maxHeartRate * 0.6));
+    QString hr70 = QString("%1").arg(qRound(maxHeartRate * 0.7));
+    QString hr80 = QString("%1").arg(qRound(maxHeartRate * 0.8));
+    QString hr90 = QString("%1").arg(qRound(maxHeartRate * 0.9));
+
+    labelMinMaxAvg->setText("Heart Rate: Min: 102bpm Max: 167bpm Avg: 134bpm");
+
+    /*
+    labelZone00->setText("0" + tr("bpm") + " - " + QString("%1").arg(hr60) + tr("bpm"));
+    labelZone60->setText(QString("%1").arg(hr60) + tr("bpm") + " - " + QString("%1").arg(hr70) + tr("bpm"));
+    labelZone70->setText(QString("%1").arg(hr70) + tr("bpm") + " - " + QString("%1").arg(hr80) + tr("bpm"));
+    labelZone80->setText(QString("%1").arg(hr80) + tr("bpm") + " - " + QString("%1").arg(hr90) + tr("bpm"));
+    labelZone90->setText(QString("%1").arg(hr90) + tr("bpm") + " - 220" + tr("bpm"));
+//    labelZone00->setText("0 " + tr("bpm") + " - " + tr("aaa") + " " + tr("bpm"));
+*/
     update();
 }
 
@@ -233,7 +278,8 @@ void CPercentBar::paintEvent(QPaintEvent *)
     painter.fillPath(innerRect, QBrush(color));
 
 
-    QString valueStrBottom = "88:88:88h";
+//    QString valueStrBottom = "88:88:88h";
+    QString valueStrBottom = "999.999 Pnts";
     qreal valuePosBottom = adjustTextPosition(valueStrBottom);
     painter.drawText(valuePosBottom, ascent + descent + 5 + 20 + 5 + ascent, valueStrBottom);
 

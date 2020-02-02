@@ -90,6 +90,49 @@ private:
 
     void initZoneItems();
 
+    struct gridRow
+    {
+        QColor color;
+        qint32 minPercent;
+        qint32 maxPercent;
+        qint32 minHR;
+        qint32 maxHR;
+    };
+    QList <gridRow> gridRows =
+    {
+        {QColor("#33a6cc"),  0,  60, 0, 0},
+        {QColor("#9ACD32"), 60,  70, 0, 0},
+        {QColor("#FFD700"), 70,  80, 0, 0},
+        {QColor("#FFA500"), 80,  90, 0, 0},
+        {QColor("#CC0000"), 90, 100, 0, 0}
+    };
+
+
+    struct gridColumn
+    {
+        QString name;
+        qreal total;
+    };
+    QList <gridColumn> gridColumns =
+    {
+        {tr("Track Points"), 0},
+        {tr("Moving Time"), 0},
+        {tr("Descent"), 0},
+        {tr("Ascent"), 0}
+    };
+
+    struct gridCell
+    {
+        qreal cellVal;
+        qreal cellPercent;
+    };
+
+    struct grid
+    {
+    };
+
+
+
 protected:
     void paintEvent(QPaintEvent *) override;
 };
@@ -110,7 +153,7 @@ private:
     const CHeartRateZonesDialog::columnType_e &type;
     const QColor &color;
     CHeartRateZonesDialog *parent;
-    qreal value = 50;
+    qreal value = 45;
 
     qreal adjustTextPosition(const QString &valueStr);
 };
