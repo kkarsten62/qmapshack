@@ -27,16 +27,6 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
 {
     setupUi(this);
 
-    for(const CTrackData::trkpt_t &pt : trk.getTrackData())
-    {
-        if(pt.isHidden())
-        {
-            continue;
-        }
-        qint32 hr = pt.extensions["gpxtpx:TrackPointExtension|gpxtpx:hr"].toInt();
-        qDebug() << "hr=" << hr;
-    }
-
     SETTINGS;
     maxHeartRate = cfg.value("TrackDetails/HeartRateZones/maxHeartRate", 180).toInt();
 
@@ -44,35 +34,64 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
 
 //    QWidget *widget = gridLayout->itemAtPosition(3, 5)->widget();
 
-    CPercentBar *percentBar1 = new CPercentBar(columnType_e::eIsPercent, colorList["moderate"], this);
-    CPercentBar *percentBar2 = new CPercentBar(columnType_e::eIsPercent, colorList["fitness"], this);
-    CPercentBar *percentBar3 = new CPercentBar(columnType_e::eIsPercent, colorList["aerobic"], this);
-    CPercentBar *percentBar4 = new CPercentBar(columnType_e::eIsPercent, colorList["anaerobic"], this);
-    CPercentBar *percentBar5 = new CPercentBar(columnType_e::eIsPercent, colorList["warning"], this);
+//    CPercentBar *percentBar1 = new CPercentBar(columnType_e::eIsPercent, colorList["moderate"], this);
+//    CPercentBar *percentBar2 = new CPercentBar(columnType_e::eIsPercent, colorList["fitness"], this);
+//    CPercentBar *percentBar3 = new CPercentBar(columnType_e::eIsPercent, colorList["aerobic"], this);
+//    CPercentBar *percentBar4 = new CPercentBar(columnType_e::eIsPercent, colorList["anaerobic"], this);
+//    CPercentBar *percentBar5 = new CPercentBar(columnType_e::eIsPercent, colorList["warning"], this);
 
 //    gridLayout->itemAtPosition(2, 5)->setGeometry(QRect(0, 0, 200, 50));
-    gridLayout->addWidget(percentBar1,  2, 3, 1, 1);
-    gridLayout->addWidget(percentBar2,  2, 4, 1, 1);
-    gridLayout->addWidget(percentBar3,  2, 5, 1, 1);
-    gridLayout->addWidget(percentBar4,  2, 6, 1, 1);
-    gridLayout->addWidget(percentBar5, 10, 6, 1, 1);
+//    gridLayout->addWidget(percentBar1,  2, 3, 1, 1);
+//    gridLayout->addWidget(percentBar2,  2, 4, 1, 1);
+//    gridLayout->addWidget(percentBar3,  2, 5, 1, 1);
+//    gridLayout->addWidget(percentBar4,  2, 6, 1, 1);
+//    gridLayout->addWidget(percentBar5, 10, 6, 1, 1);
 
-    for (qint32 i = 0; i < gridRows.size(); i++)
+    for (qint32 row = 0; row < gridRows.size(); row++)
     {
-        struct gridRow &gridRow = gridRows[i];
+        struct gridRow_t &gridRow = gridRows[row];
 
-        qint32 minBpm = qRound(gridRow.minPercent * maxHeartRate / 100.0);
-        qint32 maxBpm;
-        if (i == (gridRows.size() - 1))
+        gridRow.minHr = qRound(gridRow.minPercent * maxHeartRate / 100.0);
+        gridRow.maxHr;
+        if (row == (gridRows.size() - 1))
         {
-            maxBpm = 220;
+            gridRow.maxHr = 220;
         }
         else
         {
-            maxBpm = qRound(gridRow.maxPercent * maxHeartRate / 100.0);
+            gridRow.maxHr = qRound(gridRow.maxPercent * maxHeartRate / 100.0);
         }
-        QString label = QString("%1").arg(minBpm) + tr("bpm") + " - " + QString("%1").arg(maxBpm) + tr("bpm");
-        static_cast<QLabel *>(gridLayout->itemAtPosition(i * 2 + 2, 2)->widget())->setText(label);
+        QString label = QString("%1").arg(gridRow.minHr) + tr("bpm") + " - " + QString("%1").arg(gridRow.maxHr) + tr("bpm");
+        static_cast<QLabel *>(gridLayout->itemAtPosition(row * 2 + 2, 2)->widget())->setText(label);
+
+        for (qint32 column = 0; column < gridColumns.size(); column++)
+        {
+            struct gridCell_t gridCell;
+            gridCell.count = 0;
+            gridCell.val = 0;
+
+            switch(column)
+            {
+            case 0:
+            {
+               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::integer, gridRow.color, this);
+               break;
+            }
+            case 1:
+            {
+               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::time, gridRow.color, this);
+               break;
+            }
+            case 2:
+            case 3:
+            {
+               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::meter, gridRow.color, this);
+               break;
+            }
+            }
+            gridLayout->addWidget(gridCell.percentBar, row * 2 + 2, column + 3, 1, 1);
+            gridCells << gridCell;
+        }
     }
 
     connect(spinMaxHeartRate, SIGNAL(valueChanged(qint32)), this, SLOT(slotSetMaxHeartRate(qint32)));
@@ -88,23 +107,8 @@ CHeartRateZonesDialog::~CHeartRateZonesDialog()
 void CHeartRateZonesDialog::slotSetMaxHeartRate(qint32 maxHeartRate)
 {
     this->maxHeartRate = maxHeartRate;
-    //    labelZone00->setText("0bpm" + " - " + "112bpm");
-
-    QString hr60 = QString("%1").arg(qRound(maxHeartRate * 0.6));
-    QString hr70 = QString("%1").arg(qRound(maxHeartRate * 0.7));
-    QString hr80 = QString("%1").arg(qRound(maxHeartRate * 0.8));
-    QString hr90 = QString("%1").arg(qRound(maxHeartRate * 0.9));
 
     labelMinMaxAvg->setText("Heart Rate: Min: 102bpm Max: 167bpm Avg: 134bpm");
-
-    /*
-    labelZone00->setText("0" + tr("bpm") + " - " + QString("%1").arg(hr60) + tr("bpm"));
-    labelZone60->setText(QString("%1").arg(hr60) + tr("bpm") + " - " + QString("%1").arg(hr70) + tr("bpm"));
-    labelZone70->setText(QString("%1").arg(hr70) + tr("bpm") + " - " + QString("%1").arg(hr80) + tr("bpm"));
-    labelZone80->setText(QString("%1").arg(hr80) + tr("bpm") + " - " + QString("%1").arg(hr90) + tr("bpm"));
-    labelZone90->setText(QString("%1").arg(hr90) + tr("bpm") + " - 220" + tr("bpm"));
-//    labelZone00->setText("0 " + tr("bpm") + " - " + tr("aaa") + " " + tr("bpm"));
-*/
     update();
 }
 
@@ -131,25 +135,35 @@ void CHeartRateZonesDialog::slotApply(bool)
         }
 
         qint32 zone = 0;
-        for (qint32 i = 3; i >=0; --i)
+        for (qint32 i = gridRows.size() - 1; i >= 0; --i)
         {
-            if (hr >= (zones[i] * maxHeartRate / 100))
+            if (hr >= gridRows[i].minHr)
             {
                 zone = i;
                 break;
             }
         }
-        qDebug() << "hr: " << hr << "zone:" << zones[zone];
+        qDebug() << "hr: " << hr << "zone:" << zone;
 
         if(lastTrkpt != nullptr)
         {
             // time moving
             qreal dt = (trkpt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0;
-            if(dt > 0 && ((trkpt.deltaDistance / dt) > 0.2))
+            if(!(dt > 0 && ((trkpt.deltaDistance / dt) > 0.2)))
             {
-                zoneItems[zone][0].count++;
-                zoneItems[zone][0].sum += dt;
+                continue;    // stand still, no moving
             }
+
+            qDebug() << "Cell Row0 No=" <<  zone * gridColumns.size() + 0;
+            gridCells[zone * gridColumns.size() + 0].count++;
+            gridCells[zone * gridColumns.size() + 0].val++;
+
+            qDebug() << "Cell Row1 No=" <<  zone * gridColumns.size() + 1;
+            gridCells[zone * gridColumns.size() + 1].count++;
+            gridCells[zone * gridColumns.size() + 1].val += dt;
+
+            zoneItems[zone][0].count++;
+            zoneItems[zone][0].sum += dt;
 
             // ascent descent
             if(lastEle != NOINT)
@@ -164,11 +178,17 @@ void CHeartRateZonesDialog::slotApply(bool)
                     {
                         zoneItems[zone][1].count++;
                         zoneItems[zone][1].sum += step;
+                        qDebug() << "Cell Row2 No=" <<  zone * gridColumns.size() + 2;
+                        gridCells[zone * gridColumns.size() + 2].count++;
+                        gridCells[zone * gridColumns.size() + 2].val += step;
                     }
                     else
                     {
                         zoneItems[zone][2].count++;
                         zoneItems[zone][2].sum += step;
+                        qDebug() << "Cell Row3 No=" <<  zone * gridColumns.size() + 3;
+                        gridCells[zone * gridColumns.size() + 3].count++;
+                        gridCells[zone * gridColumns.size() + 3].val += step;
                     }
                     lastEle += step;
                 }
@@ -192,6 +212,15 @@ void CHeartRateZonesDialog::slotApply(bool)
         }
         lastTrkpt = &trkpt;
     }
+
+    qint32 i = 0;
+    for(struct gridCell_t & gridCell : gridCells)
+    {
+        qDebug() << "i=" << i << " gridCell count=" << gridCell.count;
+        qDebug() << "i=" << i << " gridCell   val=" << gridCell.val;
+        ++i;
+    }
+
 
     qreal totaltime = 0;
     for (qint32 i = 0; i < 5; i++)
@@ -250,6 +279,7 @@ void CPercentBar::paintEvent(QPaintEvent *)
     setMinimumSize(108, 64);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    painter.setFont(painter.font());
     const int ascent = QFontMetrics(painter.font()).ascent();
     const int descent = QFontMetrics(painter.font()).descent();
 
@@ -261,7 +291,7 @@ void CPercentBar::paintEvent(QPaintEvent *)
     qDebug() << "descent:" << descent;
     qDebug() << "widgetHeight:" << widgetHeight;
 
-    qreal valuePosTop = adjustTextPosition(valueStrTop);
+    qreal valuePosTop = adjustTextPosition(valueStrTop, painter);
 
     painter.drawText(valuePosTop + 4, ascent, valueStrTop);
 
@@ -279,8 +309,8 @@ void CPercentBar::paintEvent(QPaintEvent *)
 
 
 //    QString valueStrBottom = "88:88:88h";
-    QString valueStrBottom = "999.999 Pnts";
-    qreal valuePosBottom = adjustTextPosition(valueStrBottom);
+    QString valueStrBottom = "999.999";
+    qreal valuePosBottom = adjustTextPosition(valueStrBottom, painter);
     painter.drawText(valuePosBottom, ascent + descent + 5 + 20 + 5 + ascent, valueStrBottom);
 
     painter.setPen(QPen(Qt::black, 0.5));
@@ -293,9 +323,9 @@ void CPercentBar::paintEvent(QPaintEvent *)
 //                         160, ascent + descent + 5 + 20 + 5 + ascent + descent);
 }
 
-qreal CPercentBar::adjustTextPosition(const QString &valueStr)
+qreal CPercentBar::adjustTextPosition(const QString &valueStr, QPainter &painter)
 {
-    const qreal width = QFontMetrics(QPainter().font()).boundingRect(valueStr).width();
+    const qreal width = QFontMetrics(painter.font()).boundingRect(valueStr).width();
 
     qreal textPosition = ((value - width / 2) < 0) ? 0 : value - width / 2;
     textPosition = ((value + width / 2) > 100) ? 100 - width : textPosition;
