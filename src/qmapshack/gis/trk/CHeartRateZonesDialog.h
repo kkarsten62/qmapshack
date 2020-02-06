@@ -22,6 +22,7 @@
 
 class CGisItemTrk;
 class CTrackData;
+class CPercentBar;
 
 class CHeartRateZonesDialog : public QDialog, private Ui::IHeartRateZonesDialog
 {
@@ -90,15 +91,15 @@ private:
 
     void initZoneItems();
 
-    struct gridRow
+    struct gridRow_t
     {
         QColor color;
         qint32 minPercent;
         qint32 maxPercent;
-        qint32 minHR;
-        qint32 maxHR;
+        qint32 minHr;
+        qint32 maxHr;
     };
-    QList <gridRow> gridRows =
+    QList<gridRow_t> gridRows =
     {
         {QColor("#33a6cc"),  0,  60, 0, 0},
         {QColor("#9ACD32"), 60,  70, 0, 0},
@@ -107,13 +108,12 @@ private:
         {QColor("#CC0000"), 90, 100, 0, 0}
     };
 
-
-    struct gridColumn
+    struct gridColumn_t
     {
         QString name;
         qreal total;
     };
-    QList <gridColumn> gridColumns =
+    QList<gridColumn_t> gridColumns =
     {
         {tr("Track Points"), 0},
         {tr("Moving Time"), 0},
@@ -121,15 +121,14 @@ private:
         {tr("Ascent"), 0}
     };
 
-    struct gridCell
+    struct gridCell_t
     {
-        qreal cellVal;
-        qreal cellPercent;
+        qreal val;
+        qint32 count;
+        qreal percent;
+        CPercentBar *percentBar;
     };
-
-    struct grid
-    {
-    };
+    QList<struct gridCell_t> gridCells;
 
 
 
@@ -142,22 +141,30 @@ class CPercentBar : public QWidget
     Q_OBJECT
 
 public:
-    CPercentBar(const CHeartRateZonesDialog::columnType_e &type
+    enum valFormat_e
+    {
+        integer  = 0x00000001
+        , time   = 0x00000002
+        , meter  = 0x00000004
+        , degree = 0x00000008
+    };
+
+    CPercentBar(const valFormat_e valFormat
                 , const QColor &color
-                , CHeartRateZonesDialog *parent) : type(type), color(color), parent(parent) {}
+                , CHeartRateZonesDialog *parent) : valFormat(valFormat), color(color), parent(parent) {}
+    void setValue(qreal value) { this->value = value; }
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    const CHeartRateZonesDialog::columnType_e &type;
+    const valFormat_e valFormat;
     const QColor &color;
     CHeartRateZonesDialog *parent;
     qreal value = 45;
 
-    qreal adjustTextPosition(const QString &valueStr);
+    qreal adjustTextPosition(const QString &valueStr, QPainter &painter);
 };
-
 
 
 

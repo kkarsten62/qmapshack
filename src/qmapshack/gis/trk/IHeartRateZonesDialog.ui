@@ -204,7 +204,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Track Points:</string>
+          <string>Points:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -252,7 +252,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Ascent:</string>
+          <string>Descent:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -300,7 +300,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Descent:</string>
+          <string>Ascent:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -394,7 +394,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Moving Time:</string>
+          <string>Moving:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
