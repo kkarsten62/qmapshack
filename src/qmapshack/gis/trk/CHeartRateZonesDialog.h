@@ -29,65 +29,18 @@ class CHeartRateZonesDialog : public QDialog, private Ui::IHeartRateZonesDialog
     Q_OBJECT
 
 public:
-    CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk &trk);
+    CHeartRateZonesDialog(QWidget *parent, CGisItemTrk &trk);
     virtual ~CHeartRateZonesDialog();
 
-    enum columnType_e
-    {
-        eIsPercent    = 0x00000001
-        , eIsSum      = 0x00000002
-        , eIsAveradge = 0x00000004
-        , eFlagSubpt  = 0x00000008
-    };
-
-    struct zoneItem_t
-    {
-        qint32 count = 0;
-        qreal sum = 0;
-        void init()
-        {
-            count = 0;
-            sum = 0;
-        }
-    };
-
-    struct zoneRow_t
-    {
-        qreal from;
-        qreal to;
-    };
-
-    struct zoneColumn_t
-    {
-        columnType_e columnType;
-        bool showValue;
-        bool showPercent;
-    };
-
-    const qint32 numOfRows = 5;
-    const qint32 numOfColumns = 5;
-
-    QList<qreal> zones = {60, 70, 80, 90};
-    QList<zoneRow_t> zoneRows = { {0, 50}, {50, 60} };
-    QList<zoneColumn_t> zoneColumns = { {eIsPercent, true, true}, {eIsSum, true, true} };
-    zoneItem_t zoneItems[5][5];
-
 private slots:
-
-    void slotSetMaxHeartRate(qint32 maxHeartRate);
-    void slotApply(bool);
+    void slotSetMaxHr(qint32 maxHr);
 
 private:
-    QHash<QString, QColor> colorList =
-    {
-          {"moderate",  QColor("#33a6cc")}
-        , {"fitness",   QColor("#9ACD32")}
-        , {"aerobic",   QColor("#FFD700")}
-        , {"anaerobic", QColor("#FFA500")}
-        , {"warning",   QColor("#CC0000")}
-    };
-    const CGisItemTrk &trk;
-    qint32 maxHeartRate;
+    CGisItemTrk &trk;
+    qint32 maxHr;
+    qreal minTrkHr = 220.;
+    qreal maxTrkHr = 0.;
+    qreal trkHeartBeats = 0;
 
     void initZoneItems();
 
@@ -96,8 +49,8 @@ private:
         QColor color;
         qint32 minPercent;
         qint32 maxPercent;
-        qint32 minHr;
-        qint32 maxHr;
+        qreal minHr;
+        qreal maxHr;
     };
     QList<gridRow_t> gridRows =
     {
@@ -110,30 +63,38 @@ private:
 
     struct gridColumn_t
     {
-        QString name;
-        qreal total;
+        qreal val;
+        qint32 count;
+        void init()
+        {
+            val = 0;
+            count = 0;
+        }
     };
     QList<gridColumn_t> gridColumns =
     {
-        {tr("Track Points"), 0},
-        {tr("Moving Time"), 0},
-        {tr("Descent"), 0},
-        {tr("Ascent"), 0}
+        {0, 0}, // Track points
+        {0, 0}, // Moving
+        {0, 0}, // Flat
+        {0, 0}, // Descent
+        {0, 0}  // Ascent
     };
 
     struct gridCell_t
     {
         qreal val;
         qint32 count;
-        qreal percent;
         CPercentBar *percentBar;
+        void init()
+        {
+            val = 0;
+            count = 0;
+        }
     };
     QList<struct gridCell_t> gridCells;
 
-
-
-protected:
-    void paintEvent(QPaintEvent *) override;
+    void setRowsHrLabel();
+    void computeCells();
 };
 
 class CPercentBar : public QWidget
@@ -143,16 +104,17 @@ class CPercentBar : public QWidget
 public:
     enum valFormat_e
     {
-        integer  = 0x00000001
-        , time   = 0x00000002
-        , meter  = 0x00000004
-        , degree = 0x00000008
+        none        = 0x00000001
+        , integer   = 0x00000002
+        , time      = 0x00000004
+        , elevation = 0x00000008
+        , degree    = 0x00000010
     };
 
     CPercentBar(const valFormat_e valFormat
                 , const QColor &color
                 , CHeartRateZonesDialog *parent) : valFormat(valFormat), color(color), parent(parent) {}
-    void setValue(qreal value) { this->value = value; }
+    void setValues(qreal percent, qreal val) { this->percent = percent; this->val = val; }
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -161,12 +123,10 @@ private:
     const valFormat_e valFormat;
     const QColor &color;
     CHeartRateZonesDialog *parent;
-    qreal value = 45;
+    qreal percent = 0;
+    qreal val = 0;
 
     qreal adjustTextPosition(const QString &valueStr, QPainter &painter);
 };
-
-
-
 
 #endif // CHEARTRATEZONESDIALOG_H

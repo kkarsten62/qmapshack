@@ -149,7 +149,7 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
 
     connect(pushSetActivities,      &QPushButton::clicked, this, &CDetailsTrk::slotSetActivities);
     connect(toolSetEnergyCycling,   &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
-    connect(toolSetHeartRate,       &QPushButton::clicked, this, &CDetailsTrk::slotHeartRateZones);
+    connect(toolHeartRateZones,       &QPushButton::clicked, this, &CDetailsTrk::slotHeartRateZones);
     connect(lineName,         &QLineEdit::textEdited,              this, &CDetailsTrk::slotNameChanged);
     connect(lineName,         &QLineEdit::editingFinished,         this, &CDetailsTrk::slotNameChangeFinished);
 
@@ -532,6 +532,11 @@ void CDetailsTrk::updateData()
     }
     toolSetEnergyCycling->setToolTip(tooltip);
 
+    if (!trk.getExistingDataSources().contains("gpxtpx:TrackPointExtension|gpxtpx:hr"))
+    {
+        toolHeartRateZones->setEnabled(false);
+    }
+
     enableTabFilter();
     originator = false;
 }
@@ -732,12 +737,7 @@ void CDetailsTrk::slotSetEnergyCycling()
 void CDetailsTrk::slotHeartRateZones()
 {
     CHeartRateZonesDialog heartRateZonesDialog(this, trk);
-    qint32 ret = heartRateZonesDialog.exec();
-
-//    if(ret == QDialog::Accepted || ret == QDialog::Rejected)
-//    {
-//        trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
-//    }
+    heartRateZonesDialog.exec();
 }
 
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)

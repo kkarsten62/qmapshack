@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>660</width>
-    <height>343</height>
+    <width>520</width>
+    <height>444</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="label_png">
        <property name="text">
         <string/>
        </property>
@@ -27,9 +27,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="labelHeadline">
+      <widget class="QLabel" name="label_00">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
-        <string>Headline</string>
+        <string>Heart Rate Zones</string>
        </property>
       </widget>
      </item>
@@ -64,33 +70,25 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLabel" name="labelMaxHeartRate">
+        <widget class="QLabel" name="label_01">
          <property name="text">
           <string>Max Heart Rate:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinMaxHeartRate">
+        <widget class="QSpinBox" name="spinMaxHr">
          <property name="suffix">
           <string>bpm</string>
          </property>
+         <property name="minimum">
+          <number>120</number>
+         </property>
          <property name="maximum">
-          <number>250</number>
+          <number>220</number>
          </property>
          <property name="value">
           <number>180</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButtonApply">
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../resources.qrc">
-           <normaloff>:/icons/32x32/Apply.png</normaloff>:/icons/32x32/Apply.png</iconset>
          </property>
         </widget>
        </item>
@@ -107,80 +105,12 @@
          </property>
         </spacer>
        </item>
-       <item>
-        <widget class="QLabel" name="labelMinMaxAvg">
-         <property name="text">
-          <string>MinMaxAvg</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="12" column="4">
-        <widget class="QLabel" name="label_6">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="lineWidth">
-          <number>-3</number>
-         </property>
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="12" column="5">
-        <widget class="QLabel" name="label_7">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="lineWidth">
-          <number>-3</number>
-         </property>
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="7">
-        <widget class="Line" name="line_7">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="labelR4Name">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Anaerobic:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="labelR2Name">
+        <widget class="QLabel" name="label_14">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -196,7 +126,7 @@
         </widget>
        </item>
        <item row="0" column="3">
-        <widget class="QLabel" name="labelC1Header">
+        <widget class="QLabel" name="label_03">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -212,7 +142,7 @@
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="labelR1Name">
+        <widget class="QLabel" name="label_11">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -228,7 +158,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="labelR0Name">
+        <widget class="QLabel" name="label_08">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -236,15 +166,15 @@
           </font>
          </property>
          <property name="text">
-          <string>Healty:</string>
+          <string>Healthy:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="0" column="6">
-        <widget class="QLabel" name="labelC3Header">
+       <item row="0" column="7">
+        <widget class="QLabel" name="label_07">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -260,7 +190,7 @@
         </widget>
        </item>
        <item row="0" column="0" colspan="3">
-        <widget class="QLabel" name="labelC0Header">
+        <widget class="QLabel" name="label_02">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -276,7 +206,7 @@
         </widget>
        </item>
        <item row="10" column="0">
-        <widget class="QLabel" name="labelR5Name">
+        <widget class="QLabel" name="label_20">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -291,8 +221,8 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="5">
-        <widget class="QLabel" name="labelC2Header">
+       <item row="0" column="6">
+        <widget class="QLabel" name="label_06">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -308,16 +238,16 @@
         </widget>
        </item>
        <item row="10" column="2">
-        <widget class="QLabel" name="labelR5Bpm">
+        <widget class="QLabel" name="label_22">
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="7">
+       <item row="3" column="0" colspan="8">
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -325,16 +255,16 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QLabel" name="labelR0Bpm">
+        <widget class="QLabel" name="label_10">
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="7">
+       <item row="5" column="0" colspan="8">
         <widget class="Line" name="line_3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -342,9 +272,70 @@
         </widget>
        </item>
        <item row="6" column="2">
-        <widget class="QLabel" name="labelR2Bpm">
+        <widget class="QLabel" name="label_16">
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="4">
+        <widget class="QLabel" name="labelTotalMoving">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="lineWidth">
+          <number>-3</number>
+         </property>
+         <property name="text">
+          <string>-</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="6">
+        <widget class="QLabel" name="labelTotalAscent">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="lineWidth">
+          <number>-3</number>
+         </property>
+         <property name="text">
+          <string>-</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="8">
+        <widget class="Line" name="line_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Anaerobic:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -352,16 +343,16 @@
         </widget>
        </item>
        <item row="8" column="2">
-        <widget class="QLabel" name="labelR4Bpm">
+        <widget class="QLabel" name="label_19">
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="7">
+       <item row="1" column="0" colspan="8">
         <widget class="Line" name="line">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -369,16 +360,16 @@
         </widget>
        </item>
        <item row="4" column="2">
-        <widget class="QLabel" name="labelR1Bpm">
+        <widget class="QLabel" name="label_13">
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="9" column="0" colspan="7">
+       <item row="9" column="0" colspan="8">
         <widget class="Line" name="line_8">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -386,7 +377,7 @@
         </widget>
        </item>
        <item row="0" column="4">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="label_04">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -402,7 +393,7 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_15">
          <property name="text">
           <string>70% - 80%</string>
          </property>
@@ -411,8 +402,8 @@
          </property>
         </widget>
        </item>
-       <item row="12" column="6">
-        <widget class="QLabel" name="label_8">
+       <item row="12" column="7">
+        <widget class="QLabel" name="labelTotalDescent">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -423,7 +414,7 @@
           <number>-3</number>
          </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -431,7 +422,7 @@
         </widget>
        </item>
        <item row="12" column="3">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="labelTotalPoints">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -442,17 +433,17 @@
           <number>-3</number>
          </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>-</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
-       <item row="11" column="0" colspan="7">
+       <item row="11" column="0" colspan="8">
         <widget class="Line" name="line_4">
          <property name="lineWidth">
-          <number>5</number>
+          <number>1</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -460,7 +451,7 @@
         </widget>
        </item>
        <item row="12" column="2">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_23">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -476,7 +467,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_09">
          <property name="text">
           <string>0% - 60%</string>
          </property>
@@ -486,7 +477,7 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="label_12">
          <property name="text">
           <string>60% - 70%</string>
          </property>
@@ -496,7 +487,7 @@
         </widget>
        </item>
        <item row="8" column="1">
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="label_18">
          <property name="text">
           <string>80% - 90%</string>
          </property>
@@ -506,7 +497,7 @@
         </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="label_21">
          <property name="text">
           <string>&gt;90%</string>
          </property>
@@ -515,7 +506,174 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="5">
+        <widget class="QLabel" name="label_05">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Flat:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_4">
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>10</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Track Heart Rate</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Max Hr:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLabel" name="labelJouleHb">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Avg Hr:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Total Heart Beats:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>kJoule per Heart Beat:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="labelHeartBeats">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Min Hr:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="labelMinHr">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="5">
+      <widget class="QLabel" name="labelAvgHr">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="6">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="labelMaxHr">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -536,8 +694,7 @@
  </widget>
  <tabstops>
   <tabstop>toolButtonHelp</tabstop>
-  <tabstop>spinMaxHeartRate</tabstop>
-  <tabstop>toolButtonApply</tabstop>
+  <tabstop>spinMaxHr</tabstop>
  </tabstops>
  <resources>
   <include location="../../resources.qrc"/>
