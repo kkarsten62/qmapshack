@@ -29,14 +29,14 @@ class CHeartRateZonesDialog : public QDialog, private Ui::IHeartRateZonesDialog
     Q_OBJECT
 
 public:
-    CHeartRateZonesDialog(QWidget *parent, CGisItemTrk &trk);
+    CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk &trk);
     virtual ~CHeartRateZonesDialog();
 
 private slots:
     void slotSetMaxHr(qint32 maxHr);
 
 private:
-    CGisItemTrk &trk;
+    const CGisItemTrk &trk;
     qint32 maxHr;
     qreal minTrkHr = 220.;
     qreal maxTrkHr = 0.;

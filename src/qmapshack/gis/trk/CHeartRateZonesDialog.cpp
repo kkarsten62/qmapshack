@@ -15,17 +15,14 @@
 
 **********************************************************************************************/
 
-//#include <QtGlobal>
 #include "CMainWindow.h"
 #include "canvas/CCanvas.h"
 #include "gis/trk/CGisItemTrk.h"
 #include "gis/trk/CHeartRateZonesDialog.h"
+#include "gis/trk/CKnownExtension.h"
 #include "helpers/CSettings.h"
 
-#include "gis/trk/CKnownExtension.h"
-
-
-CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, CGisItemTrk &trk) :
+CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk &trk) :
     QDialog(parent)
     , trk(trk)
 {
@@ -267,7 +264,12 @@ void CHeartRateZonesDialog::computeCells()
     labelMaxHr->setText(QString("%1").arg(maxTrkHr, 0, 'f', 1) + tr("bpm"));
     labelAvgHr->setText(QString("%1").arg(trkHeartBeats / gridColumns[1].val * 60, 0, 'f', 1) + tr("bpm"));
     labelHeartBeats->setText(QString("%L1").arg(trkHeartBeats, 0, 'f', 0));
-    labelJouleHb->setText(QString("%L1").arg(trk.getEnergyCycling().getEnergyUseCycling() * 4.1868 / trkHeartBeats, 0, 'f', 4));
+
+    qreal energyUseCycling = trk.getEnergyCycling().getEnergyUseCycling();
+    if (energyUseCycling != NOFLOAT)
+    {
+        labelJouleHb->setText(QString("%L1").arg(trk.getEnergyCycling().getEnergyUseCycling() * 4.1868 / trkHeartBeats, 0, 'f', 4));
+    }
 
     update();
 }
