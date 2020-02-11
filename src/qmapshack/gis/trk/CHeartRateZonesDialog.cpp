@@ -71,6 +71,7 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
         }
     }
     connect(spinMaxHr, SIGNAL(valueChanged(qint32)), this, SLOT(slotSetMaxHr(qint32)));
+    connect(toolButtonHelp, SIGNAL(clicked(bool)), this, SLOT(slotShowHelp()));
 
     computeCells();
 }
@@ -273,6 +274,30 @@ void CHeartRateZonesDialog::computeCells()
 
     update();
 }
+
+void CHeartRateZonesDialog::slotShowHelp()
+{
+    QString msg = tr("<p><b>Set Energy Use for Cycling</b></p>"
+                     "<p>Within this dialog your personal energy use (consumption) for a cycling tour can be computed.</p>"
+                     "<p>The computed value of \"Energy Use Cycling\" can be see as an indicator for the exertion of a cycling tour.</p>"
+                     "<p>The tour length, speed and slope values will be taken into account.</p>"
+                     "<p>To individualize your personal energy use the following input data are more needed:"
+                     "<ul>"
+                     "<li>Driver and bicyle weight</li>"
+                     "<li>Air density, wind speed and position to the wind to consider the wind drag resistance</li>"
+                     "<li>Ground situation (tyre and ground) to consider the rolling resistance</li>"
+                     "<li>Average pedal cadence for the computation of pedal force</li>"
+                     "</ul></p>"
+                     "<p>The individualize data will be defined in this dialog and more computed values will be shown here.</p>"
+                     "<p>When loading older tracks or switching in history to tracks with a different parameter set compared to the previous saved parameter set"
+                     ", the shown parameter set in this dialog can be replaced by the previous saved parameter set."
+                     "<p>The energy use in unit \"kcal\" will be stored in the track (qms format only) and can be remove later on when no longer needed.</p>"
+                     "<p>For more information see tooltips on input and output values.</p>");
+
+    QMessageBox::information(CMainWindow::getBestWidgetForParent(), tr("Help"), msg);
+}
+
+
 
 // class CPercentBar
 void CPercentBar::paintEvent(QPaintEvent *)

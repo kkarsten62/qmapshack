@@ -532,10 +532,13 @@ void CDetailsTrk::updateData()
     }
     toolSetEnergyCycling->setToolTip(tooltip);
 
+    tooltip = tr("Show heart rate data from track in various Heart Rate Zones");
     if (!trk.getExistingDataSources().contains("gpxtpx:TrackPointExtension|gpxtpx:hr"))
     {
         toolHeartRateZones->setEnabled(false);
+        tooltip += "<b style='color: red;'>" + tr(" - Dialog needs valid heart rate data in track.") + "</b>";
     }
+    toolHeartRateZones->setToolTip(tooltip);
 
     enableTabFilter();
     originator = false;

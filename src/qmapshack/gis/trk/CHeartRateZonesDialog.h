@@ -34,6 +34,7 @@ public:
 
 private slots:
     void slotSetMaxHr(qint32 maxHr);
+    void slotShowHelp();
 
 private:
     const CGisItemTrk &trk;
