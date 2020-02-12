@@ -22,7 +22,7 @@
 
 class CGisItemTrk;
 class CTrackData;
-class CPercentBar;
+class CHeartRateZonesWidget;
 
 class CHeartRateZonesDialog : public QDialog, private Ui::IHeartRateZonesDialog
 {
@@ -85,7 +85,7 @@ private:
     {
         qreal val;
         qint32 count;
-        CPercentBar *percentBar;
+        CHeartRateZonesWidget *percentBar;
         void init()
         {
             val = 0;
@@ -98,7 +98,7 @@ private:
     void computeCells();
 };
 
-class CPercentBar : public QWidget
+class CHeartRateZonesWidget : public QWidget
 {
     Q_OBJECT
 
@@ -112,18 +112,18 @@ public:
         , degree    = 0x00000010
     };
 
-    CPercentBar(const valFormat_e valFormat
-                , const QColor &color
-                , CHeartRateZonesDialog *parent) : valFormat(valFormat), color(color), parent(parent) {}
+    CHeartRateZonesWidget(valFormat_e valFormat, const QColor &color) :
+        valFormat(valFormat)
+      , color(color) {}
+
     void setValues(qreal percent, qreal val) { this->percent = percent; this->val = val; }
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    const valFormat_e valFormat;
+    valFormat_e valFormat;
     const QColor &color;
-    CHeartRateZonesDialog *parent;
     qreal percent = 0;
     qreal val = 0;
 
