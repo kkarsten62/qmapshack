@@ -46,23 +46,23 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
             {
             case 0:
             {
-               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::integer, gridRow.color, this);
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::integer, gridRow.color);
                break;
             }
             case 1:
             {
-               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::time, gridRow.color, this);
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::time, gridRow.color);
                break;
             }
             case 2:
             {
-               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::none, gridRow.color, this);
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::none, gridRow.color);
                break;
             }
             case 3:
             case 4:
             {
-               gridCell.percentBar = new CPercentBar(CPercentBar::valFormat_e::elevation, gridRow.color, this);
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::elevation, gridRow.color);
                break;
             }
             }
@@ -151,10 +151,8 @@ void CHeartRateZonesDialog::computeCells()
                 break;
             }
         }
-//        qDebug() << "hr: " << hr << "zone:" << zone;
 
         // Points
-//            qDebug() << "Cell Row0 No=" <<  zone * gridColumns.size() + 0;
         gridCells[zone * gridColumns.size() + 0].count++;
         gridCells[zone * gridColumns.size() + 0].val++;
         gridColumns[0].count++;
@@ -170,8 +168,6 @@ void CHeartRateZonesDialog::computeCells()
             gridColumns[1].val += dt;
             trkHeartBeats += dt * (hr / 60.);
 
-//            qDebug() << "#=" << gridColumns[0].count << " dt=" << dt << " hr=" << hr << " beats=" << dt * (hr / 60.);
-
             // Ascent, Descent
             if(lastEle != NOINT)
             {
@@ -183,7 +179,6 @@ void CHeartRateZonesDialog::computeCells()
 
                     if(delta > 0)
                     {
-//                        qDebug() << "Cell Row2 No=" <<  zone * gridColumns.size() + 2;
                         gridCells[zone * gridColumns.size() + 3].count++;
                         gridCells[zone * gridColumns.size() + 3].val += step;
                         gridColumns[3].count++;
@@ -191,7 +186,6 @@ void CHeartRateZonesDialog::computeCells()
                     }
                     else
                     {
-//                        qDebug() << "Cell Row3 No=" <<  zone * gridColumns.size() + 3;
                         gridCells[zone * gridColumns.size() + 4].count++;
                         gridCells[zone * gridColumns.size() + 4].val += step;
                         gridColumns[4].count++;
@@ -235,15 +229,10 @@ void CHeartRateZonesDialog::computeCells()
     {
         struct gridCell_t &gridCell = gridCells[i];
 
-//        qDebug() << "gridCell i=" << i << " gridCell count=" << gridCell.count;
-//        qDebug() << "gridCell i=" << i << " gridCell   val=" << gridCell.val;
-
         qint32 column = i - qFloor(i / gridColumns.size()) * gridColumns.size();
-//        qDebug() << "colum=" << column;
 
         qreal percent = gridColumns[column].val ? gridCell.val / gridColumns[column].val * 100 : 0;
         gridCell.percentBar->setValues(percent, gridCell.val);
-//        qDebug() << "gridCell i=" << i << " gridCell percent=" << percent;
     }
 
     labelTotalPoints->setText(QString("%L1").arg(gridColumns[0].count));
@@ -297,10 +286,8 @@ void CHeartRateZonesDialog::slotShowHelp()
     QMessageBox::information(CMainWindow::getBestWidgetForParent(), tr("Help"), msg);
 }
 
-
-
 // class CPercentBar
-void CPercentBar::paintEvent(QPaintEvent *)
+void CHeartRateZonesWidget::paintEvent(QPaintEvent *)
 {
 //    qDebug() << "CPercentBar::paintEvent";
 
@@ -365,7 +352,7 @@ void CPercentBar::paintEvent(QPaintEvent *)
     painter.drawText(valStrPos, ascent + descent + 5 + 20 + 5 + ascent, valStr);
 }
 
-qreal CPercentBar::adjustTextPosition(const QString &valueStr, QPainter &painter)
+qreal CHeartRateZonesWidget::adjustTextPosition(const QString &valueStr, QPainter &painter)
 {
     const qreal width = QFontMetrics(painter.font()).boundingRect(valueStr).width();
 
