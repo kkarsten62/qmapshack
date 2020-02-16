@@ -41,31 +41,40 @@ CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk 
         {
             struct gridCell_t gridCell;
             gridCell.init();
+            gridCell.option = gridColumns[column].option;
 
-            switch(column)
+            gridCell.percentBar = new CHeartRateZonesWidget(gridCell.option, gridRow.color);
+
+/*            switch(column)
             {
             case 0:
             {
-               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::integer, gridRow.color);
-               break;
-            }
-            case 1:
-            {
-               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::time, gridRow.color);
+               gridCell.percentBar = new CHeartRateZonesWidget(gridCell.option, gridRow.color);
                break;
             }
             case 2:
             {
-               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::none, gridRow.color);
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::time, gridRow.color);
                break;
             }
             case 3:
+            {
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::speed, gridRow.color);
+               break;
+            }
             case 4:
+            {
+               gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::none, gridRow.color);
+               break;
+            }
+            case 5:
+            case 6:
             {
                gridCell.percentBar = new CHeartRateZonesWidget(CHeartRateZonesWidget::valFormat_e::elevation, gridRow.color);
                break;
             }
             }
+*/
             gridLayout->addWidget(gridCell.percentBar, row * 2 + 2, column + 3, 1, 1);
             gridCells << gridCell;
         }
@@ -152,23 +161,34 @@ void CHeartRateZonesDialog::computeCells()
             }
         }
 
+        qint32 firstRowCell = zone * gridColumns.size();
         // Points
-        gridCells[zone * gridColumns.size() + 0].count++;
-        gridCells[zone * gridColumns.size() + 0].val++;
+        gridCells[firstRowCell + 0].count++;
+        gridCells[firstRowCell + 0].val++;
         gridColumns[0].count++;
         gridColumns[0].val++;
 
         if(lastTrkpt != nullptr)
         {
-            // Moving
-            gridCells[zone * gridColumns.size() + 1].count++;
-            qreal dt = trkpt.elapsedSecondsMoving - lastTrkpt->elapsedSecondsMoving;
-            gridCells[zone * gridColumns.size() + 1].val += dt;
+            // Length
+            gridCells[firstRowCell + 1].count++;
+            gridCells[firstRowCell + 1].val += trkpt.deltaDistance;
             gridColumns[1].count++;
-            gridColumns[1].val += dt;
+            gridColumns[1].val += trkpt.deltaDistance;
+
+            // Moving
+            gridCells[firstRowCell + 2].count++;
+            qreal dt = trkpt.elapsedSecondsMoving - lastTrkpt->elapsedSecondsMoving;
+            gridCells[firstRowCell + 2].val += dt;
+            gridColumns[2].count++;
+            gridColumns[2].val += dt;
             trkHeartBeats += dt * (hr / 60.);
 
-            // Ascent, Descent
+            // Speed
+            gridColumns[3].count++;
+            gridColumns[3].val = qMax(trkpt.speed, gridColumns[3].val);
+
+            // Flat, Ascent, Descent
             if(lastEle != NOINT)
             {
                 qint32 delta  = trkpt.ele - lastEle;
@@ -177,32 +197,32 @@ void CHeartRateZonesDialog::computeCells()
                 {
                     const qint32 step = (delta / ASCENT_THRESHOLD) * ASCENT_THRESHOLD;
 
-                    if(delta > 0)
+                    if(delta > 0) // Ascent
                     {
-                        gridCells[zone * gridColumns.size() + 3].count++;
-                        gridCells[zone * gridColumns.size() + 3].val += step;
-                        gridColumns[3].count++;
-                        gridColumns[3].val += step;
+                        gridCells[firstRowCell + 5].count++;
+                        gridCells[firstRowCell + 5].val += step;
+                        gridColumns[5].count++;
+                        gridColumns[5].val += step;
                     }
-                    else
+                    else // Descent
                     {
-                        gridCells[zone * gridColumns.size() + 4].count++;
-                        gridCells[zone * gridColumns.size() + 4].val += step;
-                        gridColumns[4].count++;
-                        gridColumns[4].val += step;
+                        gridCells[firstRowCell + 6].count++;
+                        gridCells[firstRowCell + 6].val += step;
+                        gridColumns[6].count++;
+                        gridColumns[6].val += step;
                     }
                     lastEle += step;
                 }
-                else
+                else // Flat
                 {
-                    gridCells[zone * gridColumns.size() + 2].count++;
-                    gridCells[zone * gridColumns.size() + 2].val++;
-                    gridColumns[2].count++;
-                    gridColumns[2].val++;
+                    gridCells[firstRowCell + 4].count++;
+                    gridCells[firstRowCell + 4].val++;
+                    gridColumns[4].count++;
+                    gridColumns[4].val++;
                 }
             }
 
-            // slopes uphill, downhill
+            // slopes uphill, downhill - not implemented yet
             if (trkpt.slope2 > 0)
             {
 //                zoneItems[zone][3].count++;
@@ -217,10 +237,10 @@ void CHeartRateZonesDialog::computeCells()
         else
         {
             lastEle = trkpt.ele;
-            gridCells[zone * gridColumns.size() + 2].count++; // First point is flat
-            gridCells[zone * gridColumns.size() + 2].val++;
-            gridColumns[2].count++;
-            gridColumns[2].val++;
+            gridCells[firstRowCell + 4].count++; // First point is flat
+            gridCells[firstRowCell + 4].val++;
+            gridColumns[4].count++;
+            gridColumns[4].val++;
         }
         lastTrkpt = &trkpt;
     }
@@ -231,28 +251,52 @@ void CHeartRateZonesDialog::computeCells()
 
         qint32 column = i - qFloor(i / gridColumns.size()) * gridColumns.size();
 
+        if ((gridCell.option & CHeartRateZonesDialog::eOptAveradge) && gridCell.count)
+        {
+            gridCell.val /= gridCell.count; // Set averadge
+        }
+
+        if (column == 3 && gridCells[i - 1].val) // Compute speed for the cell
+        {
+             gridCell.val = gridCells[i - 2].val / gridCells[i - 1].val;
+        }
+
         qreal percent = gridColumns[column].val ? gridCell.val / gridColumns[column].val * 100 : 0;
         gridCell.percentBar->setValues(percent, gridCell.val);
     }
 
-    labelTotalPoints->setText(QString("%L1").arg(gridColumns[0].count));
+    labelTotalPoints->setText(QString("%L1").arg(gridColumns[0].count)); // Points
+
     QString text, unit;
-    IUnit::self().seconds2time(gridColumns[1].val, text, unit);
+    IUnit::self().meter2distance(gridColumns[1].val, text, unit); // Length
+    labelTotalLength->setText(QString("%1%2").arg(text).arg(unit));
+
+    IUnit::self().seconds2time(gridColumns[2].val, text, unit);  // Moving time
     labelTotalMoving->setText(QString("%1%2").arg(text).arg(unit));
 
-    IUnit::self().meter2elevation(gridColumns[3].val, text, unit);
+    if (gridColumns[1].val) // Speed
+    {
+        IUnit::self().meter2speed(gridColumns[3].val, text, unit);
+        labelSpeedMax->setText(QString(tr("Max:") + " %1%2").arg(text).arg(unit));
+
+        qreal avgSpeed = gridColumns[1].val / gridColumns[2].val;
+        IUnit::self().meter2speed(avgSpeed, text, unit);
+        labelSpeedAvg->setText(QString(tr("Avg:") + " %1%2").arg(text).arg(unit));
+    }
+
+    IUnit::self().meter2elevation(gridColumns[5].val, text, unit); // Ascent
     labelTotalAscent->setText(QString("%1%2").arg(text).arg(unit));
 
-    IUnit::self().meter2elevation(gridColumns[4].val, text, unit);
+    IUnit::self().meter2elevation(gridColumns[6].val, text, unit); // Descent
     labelTotalDescent->setText(QString("%1%2").arg(text).arg(unit));
 
     qDebug() << "trkHeartBeats :" << trkHeartBeats;
-    qDebug() << "trkHeartBeats avg:" <<  trkHeartBeats / gridColumns[1].val * 60;
+    qDebug() << "trkHeartBeats avg:" <<  trkHeartBeats / gridColumns[2].val * 60;
     qDebug() << "Fitness Rate:" << trk.getEnergyCycling().getEnergyUseCycling() * 4.1868 / trkHeartBeats;
 
     labelMinHr->setText(QString("%1").arg(minTrkHr, 0, 'f', 1) + tr("bpm"));
     labelMaxHr->setText(QString("%1").arg(maxTrkHr, 0, 'f', 1) + tr("bpm"));
-    labelAvgHr->setText(QString("%1").arg(trkHeartBeats / gridColumns[1].val * 60, 0, 'f', 1) + tr("bpm"));
+    labelAvgHr->setText(QString("%1").arg(trkHeartBeats / gridColumns[2].val * 60, 0, 'f', 1) + tr("bpm"));
     labelHeartBeats->setText(QString("%L1").arg(trkHeartBeats, 0, 'f', 0));
 
     qreal energyUseCycling = trk.getEnergyCycling().getEnergyUseCycling();
@@ -310,46 +354,61 @@ void CHeartRateZonesWidget::paintEvent(QPaintEvent *)
 
     // Two small tick lines nearby the texts
     painter.setPen(QPen(Qt::black, 0.5));
-    painter.drawLine(percent + 4 - 0.5, ascent + descent, percent + 4 - 0.5, ascent + descent + 5);
+
+    if (!(option & CHeartRateZonesDialog::eOptNoPercent))
+    {
+        painter.drawLine(percent + 4 - 0.5, ascent + descent, percent + 4 - 0.5, ascent + descent + 5);
+        const QString percentStr = QString("%1%").arg(percent, 0, 'f', 1);
+        qreal percentPos = adjustTextPosition(percentStr, painter);
+        painter.drawText(percentPos + 4, ascent, percentStr);
+    }
+/*
     if (valFormat != valFormat_e::none)
     {
         painter.drawLine(percent + 4 - 0.5, ascent + descent + 5 + 20, percent + 4 - 0.5, ascent + descent + 5 + 20 + 5);
     }
+*/
 
-    const QString percentStr = QString("%1%").arg(percent, 0, 'f', 1);
-    qreal percentPos = adjustTextPosition(percentStr, painter);
-    painter.drawText(percentPos + 4, ascent, percentStr);
+    if (!(option & CHeartRateZonesDialog::eOptNoVal))
+    {
+        painter.drawLine(percent + 4 - 0.5, ascent + descent + 5 + 20, percent + 4 - 0.5, ascent + descent + 5 + 20 + 5);
 
-    QString valStr;
-    switch (valFormat)
-    {
-    case valFormat_e::none:
-    {
-        valStr = "";
-        break;
+        QString str, unit, valStr;
+        switch (CHeartRateZonesDialog::eOptAllFormats & option)
+        {
+        case CHeartRateZonesDialog::eOptInt:
+        {
+            valStr = QString("%L1").arg(val, 0, 'f', 0);
+            break;
+        }
+        case CHeartRateZonesDialog::eOptLength:
+        {
+            IUnit::self().meter2distance(val, str, unit);
+            valStr = QString("%1%2").arg(str).arg(unit);
+            break;
+        }
+        case CHeartRateZonesDialog::eOptTime:
+        {
+            IUnit::self().seconds2time(val, str, unit);
+            valStr = QString("%1%2").arg(str).arg(unit);
+            break;
+        }
+        case CHeartRateZonesDialog::eOptSpeed:
+        {
+            IUnit::self().meter2speed(val, str, unit);
+            valStr = QString("%1%2").arg(str).arg(unit);
+            break;
+        }
+        case CHeartRateZonesDialog::eOptElevation:
+        {
+            IUnit::self().meter2elevation(val, str, unit);
+            valStr = QString("%1%2").arg(str).arg(unit);
+            break;
+        }
+        }
+        qreal valStrPos = adjustTextPosition(valStr, painter);
+        painter.drawText(valStrPos, ascent + descent + 5 + 20 + 5 + ascent, valStr);
     }
-    case valFormat_e::integer:
-    {
-        valStr = QString("%L1").arg(val, 0, 'f', 0);
-        break;
-    }
-    case valFormat_e::time:
-    {
-        QString timeStr, unit;
-        IUnit::self().seconds2time(val, timeStr, unit);
-        valStr = QString("%1%2").arg(timeStr).arg(unit);
-        break;
-    }
-    case valFormat_e::elevation:
-    {
-        QString elevationStr, unit;
-        IUnit::self().meter2elevation(val, elevationStr, unit);
-        valStr = QString("%1%2").arg(elevationStr).arg(unit);
-        break;
-    }
-    }
-    qreal valStrPos = adjustTextPosition(valStr, painter);
-    painter.drawText(valStrPos, ascent + descent + 5 + 20 + 5 + ascent, valStr);
 }
 
 qreal CHeartRateZonesWidget::adjustTextPosition(const QString &valueStr, QPainter &painter)

@@ -29,6 +29,22 @@ class CHeartRateZonesDialog : public QDialog, private Ui::IHeartRateZonesDialog
     Q_OBJECT
 
 public:
+
+    enum opt_e
+    {
+        eOptNone         = 0x00000000
+        , eOptInt        = 0x00000001
+        , eOptLength     = 0x00000002
+        , eOptTime       = 0x00000004
+        , eOptSpeed      = 0x00000008
+        , eOptElevation  = 0x00000010
+        , eOptDegree     = 0x00000020
+        , eOptAllFormats = 0x0000003F // All previous bits on
+        , eOptAveradge   = 0x00000100
+        , eOptNoVal      = 0x00001000
+        , eOptNoPercent  = 0x00010000
+    };
+
     CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk &trk);
     virtual ~CHeartRateZonesDialog();
 
@@ -55,15 +71,16 @@ private:
     };
     QList<gridRow_t> gridRows =
     {
-        {QColor("#33a6cc"),  0,  60, 0, 0},
-        {QColor("#9ACD32"), 60,  70, 0, 0},
-        {QColor("#FFD700"), 70,  80, 0, 0},
-        {QColor("#FFA500"), 80,  90, 0, 0},
-        {QColor("#CC0000"), 90, 100, 0, 0}
+        {QColor("#33a6cc"),  0,  60, 0, 0}
+        , {QColor("#9ACD32"), 60,  70, 0, 0}
+        , {QColor("#FFD700"), 70,  80, 0, 0}
+        , {QColor("#FFA500"), 80,  90, 0, 0}
+        , {QColor("#CC0000"), 90, 100, 0, 0}
     };
 
     struct gridColumn_t
     {
+        qint32 option;
         qreal val;
         qint32 count;
         void init()
@@ -74,15 +91,18 @@ private:
     };
     QList<gridColumn_t> gridColumns =
     {
-        {0, 0}, // Track points
-        {0, 0}, // Moving
-        {0, 0}, // Flat
-        {0, 0}, // Descent
-        {0, 0}  // Ascent
+        {eOptInt, 0, 0}    // 0: Points
+        , {eOptLength, 0, 0} // 1: Length
+        , {eOptTime, 0, 0} // 2: Moving
+        , {eOptSpeed | eOptAveradge, 0, 0} // 3: Speed
+        , {eOptElevation | eOptNoVal, 0, 0} // 4: Flat
+        , {eOptElevation, 0, 0}             // 5: Descent
+        , {eOptElevation, 0, 0}             // 6: Ascent
     };
 
     struct gridCell_t
     {
+        qint32 option;
         qreal val;
         qint32 count;
         CHeartRateZonesWidget *percentBar;
@@ -105,23 +125,27 @@ class CHeartRateZonesWidget : public QWidget
 public:
     enum valFormat_e
     {
-        none        = 0x00000001
-        , integer   = 0x00000002
-        , time      = 0x00000004
-        , elevation = 0x00000008
-        , degree    = 0x00000010
+        none         = 0x00000001
+        , integer    = 0x00000002
+        , time       = 0x00000004
+        , speed      = 0x00000008
+        , elevation  = 0x00000010
+        , degree     = 0x00000020
+        , isAveradge = 0x00000100
     };
 
-    CHeartRateZonesWidget(valFormat_e valFormat, const QColor &color) :
-        valFormat(valFormat)
+    CHeartRateZonesWidget(qint32 option, const QColor &color) :
+        option(option)
       , color(color) {}
 
     void setValues(qreal percent, qreal val) { this->percent = percent; this->val = val; }
+    const valFormat_e getValFormat() const { return valFormat; }
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
+    qint32 option;
     valFormat_e valFormat;
     const QColor &color;
     qreal percent = 0;
