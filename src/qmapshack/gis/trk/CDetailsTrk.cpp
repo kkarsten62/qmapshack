@@ -44,6 +44,7 @@
 #include "helpers/Signals.h"
 #include "plot/CPlot.h"
 #include "plot/CPlotProfile.h"
+#include "print/CTrkPrintDialog.h"
 #include "units/IUnit.h"
 #include "widgets/CTextEditWidget.h"
 
@@ -150,6 +151,7 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
     connect(pushSetActivities,      &QPushButton::clicked, this, &CDetailsTrk::slotSetActivities);
     connect(toolSetEnergyCycling,   &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
     connect(toolHeartRateZones,       &QPushButton::clicked, this, &CDetailsTrk::slotHeartRateZones);
+    connect(toolTrkPrint,       &QPushButton::clicked, this, &CDetailsTrk::slotTrkPrint);
     connect(lineName,         &QLineEdit::textEdited,              this, &CDetailsTrk::slotNameChanged);
     connect(lineName,         &QLineEdit::editingFinished,         this, &CDetailsTrk::slotNameChangeFinished);
 
@@ -743,6 +745,11 @@ void CDetailsTrk::slotHeartRateZones()
     heartRateZonesDialog.exec();
 }
 
+void CDetailsTrk::slotTrkPrint()
+{
+    CTrkPrintDialog trkprintDialog(this, trk);
+    trkprintDialog.exec();
+}
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)
 {
     trk.getPropertyHandler()->setupPlot(plot, source);

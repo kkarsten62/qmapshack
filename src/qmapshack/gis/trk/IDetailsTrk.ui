@@ -396,6 +396,23 @@
            </spacer>
           </item>
           <item>
+           <widget class="QToolButton" name="toolTrkPrint">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../resources.qrc">
+              <normaloff>:/icons/48x48/Print.png</normaloff>:/icons/48x48/Print.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>22</width>
+              <height>22</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="toolHeartRateZones">
             <property name="text">
              <string>...</string>
@@ -1795,10 +1812,10 @@
  </resources>
  <connections/>
  <buttongroups>
+  <buttongroup name="buttonGroupLineWidth"/>
+  <buttongroup name="buttonGroupArrow"/>
   <buttongroup name="buttonGroupGraph1"/>
   <buttongroup name="buttonGroupGraph2"/>
-  <buttongroup name="buttonGroupArrow"/>
   <buttongroup name="buttonGroupGraph3"/>
-  <buttongroup name="buttonGroupLineWidth"/>
  </buttongroups>
 </ui>
