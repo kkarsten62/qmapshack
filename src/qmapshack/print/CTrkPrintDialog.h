@@ -19,10 +19,11 @@
 #define CTRKPRINTDIALOG_H
 
 #include "ui_ITrkPrintDialog.h"
-#include <QtPrintSupport>
+#include <QPrinter>
+//#include <QtPrintSupport>
 
 class CGisItemTrk;
-class CTrackData;
+//class CTrackData;
 class CCanvas;
 
 class CTrkPrintDialog : public QDialog, private Ui::ITrkPrintDialog
@@ -30,8 +31,7 @@ class CTrkPrintDialog : public QDialog, private Ui::ITrkPrintDialog
     Q_OBJECT
 
 public:
-
-    CTrkPrintDialog(QWidget *parent, const CGisItemTrk &trk);
+    CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk);
     virtual ~CTrkPrintDialog();
 
 protected:
@@ -39,14 +39,31 @@ protected:
 
 private slots:
     void slotUpdateMetrics();
-
+    void slotPrint();
 
 private:
-    const CGisItemTrk &trk;
+    void addPageMarkers(QPainter &p, const QRectF &currPage, const QRectF &otherPage, qint32 pageNo);
+
+    struct pt_t : public QPointF
+    {
+        QRectF bb; // Boundingbox of trk in pixel up to this trkpt
+        QRectF pageScreen; // The page in screen pixel coordinate system, set for for best fit for the pt boundingBox
+    };
+
+    struct page_t
+    {
+        QPointF center;
+        QPageLayout::Orientation orientation;
+        QRectF pageScreen;
+    };
+    QList<struct page_t> pages;
+
+    CGisItemTrk &trk;
     CCanvas *canvas;
     QPrinter printer;
 
-
+    qreal scale;
+    qreal overlap = 0.01; // Overlap for sequentially pages in meter on page
 };
 
 #endif // CTRKPRINTDIALOG_H

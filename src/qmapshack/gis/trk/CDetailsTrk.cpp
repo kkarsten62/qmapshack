@@ -750,6 +750,7 @@ void CDetailsTrk::slotTrkPrint()
     CTrkPrintDialog trkprintDialog(this, trk);
     trkprintDialog.exec();
 }
+
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)
 {
     trk.getPropertyHandler()->setupPlot(plot, source);
