@@ -20,7 +20,6 @@
 
 #include "ui_ITrkPrintDialog.h"
 #include <QPrinter>
-//#include <QtPrintSupport>
 
 class CGisItemTrk;
 //class CTrackData;
@@ -40,14 +39,25 @@ protected:
 private slots:
     void slotUpdateMetrics();
     void slotPrint();
+    void slotSetPrinter();
+    void slotSetOverlap(qint32 ovl);
+    void slotLoadPdfFile();
+    void slotScaleBar(bool checked);
+    void slotPageMarkers(bool checked);
+    void slotDistanceMarker(int value);
 
 private:
     void addPageMarkers(QPainter &p, const QRectF &currPage, const QRectF &otherPage, qint32 pageNo);
+    void addDistanceMarkers(QPainter &p, const QRectF &currPage);
+
+    void checkPdfFileExist();
 
     struct pt_t : public QPointF
     {
         QRectF bb; // Boundingbox of trk in pixel up to this trkpt
         QRectF pageScreen; // The page in screen pixel coordinate system, set for for best fit for the pt boundingBox
+        QPageLayout::Orientation orientation;
+        qreal distance;
     };
 
     struct page_t
@@ -55,15 +65,30 @@ private:
         QPointF center;
         QPageLayout::Orientation orientation;
         QRectF pageScreen;
+        qreal distanceStart;
+        qreal distanceEnd;
     };
     QList<struct page_t> pages;
+
+    struct distanceMarkerPt_t : public QPointF
+    {
+        qreal km;
+        QLineF lineToText;
+    };
+    QList<struct distanceMarkerPt_t> distanceMarkerPts;
+
 
     CGisItemTrk &trk;
     CCanvas *canvas;
     QPrinter printer;
-
     qreal scale;
-    qreal overlap = 0.01; // Overlap for sequentially pages in meter on page
+    qreal overlap; // Overlap for sequentially pages in meter on page
+    bool printScaleBar = false;
+    bool printPageMarkers = true;
+
+    const QList<qint32> distanceMarkers {0, 5, 10, 15, 20, 25, 35, 50};
+    qint32 distanceMarker;
+
 };
 
 #endif // CTRKPRINTDIALOG_H
