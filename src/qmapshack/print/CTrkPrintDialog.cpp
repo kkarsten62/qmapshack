@@ -30,6 +30,7 @@
 CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     QDialog(parent)
     , trk(trk)
+//    , printer(QPrinter::HighResolution)
 {
     setupUi(this);
 
@@ -90,8 +91,6 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     connect(pushPrint,           &QPushButton::pressed, this, &CTrkPrintDialog::slotPrint);
     connect(pushLoadPdfFile,     &QPushButton::pressed, this, &CTrkPrintDialog::slotLoadPdfFile);
 
-
-
     SETTINGS;
     overlap = cfg.value("Print/Trk/overlap", 0.005).toDouble();
     QString outputFileName = cfg.value("Print/Trk/outputFileName", "").toString();
@@ -112,7 +111,7 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     checkPageMarkers->setChecked(printPageMarkers);
     comboDistanceMarker->setCurrentIndex(distanceMarker);
 
-    checkPdfFileExist();
+    setPdfFileExists();
 }
 
 CTrkPrintDialog::~CTrkPrintDialog()
@@ -170,8 +169,9 @@ void CTrkPrintDialog::slotUpdateMetrics()
         return;
     }
 
-    QRectF pageRectMeter  = printer.pageRect(QPrinter::Millimeter);
-    QRectF pageRectPx  = printer.pageRect(QPrinter::DevicePixel);
+    QRectF pageRectMeter = printer.pageRect(QPrinter::Millimeter);
+    QRectF pageRectPx = printer.pageRect(QPrinter::DevicePixel);
+
     qreal scalePageMeter = qPow(pageRectMeter.width() / 1000.0, 2) + qPow(pageRectMeter.height() / 1000.0, 2); // Diagonal of paper in meter
     qreal scalePagePx = qPow(pageRectPx.width(), 2) + qPow(pageRectPx.height(), 2);  // Diagonal of paper in pixel
     qreal scalePage;
@@ -188,7 +188,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
     scale = scaleTrk / scalePage; // One meter on paper equals to X meter on screen (trk)
 
     qreal overlapPx = overlap / scalePage; // Overlap converted from meter to pixel
-    //        qDebug() << "overlap of=" << overlap * 1000 << "mm means=" << overlapPx << "pixel ==> means=" << overlapPx * scaleTrk<< "m on screen";
 
     qreal pageLandscape = pageRectPx.width(); // Page size in pixel
     qreal pagePortrait = pageRectPx.height();
@@ -226,7 +225,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
             if (distanceMarker && pt.distance > nextDistance) // Distance Marker should be printed and current pt over next distance marker in meter
             {
                 qreal factor = (nextDistance - prevPt.distance) / (pt.distance - prevPt.distance); // The factor between prevPt and pt
-                qDebug() << "nextDistanceMarker=" << nextDistanceMarker << " factor=" << factor;
                 QLineF line = QLineF(prevPt, pt); // Distance point in pixel coords
                 QPointF kmPt = line.pointAt(factor); // Shorten line to exact kmPt
 
@@ -254,7 +252,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
     QRectF bbPages; // BoundingBox of all pages, to be used for printing
     qreal cutOffset = 0.1; // Offset to move the page a bit away from boundingBox to ensure intersection of both rects
     qreal pageDistanceStart = 0;
-    //    qDebug() << "cutOffset=" << cutOffset << " means " << cutOffset * scaleTrk << " meter on track";
 
     QLineF pageVev(pts.first(), pts.first()); // Steers the track direction to position the page on track boundingBox
     for(qint32 i = 1; i < pts.size(); ++i) // Start at 2nd points to build first line
@@ -307,7 +304,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
         {
             QLineF trkLine = QLineF(pt, prevPt); // Last trk line in pixel
 
-//             pagePts; // To store the 5 points from the page on screen
             QList<QPointF> pagePts = QPolygonF(prevPt.pageScreen).toList(); // Store the 5 points from the page rect in a point list
             bool hasIntersection = false; // There must be an intersection, if not set a debug message
             for (int j = 1; j < pagePts.size(); ++j) // Check for intersection of last trk line against previous page rect
@@ -334,7 +330,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
                     newPt.setY(ipt.y());
                     newPt.bb = QRectF(ipt, QSizeF(0, 0)); // New page start with an empty boundingBox
                     qreal deltaDistance = pt.distance - prevPt.distance;
-                    qreal factor;
+                    qreal factor;  // For calculating the distance to the newPt
                     if (qAbs(pt.x() - prevPt.x()) > 0 && qAbs(ipt.x() - prevPt.x()) > 0)
                     {
                         factor = qAbs(ipt.x() - prevPt.x()) / qAbs(pt.x() - prevPt.x());
@@ -349,9 +345,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
                         return;
                     }
                     newPt.distance = prevPt.distance + deltaDistance * factor;
-                    qDebug() << "factor=" << factor << " prevPt.distance=" << prevPt.distance << " newPt.distance=" << newPt.distance << " pt.distance=" << pt.distance;
                     pts.insert(i, newPt);
-
 
                     struct page_t page; // Build a new page
                     page.orientation = prevPt.orientation;
@@ -361,7 +355,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
                     page.distanceEnd = newPt.distance;
                     pages << page;
 
-                    pageDistanceStart = newPt.distance;
+                    pageDistanceStart = newPt.distance; // Start the new page distance at the newPt
 
                     bbPages |= page.pageScreen; // Add to the boundingBox of all Pages, used for printing
 
@@ -480,8 +474,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
     p.end();
 
     labelPlotTrack->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
-
-//    qDebug("Time elapsed: %d ms", timer.elapsed());
 }
 
 void CTrkPrintDialog::slotPrint()
@@ -491,10 +483,8 @@ void CTrkPrintDialog::slotPrint()
 
     slotUpdateMetrics();
 
-
     qint32 fromPage = printer.fromPage();
     qint32 toPage = printer.toPage();
-
 
     if(printer.fromPage() > 0)
     {
@@ -520,7 +510,6 @@ void CTrkPrintDialog::slotPrint()
         printer.setPageOrientation(pages[fromPage].orientation); // To be set before p.begin for the first page!
     }
     p.begin(&printer);
-    USE_ANTI_ALIASING(p, true);
 
     PROGRESS_SETUP(tr("Printing pages."), fromPage, toPage - 1, this);
 
@@ -580,7 +569,7 @@ void CTrkPrintDialog::slotPrint()
     }
     p.end();
 
-    checkPdfFileExist();
+    setPdfFileExists();
 }
 
 void CTrkPrintDialog::addPageMarkers(QPainter &p, const QRectF &currPage, const QRectF &otherPage, qint32 pageNo)
@@ -592,17 +581,17 @@ void CTrkPrintDialog::addPageMarkers(QPainter &p, const QRectF &currPage, const 
         {
             QPointF currPt = otherPts[i] - currPage.topLeft(); // Adjust coordinates of other point to the 1st page
             QPointF nextPt = otherPts[i + 1] - currPage.topLeft();
-            QLineF lineNext = QLineF(currPt, nextPt); // Build next line
+            QLineF lineNext(currPt, nextPt); // Build next line
             lineNext.setLength(20); // And shorten the line
             p.drawLine(lineNext); // Draw with the painter
 
             qint32 prev = (i == 0) ? otherPts.size() - 2 : i - 1; // Special for first point, prev point is the last point of rect
             QPointF prevPt = otherPts[prev] - currPage.topLeft();
-            QLineF linePrev = QLineF(currPt, prevPt); // Build previous line
+            QLineF linePrev(currPt, prevPt); // Build previous line
             linePrev.setLength(20);
             p.drawLine(linePrev);
 
-            QRectF textRect = QRectF(linePrev.p2(), lineNext.p2());
+            QRectF textRect(linePrev.p2(), lineNext.p2());
             QString pageNoStr = QString("%1").arg(pageNo);
             p.setOpacity(0.7); // Some opacity to see a bit the underlaying map
             p.fillRect(p.boundingRect(textRect, Qt::AlignCenter, pageNoStr), Qt::white); // Fill text box with a white rect
@@ -618,7 +607,7 @@ void CTrkPrintDialog::addDistanceMarkers(QPainter &p, const QRectF &currPage)
 {
     for (struct distanceMarkerPt_t dmPt : distanceMarkerPts)
     {
-        if (currPage.contains(dmPt))
+        if (currPage.contains(dmPt)) // Find the the best fitting postion from the line to the text box
         {
             qreal d = 22.5; // Degree range ==> 360 / 16
             qreal a = dmPt.lineToText.angle(); // The angel in 0-360 degree
@@ -685,7 +674,7 @@ void CTrkPrintDialog::slotSetPrinter()
     {
         slotUpdateMetrics();
     }
-    checkPdfFileExist();
+    setPdfFileExists();
 }
 
 void CTrkPrintDialog::slotSetOverlap(qint32 ovl)
@@ -697,7 +686,7 @@ void CTrkPrintDialog::slotSetOverlap(qint32 ovl)
     }
 }
 
-void CTrkPrintDialog::checkPdfFileExist()
+void CTrkPrintDialog::setPdfFileExists()
 {
     QString outputFileName = printer.outputFileName();
     if(QFileInfo(outputFileName).exists())

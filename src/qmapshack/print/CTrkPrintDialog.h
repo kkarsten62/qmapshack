@@ -50,7 +50,7 @@ private:
     void addPageMarkers(QPainter &p, const QRectF &currPage, const QRectF &otherPage, qint32 pageNo);
     void addDistanceMarkers(QPainter &p, const QRectF &currPage);
 
-    void checkPdfFileExist();
+    void setPdfFileExists();
 
     struct pt_t : public QPointF
     {
@@ -76,7 +76,6 @@ private:
         QLineF lineToText;
     };
     QList<struct distanceMarkerPt_t> distanceMarkerPts;
-
 
     CGisItemTrk &trk;
     CCanvas *canvas;
