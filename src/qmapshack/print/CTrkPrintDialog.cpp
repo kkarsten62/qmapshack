@@ -269,34 +269,35 @@ void CTrkPrintDialog::slotUpdateMetrics()
         {
             pageX = pagePortrait;
             pageY = pageLandscape;
-            pt.orientation = QPageLayout::Portrait;
+            pt.page.orientation = QPageLayout::Portrait;
         }
         else
         {
             pageX = pageLandscape;
             pageY = pagePortrait;
-            pt.orientation = QPageLayout::Landscape;
+            pt.page.orientation = QPageLayout::Landscape;
         }
 
         // Build the page on screen around the track
-        pt.pageScreen = QRectF(pt.bb.left() - cutOffset, pt.bb.top() - cutOffset, pageX - 2 * overlapPx, pageY - 2 * overlapPx); // Build page on screen in normalized form
-        qreal dx = (pageVev.dx() < 0) ? (-pt.pageScreen.width() + pt.bb.width() + 2 * cutOffset) : 0; // Move line based on trk direction in page
-        qreal dy = (pageVev.dy() < 0) ? (-pt.pageScreen.height() + pt.bb.height() + 2 * cutOffset) : 0;
-        pt.pageScreen.translate(dx, dy); // Move it
+        pt.page.setRect(pt.bb.left() - cutOffset, pt.bb.top() - cutOffset, pageX - 2 * overlapPx, pageY - 2 * overlapPx); // Build page on screen in normalized form
+//        pt.page = QRectF(pt.bb.left() - cutOffset, pt.bb.top() - cutOffset, pageX - 2 * overlapPx, pageY - 2 * overlapPx); // Build page on screen in normalized form
+        qreal dx = (pageVev.dx() < 0) ? (-pt.page.width() + pt.bb.width() + 2 * cutOffset) : 0; // Move line based on trk direction in page
+        qreal dy = (pageVev.dy() < 0) ? (-pt.page.height() + pt.bb.height() + 2 * cutOffset) : 0;
+        pt.page.translate(dx, dy); // Move it
 
-        if(prevPt.pageScreen.isNull()) // First line on page: Special treatment when first line on page is longer then page dimensions
+        if(prevPt.page.isNull()) // First line on page: Special treatment when first line on page is longer then page dimensions
         {
-            prevPt.pageScreen = pt.pageScreen; // Take the boundingBox from the next pt
+            prevPt.page = pt.page; // Take the boundingBox from the next pt
         }
 
         bool newPage = false;
         // 1st rule: When changing the orientation and current bounding box > previoius boundingBox ==> build new page
-        if(pt.orientation != prevPt.orientation && (pt.bb.width() > pt.pageScreen.width() || pt.bb.height() > pt.pageScreen.height()))
+        if(pt.page.orientation != prevPt.page.orientation && (pt.bb.width() > pt.page.width() || pt.bb.height() > pt.page.height()))
         {
             newPage = true;
         }
         // 2nd rule: current trkpt is outside to the the corosponding page ==> build new page
-        if(!pt.pageScreen.contains(pt)) // check whether pixel pt is inside current page rect on screen, if outside try to find intersection of trk line and page on screen
+        if(!pt.page.contains(pt)) // check whether pixel pt is inside current page rect on screen, if outside try to find intersection of trk line and page on screen
         {
             newPage = true;
         }
@@ -304,7 +305,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
         {
             QLineF trkLine = QLineF(pt, prevPt); // Last trk line in pixel
 
-            QList<QPointF> pagePts = QPolygonF(prevPt.pageScreen).toList(); // Store the 5 points from the page rect in a point list
+            QList<QPointF> pagePts = QPolygonF(prevPt.page).toList(); // Store the 5 points from the page rect in a point list
             bool hasIntersection = false; // There must be an intersection, if not set a debug message
             for (int j = 1; j < pagePts.size(); ++j) // Check for intersection of last trk line against previous page rect
             {
@@ -318,10 +319,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
                     QRectF bb2Ipt = QRectF(prevPt, ipt).normalized(); // BoundingBox of trk line up to intersection point
                     bb2Ipt |= prevPt.bb; // Add to the previous boundingBox
                     bb2Ipt = bb2Ipt.normalized();
-                    prevPt.pageScreen.moveCenter(bb2Ipt.center()); // Adjust page on screen the to the center of cutted boundingBox
-
-                    QPointF center = prevPt.pageScreen.center(); // in pixel
-                    canvas->convertPx2Rad(center); // convert to rad to be used for printing
+                    prevPt.page.moveCenter(bb2Ipt.center()); // Adjust page on screen the to the center of cutted boundingBox
 
                     pt.bb = QRectF(ipt, pt).normalized(); // Adjust the bb for the current pt up to the intersection pt
 
@@ -348,16 +346,18 @@ void CTrkPrintDialog::slotUpdateMetrics()
                     pts.insert(i, newPt);
 
                     struct page_t page; // Build a new page
-                    page.orientation = prevPt.orientation;
-                    page.pageScreen = prevPt.pageScreen.marginsAdded(QMarginsF(overlapPx, overlapPx, overlapPx, overlapPx)); // Add the overlap to the page for printing
-                    page.center = center; // In Rad
+                    page = prevPt.page;
+                    page += QMarginsF(overlapPx, overlapPx, overlapPx, overlapPx); // Add the overlap margin on each side
+                    QPointF centerRad = page.center(); // in pixel
+                    canvas->convertPx2Rad(centerRad); // convert to rad to be used for printing
+                    page.centerRad = centerRad; // In Rad
                     page.distanceStart = pageDistanceStart;
                     page.distanceEnd = newPt.distance;
                     pages << page;
 
                     pageDistanceStart = newPt.distance; // Start the new page distance at the newPt
 
-                    bbPages |= page.pageScreen; // Add to the boundingBox of all Pages, used for printing
+                    bbPages |= page; // Add to the boundingBox of all Pages, used for printing
 
                     pageVev = QLineF(ipt, ipt); // Set page vector to null for next page
                     hasIntersection = true; // Yeap, an intersection is found
@@ -370,19 +370,18 @@ void CTrkPrintDialog::slotUpdateMetrics()
         }
         else if (i == (pts.size() - 1)) // For last trkpt, build last page or for fullscreen on larger scale then we have only one page
         {
-            QRectF pageScreen = QRectF(0, 0, pageX, pageY); // Create a new page
-            pageScreen.moveCenter(pt.bb.center()); // And move it to the center of screen page
-            QPointF center = pageScreen.center(); // Convert to rad
-            canvas->convertPx2Rad(center);
-
             struct page_t page; // Build new page
-            page.orientation = pt.orientation;
-            page.center = center;
-            page.pageScreen = pageScreen;
+            page.setRect(0, 0, pageX, pageY);
+            page.moveCenter(pt.bb.center());
+            QPointF centerRad = page.center(); // Convert to rad
+            canvas->convertPx2Rad(centerRad);
+            page.centerRad = centerRad;
+            page.orientation = pt.page.orientation;
             page.distanceStart = pageDistanceStart;
             page.distanceEnd = pt.distance;
             pages << page;
-            bbPages |= page.pageScreen; // Add to the boundingBox of all Pages
+
+            bbPages |= page; // Add to the boundingBox of all Pages
          }
     }
 
@@ -424,8 +423,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
     p.begin(&image);
     USE_ANTI_ALIASING(p, true);
 
-    //    p.drawRect(0, 0, size.width() - 1, size.height() - 1);
-
     qreal w1 = bbPages.width();
     qreal h1 = bbPages.height();
     qreal w2 = size.width() - 10;
@@ -443,10 +440,9 @@ void CTrkPrintDialog::slotUpdateMetrics()
     qint32 pageNo = 0;
     for(const struct page_t page : pages)
     {
-        qreal p1x = 5 + offX + (page.pageScreen.x() - bbPages.x()) / scaleImg; // 5 pixel margin
-        qreal p2y = 5 + offY + (page.pageScreen.y() - bbPages.y()) / scaleImg;
-        p.drawRect(p1x, p2y,
-                   page.pageScreen.width() / scaleImg, page.pageScreen.height() / scaleImg);
+        qreal p1x = 5 + offX + (page.x() - bbPages.x()) / scaleImg; // 5 pixel margin
+        qreal p2y = 5 + offY + (page.y() - bbPages.y()) / scaleImg;
+        p.drawRect(p1x, p2y, page.width() / scaleImg, page.height() / scaleImg);
     }
 
     p.setOpacity(1); // Print the track, no opacity
@@ -465,7 +461,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     {
         for(const struct page_t page : pages)
         {
-            QPointF center = page.pageScreen.center(); // Center in pixel
+            QPointF center = page.center(); // Center in pixel
             qreal p1x = 5 + offX + (center.x() - bbPages.x()) / scaleImg - 10; // 10 text rect 20x20 pixel
             qreal p1y = 5 + offY + (center.y() - bbPages.y()) / scaleImg - 10;
             p.drawText(QRectF(p1x, p1y, 20, 20), Qt::AlignCenter, QString("%1").arg(++pageNo)); // Print the page number in center of page
@@ -519,15 +515,17 @@ void CTrkPrintDialog::slotPrint()
         const struct page_t &currPage = pages[i];
         const struct page_t &prevPage = (i > 0) ? pages[i - 1] : currPage;  // prevPage and nextPage, to be used to set the page marker on current page
         const struct page_t &nextPage = (i < (pages.size() - 1)) ? pages[i + 1] : currPage;
+
         if(newPage) // Set the right orientation before setting a new page and start printing on this new page
         {
             printer.setPageOrientation(currPage.orientation); // Change of orientation right before printer.newPage
             printer.newPage();
         }
-        QRectF pageToPrint = QRectF(0, 0, currPage.pageScreen.width(), currPage.pageScreen.height()); // The paper page
+        QRectF pageToPrint = QRectF(0, 0, currPage.width(), currPage.height()); // The paper page
         p.setClipRect(pageToPrint);
 
-        canvas->print(p, pageToPrint, currPage.center, printScaleBar); // Print the canvas content
+        canvas->print(p, pageToPrint, currPage.centerRad, printScaleBar); // Print the canvas content
+
         newPage = true; // Output a new page on next loop
 
         // Draw the scale and page number to bottom right
@@ -540,29 +538,29 @@ void CTrkPrintDialog::slotPrint()
                 .arg(qRound(scale / 100))
                 .arg(i + 1);
         QRectF textRect = p.boundingRect(QRectF(), Qt::AlignRight | Qt::AlignBottom, scaleStr);
-        p.fillRect(QRectF(currPage.pageScreen.width() - textRect.width(),
-                          currPage.pageScreen.height() - textRect.height(),
+        p.fillRect(QRectF(currPage.width() - textRect.width(),
+                          currPage.height() - textRect.height(),
                           textRect.width(), textRect.height()),
                    Qt::white);
         p.setOpacity(1);
         p.setPen(QPen());  // Print the text with default pen
-        p.drawText(QRectF(currPage.pageScreen.width() - textRect.width(),
-                          currPage.pageScreen.height() - textRect.height(),
+        p.drawText(QRectF(currPage.width() - textRect.width(),
+                          currPage.height() - textRect.height(),
                           textRect.width(), textRect.height()),
                    Qt::AlignRight | Qt::AlignBottom, scaleStr);
 
         if (i > fromPage && printPageMarkers) // Print page markers from the previous page
         {
-            addPageMarkers(p, currPage.pageScreen, prevPage.pageScreen, i);
+            addPageMarkers(p, currPage, prevPage, i);
         }
         if (i < (toPage - 1) && printPageMarkers) // Print page markers from the next page
         {
-            addPageMarkers(p, currPage.pageScreen, nextPage.pageScreen, i + 2);
+            addPageMarkers(p, currPage, nextPage, i + 2);
         }
 
         if(distanceMarker && distanceMarkerPts.size())
         {
-            addDistanceMarkers(p, currPage.pageScreen);
+            addDistanceMarkers(p, currPage);
         }
 
         PROGRESS(i, break);

@@ -52,23 +52,21 @@ private:
 
     void setPdfFileExists();
 
+    struct page_t : public QRectF
+    {
+        QPointF centerRad; // The center in rad, to be stored prior to canvas->print
+        QPageLayout::Orientation orientation; // Landscape or portrait
+        qreal distanceStart; // The trk start distance in km for the page
+        qreal distanceEnd;  // The trk end distance in km for the page
+    };
+    QList<struct page_t> pages; // List of all pages
+
     struct pt_t : public QPointF
     {
         QRectF bb; // Boundingbox of trk in pixel up to this trkpt
-        QRectF pageScreen; // The page in screen pixel coordinate system, set for for best fit for the pt boundingBox
-        QPageLayout::Orientation orientation;
-        qreal distance;
+        struct page_t page; // The page in screen pixel coordinate system, set for for best fit for the pt boundingBox
+        qreal distance; // The trk distance to this pt
     };
-
-    struct page_t
-    {
-        QPointF center;
-        QPageLayout::Orientation orientation;
-        QRectF pageScreen;
-        qreal distanceStart;
-        qreal distanceEnd;
-    };
-    QList<struct page_t> pages;
 
     struct distanceMarkerPt_t : public QPointF
     {
