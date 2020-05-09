@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ void CDemList::slotMoveUp()
 
     item->showChildren(false);
     treeWidget->takeTopLevelItem(index);
-    treeWidget->insertTopLevelItem(index-1, item);
+    treeWidget->insertTopLevelItem(index - 1, item);
     item->showChildren(true);
     treeWidget->setCurrentItem(0);
     emit treeWidget->sigChanged();
@@ -199,7 +199,7 @@ void CDemList::slotMoveDown()
 
     item->showChildren(false);
     treeWidget->takeTopLevelItem(index);
-    treeWidget->insertTopLevelItem(index+1, item);
+    treeWidget->insertTopLevelItem(index + 1, item);
     item->showChildren(true);
     treeWidget->setCurrentItem(0);
     emit treeWidget->sigChanged();
@@ -264,7 +264,6 @@ void CDemList::slotDemHonk()
     QDir dir(demPath);
 
     saveResource("World_Online_SRTM900.wcs", dir);
-    saveResource("Europe_Online_DEM25.vrt", dir);
 
     CDemDraw::setupDemPath(demPath);
 }

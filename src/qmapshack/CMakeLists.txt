@@ -116,6 +116,7 @@ set( SRCS
     gis/rte/CScrOptRte.cpp
     gis/rte/router/CRouterBRouter.cpp
     gis/rte/router/CRouterMapQuest.cpp
+    gis/rte/router/CRouterOptimization.cpp
     gis/rte/router/CRouterRoutino.cpp
     gis/rte/router/CRouterSetup.cpp
     gis/rte/router/IRouter.cpp
@@ -374,6 +375,7 @@ set( HDRS
     CMainWindow.h
     CSingleInstanceProxy.h
     GeoMath.h
+    contributors.h
     canvas/CCanvas.h
     canvas/CCanvasSetup.h
     canvas/CCanvasSelect.h
@@ -465,6 +467,7 @@ set( HDRS
     gis/rte/CScrOptRte.h
     gis/rte/router/CRouterBRouter.h
     gis/rte/router/CRouterMapQuest.h
+    gis/rte/router/CRouterOptimization.h
     gis/rte/router/CRouterRoutino.h
     gis/rte/router/CRouterSetup.h
     gis/rte/router/IRouter.h

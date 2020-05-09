@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 #include "types.h"
 
-QDataStream& operator>>(QDataStream& s, uintX& v)
+QDataStream & operator>>(QDataStream& s, uintX& v)
 {
     quint8 tmp;
     int shift   = 0;
@@ -27,7 +27,7 @@ QDataStream& operator>>(QDataStream& s, uintX& v)
     s >> tmp;
     while(tmp & 0x80)
     {
-        v.val |= (tmp & 0x7F)<<shift;
+        v.val |= (tmp & 0x7F) << shift;
         shift += 7;
         s >> tmp;
     }
@@ -46,7 +46,7 @@ QDataStream& operator>>(QDataStream& s, intX& v)
     s >> tmp;
     while(tmp & 0x80)
     {
-        v.val |= (tmp & 0x7F)<<shift;
+        v.val |= (tmp & 0x7F) << shift;
         shift += 7;
         s >> tmp;
     }

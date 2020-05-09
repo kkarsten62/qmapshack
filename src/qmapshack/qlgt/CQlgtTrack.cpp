@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <QtWidgets>
 
 
-QDataStream& operator >>(QDataStream& s, CFlags& flag)
+QDataStream & operator >>(QDataStream& s, CFlags& flag)
 {
     quint32 f;
     s >> f;

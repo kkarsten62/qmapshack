@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014-2015 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014-2015 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ private:
     qreal xPages = 0.0; //< number of pages in x dimension
     qreal yPages = 0.0; //< number of pages in y dimension
 
-    bool printScaleOnAllPages=false;
+    bool printScaleOnAllPages = false;
 };
 
 #endif //CPRINTDIALOG_H

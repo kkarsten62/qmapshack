@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -298,7 +298,7 @@ QDataStream& operator>>(QDataStream& stream, CGisItemWpt::geocache_t& geocache)
         stream >> geocache.container;
         if(version > 2)
         {
-            stream>>geocache.attributes;
+            stream >> geocache.attributes;
         }
         stream >> tmp8;
         geocache.shortDescIsHtml = tmp8;
@@ -727,7 +727,7 @@ QDataStream& CGisItemWpt::operator<<(QDataStream& stream)
     if(version <= 2 && geocache.hasData)
     {
         //If the geocache was saved with an old Version of QMS recalculate it's key to make sure geocaches with the same id are treated as being the same
-        key.item="";
+        key.item = "";
         genKey();
     }
     //Also sets icon, tooltip and text

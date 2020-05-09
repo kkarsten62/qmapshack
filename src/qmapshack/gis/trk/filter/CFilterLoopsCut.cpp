@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Michel Durand zero@cms123.fr
+    Copyright (C) 2018 Michel Durand <zero@cms123.fr>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ CFilterLoopsCut::~CFilterLoopsCut()
 void CFilterLoopsCut::slotApply()
 {
     CCanvasCursorLock cursorLock(Qt::WaitCursor, __func__);
-    trk.filterLoopsCut(spinBox->value()/IUnit::self().baseFactor);
+    trk.filterLoopsCut(spinBox->value() / IUnit::self().baseFactor);
 }
 
 void CFilterLoopsCut::showHelp()

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2015 Ivo Kronenberg
+   Copyright (C) 2015 Ivo Kronenberg <>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "gis/fit/decoder/IFitDecoderState.h"
 
-static const int fitMaxFieldSize =255;
+static const int fitMaxFieldSize = 255;
 
 class CFitFieldDataState final : public IFitDecoderState
 {

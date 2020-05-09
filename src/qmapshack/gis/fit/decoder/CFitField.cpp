@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2015 Ivo Kronenberg
+   Copyright (C) 2015 Ivo Kronenberg <>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -56,11 +56,11 @@ void CFitField::applyScaleAndOffset()
         // scale and offset is only for int / sint types
         if(baseType->isUnsignedInt())
         {
-            value = QVariant(rawValue.toUInt()/ profile().getScale() - profile().getOffset());
+            value = QVariant(rawValue.toUInt() / profile().getScale() - profile().getOffset());
         }
         if(baseType->isSignedInt())
         {
-            value = QVariant(rawValue.toInt()/ profile().getScale() - profile().getOffset());
+            value = QVariant(rawValue.toInt() / profile().getScale() - profile().getOffset());
         }
     }
     else
