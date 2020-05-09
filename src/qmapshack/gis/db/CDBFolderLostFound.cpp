@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ bool CDBFolderLostFound::update()
 void CDBFolderLostFound::expanding()
 {
     const int N = childCount();
-    for(int i=0; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
         CDBItem * item = dynamic_cast<CDBItem*>(child(i));
         if(item)

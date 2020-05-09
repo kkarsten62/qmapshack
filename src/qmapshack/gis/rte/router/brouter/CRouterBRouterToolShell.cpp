@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2017 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2017 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ void CRouterBRouterToolShell::start(const QString &dir, const QString &command, 
     isBeingKilled = false;
     isStarting = true;
     stdOut("cd " + dir);
-    stdOut(command+" " + args.join(" ") + "\n");
+    stdOut(command + " " + args.join(" ") + "\n");
     cmd.setWorkingDirectory(dir);
     startupTimer->start(200);
     cmd.start(command, args);

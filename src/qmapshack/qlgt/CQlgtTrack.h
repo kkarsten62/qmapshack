@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ class CQlgtWpt;
 class CFlags
 {
 public:
-    CFlags(quint32 f=0)
+    CFlags(quint32 f = 0)
     {
         flags = f;
         changed = true;
@@ -49,24 +49,24 @@ public:
     }
     quint32 operator  &(quint32 f) const
     {
-        return flags&f;
+        return flags & f;
     }
     quint32 operator |=(quint32 f)
     {
-        if ( flags != (flags|f) )
+        if ( flags != (flags | f) )
         {
             changed = true;
         }
-        flags|=f;
+        flags |= f;
         return flags;
     }
     quint32 operator &=(quint32 f)
     {
-        if ( flags != (flags&f) )
+        if ( flags != (flags & f) )
         {
             changed = true;
         }
-        flags&=f;
+        flags &= f;
         return flags;
     }
     quint32 operator >>(quint32 & f)

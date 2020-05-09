@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2018 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2018 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ void CMouseEditTrk::slotCopyToOrig()
 
     if(!isNewLine)
     {
-        QMessageBox::StandardButton button = QMessageBox::warning(canvas, tr("Warning!"), tr("This will replace all data of the original by a simple line of coordinates. All other data will be lost permanently."), QMessageBox::Ok|QMessageBox::Abort, QMessageBox::Ok);
+        QMessageBox::StandardButton button = QMessageBox::warning(canvas, tr("Warning!"), tr("This will replace all data of the original by a simple line of coordinates. All other data will be lost permanently."), QMessageBox::Ok | QMessageBox::Abort, QMessageBox::Ok);
 
         if(button != QMessageBox::Ok)
         {

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
 
 
     void calcRoute(const IGisItem::key_t& key) override;
-    int calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords) override;
+    int calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords, qreal *costs) override;
 
     bool hasFastRouting() override;
 

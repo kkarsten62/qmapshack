@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ public:
 
     void draw(IDrawContext::buffer_t& buf) override;
 
-    qreal getElevationAt(const QPointF& pos) override;
-    qreal getSlopeAt(const QPointF& pos) override;
+    qreal getElevationAt(const QPointF& pos, bool checkScale) override;
+    qreal getSlopeAt(const QPointF& pos, bool checkScale) override;
 
 private:
     QMutex mutex;
@@ -57,6 +57,8 @@ private:
     bool hasOverviews = false;
 
     QRectF boundingBox;
+
+    bool outOfScale = false;
 };
 
 #endif //CDEMVRT_H

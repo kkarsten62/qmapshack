@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014-2015 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014-2015 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -351,19 +351,19 @@ void CActivityTrk::printSummary(const QMap<trkact_t, summary_t>& summary, const 
     for(const desc_t *desc : descs)
     {
         const summary_t& s = summary[desc->activity];
-        IUnit::self().meter2speed(s.distance/s.ellapsedSecondsMoving, val, unit);
+        IUnit::self().meter2speed(s.distance / s.ellapsedSecondsMoving, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
         total += s.ellapsedSecondsMoving;
     }
     if(printNoAct)
     {
-        IUnit::self().meter2speed(sumActNone.distance/sumActNone.ellapsedSecondsMoving, val, unit);
+        IUnit::self().meter2speed(sumActNone.distance / sumActNone.ellapsedSecondsMoving, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
         total += sumActNone.ellapsedSecondsMoving;
     }
     if(printTotal)
     {
-        IUnit::self().meter2speed(distance/total, val, unit);
+        IUnit::self().meter2speed(distance / total, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
     }
     str += "</tr>";
@@ -375,19 +375,19 @@ void CActivityTrk::printSummary(const QMap<trkact_t, summary_t>& summary, const 
     for(const desc_t *desc : descs)
     {
         const summary_t& s = summary[desc->activity];
-        IUnit::self().meter2speed(s.distance/s.ellapsedSeconds, val, unit);
+        IUnit::self().meter2speed(s.distance / s.ellapsedSeconds, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
         total += s.ellapsedSeconds;
     }
     if(printNoAct)
     {
-        IUnit::self().meter2speed(sumActNone.distance/sumActNone.ellapsedSeconds, val, unit);
+        IUnit::self().meter2speed(sumActNone.distance / sumActNone.ellapsedSeconds, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
         total += sumActNone.ellapsedSeconds;
     }
     if(printTotal)
     {
-        IUnit::self().meter2speed(distance/total, val, unit);
+        IUnit::self().meter2speed(distance / total, val, unit);
         str += QString("<td align='right'>&nbsp;&nbsp;%1%2</td>").arg(val).arg(unit);
     }
     str += "</tr>";

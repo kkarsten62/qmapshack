@@ -1,7 +1,7 @@
 /**********************************************************************************************
-    Copyright (C) 2016 Christian Eichler code@christian-eichler.de
+    Copyright (C) 2016 Christian Eichler <code@christian-eichler.de>
 
-    Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+    Copyright (C) 2012 Digia Plc and/or its subsidiaries <>
     Contact: http://www.qt-project.org/legal
 
     This program is free software: you can redistribute it and/or modify
@@ -250,7 +250,7 @@ void CTextEditWidget::textStyle(int styleIndex)
             QTextListFormat::ListUpperRoman
         };
 
-        if( (unsigned) styleIndex <= sizeof(indexToFormat)/sizeof(QTextListFormat::Style))
+        if( (unsigned) styleIndex <= sizeof(indexToFormat) / sizeof(QTextListFormat::Style))
         {
             style = indexToFormat[styleIndex - 1];
         }

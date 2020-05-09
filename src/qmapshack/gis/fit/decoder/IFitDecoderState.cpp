@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2015 Ivo Kronenberg
+   Copyright (C) 2015 Ivo Kronenberg <>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ void IFitDecoderState::addDevFieldProfile(const CFitFieldProfile &fieldProfile)
 
 CFitFieldProfile* IFitDecoderState::devFieldProfile(quint32 fieldNr)
 {
-    for (int i=0; i < data.devFieldProfiles.size(); i++)
+    for (int i = 0; i < data.devFieldProfiles.size(); i++)
     {
         if (fieldNr == data.devFieldProfiles[i].getFieldDefNum())
         {

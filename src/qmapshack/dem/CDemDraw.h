@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,11 +47,11 @@ public:
      */
     void loadConfigForDemItem(CDemItem * item);
 
-    qreal getElevationAt(const QPointF& pos);
+    qreal getElevationAt(const QPointF& pos, bool checkScale = false);
     void  getElevationAt(const QPolygonF& pos, QPolygonF& ele);
     void  getElevationAt(SGisLine& line);
 
-    qreal getSlopeAt(const QPointF& pos);
+    qreal getSlopeAt(const QPointF& pos, bool checkScale = false);
     void  getSlopeAt(const QPolygonF& pos, QPolygonF& slope);
 
     void setProjection(const QString& proj) override;

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014-2015 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014-2015 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -242,7 +242,7 @@ bool IDBMysql::migrateDB4to5()
         }
 
         // get full size info text
-        QString comment = item->getInfo(IGisItem::eFeatureShowName|IGisItem::eFeatureShowFullText);
+        QString comment = item->getInfo(IGisItem::eFeatureShowName | IGisItem::eFeatureShowFullText);
 
         // replace comment with full size info text in items table
         QSqlQuery query2(db);
@@ -293,7 +293,7 @@ bool IDBMysql::migrateDB5to6()
         }
 
         // get full size info text
-        QString comment = item->getInfo(IGisItem::eFeatureShowName|IGisItem::eFeatureShowFullText);
+        QString comment = item->getInfo(IGisItem::eFeatureShowName | IGisItem::eFeatureShowFullText);
         QDateTime date  = item->getTimestamp();
 
         // replace comment with full size info text in items table

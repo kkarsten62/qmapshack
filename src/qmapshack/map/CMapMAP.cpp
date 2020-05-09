@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 #include <proj_api.h>
 #include <QtWidgets>
 
-#define INT_TO_DEG(x) (qreal(x)/1e6)
+#define INT_TO_DEG(x) (qreal(x) / 1e6)
 
-#define INT_TO_RAD(x) (qreal(x)/(1e6*RAD_TO_DEG))
+#define INT_TO_RAD(x) (qreal(x) / (1e6 * RAD_TO_DEG))
 
 
 
 CMapMAP::CMapMAP(const QString &filename, CMapDraw *parent)
-    : IMap(eFeatVisibility|eFeatVectorItems, parent)
+    : IMap(eFeatVisibility | eFeatVectorItems, parent)
     , filename(filename)
 {
     qDebug() << "------------------------------";

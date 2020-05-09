@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -108,11 +108,11 @@ void CScrOptRangeTool::slotCanvasResize(const QSize& sizeCanvas)
 
     QFontMetrics fm(CMainWindow::self().getMapFont());
 
-    qint32 w = qMin(fm.width("X") * 125, sizeCanvas.width()-60);
+    qint32 w = qMin(fm.width("X") * 125, sizeCanvas.width() - 60);
     qint32 h = height();
 
     setMinimumWidth(w);
-    origin = {(cw - w)>>1, ch - h - 10};
+    origin = {(cw - w) >> 1, ch - h - 10};
     move(origin);
     resize(w, height());
 }

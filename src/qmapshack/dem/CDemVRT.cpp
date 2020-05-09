@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
                   2019 Johannes Zellner johannes@zellner.org
 
     This program is free software: you can redistribute it and/or modify
@@ -106,7 +106,7 @@ CDemVRT::CDemVRT(const QString &filename, CDemDraw *parent)
 
     if(adfGeoTransform[4] != 0.0)
     {
-        trFwd.rotate(qAtan(adfGeoTransform[2]/adfGeoTransform[4]));
+        trFwd.rotate(qAtan(adfGeoTransform[2] / adfGeoTransform[4]));
     }
 
     if(pj_is_latlong(pjsrc))
@@ -138,9 +138,9 @@ CDemVRT::~CDemVRT()
     GDALClose(dataset);
 }
 
-qreal CDemVRT::getElevationAt(const QPointF& pos)
+qreal CDemVRT::getElevationAt(const QPointF& pos, bool checkScale)
 {
-    if(pjsrc == 0)
+    if(pjsrc == 0 || (checkScale && outOfScale))
     {
         return NOFLOAT;
     }
@@ -183,9 +183,9 @@ qreal CDemVRT::getElevationAt(const QPointF& pos)
     return ele;
 }
 
-qreal CDemVRT::getSlopeAt(const QPointF& pos)
+qreal CDemVRT::getSlopeAt(const QPointF& pos, bool checkScale)
 {
-    if(pjsrc == 0)
+    if(pjsrc == 0 || (checkScale && outOfScale))
     {
         return NOFLOAT;
     }
@@ -206,13 +206,13 @@ qreal CDemVRT::getSlopeAt(const QPointF& pos)
 
     qint16 win[eWinsize4x4];
     mutex.lock();
-    CPLErr err = dataset->RasterIO(GF_Read, qFloor(pt.x())-1, qFloor(pt.y())-1, 4, 4, &win, 4, 4, GDT_Int16, 1, 0, 0, 0, 0);
+    CPLErr err = dataset->RasterIO(GF_Read, qFloor(pt.x()) - 1, qFloor(pt.y()) - 1, 4, 4, &win, 4, 4, GDT_Int16, 1, 0, 0, 0, 0);
     mutex.unlock();
     if(err == CE_Failure)
     {
         return NOFLOAT;
     }
-    for(int i=0; i < eWinsize4x4; i++)
+    for(int i = 0; i < eWinsize4x4; i++)
     {
         if(hasNoData && win[i] == noData)
         {
@@ -232,13 +232,14 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf)
         return;
     }
 
-    if(!doHillshading() && !doSlopeColor() && !doElevationLimit())
+    QPointF bufferScale = buf.scale * buf.zoomFactor;
+    outOfScale = isOutOfScale(bufferScale);
+
+    if(outOfScale || (!doHillshading() && !doSlopeColor() && !doElevationLimit()))
     {
         QThread::msleep(100);
         return;
     }
-
-    QPointF bufferScale = buf.scale * buf.zoomFactor;
 
     // get pixel offset of top left buffer corner
     QPointF pp = buf.ref1;
@@ -319,12 +320,12 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf)
     USE_ANTI_ALIASING(p, true);
     p.translate(-pp);
 
-    qreal o1 = getOpacity()/100.0;
+    qreal o1 = getOpacity() / 100.0;
     qreal o2 = ((o1 + 0.4) >= 1.0) ? o1 : (o1 + 0.4);
     p.setOpacity(o1);
 
     qreal nTiles = ((right - left) * (bottom - top) / (w * h));
-    if(!isOutOfScale(bufferScale) && (nTiles < TILELIMIT))
+    if(nTiles < TILELIMIT)
     {
         for(qreal y = top - 1; y < bottom; y += h)
         {

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+   Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -102,11 +102,11 @@ void IAppSetup::prepareTranslator(QString translationPath, QString translationPr
     if (qtTranslator->load(translationPrefix + locale, translationPath))
     {
         app->installTranslator(qtTranslator);
-        qDebug() << "using file '"+ translationPath + "/" + translationPrefix + locale + ".qm' for translations.";
+        qDebug() << "using file '" + translationPath + "/" + translationPrefix + locale + ".qm' for translations.";
     }
     else
     {
-        qWarning() << "no file found for translations '"+ translationPath + "/" + translationPrefix + locale + "' (using default).";
+        qWarning() << "no file found for translations '" + translationPath + "/" + translationPrefix + locale + "' (using default).";
     }
 }
 

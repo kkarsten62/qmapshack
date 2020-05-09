@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2016 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2016 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
     scrOptSelect->toolCombineTrk->setEnabled(cntTrk > 1);
     scrOptSelect->toolActivityTrk->setEnabled(cntTrk > 0);
     scrOptSelect->toolColorTrk->setEnabled(cntTrk > 0);
-    scrOptSelect->toolEleWptTrk->setEnabled((cntWpt > 0)|(cntTrk > 0));
+    scrOptSelect->toolEleWptTrk->setEnabled((cntWpt > 0) | (cntTrk > 0));
 }
 
 void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect &rect)

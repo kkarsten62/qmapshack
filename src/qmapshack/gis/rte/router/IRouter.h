@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ public:
     virtual ~IRouter();
 
     virtual void calcRoute(const IGisItem::key_t& key) = 0;
-    virtual int calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords) = 0;
+    virtual int calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords, qreal* costs = nullptr) = 0;
     virtual bool hasFastRouting()
     {
         return fastRouting;

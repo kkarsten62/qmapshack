@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2017 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2017 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -206,7 +206,7 @@ QString CRouterBRouter::getOptions()
 {
     return QString(tr("profile: %1, alternative: %2")
                    .arg(comboProfile->currentData().toString())
-                   .arg(comboAlternative->currentData().toInt()+1));
+                   .arg(comboAlternative->currentData().toInt() + 1));
 }
 
 void CRouterBRouter::routerSelected()
@@ -323,22 +323,22 @@ QNetworkRequest CRouterBRouter::getRequest(const QVector<QPointF> &routePoints, 
     return QNetworkRequest(url);
 }
 
-int CRouterBRouter::calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords)
+int CRouterBRouter::calcRoute(const QPointF& p1, const QPointF& p2, QPolygonF& coords, qreal *costs)
 {
     if(!hasFastRouting())
     {
         return -1;
     }
 
-    const QVector<QPointF> points = {p1*RAD_TO_DEG, p2*RAD_TO_DEG};
+    const QVector<QPointF> points = {p1*RAD_TO_DEG, p2 * RAD_TO_DEG};
 
     QList<IGisItem*> nogos;
     CGisWorkspace::self().getNogoAreas(nogos);
 
-    return synchronousRequest(points, nogos, coords);
+    return synchronousRequest(points, nogos, coords, costs);
 }
 
-int CRouterBRouter::synchronousRequest(const QVector<QPointF> &points, const QList<IGisItem *> &nogos, QPolygonF &coords)
+int CRouterBRouter::synchronousRequest(const QVector<QPointF> &points, const QList<IGisItem *> &nogos, QPolygonF &coords, qreal* costs = nullptr)
 {
     if (!mutex.tryLock())
     {
@@ -377,43 +377,63 @@ int CRouterBRouter::synchronousRequest(const QVector<QPointF> &points, const QLi
         {
             throw reply->errorString();
         }
-        else
+        slotClearError();
+
+        const QByteArray &res = reply->readAll();
+
+        if(res.isEmpty())
         {
-            slotClearError();
+            throw tr("response is empty");
+        }
 
-            const QByteArray &res = reply->readAll();
+        QDomDocument xml;
+        xml.setContent(res);
+        const QDomElement &xmlGpx = xml.documentElement();
 
-            if(res.isEmpty())
+        if(xmlGpx.isNull() || xmlGpx.tagName() != "gpx")
+        {
+            throw QString(res);
+        }
+        setup->parseBRouterVersion(xmlGpx.attribute("creator"));
+
+        // read the shape
+        const QDomNodeList &xmlLatLng = xmlGpx.firstChildElement("trk")
+                                        .firstChildElement("trkseg")
+                                        .elementsByTagName("trkpt");
+        for(int n = 0; n < xmlLatLng.size(); n++)
+        {
+            const QDomElement &elem   = xmlLatLng.item(n).toElement();
+            coords << QPointF();
+            QPointF &point = coords.last();
+            point.setX(elem.attribute("lon").toFloat() * DEG_TO_RAD);
+            point.setY(elem.attribute("lat").toFloat() * DEG_TO_RAD);
+        }
+
+        //find costs of route (copied and adapted from CGisItemRte::setResultFromBrouter)
+        if(costs != nullptr)
+        {
+            const QDomNodeList &nodes = xml.childNodes();
+            for (int i = 0; i < nodes.count(); i++)
             {
-                throw tr("response is empty");
-            }
-            else
-            {
-                QDomDocument xml;
-                xml.setContent(res);
-
-                const QDomElement &xmlGpx = xml.documentElement();
-                if(xmlGpx.isNull() || xmlGpx.tagName() != "gpx")
+                const QDomNode &node = nodes.at(i);
+                if (!node.isComment())
                 {
-                    throw QString(res);
+                    continue;
                 }
-                else
+                const QString &commentTxt = node.toComment().data();
+                // ' track-length = 180864 filtered ascend = 428 plain-ascend = -172 cost=270249 '
+                const QRegExp rxAscDes("(\\s*track-length\\s*=\\s*)(-?\\d+)(\\s*)(filtered ascend\\s*=\\s*-?\\d+)(\\s*)(plain-ascend\\s*=\\s*-?\\d+)(\\s*)(cost\\s*=\\s*)(-?\\d+)(\\s*)");
+                int pos = rxAscDes.indexIn(commentTxt);
+                if (pos > -1)
                 {
-                    setup->parseBRouterVersion(xmlGpx.attribute("creator"));
-
-                    // read the shape
-                    const QDomNodeList &xmlLatLng = xmlGpx.firstChildElement("trk")
-                                                    .firstChildElement("trkseg")
-                                                    .elementsByTagName("trkpt");
-                    for(int n = 0; n < xmlLatLng.size(); n++)
+                    bool ok;
+                    *costs = rxAscDes.cap(9).toDouble(&ok);
+                    if(!ok)
                     {
-                        const QDomElement &elem   = xmlLatLng.item(n).toElement();
-                        coords << QPointF();
-                        QPointF &point = coords.last();
-                        point.setX(elem.attribute("lon").toFloat()*DEG_TO_RAD);
-                        point.setY(elem.attribute("lat").toFloat()*DEG_TO_RAD);
+                        *costs = -1;
                     }
                 }
+                break;
             }
         }
     }
@@ -533,7 +553,7 @@ void CRouterBRouter::slotRequestFinished(QNetworkReply* reply)
         CGisItemRte * rte = dynamic_cast<CGisItemRte*>(CGisWorkspace::self().getItemByKey(key));
         if(rte != nullptr)
         {
-            rte->setResultFromBRouter(xml, reply->property("options").toString() + tr("<br/>Calculation time: %1s").arg(time/1000.0, 0, 'f', 2));
+            rte->setResultFromBRouter(xml, reply->property("options").toString() + tr("<br/>Calculation time: %1s").arg(time / 1000.0, 0, 'f', 2));
         }
     }
     catch(const QString& msg)

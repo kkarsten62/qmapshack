@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2019 Henri Hornburg hrnbg@t-online.de
+    Copyright (C) 2019 Henri Hornburg <hrnbg@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #define CSEARCHLINEEDIT_H
 
 #include <QLineEdit>
+class QTimer;
 class IGisProject;
 class CSearch;
 class QTreeWidgetItem;
@@ -29,7 +30,7 @@ class CSearchLineEdit : public QLineEdit
     Q_OBJECT
 public:
     CSearchLineEdit(QWidget* parent);
-    CSearchLineEdit(QWidget* parent, IGisProject* project, CSearch *search=nullptr);
+    CSearchLineEdit(QWidget* parent, IGisProject* project, CSearch *search = nullptr);
 
 signals:
     void sigWorkspaceSearchChanged(CSearch newSearch);
@@ -57,6 +58,7 @@ private:
     IGisProject * connectedProject = nullptr;
     QTreeWidgetItem * searchItem = nullptr;
 
+    QTimer * searchCreationTimer = nullptr;
     static CSearchExplanationDialog* explanationDlg;
 };
 

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2019 Henri Hornburg hrnbg@t-online.de
+    Copyright (C) 2019 Henri Hornburg <hrnbg@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ CSearchExplanationDialog::CSearchExplanationDialog(QWidget *parent)
     explanation += "<li>" + QLocale::c().dateTimeFormat(QLocale::ShortFormat) + "</li>";
     explanation += "</ul>";
     explanation += tr("<p>The search can only convert following units:</p>");
-    explanation += "<p>"+IUnit::getUnits().join(", ") + "</p>";
+    explanation += "<p>" + IUnit::getUnits().join(", ") + "</p>";
     explanation += tr("<p>The regex search uses this syntax: https://perldoc.perl.org/perlre.html</p>");
     textBrowserExplanation->setText(explanation);
     for(QString property : CSearch::getSearchTypeKeywords())

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2015 Ivo Kronenberg
+   Copyright (C) 2015 Ivo Kronenberg <>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ void CFitDefinitionMessage::addDevField(CFitFieldDefinition fieldDef)
 
 bool CFitDefinitionMessage::hasField(const quint8 fieldNum) const
 {
-    for (int i=0; i < fields.size(); i++)
+    for (int i = 0; i < fields.size(); i++)
     {
         if (fieldNum == fields[i].getDefNr())
         {
@@ -97,7 +97,7 @@ bool CFitDefinitionMessage::hasField(const quint8 fieldNum) const
 
 const CFitFieldDefinition& CFitDefinitionMessage::getField(const quint8 fieldNum) const
 {
-    for (int i=0; i < fields.size(); i++)
+    for (int i = 0; i < fields.size(); i++)
     {
         if (fieldNum == fields[i].getDefNr())
         {

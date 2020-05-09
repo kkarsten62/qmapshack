@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ void CTableTrkInfo::updateData()
         QTreeWidgetItem * item = new QTreeWidgetItem();
         item->setIcon(eColNum, CDraw::number(cnt++, Qt::black));
         item->setText(eColDesc, trkpt.desc);
-        item->setFlags(item->flags()|Qt::ItemIsEditable);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
         item->setData(eColDesc, Qt::UserRole, trkpt.idxTotal);
         items << item;
     }

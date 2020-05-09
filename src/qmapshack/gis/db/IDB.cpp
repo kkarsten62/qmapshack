@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ bool IDB::setupDB(QString &error)
             int res = QMessageBox::warning(CMainWindow::self().getBestWidgetForParent(),
                                            tr("Migrate database..."),
                                            msg,
-                                           QMessageBox::Ok|QMessageBox::Abort);
+                                           QMessageBox::Ok | QMessageBox::Abort);
             if(res != QMessageBox::Ok)
             {
                 error = tr("Migration aborted by user");

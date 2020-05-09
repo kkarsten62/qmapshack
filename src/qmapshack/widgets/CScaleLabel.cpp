@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ void CScaleLabel::paintEvent(QPaintEvent *e)
     int xBar = HOR_MARGIN;
     int yBar = (h - BAR_HEIGHT) / 2;
 
-    QRect bar(xBar, yBar, w-2*HOR_MARGIN, BAR_HEIGHT);
+    QRect bar(xBar, yBar, w - 2 * HOR_MARGIN, BAR_HEIGHT);
     p.setPen(Qt::darkBlue);
     p.setBrush(Qt::white);
     p.drawRect(bar);

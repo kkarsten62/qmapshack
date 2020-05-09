@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2008 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2008 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,6 @@
 #endif
 
 #define GARMIN_DEG(x) ((x) < 0x800000 ? (qreal)(x) * 360.0 / 16777216.0 : (qreal)((x) - 0x1000000) * 360.0 / 16777216.0)
-#define GARMIN_RAD(x) ((x) < 0x800000 ? (qreal)(x) * (2*M_PI) / 16777216.0 : (qreal)((x) - 0x1000000) * (2*M_PI) / 16777216.0)
+#define GARMIN_RAD(x) ((x) < 0x800000 ? (qreal)(x) * (2 * M_PI) / 16777216.0 : (qreal)((x) - 0x1000000) * (2 * M_PI) / 16777216.0)
 typedef quint8 quint24[3];
 #endif                           //GARMIN_H

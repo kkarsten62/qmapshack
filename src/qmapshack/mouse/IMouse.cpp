@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2018 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2018 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ IMouse::~IMouse()
 
 void IMouse::mouseDragged(const QPoint &start, const QPoint &last, const QPoint &end)
 {
-    canvas->moveMap(end-last);
+    canvas->moveMap(end - last);
 }
 
 void IMouse::rightButtonDown(const QPoint &pos)

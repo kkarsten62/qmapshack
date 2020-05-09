@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -168,12 +168,12 @@ void CListTrkPts::addTableRow(bool focus, const CTrackData::trkpt_t& trkpt, bool
     stream << "<tr style='"
            << "color: " << color << ";"
            << "background: " << bgFocus << ";"
-           <<"'>";
+           << "'>";
 
     stream << "<td style='background: " << bgInRange << ";'>" << QString::number(trkpt.idxTotal) << "</td>";
 
     stream << "<td>" << (trkpt.time.isValid()
-                         ? IUnit::self().datetime2string(trkpt.time, true, QPointF(trkpt.lon, trkpt.lat)*DEG_TO_RAD)
+                         ? IUnit::self().datetime2string(trkpt.time, true, QPointF(trkpt.lon, trkpt.lat) * DEG_TO_RAD)
                          : "-") << "</td>";
 
     QString val, unit;

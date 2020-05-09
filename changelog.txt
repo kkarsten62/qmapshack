@@ -1,9 +1,18 @@
 V1.XX.X
-[QMS-135] Improved French translation
+[QMS-68] Route Optimization
+[QMS-132] DEMs: Make the scale range control cut off not only rendering but also loading or requesting the data.
 [QMS-134] Rework track range selection from scratch
+[QMS-135] Improved French translation
 [QMS-140] Enhancements for OS X release
+[QMS-146] Fix issues with built-in online maps
 [QMS-148] Misplaced track info window
 [QMS-151] Missing tooltip in route toolbar
+[QMS-153] Improved French translation
+[QMS-156] Request to unmount systemdrive on startup
+[QMS-164] Workspace filter is not applied to newly loaded projects
+[QMS-165] OSX: GIS files not loaded when clicked
+[QMS-173] Misleading help text for DEM range slider
+[QMS-178] Automate list of code contributors in about dialog
 
 V1.14.1
 =======

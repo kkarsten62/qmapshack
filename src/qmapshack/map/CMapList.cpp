@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -183,7 +183,7 @@ void CMapList::slotMoveUp()
 
     item->showChildren(false);
     treeWidget->takeTopLevelItem(index);
-    treeWidget->insertTopLevelItem(index-1, item);
+    treeWidget->insertTopLevelItem(index - 1, item);
     item->showChildren(true);
     treeWidget->setCurrentItem(0);
     emit treeWidget->sigChanged();
@@ -205,7 +205,7 @@ void CMapList::slotMoveDown()
 
     item->showChildren(false);
     treeWidget->takeTopLevelItem(index);
-    treeWidget->insertTopLevelItem(index+1, item);
+    treeWidget->insertTopLevelItem(index + 1, item);
     item->showChildren(true);
     treeWidget->setCurrentItem(0);
     emit treeWidget->sigChanged();

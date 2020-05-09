@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014-2015 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2018 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014-2015 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2018 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ public:
     }
 
     void updateStatus();
+    void showRoutingErrorMessage(const QString &msg) const;
 
 protected slots:
     void slotTimeoutRouting();
@@ -116,7 +117,6 @@ protected:
     QPolygonF subLinePixel2;
 
 private:
-    void showRoutingErrorMessage(const QString &msg) const;
     void tryRouting(IGisLine::point_t& pt1, IGisLine::point_t& pt2) const;
 
     QTimer * timerRouting;

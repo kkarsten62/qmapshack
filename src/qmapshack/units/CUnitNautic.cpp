@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2008 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2008 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ void CUnitNautic::meter2speed(qreal meter, qreal& val, QString& unit) const /* o
     }
     else
     {
-        val=meter * speedFactor;
+        val = meter * speedFactor;
         unit = speedUnit;
     }
 }
@@ -103,7 +103,7 @@ void CUnitNautic::meter2area(qreal meter, qreal& val, QString& unit) const /* ov
     }
     else
     {
-        val= meter / (1852 * 1852);
+        val = meter / (1852 * 1852);
         unit = "nm²";
     }
 }

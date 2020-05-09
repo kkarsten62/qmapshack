@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -188,7 +188,7 @@ void CPhotoAlbum::updateView()
 
         QRect r     = tmp.rect();
 
-        int yoff = (height()- r.height()) / 2;
+        int yoff = (height() - r.height()) / 2;
 
         p.save();
         p.translate(xoff, yoff);

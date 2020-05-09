@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2017 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2017 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@
 CGisWorkspace * CGisWorkspace::pSelf = nullptr;
 
 CGisWorkspace::CGisWorkspace(QMenu *menuProject, QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), currentSearch("")
 {
     pSelf = this;
     setupUi(this);
@@ -143,6 +143,11 @@ void CGisWorkspace::loadGisProject(const QString& filename)
         }
 
         treeWks->blockSignals(false);
+
+        if(item != nullptr)
+        {
+            item->setWorkspaceFilter(currentSearch);
+        }
     }
 
     emit sigChanged();
@@ -151,7 +156,7 @@ void CGisWorkspace::loadGisProject(const QString& filename)
 
 void CGisWorkspace::slotSetGisLayerOpacity(int val)
 {
-    CCanvas::gisLayerOpacity = qreal(val)/100;
+    CCanvas::gisLayerOpacity = qreal(val) / 100;
     CCanvas * canvas = CMainWindow::self().getVisibleCanvas();
     if(canvas != nullptr)
     {
@@ -161,6 +166,7 @@ void CGisWorkspace::slotSetGisLayerOpacity(int val)
 
 void CGisWorkspace::slotSearch(const CSearch& currentSearch)
 {
+    this->currentSearch = currentSearch;
     {
         CCanvasCursorLock cursorLock(Qt::WaitCursor, __func__);
         QMutexLocker lock(&IGisItem::mutexItems);
@@ -351,7 +357,7 @@ IGisProject * CGisWorkspace::selectProject(bool forceSelect)
             CDBProject * p = nullptr;
             while(nullptr == p)
             {
-                QApplication::processEvents(QEventLoop::WaitForMoreEvents|QEventLoop::ExcludeUserInputEvents, 100);
+                QApplication::processEvents(QEventLoop::WaitForMoreEvents | QEventLoop::ExcludeUserInputEvents, 100);
                 p = dynamic_cast<CDBProject*>(treeWks->getProjectById(evt.idChild, db));
             }
             /*
@@ -961,7 +967,7 @@ void CGisWorkspace::cutTrkByKey(const IGisItem::key_t& key)
     CGisItemTrk * trk = dynamic_cast<CGisItemTrk*>(getItemByKey(key));
     if(nullptr != trk && trk->cut())
     {
-        int res = QMessageBox::question(this, tr("Cut Track..."), tr("Do you want to delete the original track?"), QMessageBox::Ok|QMessageBox::No, QMessageBox::Ok);
+        int res = QMessageBox::question(this, tr("Cut Track..."), tr("Do you want to delete the original track?"), QMessageBox::Ok | QMessageBox::No, QMessageBox::Ok);
         if(res == QMessageBox::Ok)
         {
             delete trk;
@@ -1237,7 +1243,7 @@ void CGisWorkspace::editPrxWpt(const QList<IGisItem::key_t>& keys)
         return;
     }
 
-    qreal proximity = var.toDouble()/IUnit::self().baseFactor;
+    qreal proximity = var.toDouble() / IUnit::self().baseFactor;
     bool isNoGo = dlg.optionIsChecked();
     for(const IGisItem::key_t& key : keys)
     {
@@ -1389,7 +1395,7 @@ void CGisWorkspace::tagItemsByKey(const QList<IGisItem::key_t>& keys)
             {
                 commonKeywords = gisItem->getKeywords();
                 rating = gisItem->getRating();
-                firstItem=false;
+                firstItem = false;
             }
             else
             {
