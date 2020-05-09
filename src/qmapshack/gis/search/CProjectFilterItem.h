@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2019 Henri Hornburg hrnbg@t-online.de
+    Copyright (C) 2019 Henri Hornburg <hrnbg@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class CProjectFilterItem : public QTreeWidgetItem
 public:
     CProjectFilterItem(IGisProject *parent);
     virtual ~CProjectFilterItem();
-    void showLineEdit(CSearch* search=nullptr);
+    void showLineEdit(CSearch* search = nullptr);
     const CSearchLineEdit* getLineEdit()
     {
         return lineEdit;

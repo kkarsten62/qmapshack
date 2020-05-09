@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
     setupUi(this);
     QPixmap icon(14, 14);
     const int N = IGisItem::getColorMap().count();
-    for(int i=0; i < N; ++i)
+    for(int i = 0; i < N; ++i)
     {
         const IGisItem::color_t& color = IGisItem::getColorMap()[i];
         icon.fill(color.color);

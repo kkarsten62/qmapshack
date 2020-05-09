@@ -1,5 +1,5 @@
 /**********************************************************************************************
-   Copyright (C) 2015 Ivo Kronenberg
+   Copyright (C) 2015 Ivo Kronenberg <>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ const CFitMessage& CFitStream::nextMesg()
 
 const CFitMessage& CFitStream::lastMesg() const
 {
-    int pos = readPos-1;
+    int pos = readPos - 1;
     if(pos < 0)
     {
         pos = 0;

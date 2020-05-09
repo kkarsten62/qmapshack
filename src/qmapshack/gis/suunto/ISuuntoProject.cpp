@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2017 Michel Durand zero@cms123.fr
+    Copyright (C) 2017 Michel Durand <zero@cms123.fr>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -174,7 +174,7 @@ ISuuntoProject::sample_t ISuuntoProject::mergeSamples(QList<sample_t> samples, Q
 
         if(cnt != 0)
         {
-            result[ext.tag] = sum/cnt; // averaged value is assigned to the merged sample
+            result[ext.tag] = sum / cnt; // averaged value is assigned to the merged sample
         }
     }
 

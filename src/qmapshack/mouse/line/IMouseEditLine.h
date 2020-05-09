@@ -1,6 +1,6 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
-    Copyright (C) 2018 Norbert Truchsess norbert.truchsess@t-online.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2018 Norbert Truchsess <norbert.truchsess@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "gis/IGisItem.h"
 #include "gis/IGisLine.h"
+#include "gis/rte/router/CRouterOptimization.h"
 #include "mouse/IMouse.h"
 #include <QDebug>
 #include <QPointer>
@@ -102,6 +103,7 @@ protected slots:
     void slotVectorRouting();
     void slotTrackRouting();
 
+    void slotOptimize();
 
     virtual void slotAbort() = 0;
     void slotAbortEx(bool showMB);
@@ -153,6 +155,8 @@ private:
     bool enableStatus;
 
     QString type;
+
+    CRouterOptimization optimizer;
 };
 
 #endif //IMOUSEEDITLINE_H

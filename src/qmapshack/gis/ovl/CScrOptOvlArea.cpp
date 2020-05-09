@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ CScrOptOvlArea::CScrOptOvlArea(CGisItemOvlArea *area, const QPoint &point, IMous
     setupUi(this);
     setOrigin(point);
     label->setFont(CMainWindow::self().getMapFont());
-    label->setText(area->getInfo(IGisItem::eFeatureShowName|IGisItem::eFeatureShowLinks));
+    label->setText(area->getInfo(IGisItem::eFeatureShowName | IGisItem::eFeatureShowLinks));
     adjustSize();
 
     anchor = area->getPointCloseBy(point);

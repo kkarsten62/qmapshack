@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2016 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2016 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,6 +118,6 @@ void CSelectActivityColor::slotSetColor(QToolButton * button, trkact_t act)
 
     if(trk != nullptr)
     {
-        trk->updateVisuals(CGisItemTrk::eVisualDetails|CGisItemTrk::eVisualPlot|CGisItemTrk::eVisualProject|CGisItemTrk::eVisualTrkInfo, "CSelectActivityColor::slotSetColor()");
+        trk->updateVisuals(CGisItemTrk::eVisualDetails | CGisItemTrk::eVisualPlot | CGisItemTrk::eVisualProject | CGisItemTrk::eVisualTrkInfo, "CSelectActivityColor::slotSetColor()");
     }
 }

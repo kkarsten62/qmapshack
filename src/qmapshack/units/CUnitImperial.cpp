@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2008 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2008 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ void CUnitImperial::meter2area(qreal meter, QString& val, QString& unit) const /
     }
     else
     {
-        val.sprintf("%1.2f", meter / (1/milePerMeter * 1/milePerMeter));
+        val.sprintf("%1.2f", meter / (1 / milePerMeter * 1 / milePerMeter));
         unit = "mi²";
     }
 }
@@ -101,7 +101,7 @@ void CUnitImperial::meter2area(qreal meter, qreal& val, QString& unit) const /* 
     }
     else
     {
-        val= meter / (1/milePerMeter * 1/milePerMeter);
+        val = meter / (1 / milePerMeter * 1 / milePerMeter);
         unit = "mi²";
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
                   2019 Johannes Zellner johannes@zellner.org
 
     This program is free software: you can redistribute it and/or modify
@@ -51,8 +51,8 @@ public:
 
     virtual void draw(IDrawContext::buffer_t& buf) = 0;
 
-    virtual qreal getElevationAt(const QPointF& pos) = 0;
-    virtual qreal getSlopeAt(const QPointF& pos) = 0;
+    virtual qreal getElevationAt(const QPointF& pos, bool checkScale) = 0;
+    virtual qreal getSlopeAt(const QPointF& pos, bool checkScale) = 0;
 
     bool activated()
     {

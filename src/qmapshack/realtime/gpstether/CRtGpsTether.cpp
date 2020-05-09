@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ void CRtGpsTether::registerWithTreeWidget()
     if(tree != nullptr)
     {
         QTreeWidgetItem * itemInfo = new QTreeWidgetItem(this);
-        itemInfo->setFlags(Qt::ItemIsEnabled|Qt::ItemNeverHasChildren);
+        itemInfo->setFlags(Qt::ItemIsEnabled | Qt::ItemNeverHasChildren);
         info = new CRtGpsTetherInfo(*this, tree);
         connect(info, &CRtGpsTetherInfo::sigChanged, this, &CRtGpsTether::sigChanged);
 

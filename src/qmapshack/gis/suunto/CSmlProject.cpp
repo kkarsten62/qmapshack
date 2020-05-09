@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2017 Michel Durand zero@cms123.fr
+    Copyright (C) 2017 Michel Durand <zero@cms123.fr>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -146,8 +146,8 @@ void CSmlProject::loadSml(const QString &filename, CSmlProject *project)
 
             {
                 trk.cmt += tr("Battery usage: %1 %/hour")
-                           .arg( 100*(xmlHeader.namedItem("BatteryChargeAtStart").toElement().text().toDouble()
-                                      - xmlHeader.namedItem("BatteryCharge").toElement().text().toDouble())
+                           .arg( 100 * (xmlHeader.namedItem("BatteryChargeAtStart").toElement().text().toDouble()
+                                        - xmlHeader.namedItem("BatteryCharge").toElement().text().toDouble())
                                  / (xmlHeader.namedItem("Duration").toElement().text().toDouble() / 3600), 0, 'f', 1);
             }
         }

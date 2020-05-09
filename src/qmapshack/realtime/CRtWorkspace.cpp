@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2018 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2018 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -259,7 +259,7 @@ void CRtWorkspace::slotAddSource()
 
 void CRtWorkspace::slotDeleteSource()
 {
-    int res = QMessageBox::question(this, tr("Delete Source..."), tr("Do you really want to remove the realtime source?"), QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+    int res = QMessageBox::question(this, tr("Delete Source..."), tr("Do you really want to remove the realtime source?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if(res != QMessageBox::Yes)
     {
         return;

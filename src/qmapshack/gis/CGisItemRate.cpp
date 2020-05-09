@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2020 Henri Hornburg hrnbg@t-online.de
+    Copyright (C) 2020 Henri Hornburg <hrnbg@t-online.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,17 +84,17 @@ QSet<QString> CGisItemRate::getRemovedKeywords() const
 
 void CGisItemRate::ratingLabelClicked(int labelNumber)
 {
-    ratingChanged=true;
+    ratingChanged = true;
 
     //Comparing like this since one is a floating point and one an integer
     if(rating > labelNumber || rating < labelNumber)
     {
-        rating=labelNumber;
+        rating = labelNumber;
     }
     else
     {
         //The icon is already a star, if you click it again, the star goes away
-        rating=labelNumber-1;
+        rating = labelNumber - 1;
     }
     updateStars();
 }

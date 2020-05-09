@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ CGisItemWpt::CGisItemWpt(const CQlgtWpt& wpt1, IGisProject * project)
 
         images << image;
     }
-    boundingRect = QRectF(QPointF(wpt.lon, wpt.lat)*DEG_TO_RAD, QPointF(wpt.lon, wpt.lat)*DEG_TO_RAD);
+    boundingRect = QRectF(QPointF(wpt.lon, wpt.lat) * DEG_TO_RAD, QPointF(wpt.lon, wpt.lat) * DEG_TO_RAD);
     setIcon();
     genKey();
     setupHistory();

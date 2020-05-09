@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2008 Oliver Eichler oliver.eichler@gmx.de
+    Copyright (C) 2008 Oliver Eichler <oliver.eichler@gmx.de>
                   2019 Johannes Zellner johannes@zellner.org
 
     This program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@ void CUnitAviation::meter2area(qreal meter, QString& val, QString& unit) const /
     }
     else
     {
-        val.sprintf("%1.2f", meter / (1/nauticalMilePerMeter * 1/nauticalMilePerMeter));
+        val.sprintf("%1.2f", meter / (1 / nauticalMilePerMeter * 1 / nauticalMilePerMeter));
         unit = "nm²";
     }
 }
@@ -82,7 +82,7 @@ void CUnitAviation::meter2area(qreal meter, qreal& val, QString& unit) const /* 
     }
     else
     {
-        val= meter / (1/nauticalMilePerMeter * 1/nauticalMilePerMeter);
+        val = meter / (1 / nauticalMilePerMeter * 1 / nauticalMilePerMeter);
         unit = "nm²";
     }
 }
