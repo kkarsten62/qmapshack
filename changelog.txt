@@ -1,4 +1,6 @@
 V1.XX.X
+
+V1.15.0
 [QMS-68] Route Optimization
 [QMS-132] DEMs: Make the scale range control cut off not only rendering but also loading or requesting the data.
 [QMS-134] Rework track range selection from scratch
@@ -11,10 +13,14 @@ V1.XX.X
 [QMS-156] Request to unmount systemdrive on startup
 [QMS-164] Workspace filter is not applied to newly loaded projects
 [QMS-165] OSX: GIS files not loaded when clicked
+[QMS-172] Select action "for all" in Database Conflict
 [QMS-173] Misleading help text for DEM range slider
 [QMS-178] Automate list of code contributors in about dialog
 [QMS-183] Backward range selection causing small issues
 [QMS-192] Fix URLs still pointing to the bitbucket wiki
+[QMS-201] Fix GDAL deprecation warnings
+[QMS-204] Garmin Map: Fix crash because of bad codec number
+[QMS-207] Fixing Availability of Geocaches
 
 V1.14.1
 =======
