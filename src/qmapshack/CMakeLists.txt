@@ -945,7 +945,6 @@ target_link_libraries(${APPLICATION_NAME}
     Qt5::Network
     Qt5::WebEngineWidgets
     Qt5::Qml
-    Qt5::Positioning
     Qt5::Help
     ${DBUS_LIB}
     ${GDAL_LIBRARIES}
