@@ -75,9 +75,13 @@ private slots:
     void slotReloadMaps();
     void slotContextMenu(const QPoint &point);
     void slotFilter(const QString &str);
+    void slotClicked(const QModelIndex &);
+    void slotDoubleClicked(const QModelIndex &);
 
 private:
     QMenu * menu;
+    bool isDoubleClicked;
+
 };
 
 #endif //CMAPLIST_H
