@@ -71,9 +71,8 @@ CMapList::CMapList(QWidget *parent)
 
     connect(treeWidget,     &CMapTreeWidget::customContextMenuRequested, this, &CMapList::slotContextMenu);
     connect(treeWidget,     &CMapTreeWidget::sigChanged,                 this, &CMapList::sigChanged);
-//    connect(treeWidget,     &QTreeWidget::clicked,                       this, &CMapList::slotClicked);
-    connect(treeWidget,     &QTreeWidget::doubleClicked,                 this, &CMapList::slotDoubleClicked);
     connect(actionActivate, &QAction::triggered,                         this, &CMapList::slotActivate);
+    connect(treeWidget,     &QTreeWidget::doubleClicked,                 this, &CMapList::slotActivate);
     connect(actionMoveUp,   &QAction::triggered,                         this, &CMapList::slotMoveUp);
     connect(actionMoveDown, &QAction::triggered,                         this, &CMapList::slotMoveDown);
     connect(actionReloadMaps, &QAction::triggered,                       this, &CMapList::slotReloadMaps);
@@ -221,7 +220,7 @@ void CMapList::slotContextMenu(const QPoint& point)
     bool itemIsActivated = item ? item->isActivated() : false;
 
     actionActivate->setEnabled(itemIsSelected);
-
+    actionMoveUp->setEnabled(itemIsSelected);
     actionMoveDown->setEnabled(itemIsSelected);
 
     actionActivate->setChecked(itemIsActivated);
@@ -317,45 +316,4 @@ void CMapList::slotFilter(const QString& str)
             map->setHidden(!map->getName().toUpper().contains(tmp));
         }
     }
-}
-
-void CMapList::slotClicked(const QModelIndex &)
-{
-    qDebug() << "slotClicked";
-/*
-    if(!isDoubleClicked)
-    {
-        slotActivate();
-    }
-    isDoubleClicked = false;
-*/
-}
-
-void CMapList::slotDoubleClicked(const QModelIndex &)
-{
-    qDebug() << "slotDoubleClicked";
-    slotActivate();
-/*
-    CMapItem *item = dynamic_cast<CMapItem *>(treeWidget->currentItem());
-    qDebug() << "isExpanded: " << item->isExpanded();
-
-    if(nullptr == item)
-    {
-        return;
-    }
-
-    isDoubleClicked = true;
-
-    if (!item->isExpanded())
-    {
-    }
-
-    if (item->isActivated())
-    {
-        return;
-    }
-
-    item->activate();
-    updateHelpText();
-*/
 }
