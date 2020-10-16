@@ -31,6 +31,21 @@
    </property>
    <item>
     <widget class="QSlider" name="sliderOpacity">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="tabletTracking">
+      <bool>true</bool>
+     </property>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change opacity of map&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -71,6 +86,12 @@ zoom-in to display the map.</string>
      </item>
      <item>
       <widget class="CScaleLabel" name="labelScale">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Control the zoom range for which the map is 
 displayed. Use the two buttons left  and right 

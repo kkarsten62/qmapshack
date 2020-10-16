@@ -78,6 +78,7 @@ private slots:
 
 private:
     QMenu * menu;
+
 };
 
 #endif //CMAPLIST_H
