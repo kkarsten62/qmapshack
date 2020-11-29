@@ -1,4 +1,4 @@
-V1.XX.X
+V1.15.1
 [QMS-158] Change Routino Profiles search for [prefix-]profiles.xml
 [QMS-216] QMapShack does not compile with Qt-5.15
 [QMS-217] Fix crash due to faulty profiles.xml
@@ -10,6 +10,8 @@ V1.XX.X
 [QMS-247] Build error: "Target "qmapshack" links to target "Qt5::Positioning" but the target was not found"
 [QMS-254] MySQL: QMapShack does not automatically reconnect
 [QMS-257] Import gpx file to group folder does not trigger update
+[QMS-260] QMapTool: Enhance cut tool to work with files containig reference information
+[QMS-262] Wrong timestamp when loading FIT
 
 V1.15.0
 [QMS-68] Route Optimization
