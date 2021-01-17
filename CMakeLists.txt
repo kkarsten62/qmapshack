@@ -40,7 +40,7 @@ endif(((EXISTS ${DEBIAN_RELEASE_INFO}) AND (${YEAR} LESS ${EXPIRE_YEAR})) OR APP
 # Define project name and version tags
 ###############################################################################################
 # this is not only the QMS version it will be the package version, too.
-project(QMapShack VERSION 1.15.1)
+project(QMapShack VERSION 1.15.2)
 
 # FOR A RELEASE:
 # remove "development" for a release
@@ -107,7 +107,7 @@ if (APPLE)
 endif(APPLE)
 
 if(WIN32)
-    set(QT_DEV_PATH   "C:\\Qt5\\5.12.3\\msvc2017_64" CACHE PATH "Path to directory containing Qt5 include and lib, e.g. C:\\Qt5\\5.12.3\\msvc2017_64")
+    set(QT_DEV_PATH   "C:\\Qt\\5.12.10\\msvc2017_64" CACHE PATH "Path to directory containing Qt5 include and lib, e.g. C:\\Qt\\5.12.10\\msvc2017_64")
     set(GDAL_DEV_PATH "C:\\GDAL" CACHE PATH "Path to directory containing GDAL include and lib, e.g. M:\\lib\\gdal")
     set(PROJ4_DEV_PATH "C:\\PROJ6" CACHE PATH "Path to directory containing PROJ.4 include and lib, e.g. M:\\lib\\PROJ6")
     set(ROUTINO_DEV_PATH "C:\\routino" CACHE PATH "Path to directory containing routino include and lib, e.g. M:\\lib\\routino")
