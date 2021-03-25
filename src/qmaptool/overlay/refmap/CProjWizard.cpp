@@ -17,10 +17,10 @@
 **********************************************************************************************/
 
 #include "CMainWindow.h"
+#include "gis/proj_x.h"
 #include "helpers/mitab.h"
 #include "overlay/refmap/CProjWizard.h"
 
-#include <proj_api.h>
 #include <QtWidgets>
 
 struct mitab_entry_t
@@ -41,15 +41,23 @@ CProjWizard::CProjWizard(QLineEdit &line, QWidget * parent)
     setupUi(this);
     QList<mitab_entry_t> list;
     int idx = 0;
-    const MapInfoDatumInfo * di = asDatumInfoListQL;
 
-    while(di->nMapInfoDatumID != -1)
+    for(const MapInfoDatumInfo& di : asDatumInfoList)
     {
         mitab_entry_t entry;
-        entry.name  = di->pszOGCDatumName;
+        entry.name  = di.pszOGCDatumName;
+        if(!entry.name.isEmpty())
+        {
+            for(const MapInfoSpheroidInfo& si : asSpheroidInfoList)
+            {
+                if(si.nMapInfoId == di.nEllipsoid)
+                {
+                    entry.name += tr(" (Spheroid: %1)").arg(si.pszMapinfoName);
+                }
+            }
+        }
         entry.idx   = idx;
         list << entry;
-        ++di;
         ++idx;
     }
     qSort(list.begin(), list.end(), mitabLessThan);
@@ -114,37 +122,28 @@ CProjWizard::~CProjWizard()
 void CProjWizard::findDatum(const QString& str)
 {
     QString cmp;
-    int idx = 0;
-    const MapInfoDatumInfo * di   = asDatumInfoListQL;
-
-    while(di->nMapInfoDatumID != -1)
+    for(const MapInfoDatumInfo& di : asDatumInfoList)
     {
         cmp.clear();
-        if(di->pszOGCDatumName != QString())
+        if(di.pszOGCDatumName != QString())
         {
-            const MapInfoSpheroidInfo * si = asSpheroidInfoList;
-            while(si->nMapInfoId != -1)
+            for(const MapInfoSpheroidInfo& si : asSpheroidInfoList)
             {
-                if(si->nMapInfoId == di->nEllipsoid)
+                if(si.nMapInfoId == di.nEllipsoid)
                 {
+                    cmp += QString("+a=%1 +b=%2 ").arg(si.dfA, 0, 'f', 4).arg(si.dfA * (1.0 - (1.0 / si.dfInvFlattening)), 0, 'f', 4);
+                    cmp += QString("+towgs84=%1,%2,%3,%4,%5,%6,%7 ").arg(di.dfShiftX).arg(di.dfShiftY).arg(di.dfShiftZ).arg(di.dfDatumParm0).arg(di.dfDatumParm1).arg(di.dfDatumParm2).arg(di.dfDatumParm3);
+                    cmp += "+units=m  +no_defs";
                     break;
                 }
-                ++si;
             }
-
-            cmp += QString("+a=%1 +b=%2 ").arg(si->dfA,0,'f',4).arg(si->dfA * (1.0 - (1.0/si->dfInvFlattening)),0,'f',4);
-            cmp += QString("+towgs84=%1,%2,%3,%4,%5,%6,%7,%8 ").arg(di->dfShiftX).arg(di->dfShiftY).arg(di->dfShiftZ).arg(di->dfDatumParm0).arg(di->dfDatumParm1).arg(di->dfDatumParm2).arg(di->dfDatumParm3).arg(di->dfDatumParm4);
-            cmp += "+units=m  +no_defs";
         }
 
         if(cmp == str)
         {
-            comboDatum->setCurrentIndex(comboDatum->findText(di->pszOGCDatumName));
+            comboDatum->setCurrentIndex(comboDatum->findText(di.pszOGCDatumName));
             break;
         }
-
-        ++di;
-        ++idx;
     }
 }
 
@@ -164,11 +163,11 @@ void CProjWizard::slotChange()
     }
     else if(radioUPSNorth->isChecked())
     {
-        str += "+init=epsg:32661";
+        str += "EPSG:32661";
     }
     else if(radioUPSSouth->isChecked())
     {
-        str += "+init=epsg:32761";
+        str += "EPSG:32761";
     }
     else if(radioUTM->isChecked())
     {
@@ -180,22 +179,19 @@ void CProjWizard::slotChange()
     }
 
     int idx = comboDatum->itemData(comboDatum->currentIndex()).toInt();
-    const MapInfoDatumInfo di = asDatumInfoListQL[idx];
+    const MapInfoDatumInfo& di = asDatumInfoList[idx];
     if(di.pszOGCDatumName != QString())
     {
-        const MapInfoSpheroidInfo * si = asSpheroidInfoList;
-        while(si->nMapInfoId != -1)
+        for(const MapInfoSpheroidInfo& si : asSpheroidInfoList)
         {
-            if(si->nMapInfoId == di.nEllipsoid)
+            if(si.nMapInfoId == di.nEllipsoid)
             {
+                str += QString("+a=%1 +b=%2 ").arg(si.dfA, 0, 'f', 4).arg(si.dfA * (1.0 - (1.0 / si.dfInvFlattening)), 0, 'f', 4);
+                str += QString("+towgs84=%1,%2,%3,%4,%5,%6,%7 ").arg(di.dfShiftX).arg(di.dfShiftY).arg(di.dfShiftZ).arg(di.dfDatumParm0).arg(di.dfDatumParm1).arg(di.dfDatumParm2).arg(di.dfDatumParm3);
+                str += "+units=m  +no_defs";
                 break;
             }
-            ++si;
         }
-
-        str += QString("+a=%1 +b=%2 ").arg(si->dfA,0,'f',4).arg(si->dfA * (1.0 - (1.0/si->dfInvFlattening)),0,'f',4);
-        str += QString("+towgs84=%1,%2,%3,%4,%5,%6,%7,%8 ").arg(di.dfShiftX).arg(di.dfShiftY).arg(di.dfShiftZ).arg(di.dfDatumParm0).arg(di.dfDatumParm1).arg(di.dfDatumParm2).arg(di.dfDatumParm3).arg(di.dfDatumParm4);
-        str += "+units=m  +no_defs";
     }
 
     labelResult->setText(str);
@@ -215,23 +211,9 @@ void CProjWizard::accept()
 
 bool CProjWizard::validProjStr(const QString projStr)
 {
-    if(projStr.isEmpty())
-    {
-        return false;
-    }
-
-    projPJ projCheck = pj_init_plus(projStr.toUtf8().data());
-
-    if (!projCheck)
-    {   /* For some reason pj_errno does not work as expected in some versions of Visual Studio, so using pj_get_errno_ref instead */
-        QMessageBox::warning(&CMainWindow::self(), tr("Error..."),tr("The value\n'%1'\nis not a valid coordinate system definition:\n%2").arg(projStr).arg(pj_strerrno(*pj_get_errno_ref())),QMessageBox::Abort,QMessageBox::Abort);
-        return false;
-    }
-    else
-    {
-        pj_free(projCheck);
-        return true;
-    }
+    return CProj::validProjStr(projStr, true, [](const QString& msg){
+        QMessageBox::warning(&CMainWindow::self(), tr("Error..."), msg, QMessageBox::Abort, QMessageBox::Abort);
+    });
 }
 
 

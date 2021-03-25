@@ -20,13 +20,12 @@
 #ifndef CCANVAS_H
 #define CCANVAS_H
 
-#include <proj_api.h>
+#include "gis/IGisItem.h"
+
 #include <QMap>
 #include <QPainter>
 #include <QPointer>
 #include <QWidget>
-
-#include "gis/IGisItem.h"
 
 class IDrawContext;
 class CMapDraw;
@@ -253,7 +252,7 @@ private:
     QList<IDrawContext*> allDrawContext;
 
     /// the current point of focus (usually the canvas center)
-    QPointF posFocus {12.00 * DEG_TO_RAD, 49.00 * DEG_TO_RAD};
+    QPointF posFocus {0.209439510239, 0.855211333477};
 
     /// the mouse handler
     CMouseAdapter * mouse;

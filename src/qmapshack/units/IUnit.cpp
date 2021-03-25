@@ -17,13 +17,13 @@
 
 **********************************************************************************************/
 #include "CMainWindow.h"
-#include "GeoMath.h"
+#include "gis/GeoMath.h"
+#include "gis/proj_x.h"
 #include "units/CUnitAviation.h"
 #include "units/CUnitImperial.h"
 #include "units/CUnitMetric.h"
 #include "units/CUnitNautic.h"
 
-#include <proj_api.h>
 #include <QtWidgets>
 const IUnit * IUnit::m_self = nullptr;
 

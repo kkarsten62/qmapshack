@@ -23,6 +23,7 @@
 #include "dem/CDemDraw.h"
 #include "gis/CGisDraw.h"
 #include "gis/CGisWorkspace.h"
+#include "gis/GeoMath.h"
 #include "gis/IGisLine.h"
 #include "gis/ovl/CGisItemOvlArea.h"
 #include "gis/Poi.h"
@@ -30,7 +31,6 @@
 #include "gis/trk/CTableTrkInfo.h"
 #include "grid/CGrid.h"
 #include "grid/CGridSetup.h"
-#include "GeoMath.h"
 #include "helpers/CDraw.h"
 #include "helpers/CSettings.h"
 #include "helpers/CWptIconManager.h"
@@ -1118,7 +1118,18 @@ void CCanvas::setProjection(const QString& proj)
 {
     for(IDrawContext * context : allDrawContext)
     {
-        context->setProjection(proj);
+        if(!context->setProjection(proj))
+        {
+            QMessageBox::warning(
+                this,
+                tr("Map Projection..."),
+                tr("Failed to setup map projection. Please configure a valid projection."),
+                QMessageBox::Ok
+                );
+
+            QTimer::singleShot(1000, &CMainWindow::self(), SLOT(slotSetupMapView()));
+            return;
+        }
     }
 }
 

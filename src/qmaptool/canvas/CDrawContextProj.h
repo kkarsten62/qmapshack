@@ -20,9 +20,8 @@
 #define CDRAWCONTEXTPROJ_H
 
 #include "canvas/IDrawContext.h"
+#include "gis/proj_x.h"
 #include "helpers/CGdalFile.h"
-
-#include <proj_api.h>
 
 class CDrawContextProj : public IDrawContext, public CGdalFile
 {
@@ -43,9 +42,9 @@ public:
         return isValid;
     }
 
-    const QString& getProjection() const override
+    QString getProjection() const override
     {
-        return proj4str;
+        return proj.getProjSrc();
     }
 
     const QTransform& getTrFwd() const override
@@ -76,7 +75,7 @@ public:
 
     QRectF getMapArea() const override
     {
-        return QRectF(0,0, xsize_px, ysize_px);
+        return QRectF(0, 0, xsize_px, ysize_px);
     }
 
     void convertMap2Coord(QPointF &pt) const override;

@@ -20,7 +20,8 @@
 #define CGDALFILE_H
 
 
-#include <proj_api.h>
+#include "gis/proj_x.h"
+
 #include <QCoreApplication>
 #include <QPointF>
 #include <QRgb>
@@ -95,9 +96,7 @@ protected:
     QTransform trFwdProj;
     QTransform trInvProj;
 
-    QString proj4str;
-
-    projPJ pjsrc = nullptr;
+    CProj proj;
 };
 
 #endif //CGDALFILE_H

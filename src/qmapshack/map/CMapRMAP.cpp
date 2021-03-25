@@ -107,10 +107,10 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
     QPoint p1;
     QPoint p2;
     QPoint p3;
-    projXY c0 = {0, 0};
-    projXY c1 = {0, 0};
-    projXY c2 = {0, 0};
-    projXY c3 = {0, 0};
+    QPointF c0;
+    QPointF c1;
+    QPointF c2;
+    QPointF c3;
 
     bool pointsAreLongLat = true;
     QString projection;
@@ -148,13 +148,13 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
             p0 = QPoint(vals[0].toInt(), vals[1].toInt());
             if(vals[2] == "A")
             {
-                c0.u = vals[3].toDouble() * DEG_TO_RAD;
-                c0.v = vals[4].toDouble() * DEG_TO_RAD;
+                c0.rx() = vals[3].toDouble() * DEG_TO_RAD;
+                c0.ry() = vals[4].toDouble() * DEG_TO_RAD;
             }
             else
             {
-                c0.u = vals[3].toDouble();
-                c0.v = vals[4].toDouble();
+                c0.rx() = vals[3].toDouble();
+                c0.ry() = vals[4].toDouble();
             }
         }
         else if(line.startsWith("P1="))
@@ -169,14 +169,14 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
             p1 = QPoint(vals[0].toInt(), vals[1].toInt());
             if(vals[2] == "A")
             {
-                c1.u = vals[3].toDouble() * DEG_TO_RAD;
-                c1.v = vals[4].toDouble() * DEG_TO_RAD;
+                c1.rx() = vals[3].toDouble() * DEG_TO_RAD;
+                c1.ry() = vals[4].toDouble() * DEG_TO_RAD;
             }
             else
             {
                 pointsAreLongLat = false;
-                c1.u = vals[3].toDouble();
-                c1.v = vals[4].toDouble();
+                c1.rx() = vals[3].toDouble();
+                c1.ry() = vals[4].toDouble();
             }
         }
         else if(line.startsWith("P2="))
@@ -191,14 +191,14 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
             p2 = QPoint(vals[0].toInt(), vals[1].toInt());
             if(vals[2] == "A")
             {
-                c2.u = vals[3].toDouble() * DEG_TO_RAD;
-                c2.v = vals[4].toDouble() * DEG_TO_RAD;
+                c2.rx() = vals[3].toDouble() * DEG_TO_RAD;
+                c2.ry() = vals[4].toDouble() * DEG_TO_RAD;
             }
             else
             {
                 pointsAreLongLat = false;
-                c2.u = vals[3].toDouble();
-                c2.v = vals[4].toDouble();
+                c2.rx() = vals[3].toDouble();
+                c2.ry() = vals[4].toDouble();
             }
         }
         else if(line.startsWith("P3="))
@@ -213,14 +213,14 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
             p3 = QPoint(vals[0].toInt(), vals[1].toInt());
             if(vals[2] == "A")
             {
-                c3.u = vals[3].toDouble() * DEG_TO_RAD;
-                c3.v = vals[4].toDouble() * DEG_TO_RAD;
+                c3.rx() = vals[3].toDouble() * DEG_TO_RAD;
+                c3.ry() = vals[4].toDouble() * DEG_TO_RAD;
             }
             else
             {
                 pointsAreLongLat = false;
-                c3.u = vals[3].toDouble();
-                c3.v = vals[4].toDouble();
+                c3.rx() = vals[3].toDouble();
+                c3.ry() = vals[4].toDouble();
             }
         }
         else
@@ -239,20 +239,20 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
         }
     }
 
-    if(!pj_is_latlong(pjsrc))
+    if(!proj.isSrcLatLong())
     {
         if(pointsAreLongLat)
         {
-            pj_transform(pjtar, pjsrc, 1, 0, &c0.u, &c0.v, 0);
-            pj_transform(pjtar, pjsrc, 1, 0, &c1.u, &c1.v, 0);
-            pj_transform(pjtar, pjsrc, 1, 0, &c2.u, &c2.v, 0);
-            pj_transform(pjtar, pjsrc, 1, 0, &c3.u, &c3.v, 0);
+            proj.transform(c0, PJ_INV);
+            proj.transform(c1, PJ_INV);
+            proj.transform(c2, PJ_INV);
+            proj.transform(c3, PJ_INV);
         }
 
-//        qDebug() << c0.u << c0.v;
-//        qDebug() << c1.u << c1.v;
-//        qDebug() << c2.u << c2.v;
-//        qDebug() << c3.u << c3.v;
+//        qDebug() << c0.x() << c0.ry();
+//        qDebug() << c1.x() << c1.ry();
+//        qDebug() << c2.x() << c2.ry();
+//        qDebug() << c3.x() << c3.ry();
 
         xref1  =  NOFLOAT;
         yref1  = -NOFLOAT;
@@ -267,55 +267,20 @@ CMapRMAP::CMapRMAP(const QString &filename, CMapDraw *parent)
         yref2  =   90 * DEG_TO_RAD;
     }
 
-    if(c0.u < xref1)
-    {
-        xref1 = c0.u;
-    }
-    if(c0.u > xref2)
-    {
-        xref2 = c0.u;
-    }
-    if(c1.u < xref1)
-    {
-        xref1 = c1.u;
-    }
-    if(c1.u > xref2)
-    {
-        xref2 = c1.u;
-    }
-    if(c2.u < xref1)
-    {
-        xref1 = c2.u;
-    }
-    if(c2.u > xref2)
-    {
-        xref2 = c2.u;
-    }
 
-    if(c0.v > yref1)
-    {
-        yref1 = c0.v;
-    }
-    if(c0.v < yref2)
-    {
-        yref2 = c0.v;
-    }
-    if(c1.v > yref1)
-    {
-        yref1 = c1.v;
-    }
-    if(c1.v < yref2)
-    {
-        yref2 = c1.v;
-    }
-    if(c2.v > yref1)
-    {
-        yref1 = c2.v;
-    }
-    if(c2.v < yref2)
-    {
-        yref2 = c2.v;
-    }
+    xref1 = qMin(xref1, c0.x());
+    xref2 = qMax(xref2, c0.x());
+    xref1 = qMin(xref1, c1.x());
+    xref2 = qMax(xref2, c1.x());
+    xref1 = qMin(xref1, c2.x());
+    xref2 = qMax(xref2, c2.x());
+
+    yref1 = qMax(yref1, c0.y());
+    yref2 = qMin(yref2, c0.y());
+    yref1 = qMax(yref1, c1.y());
+    yref2 = qMin(yref2, c1.y());
+    yref1 = qMax(yref1, c2.y());
+    yref2 = qMin(yref2, c2.y());
 
     scale.rx() = (xref2 - xref1) / xsize_px;
     scale.ry() = (yref2 - yref1) / ysize_px;
@@ -379,14 +344,13 @@ bool CMapRMAP::setProjection(const QString& projection, const QString& datum)
         projstr += " +ellps=bessel +towgs84=606,23,413,0,0,0,0 +units=m +no_defs";
     }
 
-    pjsrc = pj_init_plus(projstr.toLocal8Bit().data());
-    if(pjsrc == 0)
+    proj.init(projstr.toLatin1(), "EPSG:4326");
+    if(!proj.isValid())
     {
         return false;
     }
 
-    char * ptr = pj_get_def(pjsrc, 0);
-    qDebug() << "rmap:" << ptr;
+    qDebug() << "rmap:" << proj.getProjSrc();
 
     return true;
 }
@@ -454,39 +418,17 @@ void CMapRMAP::draw(IDrawContext::buffer_t& buf) /* override */
     int idxx2 =  qCeil((p2.x() - xref1) / (level.xscale * tileSizeX));
     int idxy2 =  qCeil((p2.y() - yref1) / (level.yscale * tileSizeY));
 
-    if(idxx1 < 0)
-    {
-        idxx1 = 0;
-    }
-    if(idxx1 >= level.xTiles)
-    {
-        idxx1 = level.xTiles;
-    }
-    if(idxx2 < 0)
-    {
-        idxx2 = 0;
-    }
-    if(idxx2 >= level.xTiles)
-    {
-        idxx2 = level.xTiles;
-    }
+    idxx1 = qMax(0, idxx1);
+    idxx1 = qMin(idxx1, level.xTiles);
 
-    if(idxy1 < 0)
-    {
-        idxy1 = 0;
-    }
-    if(idxy1 >= level.yTiles)
-    {
-        idxy1 = level.yTiles;
-    }
-    if(idxy2 < 0)
-    {
-        idxy2 = 0;
-    }
-    if(idxy2 >= level.yTiles)
-    {
-        idxy2 = level.yTiles;
-    }
+    idxx2 = qMax(0, idxx2);
+    idxx2 = qMin(idxx2, level.xTiles);
+
+    idxy1 = qMax(0, idxy1);
+    idxy1 = qMin(idxy1, level.yTiles);
+
+    idxy2 = qMax(0, idxy2);
+    idxy2 = qMin(idxy2, level.yTiles);
 
     // ----- start drawing -----
     QPainter p(&buf.image);
@@ -542,10 +484,7 @@ void CMapRMAP::draw(IDrawContext::buffer_t& buf) /* override */
             l[3].rx() = xref1 +  idxx * tileSizeX * level.xscale;
             l[3].ry() = yref1 + (idxy * tileSizeY + imgh) * level.yscale;
 
-            pj_transform(pjsrc, pjtar, 1, 0, &l[0].rx(), &l[0].ry(), 0);
-            pj_transform(pjsrc, pjtar, 1, 0, &l[1].rx(), &l[1].ry(), 0);
-            pj_transform(pjsrc, pjtar, 1, 0, &l[2].rx(), &l[2].ry(), 0);
-            pj_transform(pjsrc, pjtar, 1, 0, &l[3].rx(), &l[3].ry(), 0);
+            proj.transform(l, PJ_FWD);
 
             drawTile(img, l, p);
         }
