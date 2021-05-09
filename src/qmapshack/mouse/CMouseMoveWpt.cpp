@@ -20,15 +20,15 @@
 #include "canvas/CCanvas.h"
 #include "gis/CGisDraw.h"
 #include "gis/CGisWorkspace.h"
+#include "gis/GeoMath.h"
+#include "gis/proj_x.h"
 #include "gis/wpt/CGisItemWpt.h"
-#include "GeoMath.h"
 #include "helpers/CDraw.h"
 #include "helpers/CWptIconManager.h"
 #include "mouse/CMouseAdapter.h"
 #include "mouse/CMouseMoveWpt.h"
 #include "units/IUnit.h"
 
-#include <proj_api.h>
 #include <QtWidgets>
 
 CMouseMoveWpt::CMouseMoveWpt(CGisItemWpt &wpt, CGisDraw * gis, CCanvas *canvas, CMouseAdapter *mouse)
@@ -58,7 +58,7 @@ void CMouseMoveWpt::draw(QPainter& p, CCanvas::redraw_e, const QRect&)
 
     qreal d = GPS_Math_Distance(p1.x(), p1.y(), p2.x(), p2.y(), a1, a2);
     IUnit::self().meter2distance(d, val, unit);
-    const QString &str = QString("%1 %2, %3%4").arg(val).arg(unit).arg(a2, 0, 'f', 1).arg(QChar(0260));
+    const QString &str = QString("%1 %2, %3%4").arg(val, unit).arg(a2, 0, 'f', 1).arg(QChar(0260));
 
     gis->convertRad2Px(p1);
     gis->convertRad2Px(p2);

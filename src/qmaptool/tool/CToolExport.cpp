@@ -28,7 +28,7 @@ CToolExport::CToolExport(QWidget *parent)
 {
     setupUi(this);
     setObjectName(tr("Export Maps"));
-    lineTragetFile->addAction(actionTargetFilename,QLineEdit::TrailingPosition);
+    lineTragetFile->addAction(actionTargetFilename, QLineEdit::TrailingPosition);
 
     labelHelp->setText(tr("To use the maps on your device you have to export them to the proprietary "
                           "format supported by the device. Depending on the device this can vary from "
@@ -55,13 +55,13 @@ CToolExport::CToolExport(QWidget *parent)
     connect(&CShell::self(), &CShell::sigFinishedJob, this, &CToolExport::slotFinished);
 
 
-    setupChanged();
+    CToolExport::setupChanged();
 
     SETTINGS;
     cfg.beginGroup("ToolExport");
     itemTree->loadSettings(cfg);
 
-    comboExport->setCurrentIndex(cfg.value("current",0).toInt());
+    comboExport->setCurrentIndex(cfg.value("current", 0).toInt());
     lineTragetFile->setText(cfg.value("targetFile", "").toString());
     cfg.endGroup();
 }

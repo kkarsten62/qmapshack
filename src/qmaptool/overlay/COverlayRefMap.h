@@ -54,16 +54,16 @@ public:
     enum mode_e
     {
         eModeNone
-        ,eModePointMove
-        ,eModePointAdd
-        ,eModePointDel
-        ,eModePointMoveAuto
+        , eModePointMove
+        , eModePointAdd
+        , eModePointDel
+        , eModePointMoveAuto
     };
 
     bool isOk() const;
 
 private slots:
-    void slotSetMode(mode_e m, bool on);
+    void slotSetMode(COverlayRefMap::mode_e m, bool on);
     void slotSaveGcp();
     void slotLoadGcp();
     void slotResetRef();

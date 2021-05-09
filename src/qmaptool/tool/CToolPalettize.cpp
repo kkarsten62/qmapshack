@@ -29,7 +29,7 @@ CToolPalettize::CToolPalettize(QWidget *parent)
     setupUi(this);
     setObjectName(tr("Add Color Palette"));
 
-    lineFilename->addAction(actionFilename,QLineEdit::TrailingPosition);
+    lineFilename->addAction(actionFilename, QLineEdit::TrailingPosition);
 
     labelHelp->setText(tr("Usually you use RGBA color while referencing a map because the large "
                           "color space allows you to scale and rotate the map without any loss "
@@ -67,7 +67,7 @@ CToolPalettize::CToolPalettize(QWidget *parent)
     connect(pushCancel, &QPushButton::clicked, &CShell::self(), &CShell::slotCancel);
     connect(&CShell::self(), &CShell::sigFinishedJob, this, &CToolPalettize::slotFinished);
 
-    setupChanged();
+    CToolPalettize::setupChanged();
 
     SETTINGS;
     cfg.beginGroup("ToolPalettize");
@@ -76,8 +76,8 @@ CToolPalettize::CToolPalettize(QWidget *parent)
     groupOverviews->loadSettings(cfg);
     radioSingle->setChecked(cfg.value("singleFiles", true).toBool());
     radioCombined->setChecked(cfg.value("combinedFile", false).toBool());
-    lineFilename->setText(cfg.value("filename","").toString());
-    lineSuffix->setText(cfg.value("suffix","_8bit").toString());
+    lineFilename->setText(cfg.value("filename", "").toString());
+    lineSuffix->setText(cfg.value("suffix", "_8bit").toString());
     cfg.endGroup();
 
     lineFilename->setEnabled(radioCombined->isChecked());
@@ -113,7 +113,7 @@ void CToolPalettize::slotSelectFilename()
     }
     cfg.setValue("Path/mapInput", QFileInfo(filename).absolutePath());
 
-    if(!filename.toUpper().endsWith(".TIF"))
+    if(!filename.endsWith(".TIF", Qt::CaseInsensitive))
     {
         filename += ".tif";
     }
@@ -224,8 +224,8 @@ void CToolPalettize::buildCmdFinal(QList<CShellCmd>& cmds)
         cmds << CShellCmd(IAppSetup::self().getGdalbuildvrt(), args);
 
         // ---- command 2 + N + 2 ----------------------
-        QString outFilename = lineFilename->text();        
-        if(!outFilename.toUpper().endsWith(".TIF"))
+        QString outFilename = lineFilename->text();
+        if(!outFilename.endsWith(".TIF", Qt::CaseInsensitive))
         {
             outFilename += ".tif";
         }

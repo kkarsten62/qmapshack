@@ -59,8 +59,9 @@ CMapGEMF::CMapGEMF(const QString &filename, CMapDraw *parent)
     , filename(filename)
 {
     qDebug() << "CMapGEMF: try to open " << filename;
-    pjsrc = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
-    qDebug() << "CMapGEMF:" << "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs";
+    proj.init("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs", "EPSG:4326");
+    qDebug() << "CMapGEMF:" << proj.getProjSrc();
+
     QFile file(filename);
     file.open(QIODevice::ReadOnly);
 
@@ -115,7 +116,7 @@ CMapGEMF::CMapGEMF(const QString &filename, CMapDraw *parent)
     for(quint32 i = 0; i <= MAX_ZOOM_LEVEL; i++)
     {
         QList<range_t> rangeZoom;
-        for(const range_t &range : ranges)
+        for(const range_t &range : qAsConst(ranges))
         {
             if(range.zoomlevel == i)
             {
@@ -227,7 +228,7 @@ quint64 CMapGEMF::getFilenameFromAddress(const quint64 offset, QString &filename
 {
     quint64 temp = offset;
 
-    for(const gemffile_t &gf : files)
+    for(const gemffile_t &gf : qAsConst(files))
     {
         if(temp < gf.size)
         {

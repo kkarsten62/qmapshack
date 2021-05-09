@@ -19,13 +19,12 @@
 #include "canvas/IDrawContext.h"
 #include "CMainWindow.h"
 #include "CToolRefMap.h"
+#include "gis/proj_x.h"
 #include "helpers/CSettings.h"
 #include "items/CItemRefMap.h"
 #include "overlay/refmap/COverlayRefMapPoint.h"
 #include "setup/IAppSetup.h"
 #include "shell/CShell.h"
-
-#include <proj_api.h>
 
 CToolRefMap::CToolRefMap(QWidget *parent)
     : IToolGui(parent)
@@ -51,7 +50,7 @@ CToolRefMap::CToolRefMap(QWidget *parent)
     connect(pushCancel, &QPushButton::clicked, &CShell::self(), &CShell::slotCancel);
     connect(&CShell::self(), &CShell::sigFinishedJob, this, &CToolRefMap::slotFinished);
 
-    setupChanged();
+    CToolRefMap::setupChanged();
 
     SETTINGS;
     cfg.beginGroup("ToolRefMap");
@@ -59,7 +58,7 @@ CToolRefMap::CToolRefMap(QWidget *parent)
     checkCreateVrt->setChecked(cfg.value("createVrt", false).toBool());
     groupOverviews->loadSettings(cfg);
     checkAllFiles->setChecked(cfg.value("allFiles", false).toBool());
-    lineSuffix->setText(cfg.value("suffix","_ref").toString());
+    lineSuffix->setText(cfg.value("suffix", "_ref").toString());
     cfg.endGroup();
 
     slotSomethingChanged();
@@ -135,16 +134,10 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
         return;
     }
 
-    projPJ pjsrc = pj_init_plus("+proj=longlat +datum=WGS84 +no_defs");
-    if(pjsrc == nullptr)
+    CProj proj;
+    proj.init("EPSG:4326", item->getMapProjection().toLatin1());
+    if(!proj.isValid())
     {
-        return;
-    }
-
-    projPJ pjtar = pj_init_plus(item->getMapProjection().toLatin1());
-    if(pjtar == nullptr)
-    {
-        pj_free(pjsrc);
         return;
     }
 
@@ -157,14 +150,14 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
     {
         qreal lon = pt->getPtRef().x() * DEG_TO_RAD;
         qreal lat = pt->getPtRef().y() * DEG_TO_RAD;
-        pj_transform(pjsrc, pjtar, 1, 0, &lon, &lat, 0);
+        proj.transform(lon, lat, PJ_FWD);
 
         args << "-gcp";
         args << QString::number(pt->getPtPtx().x());
         args << QString::number(pt->getPtPtx().y());
 
-        args << QString::number(lon,'f',6);
-        args << QString::number(lat,'f',6);
+        args << QString::number(lon, 'f', 6);
+        args << QString::number(lat, 'f', 6);
         args << "0";
     }
 
@@ -227,9 +220,6 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
 
     // ---- command 5 ----------------------
     groupOverviews->buildCmd(cmds, lastOutFilname, context->is32BitRgb() ? "cubic" : "nearest");
-
-    pj_free(pjsrc);
-    pj_free(pjtar);
 }
 
 void CToolRefMap::slotStart()

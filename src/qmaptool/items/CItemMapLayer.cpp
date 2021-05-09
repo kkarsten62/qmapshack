@@ -40,7 +40,7 @@ CItemMapLayer::CItemMapLayer(QTreeWidget *parent)
 }
 
 
-const QString& CItemMapLayer::getProjection() const
+QString CItemMapLayer::getProjection() const
 {
     return drawContext->getProjection();
 }
@@ -53,7 +53,7 @@ bool CItemMapLayer::addMap(CItemMap *map)
 
     if(trFwd.isScaling())
     {
-        if((qAbs((mapScale.x() - trFwd.m11())/trFwd.m11()) > 0.2) || (qAbs((mapScale.y() - trFwd.m22())/trFwd.m22()) > 0.2))
+        if((qAbs((mapScale.x() - trFwd.m11()) / trFwd.m11()) > 0.2) || (qAbs((mapScale.y() - trFwd.m22()) / trFwd.m22()) > 0.2))
         {
             return false;
         }

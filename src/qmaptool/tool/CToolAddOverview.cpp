@@ -55,7 +55,7 @@ CToolAddOverview::CToolAddOverview(QWidget *parent)
     connect(&CShell::self(), &CShell::sigFinishedJob, this, &CToolAddOverview::slotFinished);
 
 
-    setupChanged();
+    CToolAddOverview::setupChanged();
 
     SETTINGS;
     cfg.beginGroup("ToolAddOverview");
@@ -110,7 +110,7 @@ void CToolAddOverview::slotMapSelectionChanged()
 
 void CToolAddOverview::slotSelectionChanged()
 {
-    bool enable = checkBy2->isChecked()|checkBy4->isChecked()|checkBy8->isChecked()|checkBy16->isChecked()|checkBy32->isChecked()|checkBy64->isChecked()|checkRemove->isChecked();
+    bool enable = checkBy2->isChecked() | checkBy4->isChecked() | checkBy8->isChecked() | checkBy16->isChecked() | checkBy32->isChecked() | checkBy64->isChecked() | checkRemove->isChecked();
     pushStart->setEnabled(enable && itemList->count());
 
     bool isRemove = checkRemove->isChecked();
