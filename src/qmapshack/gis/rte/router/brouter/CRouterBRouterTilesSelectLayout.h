@@ -38,11 +38,11 @@ public:
 
     QSize sizeHint() const override { return QSize(200, 200); }
 
-    void setGeometry(const QRect & r) override { for (QLayoutItem *item : items) { item->setGeometry(r); }}
+    void setGeometry(const QRect & r) override { for (QLayoutItem *item : qAsConst(items)) { item->setGeometry(r); }}
 
-    QLayoutItem * itemAt(int index) const override { return items.at(index); }
+    QLayoutItem * itemAt(int index) const override { return index < items.size() ? items.at(index) : nullptr; }
 
-    QLayoutItem * takeAt(int index) override { return items.takeAt(index); }
+    QLayoutItem * takeAt(int index) override { return index < items.size() ? items.takeAt(index) : nullptr; }
 
     int count() const override { return items.size(); }
 

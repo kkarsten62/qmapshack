@@ -25,7 +25,6 @@ set( SRCS
     canvas/IDrawContext.cpp
     CMainWindow.cpp
     CSingleInstanceProxy.cpp
-    GeoMath.cpp
     helpers/CDraw.cpp
     helpers/CGdalFile.cpp
     helpers/mitab.cpp
@@ -81,6 +80,8 @@ set( SRCS
     ../common/help/CHelpBrowser.cpp
     ../common/help/CHelpIndex.cpp
     ../common/help/CHelpSearch.cpp
+    ../common/gis/GeoMath.cpp
+    ../common/gis/proj_x.cpp
 )
 
 set( HDRS
@@ -91,7 +92,6 @@ set( HDRS
     canvas/IDrawContext.h
     CMainWindow.h
     CSingleInstanceProxy.h
-    GeoMath.h
     helpers/CDraw.h
     helpers/CGdalFile.h
     helpers/CSettings.h
@@ -150,6 +150,8 @@ set( HDRS
     ../common/help/CHelpBrowser.h
     ../common/help/CHelpIndex.h
     ../common/help/CHelpSearch.h
+    ../common/gis/GeoMath.h
+    ../common/gis/proj_x.h
 )
 
 set( UIS
@@ -227,7 +229,7 @@ include_directories(
     SYSTEM # this prevents warnings from non-QMS headers
     ${CMAKE_BINARY_DIR}
     ${GDAL_INCLUDE_DIRS}
-    ${PROJ4_INCLUDE_DIRS}
+    ${PROJ_INCLUDE_DIRS}
 )
 
 if(APPLE)
@@ -254,7 +256,7 @@ target_link_libraries(${APPLICATION_NAME}
     Qt5::Network
     Qt5::Help
     ${GDAL_LIBRARIES}
-    ${PROJ4_LIBRARIES}
+    ${PROJ_LIBRARIES}
 )
 
 if(APPLE)

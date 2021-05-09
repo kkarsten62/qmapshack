@@ -20,7 +20,8 @@
 #define CGDALFILE_H
 
 
-#include <proj_api.h>
+#include "gis/proj_x.h"
+
 #include <QCoreApplication>
 #include <QPointF>
 #include <QRgb>
@@ -33,7 +34,13 @@ class CGdalFile
 {
     Q_DECLARE_TR_FUNCTIONS(CGdalFile)
 public:
-    CGdalFile();
+    enum type_e
+    {
+        eTypePixel,
+        eTypeProj
+    };
+
+    CGdalFile(type_e type);
     virtual ~CGdalFile() = default;
 
     bool getIsValid() const
@@ -47,6 +54,8 @@ protected:
     virtual QString getInfo() const;
     virtual void load(const QString& filename);
     virtual void unload();
+
+    type_e type;
 
     GDALDataset * dataset = nullptr;
 
@@ -84,9 +93,10 @@ protected:
     QTransform trFwd;
     QTransform trInv;
 
-    QString proj4str;
+    QTransform trFwdProj;
+    QTransform trInvProj;
 
-    projPJ pjsrc = nullptr;
+    CProj proj;
 };
 
 #endif //CGDALFILE_H

@@ -69,7 +69,7 @@ CMapWMTS::CMapWMTS(const QString &filename, CMapDraw *parent)
 
     if(!ServiceType.contains("WMTS", Qt::CaseInsensitive) || ServiceTypeVersion != "1.0.0")
     {
-        QMessageBox::critical(CMainWindow::getBestWidgetForParent(), tr("Error..."), tr("Unexpected service. '* WMTS 1.0.0' is expected. '%1 %2' is read.").arg(ServiceType).arg(ServiceTypeVersion), QMessageBox::Abort, QMessageBox::Abort);
+        QMessageBox::critical(CMainWindow::getBestWidgetForParent(), tr("Error..."), tr("Unexpected service. '* WMTS 1.0.0' is expected. '%1 %2' is read.").arg(ServiceType, ServiceTypeVersion), QMessageBox::Abort, QMessageBox::Abort);
         return;
     }
 
@@ -221,12 +221,13 @@ CMapWMTS::CMapWMTS(const QString &filename, CMapDraw *parent)
         oSRS.exportToProj4(&ptr2);
 
         qDebug() << ptr1 << ptr2;
-        tileset.pjsrc = pj_init_plus(ptr2);
+
+        tileset.proj.init(ptr2, "EPSG:4326");
 
         free(ptr1);
         free(ptr2);
 
-        if(tileset.pjsrc == nullptr)
+        if(!tileset.proj.isValid())
         {
             QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."), tr("No georeference information found."));
             return;
@@ -276,7 +277,7 @@ void CMapWMTS::getLayers(QListWidget& list)
     }
 
     int i = 0;
-    for(const layer_t &layer : layers)
+    for(const layer_t &layer : qAsConst(layers))
     {
         QListWidgetItem * item = new QListWidgetItem(layer.title, &list);
         item->setCheckState(layer.enabled ? Qt::Checked : Qt::Unchecked);
@@ -329,7 +330,7 @@ void CMapWMTS::loadConfig(QSettings& cfg) /* override */
 
     // enable layers stored in configuration
     enabled = cfg.value("enabledLayers", enabled).toStringList();
-    for(const QString &str : enabled)
+    for(const QString &str : qAsConst(enabled))
     {
         int idx = str.toInt();
         if(idx < layers.size())
@@ -417,24 +418,24 @@ void CMapWMTS::draw(IDrawContext::buffer_t& buf) /* override */
     QRectF viewport(QPointF(x1, y1) * RAD_TO_DEG, QPointF(x2, y2) * RAD_TO_DEG);
 
     // draw layers
-    for(const layer_t &layer : layers)
+    for(const layer_t &layer : qAsConst(layers))
     {
         if(!layer.boundingBox.intersects(viewport) || !layer.enabled)
         {
             continue;
         }
 
-        const tileset_t& tileset            = tilesets[layer.tileMatrixSet];
+        const tileset_t& tileset = tilesets[layer.tileMatrixSet];
         const QMap<QString, limit_t>& limits = layer.limits;
 
         // convert viewport to layer's coordinate system
         QPointF pt1(x1, y1);
         QPointF pt2(x2, y2);
 
-        pj_transform(pjtar, tileset.pjsrc, 1, 0, &pt1.rx(), &pt1.ry(), 0);
-        pj_transform(pjtar, tileset.pjsrc, 1, 0, &pt2.rx(), &pt2.ry(), 0);
+        tileset.proj.transform(pt1, PJ_INV);
+        tileset.proj.transform(pt2, PJ_INV);
 
-        if(pj_is_latlong(tileset.pjsrc))
+        if(tileset.proj.isSrcLatLong())
         {
             pt1 *= RAD_TO_DEG;
             pt2 *= RAD_TO_DEG;
@@ -444,7 +445,8 @@ void CMapWMTS::draw(IDrawContext::buffer_t& buf) /* override */
         QString tileMatrixId;
         QPointF s1 = (pt2 - pt1) / QPointF(buf.image.width(), buf.image.height());
         qreal d = NOFLOAT;
-        for(const QString &key : tileset.tilematrix.keys())
+        const QStringList& keys = tileset.tilematrix.keys();
+        for(const QString &key : keys)
         {
             const tilematrix_t& tilematrix = tileset.tilematrix[key];
             qreal s2 = tilematrix.scale * 0.28e-3;
@@ -554,10 +556,8 @@ void CMapWMTS::draw(IDrawContext::buffer_t& buf) /* override */
                     qreal yy2 = (row + 1) * (yscale * tilematrix.tileHeight) + tilematrix.topLeft.y();
 
                     l << QPointF(xx1, yy1) << QPointF(xx2, yy1) << QPointF(xx2, yy2) << QPointF(xx1, yy2);
-                    pj_transform(tileset.pjsrc, pjtar, 1, 0, &l[0].rx(), &l[0].ry(), 0);
-                    pj_transform(tileset.pjsrc, pjtar, 1, 0, &l[1].rx(), &l[1].ry(), 0);
-                    pj_transform(tileset.pjsrc, pjtar, 1, 0, &l[2].rx(), &l[2].ry(), 0);
-                    pj_transform(tileset.pjsrc, pjtar, 1, 0, &l[3].rx(), &l[3].ry(), 0);
+
+                    tileset.proj.transform(l, PJ_FWD);
 
                     drawTile(img, l, p);
                 }

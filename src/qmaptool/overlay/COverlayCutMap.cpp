@@ -104,7 +104,7 @@ bool COverlayCutMap::drawFx(QPainter& p, CCanvas::redraw_e needsRedraw)
     // draw black dots for each point in region
     p.setPen(QPen(Qt::black, 1));
     p.setBrush(Qt::black);
-    for(const QPointF& pt : shape)
+    for(const QPointF& pt : qAsConst(shape))
     {
         if(pt == pt1)
         {
@@ -268,7 +268,7 @@ void COverlayCutMap::saveShape(const QString& filename)
     for(const QPointF& pt : line)
     {
         QPointF pt1 = pt;
-        context->convertMap2Coord(pt1);
+        context->convertMap2Proj(pt1);
 
         if(!first)
         {
@@ -320,7 +320,7 @@ void COverlayCutMap::slotLoadShape()
                 in2 >> x >> y;
 
                 QPointF pt(x, y);
-                context->convertCoord2Map(pt);
+                context->convertProj2Map(pt);
 
                 region << pt;
 

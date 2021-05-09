@@ -32,7 +32,7 @@ CDBFolderMysql::CDBFolderMysql(const QString &server, const QString &port, const
     , name(name)
 {
     setText(CGisListDB::eColumnName, name);
-    QTimer::singleShot(200, this, SLOT(slotDelayedSetup()));
+    QTimer::singleShot(200, this, &CDBFolderMysql::slotDelayedSetup);
 }
 
 void CDBFolderMysql::slotDelayedSetup()
@@ -59,7 +59,7 @@ QString CDBFolderMysql::getDBInfo() const
     str += tr("MySQL Database") + "<br />";
     if(!port.isEmpty())
     {
-        str += tr("Server: ") + QString("<i>%1:%2</i>").arg(server).arg(port);
+        str += tr("Server: ") + QString("<i>%1:%2</i>").arg(server, port);
     }
     else
     {

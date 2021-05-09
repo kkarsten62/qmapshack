@@ -26,12 +26,13 @@
 #include <QtWidgets>
 
 CItemMap::CItemMap(const QString &filename)
-    : IItem(filename)
+    : CGdalFile(CGdalFile::eTypeProj)
+    , IItem(filename)
 {
     setText(CItemTreeWidget::eColumnName, QFileInfo(filename).completeBaseName());
     setIcon(CItemTreeWidget::eColumnName, QIcon("://icons/32x32/FolderMap.png"));
 
-    reload();
+    CItemMap::reload();
 }
 
 CItemMap::~CItemMap()
@@ -47,7 +48,7 @@ QPointF CItemMap::getScale() const
 void CItemMap::reload()
 {
     load(filename);
-    setToolTip(CItemTreeWidget::eColumnName,filename + "\n"  + getInfo());
+    setToolTip(CItemTreeWidget::eColumnName, filename + "\n"  + getInfo());
 
     QFile f(filename);
     f.open(QIODevice::ReadOnly);
@@ -78,5 +79,4 @@ void CItemMap::drawBoundingBox(QPainter& p, IDrawContext * dc)
     QPolygonF line;
     line << pt1 << pt2 << pt3 << pt4 << pt1;
     p.drawPolyline(line);
-
 }

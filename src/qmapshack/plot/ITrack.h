@@ -19,9 +19,9 @@
 #ifndef ITRACK_H
 #define ITRACK_H
 
+#include "gis/proj_x.h"
 #include "gis/trk/CTrackData.h"
 
-#include <proj_api.h>
 #include <QImage>
 #include <QPolygonF>
 
@@ -32,8 +32,8 @@ class CGisItemTrk;
 class ITrack
 {
 public:
-    ITrack();
-    virtual ~ITrack();
+    ITrack() = default;
+    virtual ~ITrack() = default;
 
     void setSize(int w, int h);
     void setTrack(CGisItemTrk * track);
@@ -47,8 +47,7 @@ protected:
     void draw(QPainter& p);
     void draw();
 
-    projPJ pjsrc = nullptr;
-    projPJ pjtar = nullptr;
+    CProj proj;
 
     bool needsRedraw = true;
     CGisItemTrk * trk = nullptr;

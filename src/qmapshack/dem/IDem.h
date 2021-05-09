@@ -22,7 +22,7 @@
 
 #include "canvas/IDrawContext.h"
 #include "canvas/IDrawObject.h"
-#include <proj_api.h>
+#include "gis/proj_x.h"
 #include <QObject>
 #include <QPointer>
 
@@ -158,22 +158,16 @@ protected:
 
     CDemDraw * dem;
 
-    /// source projection of the current map file
     /**
-        Has to be set by subclass. Destruction has to be
-        handled by subclass.
+        target should always be "EPSG:4326"
+        source will be the map's projection
      */
-    projPJ pjsrc = nullptr;
-    /// target projection
-    /**
-        Is set by IMap() to WGS84. Will be freed by ~IMap()
-     */
-    projPJ pjtar = nullptr;
+    CProj proj;
 
     /// width in number of px
-    quint32 xsize_px = 0;
+    qint32 xsize_px = 0;
     /// height in number of px
-    quint32 ysize_px = 0;
+    qint32 ysize_px = 0;
 
     /// scale [px/m]
     qreal xscale = 1.0;

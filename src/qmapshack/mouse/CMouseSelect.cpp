@@ -30,11 +30,16 @@ CMouseSelect::CMouseSelect(CGisDraw *gis, CCanvas *canvas, CMouseAdapter *mouse)
 {
     cursor = QCursor(QPixmap("://cursors/cursorSelectArea.png"), 0, 0);
 
-    canvas->reportStatus("IMouseSelect", tr("<b>Select Items On Map</b><br/>Select a rectangular area on the map. Use the left mouse button and move the mouse. Abort with a right click. Adjust the selection by point-click-move on the corners."));
+    canvas->reportStatus("IMouseSelect",
+                         tr("<b>Select Items On Map</b><br/>Select a rectangular area on the map. "
+                            "Use the left mouse button and move the mouse. Abort with a right "
+                            "click. Adjust the selection by point-click-move on the corners.")
+                         );
 
     CScrOptSelect * scrOptSelect;
     scrOpt = scrOptSelect = new CScrOptSelect(this);
 
+    connect(&CGisWorkspace::self(), &CGisWorkspace::sigChanged, this, &CMouseSelect::slotUpdate);
     connect(scrOptSelect->toolCopy,         &QToolButton::clicked, this, &CMouseSelect::slotCopy);
     connect(scrOptSelect->toolRoute,        &QToolButton::clicked, this, &CMouseSelect::slotRoute);
     connect(scrOptSelect->toolEditPrxWpt,   &QToolButton::clicked, this, &CMouseSelect::slotEditPrxWpt);
@@ -70,14 +75,14 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
         itemKeys.clear();
 
         QRectF area;
-        rectRad2Px(rectSelection, area);
+        rectRad2Deg(rectSelection, area);
         CGisWorkspace::self().getItemsByArea(area, modeSelection, items);
 
         cntWpt = 0;
         cntTrk = 0;
         cntRte = 0;
         cntOvl = 0;
-        for(IGisItem * item : items)
+        for(IGisItem * item : qAsConst(items))
         {
             itemKeys << item->getKey();
             switch(item->type())
@@ -147,7 +152,7 @@ void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect 
     QList<IGisItem*> items;
     findItems(items);
 
-    for(IGisItem * item : items)
+    for(IGisItem * item : qAsConst(items))
     {
         item->drawHighlight(p);
     }
@@ -155,7 +160,11 @@ void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect 
     IMouseSelect::draw(p, needsRedraw, rect);
 }
 
-
+void CMouseSelect::slotUpdate()
+{
+    rectLastSel = {};
+    canvas->update();
+}
 
 void CMouseSelect::slotCopy() const
 {
