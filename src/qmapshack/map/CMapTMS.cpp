@@ -17,6 +17,7 @@
 **********************************************************************************************/
 
 #include "CMainWindow.h"
+#include "gis/proj_x.h"
 #include "helpers/CDraw.h"
 #include "map/cache/CDiskCache.h"
 #include "map/CMapDraw.h"
@@ -30,7 +31,7 @@
 #include <QtXml>
 
 #include <ogr_spatialref.h>
-#include <proj_api.h>
+
 
 inline int lon2tile(double lon, int z)
 {
@@ -59,8 +60,9 @@ CMapTMS::CMapTMS(const QString &filename, CMapDraw *parent)
     qDebug() << "------------------------------";
     qDebug() << "TMS: try to open" << filename;
 
-    pjsrc = pj_init_plus("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
-    qDebug() << "tms:" << "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs";
+    proj.init("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs", "EPSG:4326");
+
+    qDebug() << "tms:" << proj.getProjSrc();
 
 
     QFile file(filename);
@@ -172,7 +174,7 @@ void CMapTMS::getLayers(QListWidget& list) /* override */
     }
 
     int i = 0;
-    for(const layer_t &layer : layers)
+    for(const layer_t &layer : qAsConst(layers))
     {
         QListWidgetItem * item = new QListWidgetItem(layer.title, &list);
         item->setCheckState(layer.enabled ? Qt::Checked : Qt::Unchecked);
@@ -225,7 +227,7 @@ void CMapTMS::loadConfig(QSettings& cfg)
 
     // enable layers stored in configuration
     enabled = cfg.value("enabledLayers", enabled).toStringList();
-    for(const QString &str : enabled)
+    for(const QString &str : qAsConst(enabled))
     {
         int idx = str.toInt();
         if(idx < layers.size())
@@ -356,7 +358,7 @@ void CMapTMS::draw(IDrawContext::buffer_t& buf) /* override */
     }
 
     // draw layers
-    for(const layer_t &layer : layers)
+    for(const layer_t &layer : qAsConst(layers))
     {
         if(!layer.enabled)
         {

@@ -28,6 +28,7 @@
 #include "gis/db/CSetupWorkspace.h"
 #include "gis/IGisLine.h"
 #include "gis/prj/IGisProject.h"
+#include "gis/proj_x.h"
 #include "gis/rte/router/CRouterBRouter.h"
 #include "gis/rte/router/CRouterRoutino.h"
 #include "gis/search/CGeoSearchConfig.h"
@@ -64,14 +65,14 @@
 #include <QtSql>
 #include <QtWidgets>
 
-#ifdef WIN32
+#ifdef Q_OS_WIN64
 #include "device/CDeviceWatcherWindows.h"
 #include <dbt.h>
 #include <guiddef.h>
 #include <initguid.h>
 #include <usbiodef.h>
 #include <windows.h>
-#endif // WIN32
+#endif // Q_OS_WIN64
 
 CMainWindow * CMainWindow::pSelf = nullptr;
 
@@ -149,21 +150,12 @@ CMainWindow::CMainWindow()
     }
     else
     {
-        QTimer::singleShot(500, this, SLOT(showMaximized()));
+        QTimer::singleShot(500, this, &CMainWindow::showMaximized);
     }
 
     if ( cfg.contains("state"))
     {
         restoreState(cfg.value("state").toByteArray());
-    }
-
-    if (cfg.contains("displaymode"))
-    {
-        displayMode = static_cast<Qt::WindowStates>(cfg.value("displaymode").toInt());
-        if (displayMode == Qt::WindowFullScreen)
-        {
-            displayMode = Qt::WindowMaximized;
-        }
     }
 
     if (cfg.contains("dockstate"))
@@ -173,12 +165,12 @@ CMainWindow::CMainWindow()
 
     menuVisible = cfg.value("menuvisible", false).toBool();
 
-    if(windowState() == Qt::WindowFullScreen)
+    if(windowState() & Qt::WindowFullScreen)
     {
+        setWindowState(windowState() | Qt::WindowMaximized);
         displayRegular();
     }
     cfg.endGroup();
-
     // end ---- restore window geometry -----
 
     connect(actionAbout,                 &QAction::triggered,            this,      &CMainWindow::slotAbout);
@@ -244,7 +236,7 @@ CMainWindow::CMainWindow()
     CDemDraw::loadDemPath(cfg);
 
     cfg.beginGroup("Views");
-    QStringList names = cfg.childGroups();
+    const QStringList& names = cfg.childGroups();
 
     for(const QString &name : names)
     {
@@ -312,7 +304,7 @@ CMainWindow::CMainWindow()
     if (cfg.contains("MainWindow/activedocks"))
     {
         const QStringList & dockNames = cfg.value("MainWindow/activedocks").toStringList();
-        for(QDockWidget * const & dock : docks)
+        for(QDockWidget * const & dock : qAsConst(docks))
         {
             if(dockNames.contains(dock->objectName()))
             {
@@ -321,7 +313,7 @@ CMainWindow::CMainWindow()
         }
     }
 
-    for (QDockWidget * const & dock : docks)
+    for (QDockWidget * const & dock : qAsConst(docks))
     {
         connect(dock, &QDockWidget::visibilityChanged, this, &CMainWindow::slotDockVisibilityChanged);
         connect(dock, &QDockWidget::topLevelChanged, this, &CMainWindow::slotDockFloating);
@@ -479,7 +471,7 @@ CMainWindow::CMainWindow()
     prepareMenuForMac();
 
     // make sure all actions that have a shortcut are available even when menu and toolbar are not visible
-    for (QAction * action : availableActions)
+    for (QAction * action : qAsConst(availableActions))
     {
         if (!action->shortcuts().isEmpty())
         {
@@ -487,9 +479,9 @@ CMainWindow::CMainWindow()
         }
     }
 
-    QTimer::singleShot(100, widgetGisWorkspace, SLOT(slotLateInit()));
+    QTimer::singleShot(100, widgetGisWorkspace, &CGisWorkspace::slotLateInit);
 
-    QTimer::singleShot(100, this, SLOT(slotSanityTest()));
+    QTimer::singleShot(100, this, &CMainWindow::slotSanityTest);
 }
 
 void CMainWindow::prepareMenuForMac()
@@ -513,13 +505,12 @@ CMainWindow::~CMainWindow()
     cfg.setValue("geometry", saveGeometry());
     cfg.setValue("units", IUnit::self().type);
     QStringList activeDockNames;
-    for (QDockWidget * const & dock : activeDocks)
+    for (QDockWidget * const & dock : qAsConst(activeDocks))
     {
         activeDockNames << dock->objectName();
     }
     cfg.setValue("activedocks", activeDockNames);
 
-    cfg.setValue("displaymode", static_cast<int>(displayMode));
     cfg.setValue("dockstate", dockStates);
     cfg.setValue("menuvisible", menuVisible);
     cfg.endGroup();
@@ -827,7 +818,8 @@ void CMainWindow::zoomCanvasTo(const QRectF rect)
 
 void CMainWindow::resetMouse()
 {
-    for(CCanvas * canvas : getCanvas())
+    const QList<CCanvas*>& allCanvas = getCanvas();
+    for(CCanvas * canvas : allCanvas)
     {
         canvas->resetMouse();
     }
@@ -1173,7 +1165,7 @@ void CMainWindow::slotMousePosition(const QPointF& pos, qreal ele, qreal slope)
     {
         QString val, unit;
         IUnit::self().meter2elevation(ele, val, unit);
-        lblElevation->setText(tr("Ele.: %1%2").arg(val).arg(unit));
+        lblElevation->setText(tr("Ele.: %1%2").arg(val, unit));
         lblElevation->show();
     }
     else
@@ -1186,7 +1178,7 @@ void CMainWindow::slotMousePosition(const QPointF& pos, qreal ele, qreal slope)
         QString val;
         QString unit;
         IUnit::self().slope2string(slope, val, unit);
-        lblSlope->setText(tr("Slope: %1%2", "terrain").arg(val).arg(unit));
+        lblSlope->setText(tr("Slope: %1%2", "terrain").arg(val, unit));
         lblSlope->show();
     }
     else
@@ -1217,6 +1209,10 @@ void CMainWindow::slotUpdateTabWidgets()
     for(int n = 0; n < N; n++)
     {
         QWidget * w = tabWidget->widget(n);
+        if(w == nullptr)
+        {
+            continue;
+        }
 
         CCanvas * canvas = dynamic_cast<CCanvas*>(w);
         if(canvas != nullptr)
@@ -1441,14 +1437,14 @@ void CMainWindow::slotLoadView()
     cfg.setValue("Paths/lastViewPath", path);
 }
 
-void CMainWindow::slotSetProfileMode(bool on)
+void CMainWindow::slotSetProfileMode(bool /*on*/)
 {
     for(int i = 0; i < tabWidget->count(); i++)
     {
         CCanvas * view = dynamic_cast<CCanvas*>(tabWidget->widget(i));
         if(nullptr != view)
         {
-            view->showProfileAsWindow(on);
+            view->showProfileAsWindow();
         }
     }
 }
@@ -1629,7 +1625,7 @@ void CMainWindow::showDocks() const
 void CMainWindow::hideDocks()
 {
     activeDocks.clear();
-    for (QDockWidget * const & dock : docks)
+    for (QDockWidget * const & dock : qAsConst(docks))
     {
         if (!dock->isHidden())
         {
@@ -1660,7 +1656,7 @@ void CMainWindow::slotDockVisibilityChanged(bool visible)
     }
     else
     {
-        for (QDockWidget * const & dock : docks)
+        for (QDockWidget * const & dock : qAsConst(docks))
         {
             if (!dock->isHidden())
             {
@@ -1676,14 +1672,12 @@ void CMainWindow::slotFullScreen()
 {
     QMutexLocker lock(&CMainWindow::mutex);
 
-    Qt::WindowStates state = windowState();
-    if(state == Qt::WindowFullScreen)
+    if(windowState() & Qt::WindowFullScreen)
     {
         displayRegular();
     }
     else
     {
-        displayMode = state;
         displayFullscreen();
     }
 }
@@ -1726,13 +1720,13 @@ void CMainWindow::displayRegular()
         menuBar()->setVisible(true);
     }
     actionFullScreen->setIcon(QIcon(":/icons/32x32/FullScreen.png"));
-    setWindowState(displayMode);
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
 }
 
 void CMainWindow::displayFullscreen()
 {
     dockStates = saveState();
-    setWindowState(Qt::WindowFullScreen);
+    setWindowState(windowState() | Qt::WindowFullScreen);
     statusBar()->setVisible(false);
     menuVisible = menuBar()->isVisible();
     // menu is handled dynamically as on some platforms (e.g. ubuntu with unity)
@@ -1753,7 +1747,7 @@ void CMainWindow::displayFullscreen()
     actionFullScreen->setIcon(QIcon(":/icons/32x32/RegularScreen.png"));
 }
 
-#ifdef WIN32
+#ifdef Q_OS_WIN64
 
 static void sendDeviceEvent(DWORD unitmask, bool add)
 {
@@ -1814,7 +1808,7 @@ bool CMainWindow::nativeEvent(const QByteArray & eventType, void * message, long
 
     return QWidget::nativeEvent(eventType, message, result);
 }
-#endif // WIN32
+#endif // Q_OS_WIN64
 
 void CMainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -1834,7 +1828,7 @@ void CMainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void CMainWindow::dropEvent(QDropEvent *event)
 {
-    QList<QUrl> urls = event->mimeData()->urls();
+    const QList<QUrl>& urls = event->mimeData()->urls();
 
     QStringList filenames;
     for(const QUrl &url : urls)
@@ -1849,21 +1843,38 @@ void CMainWindow::dropEvent(QDropEvent *event)
 
 void CMainWindow::slotSanityTest()
 {
-    projPJ pjsrc = pj_init_plus("+init=epsg:32661");
-    if(pjsrc == nullptr)
+    try
+    {
+        CProj proj;
+        proj.init("EPSG:4326", "EPSG:32661");
+
+        if(!proj.isValid())
+        {
+            throw QException();
+        }
+
+        QPointF pt(11 * DEG_TO_RAD, 80 * DEG_TO_RAD);
+
+        proj.transform(pt, PJ_FWD);
+        if((qFloor(pt.x()) != 2212361) | (qFloor(pt.y()) != 907496))
+        {
+            throw QException();
+        }
+
+        proj.transform(pt, PJ_INV);
+        if((qRound(pt.x() * RAD_TO_DEG) != 11) | (qRound(pt.y() * RAD_TO_DEG) != 80))
+        {
+            throw QException();
+        }
+        qDebug() << "Sanity test passed.";
+    }
+    catch(const QException& e)
     {
         QMessageBox::critical(this, tr("Fatal...")
-                              , tr("QMapShack detected a badly installed Proj4 library. The translation tables for EPSG projections usually stored in /usr/share/proj are missing. Please contact the package maintainer of your distribution to fix it.")
+                              , tr("QMapShack detected a badly installed Proj library. Please contact the package maintainer of your distribution to fix it.")
                               , QMessageBox::Close);
-
         deleteLater();
-        return;
     }
-
-    pj_free(pjsrc);
-
-
-    qDebug() << "Sanity test passed.";
 }
 
 void CMainWindow::slotHelp()

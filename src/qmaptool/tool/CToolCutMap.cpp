@@ -47,14 +47,14 @@ CToolCutMap::CToolCutMap(QWidget *parent)
     connect(pushCancel, &QPushButton::clicked, &CShell::self(), &CShell::slotCancel);
     connect(&CShell::self(), &CShell::sigFinishedJob, this, &CToolCutMap::slotFinished);
 
-    setupChanged();
+    CToolCutMap::setupChanged();
 
     SETTINGS;
     cfg.beginGroup("ToolCutMap");
     itemList->loadSettings(cfg);
     groupOverviews->loadSettings(cfg);
     checkAllFiles->setChecked(cfg.value("allFiles", false).toBool());
-    lineSuffix->setText(cfg.value("suffix","_cut").toString());
+    lineSuffix->setText(cfg.value("suffix", "_cut").toString());
     cfg.endGroup();
 
     slotSomethingChanged();

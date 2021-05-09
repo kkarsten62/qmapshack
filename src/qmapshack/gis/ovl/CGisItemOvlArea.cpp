@@ -19,14 +19,14 @@
 
 #include "gis/CGisDraw.h"
 #include "gis/CGisListWks.h"
+#include "gis/GeoMath.h"
 #include "gis/ovl/CDetailsOvlArea.h"
 #include "gis/ovl/CGisItemOvlArea.h"
 #include "gis/ovl/CScrOptOvlArea.h"
 #include "gis/prj/IGisProject.h"
-#include "GeoMath.h"
+#include "gis/proj_x.h"
 #include "helpers/CDraw.h"
 
-#include <proj_api.h>
 #include <QtWidgets>
 
 #define DEFAULT_COLOR       4
@@ -141,7 +141,9 @@ bool CGisItemOvlArea::isCloseTo(const QPointF& pos)
 
 bool CGisItemOvlArea::isWithin(const QRectF& area, selflags_t flags)
 {
-    return (flags & eSelectionOvl) ? IGisItem::isWithin(area, flags, polygonArea) : false;
+    QPolygonF l;
+    getPolylineDegFromData(l);
+    return (flags & eSelectionOvl) ? IGisItem::isWithin(area, flags, l) : false;
 }
 
 QPointF CGisItemOvlArea::getPointCloseBy(const QPoint& screenPos)
@@ -151,7 +153,7 @@ QPointF CGisItemOvlArea::getPointCloseBy(const QPoint& screenPos)
     qint32 i    = 0;
     qint32 idx  = NOIDX;
     qint32 d    = NOINT;
-    for(const QPointF &point : polygonArea)
+    for(const QPointF &point : qAsConst(polygonArea))
     {
         int tmp = (screenPos - point).manhattanLength();
         if(tmp < d)
@@ -211,7 +213,7 @@ void CGisItemOvlArea::deriveSecondaryData()
     qreal south =  90;
     qreal west  =  180;
 
-    for(const pt_t &pt : area.pts)
+    for(const pt_t &pt : qAsConst(area.pts))
     {
         if(pt.lon < west)
         {
@@ -260,7 +262,7 @@ void CGisItemOvlArea::deriveSecondaryData()
     area.area = qAbs(area.area / 2);
 }
 
-void CGisItemOvlArea::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>& blockedAreas, CGisDraw * gis)
+void CGisItemOvlArea::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>& /*blockedAreas*/, CGisDraw * gis)
 {
     QMutexLocker lock(&mutexItems);
 
@@ -272,7 +274,7 @@ void CGisItemOvlArea::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRe
 
     QPointF pt1;
 
-    for(const pt_t &pt : area.pts)
+    for(const pt_t &pt : qAsConst(area.pts))
     {
         pt1.setX(pt.lon);
         pt1.setY(pt.lat);
@@ -307,7 +309,7 @@ void CGisItemOvlArea::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRe
     p.restore();
 }
 
-void CGisItemOvlArea::drawLabel(QPainter& p, const QPolygonF &viewport, QList<QRectF>& blockedAreas, const QFontMetricsF& fm, CGisDraw * gis)
+void CGisItemOvlArea::drawLabel(QPainter& p, const QPolygonF &/*viewport*/, QList<QRectF>& blockedAreas, const QFontMetricsF& fm, CGisDraw * /*gis*/)
 {
     QMutexLocker lock(&mutexItems);
 
@@ -382,14 +384,14 @@ QString CGisItemOvlArea::getInfo(quint32 feature) const
     QString unit, val;
     QString str = "<div>";
 
-    if(feature && eFeatureShowName)
+    if(feature & eFeatureShowName)
     {
         str += "<b>" + getName() + "</b>";
     }
 
 
     IUnit::self().meter2area(area.area, val, unit);
-    str += "<br/>\n" + tr("Area: %1%2").arg(val).arg(unit);
+    str += "<br/>\n" + tr("Area: %1%2").arg(val, unit);
 
     QString desc = removeHtml(area.desc).simplified();
     if(desc.count())
@@ -434,7 +436,7 @@ QString CGisItemOvlArea::getInfo(quint32 feature) const
             if(link.type.isEmpty() || (link.type == "text/html"))
             {
                 str += "<br/>\n";
-                str += QString("<a href='%1'>%2</a>").arg(link.uri.toString()).arg(link.text);
+                str += QString("<a href='%1'>%2</a>").arg(link.uri.toString(), link.text);
             }
         }
     }
@@ -602,7 +604,7 @@ QMap<searchProperty_e, CGisItemOvlArea::fSearch> CGisItemOvlArea::initKeywordLam
         searchValue.str1 = QStringList(item->getKeywords().toList()).join(", ");
         return searchValue;
     });
-    map.insert(eSearchPropertyGeneralType, [](CGisItemOvlArea* item){
+    map.insert(eSearchPropertyGeneralType, [](CGisItemOvlArea* /*item*/){
         searchValue_t searchValue;
         searchValue.str1 = tr("area");
         return searchValue;

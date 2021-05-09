@@ -246,14 +246,14 @@ void CGridPlacer::updateStatus()
 }
 
 
-void CGridPlacer::slotSetArea() const
+void CGridPlacer::slotSetArea()
 {
     qreal bottom    = -NOFLOAT;
     qreal top       =  NOFLOAT;
     qreal left      =  NOFLOAT;
     qreal right     = -NOFLOAT;
 
-    for(const CGridPoint& point : points)
+    for(const CGridPoint& point : qAsConst(points))
     {
         const QPointF& pt = point.getPoint();
 
@@ -263,7 +263,7 @@ void CGridPlacer::slotSetArea() const
         right   = qMax(pt.x(), right);
     }
 
-    QRectF r(0,0,1,1);
+    QRectF r(0, 0, 1, 1);
     r.setLeft(left);
     r.setRight(right);
     r.setTop(top);

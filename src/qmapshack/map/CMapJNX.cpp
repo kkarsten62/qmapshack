@@ -87,7 +87,7 @@ CMapJNX::CMapJNX(const QString &filename, CMapDraw *parent)
     qint32 productId = -1;
     readFile(filename, productId);
 
-    pjsrc = pj_init_plus("+proj=merc +ellps=WGS84 +datum=WGS84 +units=m +no_defs +towgs84=0,0,0");
+    proj.init("EPSG:3857", "EPSG:4326");
 
     isActivated = true;
 }
@@ -306,7 +306,7 @@ void CMapJNX::draw(IDrawContext::buffer_t& buf) /* override */
     p.setOpacity(getOpacity() / 100.0);
     p.translate(-pp);
 
-    for(const file_t &mapFile : files)
+    for(const file_t &mapFile : qAsConst(files))
     {
         if(!viewport.intersects(mapFile.bbox))
         {

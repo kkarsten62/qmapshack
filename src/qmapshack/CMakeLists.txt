@@ -22,11 +22,10 @@ add_definitions(-DROUTINO_XML_PATH=${ROUTINO_XML_PATH})
 # All source files needed to compile
 ###############################################################################################
 
-set( SRCS    
-    CAbout.cpp    
+set( SRCS
+    CAbout.cpp
     CMainWindow.cpp
     CSingleInstanceProxy.cpp
-    GeoMath.cpp
     canvas/CCanvas.cpp
     canvas/CCanvasSetup.cpp
     canvas/CCanvasSelect.cpp
@@ -162,7 +161,7 @@ set( SRCS
     gis/trk/CInvalidTrk.cpp
     gis/trk/CKnownExtension.cpp
     gis/trk/CListTrkPts.cpp
-    gis/trk/CPropertyTrk.cpp    
+    gis/trk/CPropertyTrk.cpp
     gis/trk/CScrOptTrk.cpp
     gis/trk/CSelectActivityColor.cpp
     gis/trk/CTableTrk.cpp
@@ -274,7 +273,7 @@ set( SRCS
     mouse/line/CLineOpMovePoint.cpp
     mouse/line/CLineOpSelectRange.cpp
     mouse/line/CScrOptEditLine.cpp
-    mouse/line/CScrOptRangeLine.cpp    
+    mouse/line/CScrOptRangeLine.cpp
     mouse/line/ILineOp.cpp
     mouse/line/IMouseEditLine.cpp
     plot/CPlot.cpp
@@ -345,6 +344,8 @@ set( SRCS
     ../common/help/CHelpBrowser.cpp
     ../common/help/CHelpIndex.cpp
     ../common/help/CHelpSearch.cpp
+    ../common/gis/GeoMath.cpp
+    ../common/gis/proj_x.cpp
 )
 
 
@@ -375,7 +376,6 @@ set( HDRS
     CAbout.h
     CMainWindow.h
     CSingleInstanceProxy.h
-    GeoMath.h
     contributors.h
     canvas/CCanvas.h
     canvas/CCanvasSetup.h
@@ -402,7 +402,7 @@ set( HDRS
     gis/CGisListDB.h
     gis/CGisListWks.h
     gis/CGisWorkspace.h
-    gis/CSelDevices.h    
+    gis/CSelDevices.h
     gis/IGisItem.h
     gis/IGisLine.h
     gis/Poi.h
@@ -514,7 +514,7 @@ set( HDRS
     gis/trk/CInvalidTrk.h
     gis/trk/CKnownExtension.h
     gis/trk/CListTrkPts.h
-    gis/trk/CPropertyTrk.h    
+    gis/trk/CPropertyTrk.h
     gis/trk/CScrOptTrk.h
     gis/trk/CSelectActivityColor.h
     gis/trk/CTableTrk.h
@@ -581,7 +581,7 @@ set( HDRS
     map/CMapList.h
     map/CMapMAP.h
     map/CMapPathSetup.h
-    map/CMapPropSetup.h    
+    map/CMapPropSetup.h
     map/CMapRMAP.h
     map/CMapTMS.h
     map/CMapVRT.h
@@ -657,7 +657,7 @@ set( HDRS
     realtime/CRtSelectSource.h
     realtime/CRtWorkspace.h
     realtime/IRtInfo.h
-    realtime/IRtRecord.h    
+    realtime/IRtRecord.h
     realtime/IRtSource.h
     realtime/gpstether/CRtGpsTether.h
     realtime/gpstether/CRtGpsTetherInfo.h
@@ -702,6 +702,8 @@ set( HDRS
     ../common/help/CHelpBrowser.h
     ../common/help/CHelpIndex.h
     ../common/help/CHelpSearch.h
+    ../common/gis/GeoMath.h
+    ../common/gis/proj_x.h
 )
 
 
@@ -764,7 +766,7 @@ set( UIS
     gis/search/IGeoSearchWebConfigDialog.ui
     gis/search/ISearchExplanationDialog.ui
     gis/summary/IGisSummary.ui
-    gis/summary/IGisSummarySetup.ui    
+    gis/summary/IGisSummarySetup.ui
     gis/trk/ICombineTrk.ui
     gis/trk/ICutTrk.ui
     gis/trk/IDetailsTrk.ui
@@ -819,7 +821,7 @@ set( UIS
     mouse/range/IActionSelect.ui
     mouse/range/IRangeToolSetup.ui
     mouse/range/IScrOptRangeTool.ui
-    mouse/range/IScrOptRangeTrk.ui    
+    mouse/range/IScrOptRangeTrk.ui
     mouse/IScrOptRuler.ui
     mouse/IScrOptSelect.ui
     mouse/line/IScrOptEditLine.ui
@@ -897,10 +899,9 @@ include_directories(
     SYSTEM # this prevents warnings from non-QMS headers
     ${CMAKE_BINARY_DIR}
     ${GDAL_INCLUDE_DIRS}
-    ${PROJ4_INCLUDE_DIRS}
+    ${PROJ_INCLUDE_DIRS}
     ${ROUTINO_INCLUDE_DIRS}
     ${ALGLIB_INCLUDE_DIRS}
-    ${QUAZIP_INCLUDE_DIRS}
 )
 
 if(APPLE)
@@ -935,20 +936,20 @@ endif(Qt5DBus_FOUND)
 
 target_link_libraries(${APPLICATION_NAME}
     Qt5::Widgets
-    Qt5::Xml    
+    Qt5::Xml
     Qt5::Sql
     Qt5::PrintSupport
-    Qt5::UiTools    
+    Qt5::UiTools
     Qt5::Network
     Qt5::WebEngineWidgets
     Qt5::Qml
     Qt5::Help
     ${DBUS_LIB}
     ${GDAL_LIBRARIES}
-    ${PROJ4_LIBRARIES}
+    ${PROJ_LIBRARIES}
     ${ROUTINO_LIBRARIES}
     ${ALGLIB_LIBRARIES}
-    ${QUAZIP_LIBRARIES}
+    QuaZip::QuaZip
 )
 
 if(APPLE)

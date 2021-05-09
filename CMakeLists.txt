@@ -17,34 +17,16 @@ if (COMMAND CMAKE_POLICY)
     endif()
 endif()
 
-###############################################################################################
-# Do distribution dependent stuff
-###############################################################################################
-string(TIMESTAMP YEAR "%Y")
-set(EXPIRE_YEAR "2021")
-set(DEBIAN_RELEASE_INFO "/etc/debian_version")
-
-if(((EXISTS ${DEBIAN_RELEASE_INFO}) AND (${YEAR} LESS ${EXPIRE_YEAR})) OR APPLE)
-    message( STATUS "Apply patches to fix build system on Debian")
-    execute_process(COMMAND bash "-c" "patch --quiet -p1 < FindPROJ4.patch"
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    OUTPUT_QUIET)
-    execute_process(COMMAND bash "-c" "patch --quiet -p1 < FindQuaZip5.patch"
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    OUTPUT_QUIET)
-endif(((EXISTS ${DEBIAN_RELEASE_INFO}) AND (${YEAR} LESS ${EXPIRE_YEAR})) OR APPLE)
-
-
 
 ###############################################################################################
 # Define project name and version tags
 ###############################################################################################
 # this is not only the QMS version it will be the package version, too.
-project(QMapShack VERSION 1.15.0)
+project(QMapShack VERSION 1.15.2)
 
 # FOR A RELEASE:
 # remove "development" for a release
-set(DEVELOPMENT_VERSION ON)
+set(DEVELOPMENT_VERSION OFF)
 
 
 ###############################################################################################
@@ -107,7 +89,7 @@ if (APPLE)
 endif(APPLE)
 
 if(WIN32)
-    set(QT_DEV_PATH   "C:\\Qt5\\5.12.3\\msvc2017_64" CACHE PATH "Path to directory containing Qt5 include and lib, e.g. C:\\Qt5\\5.12.3\\msvc2017_64")
+    set(QT_DEV_PATH   "C:\\Qt\\5.12.10\\msvc2017_64" CACHE PATH "Path to directory containing Qt5 include and lib, e.g. C:\\Qt\\5.12.10\\msvc2017_64")
     set(GDAL_DEV_PATH "C:\\GDAL" CACHE PATH "Path to directory containing GDAL include and lib, e.g. M:\\lib\\gdal")
     set(PROJ4_DEV_PATH "C:\\PROJ6" CACHE PATH "Path to directory containing PROJ.4 include and lib, e.g. M:\\lib\\PROJ6")
     set(ROUTINO_DEV_PATH "C:\\routino" CACHE PATH "Path to directory containing routino include and lib, e.g. M:\\lib\\routino")
@@ -167,10 +149,10 @@ find_package(Qt5WebEngineWidgets    REQUIRED)
 find_package(Qt5Qml                 REQUIRED)
 find_package(Qt5Help                REQUIRED)
 find_package(GDAL                   REQUIRED)
-find_package(PROJ4                  REQUIRED)
+find_package(PROJ                   REQUIRED)
 find_package(JPEG                   REQUIRED)
 find_package(ROUTINO                REQUIRED)
-find_package(QuaZip5                REQUIRED)
+find_package(QuaZip-Qt5             REQUIRED)
 find_package(ALGLIB                         ) # optional as we can use our local version
 
 
@@ -178,8 +160,8 @@ if(${Qt5Widgets_VERSION} VERSION_LESS 5.8.0)
     message( SEND_ERROR "You need at least Qt5.8 or newer.")
 endif()
 
-if(${PROJ4_VERSION} VERSION_LESS 5.0.0)
-    message( SEND_ERROR "You need at least PROJ4 5.0.0 or newer.")
+if(${PROJ_VERSION} VERSION_LESS 7.2.1)
+    message( SEND_ERROR "You need at least PROJ 7.2.1 or newer.")
 endif()
 
 if(USE_QT5DBus)
@@ -203,7 +185,7 @@ if(NOT ALGLIB_FOUND AND BUILD_QMAPSHACK)
     add_subdirectory(3rdparty/alglib)
 endif(NOT ALGLIB_FOUND AND BUILD_QMAPSHACK)
 
-add_definitions(-DACCEPT_USE_OF_DEPRECATED_PROJ_API_H -DHELPPATH=${HTML_INSTALL_DIR})
+add_definitions(-DHELPPATH=${HTML_INSTALL_DIR})
 
 ###############################################################################################
 # Create global config.h

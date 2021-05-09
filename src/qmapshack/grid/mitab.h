@@ -18,20 +18,23 @@
 #ifndef MITAB_H
 #define MITAB_H
 
-struct MapInfoDatumInfo
-{
-    int nMapInfoDatumID;
+#include <QVector>
+
+typedef struct {
+    int         nDatumEPSGCode;
+    int         nMapInfoDatumID;
     const char  *pszOGCDatumName;
-    int nEllipsoid;
-    double dfShiftX;
-    double dfShiftY;
-    double dfShiftZ;
-    double dfDatumParm0;         /* RotX */
-    double dfDatumParm1;         /* RotY */
-    double dfDatumParm2;         /* RotZ */
-    double dfDatumParm3;         /* Scale Factor */
-    double dfDatumParm4;         /* Prime Meridian */
-};
+    int         nEllipsoid;
+    double      dfShiftX;
+    double      dfShiftY;
+    double      dfShiftZ;
+    double      dfDatumParm0; /* RotX */
+    double      dfDatumParm1; /* RotY */
+    double      dfDatumParm2; /* RotZ */
+    double      dfDatumParm3; /* Scale Factor */
+    double      dfDatumParm4; /* Prime Meridian */
+} MapInfoDatumInfo;
+
 
 struct MapInfoSpheroidInfo
 {
@@ -41,6 +44,6 @@ struct MapInfoSpheroidInfo
     double dfInvFlattening;      /* Inverse flattening */
 };
 
-extern const MapInfoDatumInfo asDatumInfoListQL[];
-extern const MapInfoSpheroidInfo asSpheroidInfoList[];
+extern const QVector<MapInfoDatumInfo> asDatumInfoList;
+extern const QVector<MapInfoSpheroidInfo> asSpheroidInfoList;
 #endif                           //MITAB_H

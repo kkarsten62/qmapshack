@@ -246,7 +246,7 @@ qint32 IGisProject::isOnDevice() const
 
 bool IGisProject::isChanged() const
 {
-    return text(CGisListWks::eColumnDecoration) == "*";
+    return text(CGisListWks::eColumnDecoration).contains("*");
 }
 
 void IGisProject::edit()
@@ -315,18 +315,22 @@ void IGisProject::setChanged()
 {
     if(autoSave)
     {
-        setText(CGisListWks::eColumnDecoration, "A");
-
         if(!autoSavePending)
         {
             autoSavePending = true;
             CGisWorkspace::self().postEventForWks(new CEvtA2WSave(getKey()));
         }
     }
-    else
+
+    if(autoSyncToDev)
     {
-        setText(CGisListWks::eColumnDecoration, "*");
+        if(!autoSyncToDevPending)
+        {
+            autoSyncToDevPending = true;
+            CGisWorkspace::self().postEventForWks(new CEvtA2WSync(getKey()));
+        }
     }
+    updateDecoration(false);
     updateItems();
 }
 
@@ -340,6 +344,12 @@ void IGisProject::setAutoSave(bool on)
 
     autoSave = on;
     setChanged();
+}
+
+void IGisProject::setAutoSyncToDevice(bool yes)
+{
+    autoSyncToDev = yes;
+    updateDecoration();
 }
 
 void IGisProject::switchOnCorrelation()
@@ -517,7 +527,7 @@ void IGisProject::setupName(const QString &defaultName)
 
 void IGisProject::markAsSaved()
 {
-    setText(CGisListWks::eColumnDecoration, autoSave ? "A" : "");
+    updateDecoration(true);
     for(int i = 0; i < childCount(); i++)
     {
         IGisItem * item = dynamic_cast<IGisItem*>(child(i));
@@ -731,7 +741,7 @@ bool IGisProject::delItemByKey(const IGisItem::key_t& key, QMessageBox::Standard
         {
             if(last != QMessageBox::YesToAll)
             {
-                QString msg = tr("Are you sure you want to delete '%1' from project '%2'?").arg(item->getName()).arg(text(CGisListWks::eColumnName));
+                QString msg = tr("Are you sure you want to delete '%1' from project '%2'?").arg(item->getName(), text(CGisListWks::eColumnName));
                 last = QMessageBox::question(CMainWindow::getBestWidgetForParent(), tr("Delete..."), msg, QMessageBox::YesToAll | QMessageBox::Cancel | QMessageBox::Ok | QMessageBox::No, QMessageBox::Ok);
                 if((last == QMessageBox::No) || (last == QMessageBox::Cancel))
                 {
@@ -1075,7 +1085,17 @@ void IGisProject::updateDecoration()
             break;
         }
     }
-    setText(CGisListWks::eColumnDecoration, autoSave ? "A" : saved ? "" : "*");
+    updateDecoration(saved);
+}
+
+void IGisProject::updateDecoration(bool saved)
+{
+    QString str = autoSave ? "A" : saved ? "" : "*";
+    if(autoSyncToDev)
+    {
+        str += "S";
+    }
+    setText(CGisListWks::eColumnDecoration, str);
 }
 
 void IGisProject::sortItems()
@@ -1087,7 +1107,7 @@ void IGisProject::sortItems()
 
     QList<QTreeWidgetItem*> items = takeChildren();
     QList<QTreeWidgetItem*> others; //For example Search
-    for(QTreeWidgetItem* item : items)
+    for(QTreeWidgetItem* item : qAsConst(items))
     {
         CGisItemTrk * trk = dynamic_cast<CGisItemTrk*>(item);
         if(trk != nullptr)
@@ -1127,19 +1147,19 @@ void IGisProject::sortItems()
 
     items.clear();
     items << others;
-    for(IGisItem * item : trks)
+    for(IGisItem * item : qAsConst(trks))
     {
         items << item;
     }
-    for(IGisItem * item : rtes)
+    for(IGisItem * item : qAsConst(rtes))
     {
         items << item;
     }
-    for(IGisItem * item : wpts)
+    for(IGisItem * item : qAsConst(wpts))
     {
         items << item;
     }
-    for(IGisItem * item : ovls)
+    for(IGisItem * item : qAsConst(ovls))
     {
         items << item;
     }

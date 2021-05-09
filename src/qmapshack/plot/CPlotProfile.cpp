@@ -17,6 +17,7 @@
 **********************************************************************************************/
 
 #include "CMainWindow.h"
+#include "gis/proj_x.h"
 #include "gis/trk/CGisItemTrk.h"
 #include "gis/wpt/CGisItemWpt.h"
 #include "helpers/CDraw.h"
@@ -26,7 +27,7 @@
 #include "units/IUnit.h"
 
 #include <interpolation.h>
-#include <proj_api.h>
+
 
 CPlotProfile::CPlotProfile(QWidget * parent)
     : IPlot(nullptr, CPlotData::eAxisLinear, eModeNormal, parent)
@@ -41,7 +42,7 @@ CPlotProfile::CPlotProfile(CGisItemTrk *trk, CLimit& lim, mode_e mode, QWidget *
     init();
     connect(limit, &CLimit::sigChanged, this, &CPlotProfile::setLimits);
     setWindowTitle(trk->getNameEx());
-    updateData();
+    CPlotProfile::updateData();
 }
 
 CPlotProfile::~CPlotProfile()
@@ -175,7 +176,7 @@ void CPlotProfile::updateData()
     if(trk->isInterpolationEnabled())
     {
         QPolygonF spline;
-        for(const QPointF& pt : lineEle)
+        for(const QPointF& pt : qAsConst(lineEle))
         {
             spline << QPointF(pt.x(), trk->getElevationInterpolated(pt.x()) * elevationFactor);
         }

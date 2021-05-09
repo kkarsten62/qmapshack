@@ -42,7 +42,7 @@ CWptIconManager::~CWptIconManager()
 
 void CWptIconManager::removeNumberedBullets()
 {
-    for(const QString& filename : mapNumberedBullets)
+    for(const QString& filename : qAsConst(mapNumberedBullets))
     {
         QFile::remove(filename);
     }
@@ -141,7 +141,7 @@ void CWptIconManager::init()
     QDir dirIcon(cfg.value("Paths/externalWptIcons", IAppSetup::getPlatformInstance()->userDataPath("WaypointIcons")).toString());
 
 
-    QStringList filenames = dirIcon.entryList(QString("*.bmp *.png").split(" "), QDir::Files);
+    const QStringList& filenames = dirIcon.entryList(QString("*.bmp *.png").split(" "), QDir::Files);
 
     for(const QString &filename : filenames)
     {
@@ -248,31 +248,6 @@ QString CWptIconManager::selectWptIcon(QWidget * parent)
 }
 
 
-QMenu * CWptIconManager::getWptIconMenu(const QString& title, QObject * obj, const char * slot, QWidget * parent)
-{
-    QMenu * menu = new QMenu(title, parent);
-    menu->setIcon(QIcon("://icons/waypoints/32x32/PinBlue.png"));
-
-    const QMap<QString, icon_t>& wptIcons = getWptIcons();
-    QStringList keys = wptIcons.keys();
-
-    qSort(keys.begin(), keys.end(), sortByString);
-
-    for(const QString &key : keys)
-    {
-        const QString& icon = wptIcons[key].path;
-        QPixmap pixmap      = loadIcon(icon);
-
-        QAction * action = menu->addAction(pixmap, key);
-        action->setProperty("iconName", key);
-        if(obj != nullptr)
-        {
-            QAction::connect(action, SIGNAL(triggered(bool)), obj, slot);
-        }
-    }
-
-    return menu;
-}
 
 QString CWptIconManager::getNumberedBullet(qint32 n)
 {
@@ -296,3 +271,30 @@ QString CWptIconManager::getNumberedBullet(qint32 n)
 
     return filename;
 }
+
+QMenu * CWptIconManager::getWptIconMenu(const QString& title, QObject * obj, const char * slot, QWidget * parent)
+{
+    QMenu * menu = new QMenu(title, parent);
+    menu->setIcon(QIcon("://icons/waypoints/32x32/PinBlue.png"));
+
+    const QMap<QString, icon_t>& wptIcons = getWptIcons();
+    QStringList keys = wptIcons.keys();
+
+    qSort(keys.begin(), keys.end(), sortByString);
+
+    for(const QString &key : qAsConst(keys))
+    {
+        const QString& icon = wptIcons[key].path;
+        QPixmap pixmap      = loadIcon(icon);
+
+        QAction * action = menu->addAction(pixmap, key);
+        action->setProperty("iconName", key);
+        if(obj != nullptr)
+        {
+            QAction::connect(action, SIGNAL(triggered(bool)), obj, slot);
+        }
+    }
+
+    return menu;
+}
+

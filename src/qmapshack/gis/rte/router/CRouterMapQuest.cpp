@@ -19,12 +19,11 @@
 #include "canvas/CCanvas.h"
 #include "CMainWindow.h"
 #include "gis/CGisWorkspace.h"
+#include "gis/proj_x.h"
 #include "gis/rte/CGisItemRte.h"
 #include "gis/rte/router/CRouterMapQuest.h"
 #include "helpers/CSettings.h"
 
-
-#include <proj_api.h>
 #include <QtNetwork>
 #include <QtWidgets>
 const QByteArray CRouterMapQuest::keyMapQuest = "Fmjtd%7Cluu2n16t2h%2Crw%3Do5-haya0";
@@ -177,7 +176,7 @@ void CRouterMapQuest::addMapQuestLocations(QDomDocument& xml, QDomElement& locat
     SGisLine line;
     rte.getPolylineFromData(line);
 
-    for(const IGisLine::point_t &pt : line)
+    for(const IGisLine::point_t &pt : qAsConst(line))
     {
         QDomElement location = xml.createElement("location");
         location.appendChild(xml.createTextNode(QString("%1,%2").arg(pt.coord.y() * RAD_TO_DEG).arg(pt.coord.x() * RAD_TO_DEG)));

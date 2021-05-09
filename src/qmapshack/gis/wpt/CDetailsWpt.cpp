@@ -16,6 +16,7 @@
 
 **********************************************************************************************/
 
+#include "gis/proj_x.h"
 #include "gis/wpt/CDetailsWpt.h"
 #include "gis/wpt/CGisItemWpt.h"
 #include "helpers/CElevationDialog.h"
@@ -26,7 +27,6 @@
 #include "units/IUnit.h"
 #include "widgets/CTextEditWidget.h"
 
-#include <proj_api.h>
 #include <QtWidgets>
 
 CDetailsWpt::CDetailsWpt(CGisItemWpt &wpt, QWidget *parent)
@@ -91,7 +91,7 @@ void CDetailsWpt::setupGui()
     if(wpt.getElevation() != NOINT)
     {
         IUnit::self().meter2elevation(wpt.getElevation(), val, unit);
-        elevationStr = QString("%1 %2").arg(val).arg(unit);
+        elevationStr = QString("%1 %2").arg(val, unit);
     }
     labelElevation->setText(IGisItem::toLink(isReadOnly, "elevation", elevationStr, ""));
 
@@ -100,7 +100,7 @@ void CDetailsWpt::setupGui()
     if(wpt.getProximity() != NOFLOAT)
     {
         IUnit::self().meter2elevation(wpt.getProximity(), val, unit);
-        proxStr = QString("%1 %2").arg(val).arg(unit);
+        proxStr = QString("%1 %2").arg(val, unit);
     }
     labelProximity->setText(IGisItem::toLink(isReadOnly, "proximity", proxStr, ""));
 
