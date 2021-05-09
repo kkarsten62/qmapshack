@@ -69,7 +69,7 @@ CPrintDialog::CPrintDialog(type_e type, const QRectF& area, CCanvas *source)
         setWindowTitle(tr("Print Map..."));
         frameImage->hide();
         // update zoom info and print metrics
-        QTimer::singleShot(100, this, SLOT(slotGetPrinter()));
+        QTimer::singleShot(100, this, &CPrintDialog::slotGetPrinter);
     }
     else
     {
@@ -221,7 +221,7 @@ void CPrintDialog::slotPrint()
     int n = 0;
     PROGRESS_SETUP(tr("Printing pages."), 0, N, this);
 
-    for(const QPointF &pt : centers)
+    for(const QPointF &pt : qAsConst(centers))
     {
         if(!first)
         {

@@ -142,7 +142,14 @@ private:
     void migrateDB3to4();
     void setVisibilityOnMap(bool visible);
     QAction * addSortAction(QObject *parent, QActionGroup *actionGroup, const QString& icon, const QString& text, IGisProject::sorting_folder_e mode);
-    QAction * addAction(const QIcon& icon, const QString& name, QObject * parent, const char * slot);
+
+    template<typename Func>
+    QAction * addAction(const QIcon& icon, const QString& name, QObject * parent, Func slot)
+    {
+        QAction * action = new QAction(icon, name, parent);
+        connect(action, &QAction::triggered, this, slot);
+        return action;
+    }
 
     void showMenuProjectWks(const QPoint &p);
     void showMenuProjectDev(const QPoint &p);
@@ -157,12 +164,13 @@ private:
     QSet<QString> getAllDeviceKeys() const;
 
     template<typename T>
-    QList<IGisItem::key_t> selectedItems2Keys()
+    QList<IGisItem::key_t> selectedItems2Keys() const
     {
         QList<IGisItem::key_t> keys;
-        for(QTreeWidgetItem * item : selectedItems())
+        const QList<QTreeWidgetItem*>& items = selectedItems();
+        for(const QTreeWidgetItem * item : items)
         {
-            T * gisItem = dynamic_cast<T*>(item);
+            const T * gisItem = dynamic_cast<const T*>(item);
             if(nullptr != gisItem)
             {
                 keys << gisItem->getKey();

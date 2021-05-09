@@ -24,7 +24,7 @@
 
 static const qreal degrees = 180.0;
 static const qreal twoPow31 = qPow(2, 31);
-static const uint sec1970to1990 = QDateTime(QDate(1989, 12, 31), QTime(0, 0, 0), Qt::UTC).toTime_t();
+static const uint sec1970to1990 = 631065600;
 
 /**
  * converts the semicircle to the WGS-84 geoids (Degrees Decimal Minutes (DDD MM.MMM)).
@@ -83,8 +83,10 @@ static bool readFitRecord(const CFitMessage &mesg, IGisItem::wpt_t &pt)
     {
         pt.lon = toDegree(mesg.getFieldValue(eRecordPositionLong).toInt());
         pt.lat = toDegree(mesg.getFieldValue(eRecordPositionLat).toInt());
-        // QVariant.toInt() does not convert double to int but return 0.
-        pt.ele = (int) mesg.getFieldValue(eRecordEnhancedAltitude).toDouble();
+        if(mesg.isFieldValueValid(eRecordEnhancedAltitude))
+        {
+            pt.ele = mesg.getFieldValue(eRecordEnhancedAltitude).toInt();
+        }
         pt.time = toDateTime(mesg.getFieldValue(eRecordTimestamp).toUInt());
 
         readKnownExtensions(pt.extensions, mesg);
@@ -172,7 +174,10 @@ static bool readFitSegmentPoint(const CFitMessage &mesg, CTrackData::trkpt_t &pt
     {
         pt.lon = toDegree(mesg.getFieldValue(eSegmentPointPositionLong).toInt());
         pt.lat = toDegree(mesg.getFieldValue(eSegmentPointPositionLat).toInt());
-        pt.ele = (int) mesg.getFieldValue(eSegmentPointAltitude).toDouble();
+        if(mesg.isFieldValueValid(eSegmentPointAltitude))
+        {
+            pt.ele = mesg.getFieldValue(eSegmentPointAltitude).toInt();
+        }
         // sum with file_id time_created
         pt.time = toDateTime(timeCreated + mesg.getFieldValue(eSegmentPointLeaderTime).toUInt());
         return true;
