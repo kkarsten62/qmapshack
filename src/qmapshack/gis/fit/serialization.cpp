@@ -242,6 +242,20 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
     do
     {
         const CFitMessage& mesg = stream.nextMesg();
+
+        qDebug() << "getGlobalMesgNr=" << mesg.getGlobalMesgNr();
+
+        if(mesg.getGlobalMesgNr() == eMesgNumSession)
+        {
+            qDebug() << "\n\neSessionAvgHeartRate=" << mesg.getFieldValue(eSessionAvgHeartRate).toUInt();
+            qDebug() << "eSessionAvgPower=" << mesg.getFieldValue(eSessionAvgPower).toULongLong();
+            qDebug() << "eSessionNormalizedPower=" << mesg.getFieldValue(eSessionNormalizedPower).toULongLong();
+            qDebug() << "eSessionTotalDistance=" << mesg.getFieldValue(eSessionTotalDistance).toUInt();
+            qDebug() << "eSessionTotalElapsedTime=" << mesg.getFieldValue(eSessionTotalElapsedTime).toUInt();
+            qDebug() << "eSessionTotalTimerTime=" << mesg.getFieldValue(eSessionTotalTimerTime).toUInt();
+
+        }
+
         if(mesg.getGlobalMesgNr() == eMesgNumRecord)
         {
             // for documentation: MesgNumActivity, MesgNumSession, MesgNumLap, MesgNumLength could also contain data
