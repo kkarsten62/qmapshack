@@ -521,7 +521,6 @@ void CDetailsTrk::updateData()
         filterChangeStartPoint->updateUi();
     }
 
-
     QString tooltip = tr("Set parameters to compute \"Energy Use Cycling\" for a cycling tour");
     if(trk.getEnergyCycling().isValid())
     {
@@ -533,6 +532,15 @@ void CDetailsTrk::updateData()
         tooltip += "<b style='color: red;'>" + tr(" - Computation needs valid time, elevation and slope data.") + "</b>";
     }
     toolSetEnergyCycling->setToolTip(tooltip);
+
+    if(trk.getFitDatas().count())
+    {
+        toolFitData->setEnabled(true);
+    }
+    else
+    {
+        toolFitData->setEnabled(false);
+    }
 
     enableTabFilter();
     originator = false;
@@ -734,7 +742,13 @@ void CDetailsTrk::slotSetEnergyCycling()
 void CDetailsTrk::slotFitData()
 {
     CFitDataDialog fitDataDialog(trk.getFitDatas(), this);
-    fitDataDialog.exec();
+
+    qint32 ret = fitDataDialog.exec();
+
+    if(ret == QDialog::Rejected)
+    {
+        trk.updateHistory(CGisItemTrk::eVisualDetails);
+    }
 }
 
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)

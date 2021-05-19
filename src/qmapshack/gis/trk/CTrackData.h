@@ -240,8 +240,8 @@ public:
         quint8 maxHr = 0;
         quint8 avgCad = 0;
         quint8 maxCad = 0;
-        quint16 totalAscent = 0;
-        quint16 totalDescent = 0;
+        quint16 ascent = 0;
+        quint16 descent = 0;
         quint16 avgPower = 0;
         quint16 maxPower = 0;
         quint16 normPower = 0;

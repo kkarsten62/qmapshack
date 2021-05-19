@@ -33,7 +33,8 @@ public:
     explicit CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QWidget *parent);
     ~CFitDataDialog();
 
-// private slots:
+private slots:
+    void slotRemove(bool);
 
 private:
     enum columns_t
@@ -67,7 +68,7 @@ private:
         , eColCalories
         , eColMax
     };
-
+    QList<struct CTrackData::fitdata_t> &fitdatas;
 };
 
 #endif // CFITDATADIALOG_H

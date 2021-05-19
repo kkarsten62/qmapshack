@@ -345,13 +345,13 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
             }
             if(mesg.isFieldValueValid(eLapTotalAscent))
             {
-                fitdata.totalAscent = mesg.getFieldValue(eLapTotalAscent).toUInt(); // uint16, meter
-                qDebug() << "eLapTotalAscent=" << fitdata.totalAscent;
+                fitdata.ascent = mesg.getFieldValue(eLapTotalAscent).toUInt(); // uint16, meter
+                qDebug() << "eLapTotalAscent=" << fitdata.ascent;
             }
             if(mesg.isFieldValueValid(eLapTotalDescent))
             {
-                fitdata.totalDescent = mesg.getFieldValue(eLapTotalDescent).toUInt(); // uint16, meter
-                qDebug() << "eLapTotalDescent=" << fitdata.totalDescent;
+                fitdata.descent = mesg.getFieldValue(eLapTotalDescent).toUInt(); // uint16, meter
+                qDebug() << "eLapTotalDescent=" << fitdata.descent;
             }
             if(mesg.isFieldValueValid(eLapAvgPower))
             {
@@ -467,13 +467,13 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
             }
             if(mesg.isFieldValueValid(eSessionTotalAscent))
             {
-                fitdata.totalAscent = mesg.getFieldValue(eSessionTotalAscent).toUInt(); // uint16, meter
-                qDebug() << "eSessionTotalAscent=" << fitdata.totalAscent;
+                fitdata.ascent = mesg.getFieldValue(eSessionTotalAscent).toUInt(); // uint16, meter
+                qDebug() << "eSessionTotalAscent=" << fitdata.ascent;
             }
             if(mesg.isFieldValueValid(eSessionTotalDescent))
             {
-                fitdata.totalDescent = mesg.getFieldValue(eSessionTotalDescent).toUInt(); // uint16, meter
-                qDebug() << "eSessionTotalDescent=" << fitdata.totalDescent;
+                fitdata.descent = mesg.getFieldValue(eSessionTotalDescent).toUInt(); // uint16, meter
+                qDebug() << "eSessionTotalDescent=" << fitdata.descent;
             }
             if(mesg.isFieldValueValid(eSessionAvgPower))
             {

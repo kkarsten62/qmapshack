@@ -28,7 +28,7 @@
 
 #include <QtWidgets>
 
-#define VER_TRK         quint8(7)
+#define VER_TRK         quint8(8)
 #define VER_WPT         quint8(4)
 #define VER_RTE         quint8(4)
 #define VER_AREA        quint8(2)
@@ -50,6 +50,7 @@
 #define VER_CVALUE      quint8(1)
 #define VER_CLIMIT      quint8(1)
 #define VER_ENERGYCYCLE quint8(1)
+#define VER_FITDATA     quint8(1)
 
 #define MAGIC_SIZE      10
 #define MAGIC_TRK       "QMTrk     "
@@ -540,6 +541,31 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t &e)
     return stream;
 }
 
+QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
+{
+    stream  << VER_FITDATA << f.type << f.index << f.totalElapsedTime
+            << f.totalTimerTime << f.totalDistance << f.avgSpeed << f.maxSpeed
+            << f.avgHr << f.maxHr << f.avgCad << f.maxCad << f.ascent
+            << f.descent << f.avgPower << f.maxPower << f.normPower
+            << f.rightBalance << f.leftBalance << f.leftPedalSmooth
+            << f.rightPedalSmooth << f.leftTorqueEff << f.rightTorqueEff
+            << f.intensity << f.trainStress << f.work << f.totalCalories;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
+{
+    quint8 version;
+    stream  >> version >> f.type >> f.index >> f.totalElapsedTime
+            >> f.totalTimerTime >> f.totalDistance >> f.avgSpeed >> f.maxSpeed
+            >> f.avgHr >> f.maxHr >> f.avgCad >> f.maxCad >> f.ascent
+            >> f.descent >> f.avgPower >> f.maxPower >> f.normPower
+            >> f.rightBalance >> f.leftBalance >> f.leftPedalSmooth
+            >> f.rightPedalSmooth >> f.leftTorqueEff >> f.rightTorqueEff
+            >> f.intensity >> f.trainStress >> f.work >> f.totalCalories;
+    return stream;
+}
+
 // ---------------- main objects ---------------------------------
 
 QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
@@ -571,6 +597,8 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
     out << limitsGraph3;
 
     out << energyCycling.getEnergyTrkSet();
+
+    out << trk.fitdatas;
 
     out << trk.segs;
 
@@ -660,6 +688,11 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream)
         CEnergyCycling::energy_set_t set;
         in >> set;
         energyCycling.setEnergyTrkSet(set, false);
+    }
+
+    if(version > 7)
+    {
+        in >> trk.fitdatas;
     }
 
     trk.segs.clear();

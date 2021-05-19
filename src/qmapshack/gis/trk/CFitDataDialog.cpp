@@ -17,8 +17,6 @@
 
 #include "CMainWindow.h"
 #include "gis/trk/CFitDataDialog.h"
-//#include "gis/trk/CGisItemTrk.h"
-
 
 /** @brief Constructor - Initiate the dialog GUI
 
@@ -27,10 +25,16 @@
  */
 CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QWidget *parent) :
     QDialog(parent)
+    , fitdatas(fitdatas)
 {
+
+
     setupUi(this);
 
-//    treeTable->setColumnCount(5);
+//    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotLoadFromSettings);
+    connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotRemove);
+
+
 
     QStringList labels;
     labels << tr("Type");
@@ -106,11 +110,11 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
         item->setText(eColMaxSpeed, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColMaxSpeed, Qt::AlignRight);
 
-        IUnit::self().meter2elevation(fitdata.totalAscent, val, unit);
+        IUnit::self().meter2elevation(fitdata.ascent, val, unit);
         item->setText(eColAscent, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColAscent, Qt::AlignRight);
 
-        IUnit::self().meter2elevation(fitdata.totalDescent, val, unit);
+        IUnit::self().meter2elevation(fitdata.descent, val, unit);
         item->setText(eColDescent, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColDescent, Qt::AlignRight);
 
@@ -168,19 +172,17 @@ CFitDataDialog::~CFitDataDialog()
 {
 }
 
-/** @brief Update all widgets when a input value has changed in dialog
- */
-
-/** @brief When "Ok" button is clicked:
-     Set the temporarily parameter set back to parameter set of the track
-     Compute the "Energy Use Cycling" value in track parameter set
-     Update history
-     Update status panel
-     Save parameter set to SETTINGS
- */
-/*
-void CFitDataDialog::slotOk(bool)
+void CFitDataDialog::slotRemove(bool)
 {
-    accept();
+    qint32 ret = QMessageBox::question(CMainWindow::getBestWidgetForParent()
+                    , tr("Remove the FIT data from the track and close the dialog")
+                    , "<h3>" + tr("Do you really want to remove all FIT data from the track and close this dialog?") + "</h3>"
+                    , QMessageBox::No | QMessageBox::Yes
+                    , QMessageBox::No);
+
+    if (ret == QMessageBox::Yes)
+    {
+        fitdatas.clear();
+        reject();
+    }
 }
-*/
