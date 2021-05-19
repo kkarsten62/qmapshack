@@ -19,6 +19,7 @@
 #include "gis/proj_x.h"
 #include "gis/trk/CDetailsTrk.h"
 #include "gis/trk/CEnergyCyclingDialog.h"
+#include "gis/trk/CFitDataDialog.h"
 #include "gis/trk/CKnownExtension.h"
 #include "gis/trk/CPropertyTrk.h"
 #include "gis/trk/filter/CFilterChangeStartPoint.h"
@@ -148,6 +149,7 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
 
     connect(pushSetActivities,    &QPushButton::clicked, this, &CDetailsTrk::slotSetActivities);
     connect(toolSetEnergyCycling, &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
+    connect(toolFitData,          &QPushButton::clicked, this, &CDetailsTrk::slotFitData);
 
     connect(lineName,         &QLineEdit::textEdited,              this, &CDetailsTrk::slotNameChanged);
     connect(lineName,         &QLineEdit::editingFinished,         this, &CDetailsTrk::slotNameChangeFinished);
@@ -727,6 +729,12 @@ void CDetailsTrk::slotSetEnergyCycling()
     {
         trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
     }
+}
+
+void CDetailsTrk::slotFitData()
+{
+    CFitDataDialog fitDataDialog(trk.getFitDatas(), this);
+    fitDataDialog.exec();
 }
 
 void CDetailsTrk::setupGraph(CPlot * plot, const CLimit& limit, const QString& source, QDoubleSpinBox * spinMin, QDoubleSpinBox * spinMax)

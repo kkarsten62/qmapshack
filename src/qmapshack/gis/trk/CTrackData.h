@@ -221,6 +221,43 @@ public:
         }
     };
 
+    struct fitdata_t
+    {
+        enum type_e
+        {
+            unknown     = 0
+            , eLap      = 1
+            , eSession  = 2
+        };
+        quint32 type = type_e::unknown;
+        quint32 index = NOINT;
+        quint32 totalElapsedTime = 0;
+        quint32 totalTimerTime = 0;
+        quint32 totalDistance = 0;
+        quint16 avgSpeed = 0;
+        quint16 maxSpeed = 0;
+        quint8 avgHr = 0;
+        quint8 maxHr = 0;
+        quint8 avgCad = 0;
+        quint8 maxCad = 0;
+        quint16 totalAscent = 0;
+        quint16 totalDescent = 0;
+        quint16 avgPower = 0;
+        quint16 maxPower = 0;
+        quint16 normPower = 0;
+        qreal rightBalance = 0;
+        qreal leftBalance = 0;
+        quint8 leftPedalSmooth = 0;
+        quint8 rightPedalSmooth = 0;
+        quint8 leftTorqueEff = 0;
+        quint8 rightTorqueEff = 0;
+        qreal intensity = 0;
+        qreal trainStress = 0;
+        quint32 work = 0;
+        quint16 totalCalories = 0;
+    };
+    QList<struct fitdata_t> fitdatas;
+
     CTrackData() {}
 
     CTrackData(const QString &name, const CTrackData &other, qint32 rangeStart, qint32 rangeEnd);

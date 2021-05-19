@@ -52,6 +52,7 @@ private slots:
     void slotMouseClickState(int);
     void slotSetActivities();
     void slotSetEnergyCycling();
+    void slotFitData();
 
     void slotColorSourceChanged(int idx);
     void slotColorLimitHighChanged();
