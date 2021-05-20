@@ -34,7 +34,9 @@ public:
     ~CFitDataDialog();
 
 private slots:
-    void slotRemove(bool);
+    void slotReset(bool);
+    void slotRestoreDefaults(bool);
+    void slotCheckHeader(bool checked);
 
 private:
     enum columns_t

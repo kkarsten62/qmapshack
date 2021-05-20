@@ -231,9 +231,9 @@ public:
         };
         quint32 type = type_e::unknown;
         quint32 index = NOINT;
-        quint32 totalElapsedTime = 0;
-        quint32 totalTimerTime = 0;
-        quint32 totalDistance = 0;
+        quint32 elapsedTime = 0;
+        quint32 timerTime = 0;
+        quint32 distance = 0;
         quint16 avgSpeed = 0;
         quint16 maxSpeed = 0;
         quint8 avgHr = 0;

@@ -543,8 +543,8 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t &e)
 
 QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
 {
-    stream  << VER_FITDATA << f.type << f.index << f.totalElapsedTime
-            << f.totalTimerTime << f.totalDistance << f.avgSpeed << f.maxSpeed
+    stream  << VER_FITDATA << f.type << f.index << f.elapsedTime
+            << f.timerTime << f.distance << f.avgSpeed << f.maxSpeed
             << f.avgHr << f.maxHr << f.avgCad << f.maxCad << f.ascent
             << f.descent << f.avgPower << f.maxPower << f.normPower
             << f.rightBalance << f.leftBalance << f.leftPedalSmooth
@@ -556,8 +556,8 @@ QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
 QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
 {
     quint8 version;
-    stream  >> version >> f.type >> f.index >> f.totalElapsedTime
-            >> f.totalTimerTime >> f.totalDistance >> f.avgSpeed >> f.maxSpeed
+    stream  >> version >> f.type >> f.index >> f.elapsedTime
+            >> f.timerTime >> f.distance >> f.avgSpeed >> f.maxSpeed
             >> f.avgHr >> f.maxHr >> f.avgCad >> f.maxCad >> f.ascent
             >> f.descent >> f.avgPower >> f.maxPower >> f.normPower
             >> f.rightBalance >> f.leftBalance >> f.leftPedalSmooth

@@ -7,13 +7,36 @@
     <x>0</x>
     <y>0</y>
     <width>862</width>
-    <height>335</height>
+    <height>336</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Energy Use Cycling Parameter Set</string>
+   <string>Show FIT data</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok|QDialogButtonBox::Reset|QDialogButtonBox::RestoreDefaults|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="line_3">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -41,7 +64,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Show Fit Data from Device: XYZ</string>
+        <string>Show FIT data from device: XYZ</string>
        </property>
       </widget>
      </item>
@@ -71,29 +94,6 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="toolTip">
-      <string/>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Ok|QDialogButtonBox::Reset|QDialogButtonBox::RestoreDefaults</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="Line" name="line_3">
-     <property name="lineWidth">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QTreeWidget" name="treeTable">
      <column>
@@ -101,6 +101,15 @@
        <string notr="true">1</string>
       </property>
      </column>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QWidget" name="widgetHeaderCb" native="true">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridHeaderCb"/>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

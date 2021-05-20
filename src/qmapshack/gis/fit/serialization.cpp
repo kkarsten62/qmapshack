@@ -295,23 +295,23 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
 
             if(mesg.isFieldValueValid(eLapMessageIndex))
             {
-                fitdata.index = mesg.getFieldValue(eLapMessageIndex).toUInt(); // uint16
+                fitdata.index = mesg.getFieldValue(eLapMessageIndex).toUInt() + 1; // uint16
                 qDebug() << "eLapMessageIndex=" << fitdata.index;
             }
             if(mesg.isFieldValueValid(eLapTotalElapsedTime))
             {
-                fitdata.totalElapsedTime = mesg.getFieldValue(eLapTotalElapsedTime).toUInt(); // uint32, second
-                qDebug() << "eLapTotalElapsedTime=" << fitdata.totalElapsedTime;
+                fitdata.elapsedTime = mesg.getFieldValue(eLapTotalElapsedTime).toUInt(); // uint32, second
+                qDebug() << "eLapTotalElapsedTime=" << fitdata.elapsedTime;
             }
             if(mesg.isFieldValueValid(eLapTotalTimerTime))
             {
-                fitdata.totalTimerTime = mesg.getFieldValue(eLapTotalTimerTime).toUInt(); // uint32, second
-                qDebug() << "eLapTotalTimerTime=" << fitdata.totalTimerTime;
+                fitdata.timerTime = mesg.getFieldValue(eLapTotalTimerTime).toUInt(); // uint32, second
+                qDebug() << "eLapTotalTimerTime=" << fitdata.timerTime;
             }
             if(mesg.isFieldValueValid(eLapTotalDistance))
             {
-                fitdata.totalDistance = mesg.getFieldValue(eLapTotalDistance).toUInt(); // uint32, meter
-                qDebug() << "eLapTotalDistance=" << fitdata.totalDistance;
+                fitdata.distance = mesg.getFieldValue(eLapTotalDistance).toUInt(); // uint32, meter
+                qDebug() << "eLapTotalDistance=" << fitdata.distance;
             }
             if(mesg.isFieldValueValid(eLapAvgSpeed))
             {
@@ -422,18 +422,18 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
             }
             if(mesg.isFieldValueValid(eSessionTotalElapsedTime))
             {
-                fitdata.totalElapsedTime = mesg.getFieldValue(eSessionTotalElapsedTime).toUInt(); // uint32, second
-                qDebug() << "eSessionTotalElapsedTime=" << fitdata.totalElapsedTime;
+                fitdata.elapsedTime = mesg.getFieldValue(eSessionTotalElapsedTime).toUInt(); // uint32, second
+                qDebug() << "eSessionTotalElapsedTime=" << fitdata.elapsedTime;
             }
             if(mesg.isFieldValueValid(eSessionTotalTimerTime))
             {
-                fitdata.totalTimerTime = mesg.getFieldValue(eSessionTotalTimerTime).toUInt(); // uint32, second
-                qDebug() << "eSessionTotalTimerTime=" << fitdata.totalTimerTime;
+                fitdata.timerTime = mesg.getFieldValue(eSessionTotalTimerTime).toUInt(); // uint32, second
+                qDebug() << "eSessionTotalTimerTime=" << fitdata.timerTime;
             }
             if(mesg.isFieldValueValid(eSessionTotalDistance))
             {
-                fitdata.totalDistance = mesg.getFieldValue(eSessionTotalDistance).toUInt(); // uint32, meter
-                qDebug() << "eSessionTotalDistance=" << fitdata.totalDistance;
+                fitdata.distance = mesg.getFieldValue(eSessionTotalDistance).toUInt(); // uint32, meter
+                qDebug() << "eSessionTotalDistance=" << fitdata.distance;
             }
             if(mesg.isFieldValueValid(eSessionAvgSpeed))
             {

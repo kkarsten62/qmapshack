@@ -27,14 +27,17 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     QDialog(parent)
     , fitdatas(fitdatas)
 {
-
-
     setupUi(this);
 
-//    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotLoadFromSettings);
-    connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotRemove);
+    buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
+    buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
+    buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save to csv"));
+
+    buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
 
+    connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
+    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotRestoreDefaults);
 
     QStringList labels;
     labels << tr("Type");
@@ -66,6 +69,22 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     labels << tr("KCalories");
     treeTable->setHeaderLabels(labels);
 
+    quint8 index = 0;
+    const quint8 noOfGridCols = 5;
+    for (QString label : labels)
+    {
+        quint8 row = index / noOfGridCols;
+        quint8 col = index - row * noOfGridCols;
+
+        QCheckBox *checkbox = new QCheckBox(label, this);
+        checkbox->setProperty("index", index);
+        checkbox->setChecked(true);
+        connect(checkbox, &QCheckBox::clicked, this, &CFitDataDialog::slotCheckHeader);
+        gridHeaderCb->addWidget(checkbox, row, col);
+        ++index;
+    }
+    widgetHeaderCb->hide();
+
     QList<QTreeWidgetItem*> items;
 
     for(struct CTrackData::fitdata_t fitdata : fitdatas)
@@ -86,19 +105,19 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
         item->setTextAlignment(eColIndex, Qt::AlignRight);
 
         QString val, unit;
-        IUnit::self().seconds2time(fitdata.totalElapsedTime, val, unit);
+        IUnit::self().seconds2time(fitdata.elapsedTime, val, unit);
         item->setText(eColElapsedTime, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColElapsedTime, Qt::AlignRight);
 
-        IUnit::self().seconds2time(fitdata.totalTimerTime, val, unit);
+        IUnit::self().seconds2time(fitdata.timerTime, val, unit);
         item->setText(eColTimerTime, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColTimerTime, Qt::AlignRight);
 
-        IUnit::self().seconds2time(fitdata.totalElapsedTime - fitdata.totalTimerTime, val, unit);
+        IUnit::self().seconds2time(fitdata.elapsedTime - fitdata.timerTime, val, unit);
         item->setText(eColPause, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColPause, Qt::AlignRight);
 
-        IUnit::self().meter2distance(fitdata.totalDistance, val, unit);
+        IUnit::self().meter2distance(fitdata.distance, val, unit);
         item->setText(eColDistance, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColDistance, Qt::AlignRight);
 
@@ -165,17 +184,16 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     treeTable->clear();
     treeTable->addTopLevelItems(items);
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
-
 }
 
 CFitDataDialog::~CFitDataDialog()
 {
 }
 
-void CFitDataDialog::slotRemove(bool)
+void CFitDataDialog::slotReset(bool)
 {
     qint32 ret = QMessageBox::question(CMainWindow::getBestWidgetForParent()
-                    , tr("Remove the FIT data from the track and close the dialog")
+                    , tr("Remove the FIT data from the track and close the dialog.")
                     , "<h3>" + tr("Do you really want to remove all FIT data from the track and close this dialog?") + "</h3>"
                     , QMessageBox::No | QMessageBox::Yes
                     , QMessageBox::No);
@@ -186,3 +204,29 @@ void CFitDataDialog::slotRemove(bool)
         reject();
     }
 }
+
+void CFitDataDialog::slotRestoreDefaults(bool)
+{
+    qDebug() << "slotRestoreDefaults";
+
+    qDebug() << "sizeof quint32=" << sizeof(quint32);
+    qDebug() << "sizeof qulonglong=" << sizeof(qulonglong);
+
+    bool isEnabled = buttonBox->button(QDialogButtonBox::Reset)->isEnabled();
+
+    widgetHeaderCb->setVisible(isEnabled);
+    buttonBox->button(QDialogButtonBox::Reset)->setEnabled(!isEnabled);
+    buttonBox->button(QDialogButtonBox::Save)->setEnabled(!isEnabled);
+    buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!isEnabled);
+}
+
+void CFitDataDialog::slotCheckHeader(bool checked)
+{
+    QWidget *widget = qApp->focusWidget();
+//    QCheckBox *cb = static_cast<QCheckBox*>(widget);
+    quint8 index = widget->property("index").toInt();
+    treeTable->setColumnHidden(index, !checked);
+    qDebug() << "index=" << index;
+    qDebug() << "checked=" << checked;
+}
+
