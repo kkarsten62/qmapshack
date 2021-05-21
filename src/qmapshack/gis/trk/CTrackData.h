@@ -254,7 +254,7 @@ public:
         qreal intensity = 0;
         qreal trainStress = 0;
         quint32 work = 0;
-        quint16 totalCalories = 0;
+        quint16 energy = 0;
     };
     QList<struct fitdata_t> fitdatas;
 

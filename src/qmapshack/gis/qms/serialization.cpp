@@ -549,7 +549,7 @@ QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
             << f.descent << f.avgPower << f.maxPower << f.normPower
             << f.rightBalance << f.leftBalance << f.leftPedalSmooth
             << f.rightPedalSmooth << f.leftTorqueEff << f.rightTorqueEff
-            << f.intensity << f.trainStress << f.work << f.totalCalories;
+            << f.intensity << f.trainStress << f.work << f.energy;
     return stream;
 }
 
@@ -562,7 +562,7 @@ QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
             >> f.descent >> f.avgPower >> f.maxPower >> f.normPower
             >> f.rightBalance >> f.leftBalance >> f.leftPedalSmooth
             >> f.rightPedalSmooth >> f.leftTorqueEff >> f.rightTorqueEff
-            >> f.intensity >> f.trainStress >> f.work >> f.totalCalories;
+            >> f.intensity >> f.trainStress >> f.work >> f.energy;
     return stream;
 }
 

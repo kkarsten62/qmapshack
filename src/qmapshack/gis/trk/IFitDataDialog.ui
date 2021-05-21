@@ -120,22 +120,5 @@
  <resources>
   <include location="../../resources.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>IFitDataDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>430</x>
-     <y>313</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>430</x>
-     <y>167</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

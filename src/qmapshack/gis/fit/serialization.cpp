@@ -402,8 +402,8 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
             }
             if(mesg.isFieldValueValid(eLapTotalCalories))
             {
-                fitdata.totalCalories = mesg.getFieldValue(eLapTotalCalories).toUInt(); // uint16, kcalorie
-                qDebug() << "eLapTotalCalories=" << fitdata.totalCalories;
+                fitdata.energy = mesg.getFieldValue(eLapTotalCalories).toUInt(); // uint16, kcalorie
+                qDebug() << "eLapTotalCalories=" << fitdata.energy;
             }
             trk.fitdatas << fitdata;
         }
@@ -534,8 +534,8 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
             }
             if(mesg.isFieldValueValid(eSessionTotalCalories))
             {
-                fitdata.totalCalories = mesg.getFieldValue(eSessionTotalCalories).toUInt(); // uint16, kcalorie
-                qDebug() << "eSessionTotalCalories=" << fitdata.totalCalories;
+                fitdata.energy = mesg.getFieldValue(eSessionTotalCalories).toUInt(); // uint16, kcalorie
+                qDebug() << "eSessionTotalCalories=" << fitdata.energy;
             }
             trk.fitdatas << fitdata;
         }

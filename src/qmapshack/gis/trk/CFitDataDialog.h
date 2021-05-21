@@ -36,7 +36,9 @@ public:
 private slots:
     void slotReset(bool);
     void slotRestoreDefaults(bool);
-    void slotCheckHeader(bool checked);
+    void slotCheckColumns(bool checked);
+    void slotSave2Csv(bool);
+    void slotShowHelp();
 
 private:
     enum columns_t
@@ -67,10 +69,12 @@ private:
         , eColTrainStress
         , eColIntensity
         , eColWork
-        , eColCalories
+        , eColEnergy
         , eColMax
     };
     QList<struct CTrackData::fitdata_t> &fitdatas;
+
+    QStringList labels;
 
     quint32 checkstates; //Bitmask to store checkbox states, 31 columns max
 };
