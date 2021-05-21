@@ -71,6 +71,8 @@ private:
         , eColMax
     };
     QList<struct CTrackData::fitdata_t> &fitdatas;
+
+    quint32 checkstates; //Bitmask to store checkbox states, 31 columns max
 };
 
 #endif // CFITDATADIALOG_H

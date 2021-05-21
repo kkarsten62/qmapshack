@@ -17,6 +17,7 @@
 
 #include "CMainWindow.h"
 #include "gis/trk/CFitDataDialog.h"
+#include "helpers/CSettings.h"
 
 /** @brief Constructor - Initiate the dialog GUI
 
@@ -29,15 +30,18 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
 {
     setupUi(this);
 
+    widgetHeaderCb->hide();
+
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
     buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
     buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save to csv"));
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
-
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotRestoreDefaults);
+
+    qDebug() << "max=" << eColMax;
 
     QStringList labels;
     labels << tr("Type");
@@ -66,27 +70,10 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     labels << tr("Train. Stress");
     labels << tr("Intensity");
     labels << tr("Work");
-    labels << tr("KCalories");
+    labels << tr("kCalories");
     treeTable->setHeaderLabels(labels);
 
-    quint8 index = 0;
-    const quint8 noOfGridCols = 5;
-    for (QString label : labels)
-    {
-        quint8 row = index / noOfGridCols;
-        quint8 col = index - row * noOfGridCols;
-
-        QCheckBox *checkbox = new QCheckBox(label, this);
-        checkbox->setProperty("index", index);
-        checkbox->setChecked(true);
-        connect(checkbox, &QCheckBox::clicked, this, &CFitDataDialog::slotCheckHeader);
-        gridHeaderCb->addWidget(checkbox, row, col);
-        ++index;
-    }
-    widgetHeaderCb->hide();
-
     QList<QTreeWidgetItem*> items;
-
     for(struct CTrackData::fitdata_t fitdata : fitdatas)
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
@@ -184,6 +171,31 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     treeTable->clear();
     treeTable->addTopLevelItems(items);
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
+
+    SETTINGS;
+    cfg.beginGroup("FitData");
+    checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns
+    cfg.endGroup();
+
+    const quint8 noOfGridCols = 5;
+    for (quint8 index = 0; index < eColMax; ++index)
+    {
+        quint8 row = index / noOfGridCols;
+        quint8 col = index - row * noOfGridCols;
+
+        QCheckBox *checkbox = new QCheckBox(labels.at(index), this);
+        checkbox->setProperty("index", index);
+
+        qDebug() << "checkstates=" << checkstates;
+        bool checked = (checkstates >> index) & 0x1;
+        checkbox->setChecked(checked);
+
+        treeTable->setColumnHidden(index, !checked);
+
+        connect(checkbox, &QCheckBox::clicked, this, &CFitDataDialog::slotCheckHeader);
+
+        gridHeaderCb->addWidget(checkbox, row, col);
+    }
 }
 
 CFitDataDialog::~CFitDataDialog()
@@ -223,9 +235,15 @@ void CFitDataDialog::slotRestoreDefaults(bool)
 void CFitDataDialog::slotCheckHeader(bool checked)
 {
     QWidget *widget = qApp->focusWidget();
-//    QCheckBox *cb = static_cast<QCheckBox*>(widget);
     quint8 index = widget->property("index").toInt();
     treeTable->setColumnHidden(index, !checked);
+
+    checkstates ^= 1 << index; // Toogle
+    SETTINGS;
+    cfg.beginGroup("FitData");
+    cfg.setValue("checkstates", checkstates);
+    cfg.endGroup();
+
     qDebug() << "index=" << index;
     qDebug() << "checked=" << checked;
 }
