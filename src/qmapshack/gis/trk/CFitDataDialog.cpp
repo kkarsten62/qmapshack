@@ -24,13 +24,20 @@
    @param energyCycling Reference to the track's CEnergyCycling object
    @param parent Pointer to the parent widget
  */
-CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QWidget *parent) :
+CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) :
     QDialog(parent)
-    , fitdatas(fitdatas)
+    , fitdata(fitdata)
 {
     setupUi(this);
 
     widgetHeaderCb->hide();
+
+    quint16 product = fitdata.getProduct();
+    QString prefix(tr("FIT data from device:"));
+    QString labelTxt = productName.contains(product) ?
+                QString("%1 (%2) %3").arg(prefix).arg(product).arg(productName[product]) :
+                QString("%1 (%2) %3").arg(prefix).arg(product).arg(tr("Unknown device"));
+    label->setText(labelTxt);
 
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
     buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
@@ -39,133 +46,114 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
-    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotRestoreDefaults);
+    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
     connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::accept);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
-    labels << tr("Type");
-    labels << "#";
-    labels << tr("Elaps. Time");
-    labels << tr("Timer Time");
-    labels << tr("Pause");
-    labels << tr("Distance");
-    labels << tr("Avg. Speed");
-    labels << tr("Max. Speed");
-    labels << tr("Ascent");
-    labels << tr("Desent");
-    labels << tr("Avg. HR");
-    labels << tr("Max. HR");
-    labels << tr("Avg. Cad.");
-    labels << tr("Max. Cad.");
-    labels << tr("Avg. Power");
-    labels << tr("Max. Power");
-    labels << tr("Norm. Power");
-    labels << tr("Left Balance");
-    labels << tr("Right Balance");
-    labels << tr("Left Pedal Smooth.");
-    labels << tr("Right Pedal Smooth.");
-    labels << tr("Left Torque Eff.");
-    labels << tr("Right Torque Eff.");
-    labels << tr("Training Stress");
-    labels << tr("Intensity");
-    labels << tr("Work");
-    labels << tr("Energy Use");
-    treeTable->setHeaderLabels(labels);
+    QTreeWidgetItem *item = new QTreeWidgetItem();
+    QMapIterator<columns_t, struct columnLabel_t> col(columns);
+    while (col.hasNext())
+    {
+        col.next();
+        item->setText(col.key(), col.value().label);
+        item->setTextAlignment(col.key(), col.value().alignment);
+    }
+    treeTable->setHeaderItem(item);
 
     QList<QTreeWidgetItem*> items;
-    for(struct CTrackData::fitdata_t fitdata : fitdatas)
+    for(struct CTrackData::fitdata_t::lap_t lap : fitdata.getLaps())
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         QFont font = QFont();
-        if (fitdata.type == CTrackData::fitdata_t::eLap)
+        if (lap.type == CTrackData::fitdata_t::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
         }
-        else if (fitdata.type == CTrackData::fitdata_t::eSession)
+        else if (lap.type == CTrackData::fitdata_t::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
             font.setBold(true);
         }
         item->setFont(eColType, font);
-        item->setTextAlignment(eColType, Qt::AlignLeft);
+        item->setTextAlignment(eColType, columns[eColType].alignment);
 
-        item->setText(eColIndex, QString("%1").arg(fitdata.index));
-        item->setTextAlignment(eColIndex, Qt::AlignRight);
+        item->setText(eColIndex, QString("%1").arg(lap.index));
+        item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
 
         QString val, unit;
-        IUnit::self().seconds2time(fitdata.elapsedTime, val, unit);
+        IUnit::self().seconds2time(lap.elapsedTime, val, unit);
         item->setText(eColElapsedTime, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColElapsedTime, Qt::AlignRight);
 
-        IUnit::self().seconds2time(fitdata.timerTime, val, unit);
+        IUnit::self().seconds2time(lap.timerTime, val, unit);
         item->setText(eColTimerTime, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColTimerTime, Qt::AlignRight);
 
-        IUnit::self().seconds2time(fitdata.elapsedTime - fitdata.timerTime, val, unit);
+        IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
         item->setText(eColPause, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColPause, Qt::AlignRight);
 
-        IUnit::self().meter2distance(fitdata.distance, val, unit);
+        IUnit::self().meter2distance(lap.distance, val, unit);
         item->setText(eColDistance, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColDistance, Qt::AlignRight);
 
-        IUnit::self().meter2speed(fitdata.avgSpeed / 1000., val, unit);
+        IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
         item->setText(eColAvgSpeed, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColAvgSpeed, Qt::AlignRight);
 
-        IUnit::self().meter2speed(fitdata.maxSpeed / 1000., val, unit);
+        IUnit::self().meter2speed(lap.maxSpeed / 1000., val, unit);
         item->setText(eColMaxSpeed, QString("%L1%2").arg(val).arg(unit));
         item->setTextAlignment(eColMaxSpeed, Qt::AlignRight);
 
-        IUnit::self().meter2elevation(fitdata.ascent, val, unit);
+        IUnit::self().meter2elevation(lap.ascent, val, unit);
         item->setText(eColAscent, QString("%L1%2").arg(val).arg(unit));
         item->setTextAlignment(eColAscent, Qt::AlignRight);
 
-        IUnit::self().meter2elevation(fitdata.descent, val, unit);
+        IUnit::self().meter2elevation(lap.descent, val, unit);
         item->setText(eColDescent, QString("%L1%2").arg(val).arg(unit));
         item->setTextAlignment(eColDescent, Qt::AlignRight);
 
-        item->setText(eColAvgHr, QString("%L1%2").arg(fitdata.avgHr).arg(tr("bpm")));
+        item->setText(eColAvgHr, QString("%L1%2").arg(lap.avgHr).arg(tr("bpm")));
         item->setTextAlignment(eColAvgHr, Qt::AlignRight);
-        item->setText(eColMaxHr, QString("%L1%2").arg(fitdata.maxHr).arg(tr("bpm")));
+        item->setText(eColMaxHr, QString("%L1%2").arg(lap.maxHr).arg(tr("bpm")));
         item->setTextAlignment(eColMaxHr, Qt::AlignRight);
 
-        item->setText(eColAvgCad, QString("%L1%2").arg(fitdata.avgCad).arg(tr("rpm")));
+        item->setText(eColAvgCad, QString("%L1%2").arg(lap.avgCad).arg(tr("rpm")));
         item->setTextAlignment(eColAvgCad, Qt::AlignRight);
-        item->setText(eColMaxCad, QString("%L1%2").arg(fitdata.maxCad).arg(tr("rpm")));
+        item->setText(eColMaxCad, QString("%L1%2").arg(lap.maxCad).arg(tr("rpm")));
         item->setTextAlignment(eColMaxCad, Qt::AlignRight);
 
-        item->setText(eColAvgPower, QString("%L1%2").arg(fitdata.avgPower).arg("Watt"));
+        item->setText(eColAvgPower, QString("%L1%2").arg(lap.avgPower).arg("Watt"));
         item->setTextAlignment(eColAvgPower, Qt::AlignRight);
-        item->setText(eColMaxPower, QString("%L1%2").arg(fitdata.maxPower).arg("Watt"));
+        item->setText(eColMaxPower, QString("%L1%2").arg(lap.maxPower).arg("Watt"));
         item->setTextAlignment(eColMaxPower, Qt::AlignRight);
-        item->setText(eColNormPower, QString("%L1%2").arg(fitdata.normPower).arg("Watt"));
+        item->setText(eColNormPower, QString("%L1%2").arg(lap.normPower).arg("Watt"));
         item->setTextAlignment(eColNormPower, Qt::AlignRight);
 
-        item->setText(eColLeftBalance, QString("%L1%").arg(fitdata.leftBalance, 0, 'f', 2));
+        item->setText(eColLeftBalance, QString("%L1%").arg(lap.leftBalance, 0, 'f', 2));
         item->setTextAlignment(eColLeftBalance, Qt::AlignRight);
-        item->setText(eColRightBalance, QString("%L1%").arg(fitdata.rightBalance, 0, 'f', 2));
+        item->setText(eColRightBalance, QString("%L1%").arg(lap.rightBalance, 0, 'f', 2));
         item->setTextAlignment(eColRightBalance, Qt::AlignRight);
 
-        item->setText(eColLeftPedalSmooth, QString("%L1%").arg(fitdata.leftPedalSmooth));
+        item->setText(eColLeftPedalSmooth, QString("%L1%").arg(lap.leftPedalSmooth));
         item->setTextAlignment(eColLeftPedalSmooth, Qt::AlignRight);
-        item->setText(eColRightPedalSmooth, QString("%L1%").arg(fitdata.rightPedalSmooth));
+        item->setText(eColRightPedalSmooth, QString("%L1%").arg(lap.rightPedalSmooth));
         item->setTextAlignment(eColRightPedalSmooth, Qt::AlignRight);
 
-        item->setText(eColLeftTorqueEff, QString("%L1%").arg(fitdata.leftTorqueEff));
+        item->setText(eColLeftTorqueEff, QString("%L1%").arg(lap.leftTorqueEff));
         item->setTextAlignment(eColLeftTorqueEff, Qt::AlignRight);
-        item->setText(eColRightTorqueEff, QString("%L1%").arg(fitdata.rightTorqueEff));
+        item->setText(eColRightTorqueEff, QString("%L1%").arg(lap.rightTorqueEff));
         item->setTextAlignment(eColRightTorqueEff, Qt::AlignRight);
 
-        item->setText(eColTrainStress, fitdata.trainStress ? QString("%L1").arg(fitdata.trainStress, 0, 'f', 2) : "-");
+        item->setText(eColTrainStress, lap.trainStress ? QString("%L1").arg(lap.trainStress, 0, 'f', 2) : "-");
         item->setTextAlignment(eColTrainStress, Qt::AlignRight);
-        item->setText(eColIntensity, fitdata.intensity ? QString("%L1").arg(fitdata.intensity, 0, 'f', 2) : "-");
+        item->setText(eColIntensity, lap.intensity ? QString("%L1").arg(lap.intensity, 0, 'f', 2) : "-");
         item->setTextAlignment(eColIntensity, Qt::AlignRight);
 
-        item->setText(eColWork, QString("%L1%2").arg(fitdata.work / 1000).arg("kJ"));
+        item->setText(eColWork, QString("%L1%2").arg(lap.work / 1000).arg("kJ"));
         item->setTextAlignment(eColWork, Qt::AlignRight);
-        item->setText(eColEnergy, QString("%L1%2").arg(fitdata.energy).arg("kcal"));
+        item->setText(eColEnergy, QString("%L1%2").arg(lap.energy).arg("kcal"));
         item->setTextAlignment(eColEnergy, Qt::AlignRight);
 
         items << item;
@@ -180,19 +168,19 @@ CFitDataDialog::CFitDataDialog(QList<struct CTrackData::fitdata_t> &fitdatas, QW
     cfg.endGroup();
 
     const quint8 noOfGridCols = 5;
-    for (quint8 index = 0; index < eColMax; ++index)
+    for (qint32 i = 0; i < eColMax; ++i)
     {
-        quint8 row = index / noOfGridCols;
-        quint8 col = index - row * noOfGridCols;
+        quint8 row = i / noOfGridCols;
+        quint8 col = i - row * noOfGridCols;
 
-        QCheckBox *checkbox = new QCheckBox(labels.at(index), this);
-        checkbox->setProperty("index", index);
+        QCheckBox *checkbox = new QCheckBox(columns[(columns_t)i].label, this);
+        checkbox->setProperty("index", i);
 
         qDebug() << "checkstates=" << checkstates;
-        bool checked = (checkstates >> index) & 0x1;
+        bool checked = (checkstates >> i) & 0x1;
         checkbox->setChecked(checked);
 
-        treeTable->setColumnHidden(index, !checked);
+        treeTable->setColumnHidden(i, !checked);
 
         connect(checkbox, &QCheckBox::clicked, this, &CFitDataDialog::slotCheckColumns);
 
@@ -214,24 +202,21 @@ void CFitDataDialog::slotReset(bool)
 
     if (ret == QMessageBox::Yes)
     {
-        fitdatas.clear();
+        fitdata.clear();
         reject();
     }
 }
 
-void CFitDataDialog::slotRestoreDefaults(bool)
+void CFitDataDialog::slotButtonColumns(bool)
 {
-    qDebug() << "slotRestoreDefaults";
-
-    qDebug() << "sizeof quint32=" << sizeof(quint32);
-    qDebug() << "sizeof qulonglong=" << sizeof(qulonglong);
-
     bool isEnabled = buttonBox->button(QDialogButtonBox::Reset)->isEnabled();
 
-    widgetHeaderCb->setVisible(isEnabled);
     buttonBox->button(QDialogButtonBox::Reset)->setEnabled(!isEnabled);
     buttonBox->button(QDialogButtonBox::Save)->setEnabled(!isEnabled);
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!isEnabled);
+    widgetHeaderCb->setVisible(isEnabled);
+
+    treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 }
 
 void CFitDataDialog::slotCheckColumns(bool checked)
@@ -245,13 +230,11 @@ void CFitDataDialog::slotCheckColumns(bool checked)
     cfg.beginGroup("FitData");
     cfg.setValue("checkstates", checkstates);
     cfg.endGroup();
-
-    qDebug() << "index=" << index;
-    qDebug() << "checked=" << checked;
 }
 
 void CFitDataDialog::slotSave2Csv(bool)
 {
+
     SETTINGS;
     cfg.beginGroup("FitData");
     QString path = cfg.value("csvPath", QDir::homePath()).toString();
@@ -264,26 +247,33 @@ void CFitDataDialog::slotSave2Csv(bool)
     {
         QTextStream stream(&file);
 
+        QStringList labels;
+        QMapIterator<columns_t, struct columnLabel_t> col(columns);
+        while (col.hasNext())
+        {
+            col.next();
+            labels << col.value().label;
+        }
         stream << labels.join(";") + "\n";
 
         QStringList strList;
-        for (const struct CTrackData::fitdata_t &f : fitdatas)
+        for (const struct CTrackData::fitdata_t::lap_t &lap : fitdata.getLaps())
         {
             strList.clear();
-            strList << QString("%L1").arg(f.type) << QString("%L1").arg(f.index)
-                    << QString("%L1").arg(f.elapsedTime) << QString("%L1").arg(f.timerTime)
-                    << QString("%L1").arg(f.elapsedTime - f.timerTime)
-                    << QString("%L1").arg(f.distance) << QString("%L1").arg(f.avgSpeed / 1000., 0, 'f', 3)
-                    << QString("%L1").arg(f.maxSpeed / 1000., 0, 'f', 3) << QString("%L1").arg(f.avgHr)
-                    << QString("%L1").arg(f.maxHr) << QString("%L1").arg(f.avgCad)
-                    << QString("%L1").arg(f.maxCad) << QString("%L1").arg(f.ascent)
-                    << QString("%L1").arg(f.descent) << QString("%L1").arg(f.avgPower)
-                    << QString("%L1").arg(f.maxPower) << QString("%L1").arg(f.normPower)
-                    << QString("%L1").arg(f.rightBalance, 0, 'f', 2) << QString("%L1").arg(f.leftBalance, 0, 'f', 2)
-                    << QString("%L1").arg(f.leftPedalSmooth) << QString("%L1").arg(f.rightPedalSmooth)
-                    << QString("%L1").arg(f.leftTorqueEff) << QString("%L1").arg(f.rightTorqueEff)
-                    << QString("%L1").arg(f.intensity, 0, 'f', 2) << QString("%L1").arg(f.trainStress, 0, 'f', 2)
-                    << QString("%L1").arg(f.work / 1000) << QString("%L1").arg(f.energy);
+            strList << QString("%L1").arg(lap.type) << QString("%L1").arg(lap.index)
+                    << QString("%L1").arg(lap.elapsedTime) << QString("%L1").arg(lap.timerTime)
+                    << QString("%L1").arg(lap.elapsedTime - lap.timerTime)
+                    << QString("%L1").arg(lap.distance) << QString("%L1").arg(lap.avgSpeed / 1000., 0, 'f', 3)
+                    << QString("%L1").arg(lap.maxSpeed / 1000., 0, 'f', 3) << QString("%L1").arg(lap.avgHr)
+                    << QString("%L1").arg(lap.maxHr) << QString("%L1").arg(lap.avgCad)
+                    << QString("%L1").arg(lap.maxCad) << QString("%L1").arg(lap.ascent)
+                    << QString("%L1").arg(lap.descent) << QString("%L1").arg(lap.avgPower)
+                    << QString("%L1").arg(lap.maxPower) << QString("%L1").arg(lap.normPower)
+                    << QString("%L1").arg(lap.rightBalance, 0, 'f', 2) << QString("%L1").arg(lap.leftBalance, 0, 'f', 2)
+                    << QString("%L1").arg(lap.leftPedalSmooth) << QString("%L1").arg(lap.rightPedalSmooth)
+                    << QString("%L1").arg(lap.leftTorqueEff) << QString("%L1").arg(lap.rightTorqueEff)
+                    << QString("%L1").arg(lap.intensity, 0, 'f', 2) << QString("%L1").arg(lap.trainStress, 0, 'f', 2)
+                    << QString("%L1").arg(lap.work / 1000) << QString("%L1").arg(lap.energy);
 
             stream << strList.join(";") + "\n";
         }
@@ -292,6 +282,7 @@ void CFitDataDialog::slotSave2Csv(bool)
     path = QFileInfo(filename).absolutePath();
     cfg.setValue("csvPath", path);
     cfg.endGroup();
+
 }
 
 void CFitDataDialog::slotShowHelp()

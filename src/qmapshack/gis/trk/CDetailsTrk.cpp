@@ -533,7 +533,7 @@ void CDetailsTrk::updateData()
     }
     toolSetEnergyCycling->setToolTip(tooltip);
 
-    if(trk.getFitDatas().count())
+    if(trk.getFitdata().getIsFit())
     {
         toolFitData->setEnabled(true);
     }
@@ -741,7 +741,7 @@ void CDetailsTrk::slotSetEnergyCycling()
 
 void CDetailsTrk::slotFitData()
 {
-    CFitDataDialog fitDataDialog(trk.getFitDatas(), this);
+    CFitDataDialog fitDataDialog(trk.getFitdata(), this);
 
     qint32 ret = fitDataDialog.exec();
 

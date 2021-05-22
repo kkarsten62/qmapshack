@@ -543,26 +543,38 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t &e)
 
 QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
 {
-    stream  << VER_FITDATA << f.type << f.index << f.elapsedTime
-            << f.timerTime << f.distance << f.avgSpeed << f.maxSpeed
-            << f.avgHr << f.maxHr << f.avgCad << f.maxCad << f.ascent
-            << f.descent << f.avgPower << f.maxPower << f.normPower
-            << f.rightBalance << f.leftBalance << f.leftPedalSmooth
-            << f.rightPedalSmooth << f.leftTorqueEff << f.rightTorqueEff
-            << f.intensity << f.trainStress << f.work << f.energy;
+    stream  << VER_FITDATA << f.isFit << f.product << f.laps;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
 {
     quint8 version;
-    stream  >> version >> f.type >> f.index >> f.elapsedTime
-            >> f.timerTime >> f.distance >> f.avgSpeed >> f.maxSpeed
-            >> f.avgHr >> f.maxHr >> f.avgCad >> f.maxCad >> f.ascent
-            >> f.descent >> f.avgPower >> f.maxPower >> f.normPower
-            >> f.rightBalance >> f.leftBalance >> f.leftPedalSmooth
-            >> f.rightPedalSmooth >> f.leftTorqueEff >> f.rightTorqueEff
-            >> f.intensity >> f.trainStress >> f.work >> f.energy;
+    stream  >> version >> f.isFit >> f.product >> f.laps;
+    return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t::lap_t &l)
+{
+    stream  << l.type << l.index << l.elapsedTime
+            << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
+            << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
+            << l.descent << l.avgPower << l.maxPower << l.normPower
+            << l.rightBalance << l.leftBalance << l.leftPedalSmooth
+            << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
+            << l.intensity << l.trainStress << l.work << l.energy;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t::lap_t &l)
+{
+    stream  >> l.type >> l.index >> l.elapsedTime
+            >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
+            >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
+            >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
+            >> l.rightBalance >> l.leftBalance >> l.leftPedalSmooth
+            >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
+            >> l.intensity >> l.trainStress >> l.work >> l.energy;
     return stream;
 }
 
@@ -598,7 +610,7 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
 
     out << energyCycling.getEnergyTrkSet();
 
-    out << trk.fitdatas;
+    out << trk.fitdata;
 
     out << trk.segs;
 
@@ -692,7 +704,7 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream)
 
     if(version > 7)
     {
-        in >> trk.fitdatas;
+        in >> trk.fitdata;
     }
 
     trk.segs.clear();

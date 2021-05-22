@@ -199,7 +199,7 @@ public:
     }
 
     CEnergyCycling &getEnergyCycling() { return energyCycling; }
-    QList<struct CTrackData::fitdata_t> &getFitDatas() { return trk.fitdatas; }
+    CTrackData::fitdata_t &getFitdata() { return trk.fitdata; }
 
     /// returns "true" when trk has no time-related invalid points
     bool isTrkTimeValid() const { return (allValidFlags & CTrackData::trkpt_t::eInvalidTime) == 0; }

@@ -223,40 +223,55 @@ public:
 
     struct fitdata_t
     {
-        enum type_e
+        enum lapType_e
         {
-            unknown     = 0
-            , eLap      = 1
-            , eSession  = 2
+            eTypeUnknown   = 0
+            , eTypeLap     = 1
+            , eTypeSession = 2
         };
-        quint32 type = type_e::unknown;
-        quint32 index = NOINT;
-        quint32 elapsedTime = 0;
-        quint32 timerTime = 0;
-        quint32 distance = 0;
-        quint16 avgSpeed = 0;
-        quint16 maxSpeed = 0;
-        quint8 avgHr = 0;
-        quint8 maxHr = 0;
-        quint8 avgCad = 0;
-        quint8 maxCad = 0;
-        quint16 ascent = 0;
-        quint16 descent = 0;
-        quint16 avgPower = 0;
-        quint16 maxPower = 0;
-        quint16 normPower = 0;
-        qreal rightBalance = 0;
-        qreal leftBalance = 0;
-        quint8 leftPedalSmooth = 0;
-        quint8 rightPedalSmooth = 0;
-        quint8 leftTorqueEff = 0;
-        quint8 rightTorqueEff = 0;
-        qreal intensity = 0;
-        qreal trainStress = 0;
-        quint32 work = 0;
-        quint16 energy = 0;
+        struct lap_t
+        {
+            quint32 type = lapType_e::eTypeUnknown;
+            quint32 index = NOINT;
+            quint32 elapsedTime = 0;
+            quint32 timerTime = 0;
+            quint32 distance = 0;
+            quint16 avgSpeed = 0;
+            quint16 maxSpeed = 0;
+            quint8 avgHr = 0;
+            quint8 maxHr = 0;
+            quint8 avgCad = 0;
+            quint8 maxCad = 0;
+            quint16 ascent = 0;
+            quint16 descent = 0;
+            quint16 avgPower = 0;
+            quint16 maxPower = 0;
+            quint16 normPower = 0;
+            qreal rightBalance = 0;
+            qreal leftBalance = 0;
+            quint8 leftPedalSmooth = 0;
+            quint8 rightPedalSmooth = 0;
+            quint8 leftTorqueEff = 0;
+            quint8 rightTorqueEff = 0;
+            qreal intensity = 0;
+            qreal trainStress = 0;
+            quint32 work = 0;
+            quint16 energy = 0;
+        };
+        bool isFit = false;
+        quint16 product = 0;
+        QList<struct lap_t> laps;
+
+        bool getIsFit() const { return isFit; }
+        void setIsFit(bool isFit) { this->isFit = isFit; }
+        QList<struct lap_t> &getLaps() { return laps; }
+        void setLap(struct lap_t &lap) { laps << lap; }
+        void clear() { laps.clear(); isFit = false; }
+        quint16 getProduct() { return product; }
+        void setProduct(quint16 product) { this->product = product; }
     };
-    QList<struct fitdata_t> fitdatas;
+    struct fitdata_t fitdata;
+    struct fitdata_t &getFitData() { return fitdata; }
 
     CTrackData() {}
 
