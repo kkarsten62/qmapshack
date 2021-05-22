@@ -21,8 +21,8 @@
 
 /** @brief Constructor - Initiate the dialog GUI
 
-   @param energyCycling Reference to the track's CEnergyCycling object
-   @param parent Pointer to the parent widget
+   @param xxx yyy
+   @param xxx yyy
  */
 CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) :
     QDialog(parent)
@@ -51,6 +51,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::accept);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
+    // Add Header labels to treeTable
     QTreeWidgetItem *item = new QTreeWidgetItem();
     QMapIterator<columns_t, struct columnLabel_t> col(columns);
     while (col.hasNext())
@@ -61,6 +62,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     }
     treeTable->setHeaderItem(item);
 
+    // Add values to treeTable
     QList<QTreeWidgetItem*> items;
     for(struct CTrackData::fitdata_t::lap_t lap : fitdata.getLaps())
     {
@@ -116,43 +118,52 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
 
         item->setText(eColAvgHr, QString("%L1%2").arg(lap.avgHr).arg(tr("bpm")));
         item->setTextAlignment(eColAvgHr, Qt::AlignRight);
+
         item->setText(eColMaxHr, QString("%L1%2").arg(lap.maxHr).arg(tr("bpm")));
         item->setTextAlignment(eColMaxHr, Qt::AlignRight);
 
         item->setText(eColAvgCad, QString("%L1%2").arg(lap.avgCad).arg(tr("rpm")));
         item->setTextAlignment(eColAvgCad, Qt::AlignRight);
+
         item->setText(eColMaxCad, QString("%L1%2").arg(lap.maxCad).arg(tr("rpm")));
         item->setTextAlignment(eColMaxCad, Qt::AlignRight);
 
         item->setText(eColAvgPower, QString("%L1%2").arg(lap.avgPower).arg("Watt"));
         item->setTextAlignment(eColAvgPower, Qt::AlignRight);
+
         item->setText(eColMaxPower, QString("%L1%2").arg(lap.maxPower).arg("Watt"));
         item->setTextAlignment(eColMaxPower, Qt::AlignRight);
+
         item->setText(eColNormPower, QString("%L1%2").arg(lap.normPower).arg("Watt"));
         item->setTextAlignment(eColNormPower, Qt::AlignRight);
 
         item->setText(eColLeftBalance, QString("%L1%").arg(lap.leftBalance, 0, 'f', 2));
         item->setTextAlignment(eColLeftBalance, Qt::AlignRight);
+
         item->setText(eColRightBalance, QString("%L1%").arg(lap.rightBalance, 0, 'f', 2));
         item->setTextAlignment(eColRightBalance, Qt::AlignRight);
 
         item->setText(eColLeftPedalSmooth, QString("%L1%").arg(lap.leftPedalSmooth));
         item->setTextAlignment(eColLeftPedalSmooth, Qt::AlignRight);
+
         item->setText(eColRightPedalSmooth, QString("%L1%").arg(lap.rightPedalSmooth));
         item->setTextAlignment(eColRightPedalSmooth, Qt::AlignRight);
 
         item->setText(eColLeftTorqueEff, QString("%L1%").arg(lap.leftTorqueEff));
         item->setTextAlignment(eColLeftTorqueEff, Qt::AlignRight);
+
         item->setText(eColRightTorqueEff, QString("%L1%").arg(lap.rightTorqueEff));
         item->setTextAlignment(eColRightTorqueEff, Qt::AlignRight);
 
         item->setText(eColTrainStress, lap.trainStress ? QString("%L1").arg(lap.trainStress, 0, 'f', 2) : "-");
         item->setTextAlignment(eColTrainStress, Qt::AlignRight);
+
         item->setText(eColIntensity, lap.intensity ? QString("%L1").arg(lap.intensity, 0, 'f', 2) : "-");
         item->setTextAlignment(eColIntensity, Qt::AlignRight);
 
         item->setText(eColWork, QString("%L1%2").arg(lap.work / 1000).arg("kJ"));
         item->setTextAlignment(eColWork, Qt::AlignRight);
+
         item->setText(eColEnergy, QString("%L1%2").arg(lap.energy).arg("kcal"));
         item->setTextAlignment(eColEnergy, Qt::AlignRight);
 
@@ -162,12 +173,14 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     treeTable->addTopLevelItems(items);
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 
+    // Read checkstates from setting file
     SETTINGS;
     cfg.beginGroup("FitData");
     checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns
     cfg.endGroup();
 
-    const quint8 noOfGridCols = 5;
+    // Put checkboxes on checkbox widget
+    const quint8 noOfGridCols = 5; // Five checkboxes in one row
     for (qint32 i = 0; i < eColMax; ++i)
     {
         quint8 row = i / noOfGridCols;
@@ -246,17 +259,18 @@ void CFitDataDialog::slotSave2Csv(bool)
     if(file.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&file);
-
-        QStringList labels;
-        QMapIterator<columns_t, struct columnLabel_t> col(columns);
-        while (col.hasNext())
-        {
-            col.next();
-            labels << col.value().label;
-        }
-        stream << labels.join(";") + "\n";
-
         QStringList strList;
+
+        // Put header labels into stream
+        QMapIterator<columns_t, struct columnLabel_t> column(columns);
+        while (column.hasNext())
+        {
+            column.next();
+            strList << column.value().label;
+        }
+        stream << strList.join(";") + "\n";
+
+        // Put values into stream
         for (const struct CTrackData::fitdata_t::lap_t &lap : fitdata.getLaps())
         {
             strList.clear();
