@@ -543,14 +543,14 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t &e)
 
 QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
 {
-    stream  << VER_FITDATA << f.isFit << f.product << f.laps;
+    stream  << VER_FITDATA << f.isValid << f.product << f.laps;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
 {
     quint8 version;
-    stream  >> version >> f.isFit >> f.product >> f.laps;
+    stream  >> version >> f.isValid >> f.product >> f.laps;
     return stream;
 }
 

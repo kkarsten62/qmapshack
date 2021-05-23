@@ -32,6 +32,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
 
     widgetHeaderCb->hide();
 
+    // Show product name in GUI label
     quint16 product = fitdata.getProduct();
     QString prefix(tr("FIT data from device:"));
     QString labelTxt = productName.contains(product) ?
@@ -67,7 +68,6 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     for(struct CTrackData::fitdata_t::lap_t lap : fitdata.getLaps())
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
-        QFont font = QFont();
         if (lap.type == CTrackData::fitdata_t::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
@@ -75,9 +75,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
         else if (lap.type == CTrackData::fitdata_t::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
-            font.setBold(true);
         }
-        item->setFont(eColType, font);
         item->setTextAlignment(eColType, columns[eColType].alignment);
 
         item->setText(eColIndex, QString("%1").arg(lap.index));
@@ -86,86 +84,94 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
         QString val, unit;
         IUnit::self().seconds2time(lap.elapsedTime, val, unit);
         item->setText(eColElapsedTime, QString("%1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColElapsedTime, Qt::AlignRight);
+        item->setTextAlignment(eColElapsedTime, columns[eColElapsedTime].alignment);
 
         IUnit::self().seconds2time(lap.timerTime, val, unit);
         item->setText(eColTimerTime, QString("%1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColTimerTime, Qt::AlignRight);
+        item->setTextAlignment(eColTimerTime, columns[eColTimerTime].alignment);
 
         IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
         item->setText(eColPause, QString("%1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColPause, Qt::AlignRight);
+        item->setTextAlignment(eColPause, columns[eColPause].alignment);
 
         IUnit::self().meter2distance(lap.distance, val, unit);
         item->setText(eColDistance, QString("%1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColDistance, Qt::AlignRight);
+        item->setTextAlignment(eColDistance, columns[eColDistance].alignment);
 
         IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
         item->setText(eColAvgSpeed, QString("%1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColAvgSpeed, Qt::AlignRight);
+        item->setTextAlignment(eColAvgSpeed, columns[eColAvgSpeed].alignment);
 
         IUnit::self().meter2speed(lap.maxSpeed / 1000., val, unit);
         item->setText(eColMaxSpeed, QString("%L1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColMaxSpeed, Qt::AlignRight);
+        item->setTextAlignment(eColMaxSpeed, columns[eColMaxSpeed].alignment);
 
         IUnit::self().meter2elevation(lap.ascent, val, unit);
         item->setText(eColAscent, QString("%L1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColAscent, Qt::AlignRight);
+        item->setTextAlignment(eColAscent, columns[eColAscent].alignment);
 
         IUnit::self().meter2elevation(lap.descent, val, unit);
         item->setText(eColDescent, QString("%L1%2").arg(val).arg(unit));
-        item->setTextAlignment(eColDescent, Qt::AlignRight);
+        item->setTextAlignment(eColDescent, columns[eColDescent].alignment);
 
         item->setText(eColAvgHr, QString("%L1%2").arg(lap.avgHr).arg(tr("bpm")));
-        item->setTextAlignment(eColAvgHr, Qt::AlignRight);
+        item->setTextAlignment(eColAvgHr, columns[eColAvgHr].alignment);
 
         item->setText(eColMaxHr, QString("%L1%2").arg(lap.maxHr).arg(tr("bpm")));
-        item->setTextAlignment(eColMaxHr, Qt::AlignRight);
+        item->setTextAlignment(eColMaxHr, columns[eColMaxHr].alignment);
 
         item->setText(eColAvgCad, QString("%L1%2").arg(lap.avgCad).arg(tr("rpm")));
-        item->setTextAlignment(eColAvgCad, Qt::AlignRight);
+        item->setTextAlignment(eColAvgCad, columns[eColAvgCad].alignment);
 
         item->setText(eColMaxCad, QString("%L1%2").arg(lap.maxCad).arg(tr("rpm")));
-        item->setTextAlignment(eColMaxCad, Qt::AlignRight);
+        item->setTextAlignment(eColMaxCad, columns[eColMaxCad].alignment);
 
         item->setText(eColAvgPower, QString("%L1%2").arg(lap.avgPower).arg("Watt"));
-        item->setTextAlignment(eColAvgPower, Qt::AlignRight);
+        item->setTextAlignment(eColAvgPower, columns[eColAvgPower].alignment);
 
         item->setText(eColMaxPower, QString("%L1%2").arg(lap.maxPower).arg("Watt"));
-        item->setTextAlignment(eColMaxPower, Qt::AlignRight);
+        item->setTextAlignment(eColMaxPower, columns[eColMaxPower].alignment);
 
         item->setText(eColNormPower, QString("%L1%2").arg(lap.normPower).arg("Watt"));
-        item->setTextAlignment(eColNormPower, Qt::AlignRight);
+        item->setTextAlignment(eColNormPower, columns[eColNormPower].alignment);
 
         item->setText(eColLeftBalance, QString("%L1%").arg(lap.leftBalance, 0, 'f', 2));
-        item->setTextAlignment(eColLeftBalance, Qt::AlignRight);
+        item->setTextAlignment(eColLeftBalance, columns[eColLeftBalance].alignment);
 
         item->setText(eColRightBalance, QString("%L1%").arg(lap.rightBalance, 0, 'f', 2));
-        item->setTextAlignment(eColRightBalance, Qt::AlignRight);
+        item->setTextAlignment(eColRightBalance, columns[eColRightBalance].alignment);
 
         item->setText(eColLeftPedalSmooth, QString("%L1%").arg(lap.leftPedalSmooth));
-        item->setTextAlignment(eColLeftPedalSmooth, Qt::AlignRight);
+        item->setTextAlignment(eColLeftPedalSmooth, columns[eColLeftPedalSmooth].alignment);
 
         item->setText(eColRightPedalSmooth, QString("%L1%").arg(lap.rightPedalSmooth));
-        item->setTextAlignment(eColRightPedalSmooth, Qt::AlignRight);
+        item->setTextAlignment(eColRightPedalSmooth, columns[eColRightPedalSmooth].alignment);
 
         item->setText(eColLeftTorqueEff, QString("%L1%").arg(lap.leftTorqueEff));
-        item->setTextAlignment(eColLeftTorqueEff, Qt::AlignRight);
+        item->setTextAlignment(eColLeftTorqueEff, columns[eColLeftTorqueEff].alignment);
 
         item->setText(eColRightTorqueEff, QString("%L1%").arg(lap.rightTorqueEff));
-        item->setTextAlignment(eColRightTorqueEff, Qt::AlignRight);
+        item->setTextAlignment(eColRightTorqueEff, columns[eColRightTorqueEff].alignment);
 
         item->setText(eColTrainStress, lap.trainStress ? QString("%L1").arg(lap.trainStress, 0, 'f', 2) : "-");
-        item->setTextAlignment(eColTrainStress, Qt::AlignRight);
+        item->setTextAlignment(eColTrainStress, columns[eColTrainStress].alignment);
 
         item->setText(eColIntensity, lap.intensity ? QString("%L1").arg(lap.intensity, 0, 'f', 2) : "-");
-        item->setTextAlignment(eColIntensity, Qt::AlignRight);
+        item->setTextAlignment(eColIntensity, columns[eColIntensity].alignment);
 
         item->setText(eColWork, QString("%L1%2").arg(lap.work / 1000).arg("kJ"));
-        item->setTextAlignment(eColWork, Qt::AlignRight);
+        item->setTextAlignment(eColWork, columns[eColWork].alignment);
 
         item->setText(eColEnergy, QString("%L1%2").arg(lap.energy).arg("kcal"));
-        item->setTextAlignment(eColEnergy, Qt::AlignRight);
+        item->setTextAlignment(eColEnergy, columns[eColEnergy].alignment);
+
+        // Set bold to session row
+        if (lap.type == CTrackData::fitdata_t::eTypeSession)
+        {
+            QFont font = QFont();
+            font.setBold(true);
+            for (qint32 i = 0; i < item->columnCount();item->setFont(i, font), ++i);
+        }
 
         items << item;
     }
@@ -247,7 +253,6 @@ void CFitDataDialog::slotCheckColumns(bool checked)
 
 void CFitDataDialog::slotSave2Csv(bool)
 {
-
     SETTINGS;
     cfg.beginGroup("FitData");
     QString path = cfg.value("csvPath", QDir::homePath()).toString();

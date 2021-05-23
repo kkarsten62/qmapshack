@@ -533,7 +533,7 @@ void CDetailsTrk::updateData()
     }
     toolSetEnergyCycling->setToolTip(tooltip);
 
-    if(trk.getFitdata().getIsFit())
+    if(trk.getFitdata().getIsValid())
     {
         toolFitData->setEnabled(true);
     }

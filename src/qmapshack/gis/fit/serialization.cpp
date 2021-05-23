@@ -234,7 +234,7 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
     }
     if(fileIdMesg.isFieldValueValid(eFileIdProduct))
     {
-        trk.getFitData().setIsFit(true);
+        trk.getFitData().setIsValid(true);
         trk.getFitData().setProduct(fileIdMesg.getFieldValue(eFileIdProduct).toUInt());
     }
     stream.reset();

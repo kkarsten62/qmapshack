@@ -258,15 +258,15 @@ public:
             quint32 work = 0;
             quint16 energy = 0;
         };
-        bool isFit = false;
+        bool isValid = false;
         quint16 product = 0;
         QList<struct lap_t> laps;
 
-        bool getIsFit() const { return isFit; }
-        void setIsFit(bool isFit) { this->isFit = isFit; }
+        bool getIsValid() const { return isValid; }
+        void setIsValid(bool isValid) { this->isValid = isValid; }
         QList<struct lap_t> &getLaps() { return laps; }
         void setLap(struct lap_t &lap) { laps << lap; }
-        void clear() { laps.clear(); isFit = false; }
+        void clear() { laps.clear(); isValid = false; }
         quint16 getProduct() { return product; }
         void setProduct(quint16 product) { this->product = product; }
     };
