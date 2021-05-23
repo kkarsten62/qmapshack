@@ -556,7 +556,7 @@ QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
 
 QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t::lap_t &l)
 {
-    stream  << l.type << l.index << l.elapsedTime
+    stream  << l.type << l.no << l.comment << l.elapsedTime
             << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
             << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
             << l.descent << l.avgPower << l.maxPower << l.normPower
@@ -568,7 +568,7 @@ QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t::lap_t 
 
 QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t::lap_t &l)
 {
-    stream  >> l.type >> l.index >> l.elapsedTime
+    stream  >> l.type >> l.no >> l.comment >> l.elapsedTime
             >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
             >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
             >> l.descent >> l.avgPower >> l.maxPower >> l.normPower

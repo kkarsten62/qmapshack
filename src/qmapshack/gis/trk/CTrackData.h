@@ -231,8 +231,9 @@ public:
         };
         struct lap_t
         {
-            quint32 type = lapType_e::eTypeUnknown;
-            quint32 index = NOINT;
+            qint32 type = lapType_e::eTypeUnknown;
+            qint32 no = NOIDX;
+            QString comment = "-";
             quint32 elapsedTime = 0;
             quint32 timerTime = 0;
             quint32 distance = 0;
@@ -264,11 +265,14 @@ public:
 
         bool getIsValid() const { return isValid; }
         void setIsValid(bool isValid) { this->isValid = isValid; }
-        QList<struct lap_t> &getLaps() { return laps; }
-        void setLap(struct lap_t &lap) { laps << lap; }
+        QList<struct lap_t>& getLaps() { return laps; }
+        void setLap(struct lap_t& lap) { laps << lap; }
+        struct lap_t& getLap(quint32 index) { return laps[index]; }
         void clear() { laps.clear(); isValid = false; }
-        quint16 getProduct() { return product; }
+        quint16 getProduct() const { return product; }
         void setProduct(quint16 product) { this->product = product; }
+        void setLapComment(qint32 index, const QString& comment) { laps[index].comment = comment; }
+        qint32 getLapNo(qint32 index) const { return laps[index].no; }
     };
     struct fitdata_t fitdata;
     struct fitdata_t &getFitData() { return fitdata; }

@@ -290,8 +290,8 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
 
             if(mesg.isFieldValueValid(eLapMessageIndex))
             {
-                lap.index = mesg.getFieldValue(eLapMessageIndex).toUInt() + 1; // uint16
-                qDebug() << "eLapMessageIndex=" << lap.index;
+                lap.no = mesg.getFieldValue(eLapMessageIndex).toUInt() + 1; // uint16
+                qDebug() << "eLapMessageIndex=" << lap.no;
             }
             if(mesg.isFieldValueValid(eLapTotalElapsedTime))
             {
@@ -412,8 +412,8 @@ void CGisItemTrk::readTrkFromFit(CFitStream &stream)
 
             if(mesg.isFieldValueValid(eSessionNumLaps))
             {
-                session.index = mesg.getFieldValue(eSessionNumLaps).toUInt(); // uint16
-                qDebug() << "eSessionNumLaps=" << session.index;
+                session.no = mesg.getFieldValue(eSessionNumLaps).toUInt(); // uint16
+                qDebug() << "eSessionNumLaps=" << session.no;
             }
             if(mesg.isFieldValueValid(eSessionTotalElapsedTime))
             {

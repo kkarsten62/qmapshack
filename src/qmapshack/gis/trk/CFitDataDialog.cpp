@@ -49,8 +49,10 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
-    connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::accept);
+    connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
+    connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
+
 
     // Add Header labels to treeTable
     QTreeWidgetItem *item = new QTreeWidgetItem();
@@ -64,22 +66,29 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     treeTable->setHeaderItem(item);
 
     // Add values to treeTable
+    qint32 index = 0;
     QList<QTreeWidgetItem*> items;
-    for(struct CTrackData::fitdata_t::lap_t lap : fitdata.getLaps())
+    for(struct CTrackData::fitdata_t::lap_t& lap : fitdata.getLaps())
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         if (lap.type == CTrackData::fitdata_t::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
+            item->setText(eColIndex, QString("%1").arg(lap.no));
         }
         else if (lap.type == CTrackData::fitdata_t::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
+            item->setText(eColIndex, QString("%1").arg(lap.no));
         }
         item->setTextAlignment(eColType, columns[eColType].alignment);
-
-        item->setText(eColIndex, QString("%1").arg(lap.index));
         item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
+
+        item->setText(eColComment, lap.comment);
+        item->setToolTip(eColComment, tr("Double click to edit comment"));
+
+        item->setData(eColComment, Qt::UserRole, QVariant(index++));
+        item->setTextAlignment(eColComment, columns[eColComment].alignment);
 
         QString val, unit;
         IUnit::self().seconds2time(lap.elapsedTime, val, unit);
@@ -211,6 +220,18 @@ CFitDataDialog::~CFitDataDialog()
 {
 }
 
+void CFitDataDialog::slotOk(bool)
+{
+    if (isChanged)
+    {
+        reject();
+    }
+    else
+    {
+        accept();
+    }
+}
+
 void CFitDataDialog::slotReset(bool)
 {
     qint32 ret = QMessageBox::question(CMainWindow::getBestWidgetForParent()
@@ -273,40 +294,89 @@ void CFitDataDialog::slotSave2Csv(bool)
             column.next();
             strList << column.value().label;
         }
-        stream << strList.join(";") + "\n";
+        stream << strList.join(";") + "\n"; // Separeted by semicolon!
 
         // Put values into stream
         for (const struct CTrackData::fitdata_t::lap_t &lap : fitdata.getLaps())
         {
             strList.clear();
-            strList << QString("%L1").arg(lap.type) << QString("%L1").arg(lap.index)
-                    << QString("%L1").arg(lap.elapsedTime) << QString("%L1").arg(lap.timerTime)
-                    << QString("%L1").arg(lap.elapsedTime - lap.timerTime)
-                    << QString("%L1").arg(lap.distance) << QString("%L1").arg(lap.avgSpeed / 1000., 0, 'f', 3)
-                    << QString("%L1").arg(lap.maxSpeed / 1000., 0, 'f', 3) << QString("%L1").arg(lap.avgHr)
-                    << QString("%L1").arg(lap.maxHr) << QString("%L1").arg(lap.avgCad)
-                    << QString("%L1").arg(lap.maxCad) << QString("%L1").arg(lap.ascent)
-                    << QString("%L1").arg(lap.descent) << QString("%L1").arg(lap.avgPower)
-                    << QString("%L1").arg(lap.maxPower) << QString("%L1").arg(lap.normPower)
-                    << QString("%L1").arg(lap.rightBalance, 0, 'f', 2) << QString("%L1").arg(lap.leftBalance, 0, 'f', 2)
-                    << QString("%L1").arg(lap.leftPedalSmooth) << QString("%L1").arg(lap.rightPedalSmooth)
-                    << QString("%L1").arg(lap.leftTorqueEff) << QString("%L1").arg(lap.rightTorqueEff)
-                    << QString("%L1").arg(lap.intensity, 0, 'f', 2) << QString("%L1").arg(lap.trainStress, 0, 'f', 2)
-                    << QString("%L1").arg(lap.work / 1000) << QString("%L1").arg(lap.energy);
-
-            stream << strList.join(";") + "\n";
+            strList << QString("%L1").arg(lap.type)
+                << QString("%L1").arg(lap.no)
+                << QString("\"%1\"").arg(lap.comment)
+                << QString("%L1").arg(lap.elapsedTime)
+                << QString("%L1").arg(lap.timerTime)
+                << QString("%L1").arg(lap.elapsedTime - lap.timerTime)
+                << QString("%L1").arg(lap.distance)
+                << QString("%L1").arg(lap.avgSpeed / 1000., 0, 'f', 3)
+                << QString("%L1").arg(lap.maxSpeed / 1000., 0, 'f', 3)
+                << QString("%L1").arg(lap.avgHr)
+                << QString("%L1").arg(lap.maxHr)
+                << QString("%L1").arg(lap.avgCad)
+                << QString("%L1").arg(lap.maxCad)
+                << QString("%L1").arg(lap.ascent)
+                << QString("%L1").arg(lap.descent)
+                << QString("%L1").arg(lap.avgPower)
+                << QString("%L1").arg(lap.maxPower)
+                << QString("%L1").arg(lap.normPower)
+                << QString("%L1").arg(lap.rightBalance, 0, 'f', 2)
+                << QString("%L1").arg(lap.leftBalance, 0, 'f', 2)
+                << QString("%L1").arg(lap.leftPedalSmooth)
+                << QString("%L1").arg(lap.rightPedalSmooth)
+                << QString("%L1").arg(lap.leftTorqueEff)
+                << QString("%L1").arg(lap.rightTorqueEff)
+                << QString("%L1").arg(lap.intensity, 0, 'f', 2)
+                << QString("%L1").arg(lap.trainStress, 0, 'f', 2)
+                << QString("%L1").arg(lap.work / 1000)
+                << QString("%L1").arg(lap.energy);
+             stream << strList.join(";") + "\n"; // Separeted by semicolon!
         }
         file.close();
     }
     path = QFileInfo(filename).absolutePath();
     cfg.setValue("csvPath", path);
     cfg.endGroup();
+}
 
+void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
+{
+    if (column != eColComment)
+    {
+      return;
+    }
+
+    bool ok;
+    QString comCur = item->text(eColComment);
+
+    qint32 index = item->data(eColComment, Qt::UserRole).toInt();
+
+    CTrackData::fitdata_t::lap_t lap = fitdata.getLap(index);
+
+    QString str = tr("Comment for") + " ";
+    if (lap.type == CTrackData::fitdata_t::eTypeLap)
+    {
+        str += tr("lap");
+    }
+    else if (lap.type == CTrackData::fitdata_t::eTypeSession)
+    {
+        str += tr("session");
+    }
+    str += QString(" %1").arg(fitdata.getLapNo(index));
+
+    QString comNew = QInputDialog::getText(this, tr("Edit comment"),
+                        str, QLineEdit::Normal, comCur, &ok);
+
+    if (ok && comNew != comCur)
+    {
+        item->setText(eColComment, comNew);
+        fitdata.setLapComment(index, comNew);
+        isChanged = true;
+        treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
+    }
 }
 
 void CFitDataDialog::slotShowHelp()
 {
-    QString msg = tr("<p><b>Set Energy Use for Cycling</b></p>"
+    QString msg = tr("<p><b>Header</b></p>"
                      "<p>Within this dialog your personal energy use (consumption) for a cycling tour can be computed.</p>"
                      "<p>The computed value of \"Energy Use Cycling\" can be see as an indicator for the exertion of a cycling tour.</p>"
                      "<p>The tour length, speed and slope values will be taken into account.</p>"

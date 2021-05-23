@@ -34,10 +34,12 @@ public:
     ~CFitDataDialog();
 
 private slots:
+    void slotOk(bool);
     void slotReset(bool);
     void slotButtonColumns(bool);
     void slotCheckColumns(bool checked);
     void slotSave2Csv(bool);
+    void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
     void slotShowHelp();
 
 private:
@@ -51,6 +53,7 @@ private:
     {
         eColType
         , eColIndex
+        , eColComment
         , eColElapsedTime
         , eColTimerTime
         , eColPause
@@ -86,6 +89,7 @@ private:
     QMap<columns_t, struct columnLabel_t> columns = {
         {eColType, {tr("Type"), Qt::AlignLeft}}
         , {eColIndex, {"#", Qt::AlignRight}}
+        , {eColComment, {tr("Comment"), Qt::AlignLeft}}
         , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignRight}}
         , {eColTimerTime, {tr("Timer Time"), Qt::AlignRight}}
         , {eColPause, {tr("Pause"), Qt::AlignRight}}
@@ -114,6 +118,7 @@ private:
     };
 
     quint32 checkstates; //Bitmask to store checkbox states, 31 columns max
+    bool isChanged = false;
 };
 
 #endif // CFITDATADIALOG_H

@@ -745,8 +745,11 @@ void CDetailsTrk::slotFitData()
 
     qint32 ret = fitDataDialog.exec();
 
+//    trk.updateHistory(CGisItemTrk::eVisualDetails);
+    trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
     if(ret == QDialog::Rejected)
     {
+//        trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
         trk.updateHistory(CGisItemTrk::eVisualDetails);
     }
 }
