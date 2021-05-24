@@ -198,7 +198,7 @@ public:
         return trk.name.isEmpty() ? noName : trk.name;
     }
 
-//    const CEnergyCycling &getEnergyCycling() const { return energyCycling; }
+    const CEnergyCycling &getEnergyCycling() const { return energyCycling; }
     CEnergyCycling& getEnergyCycling() { return energyCycling; }
 
     /// returns "true" when trk has no time-related invalid points

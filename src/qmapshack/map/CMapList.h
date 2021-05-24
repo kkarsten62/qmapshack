@@ -77,12 +77,7 @@ private slots:
     void slotFilter(const QString& str);
 
 private:
-<<<<<<< HEAD
-    QMenu * menu;
-
-=======
     QMenu* menu;
->>>>>>> upstream/dev
 };
 
 #endif //CMAPLIST_H
