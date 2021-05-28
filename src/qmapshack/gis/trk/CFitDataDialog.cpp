@@ -16,15 +16,20 @@
 **********************************************************************************************/
 
 #include "CMainWindow.h"
+#include "gis/trk/CFitData.h"
 #include "gis/trk/CFitDataDialog.h"
 #include "helpers/CSettings.h"
+#include <QCheckBox>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QInputDialog>
 
 /** @brief Constructor - Initiate the dialog GUI
 
    @param xxx yyy
    @param xxx yyy
  */
-CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) :
+CFitDataDialog::CFitDataDialog(CFitData& fitdata, QWidget* parent) :
     QDialog(parent)
     , fitdata(fitdata)
 {
@@ -55,7 +60,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
 
 
     // Add Header labels to treeTable
-    QTreeWidgetItem *item = new QTreeWidgetItem();
+    QTreeWidgetItem* item = new QTreeWidgetItem();
     QMapIterator<columns_t, struct columnLabel_t> col(columns);
     while (col.hasNext())
     {
@@ -68,15 +73,15 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
     // Add values to treeTable
     qint32 index = 0;
     QList<QTreeWidgetItem*> items;
-    for(struct CTrackData::fitdata_t::lap_t& lap : fitdata.getLaps())
+    for(CFitData::lap_t& lap : fitdata.getLaps())
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
-        if (lap.type == CTrackData::fitdata_t::eTypeLap)
+        if (lap.type == CFitData::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
             item->setText(eColIndex, QString("%1").arg(lap.no));
         }
-        else if (lap.type == CTrackData::fitdata_t::eTypeSession)
+        else if (lap.type == CFitData::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
             item->setText(eColIndex, QString("%1").arg(lap.no));
@@ -175,7 +180,7 @@ CFitDataDialog::CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent) 
         item->setTextAlignment(eColEnergy, columns[eColEnergy].alignment);
 
         // Set bold to session row
-        if (lap.type == CTrackData::fitdata_t::eTypeSession)
+        if (lap.type == CFitData::eTypeSession)
         {
             QFont font = QFont();
             font.setBold(true);
@@ -297,7 +302,7 @@ void CFitDataDialog::slotSave2Csv(bool)
         stream << strList.join(";") + "\n"; // Separeted by semicolon!
 
         // Put values into stream
-        for (const struct CTrackData::fitdata_t::lap_t &lap : fitdata.getLaps())
+        for (const CFitData::lap_t& lap : fitdata.getLaps())
         {
             strList.clear();
             strList << QString("%L1").arg(lap.type)
@@ -349,14 +354,14 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
 
     qint32 index = item->data(eColComment, Qt::UserRole).toInt();
 
-    CTrackData::fitdata_t::lap_t lap = fitdata.getLap(index);
+    CFitData::lap_t &lap = fitdata.getLap(index);
 
     QString str = tr("Comment for") + " ";
-    if (lap.type == CTrackData::fitdata_t::eTypeLap)
+    if (lap.type == CFitData::eTypeLap)
     {
         str += tr("lap");
     }
-    else if (lap.type == CTrackData::fitdata_t::eTypeSession)
+    else if (lap.type == CFitData::eTypeSession)
     {
         str += tr("session");
     }

@@ -238,8 +238,8 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
     }
     if(fileIdMesg.isFieldValueValid(eFileIdProduct))
     {
-        trk.getFitData().setIsValid(true);
-        trk.getFitData().setProduct(fileIdMesg.getFieldValue(eFileIdProduct).toUInt());
+        getFitData().setIsValid(true);
+        getFitData().setProduct(fileIdMesg.getFieldValue(eFileIdProduct).toUInt());
     }
     stream.reset();
 
@@ -288,9 +288,14 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
         {
             qDebug() << "\n";
 
-            struct CTrackData::fitdata_t::lap_t lap;
+            CFitData::lap_t lap;
 
-            lap.type = CTrackData::fitdata_t::eTypeLap;
+//            qDebug() << "Start pt.lon=" << toDegree(mesg.getFieldValue(3).toInt());
+//            qDebug() << "Start pt.lat=" << toDegree(mesg.getFieldValue(4).toInt());
+//            qDebug() << "End   pt.lon=" << toDegree(mesg.getFieldValue(5).toInt());
+//            qDebug() << "End   pt.lat=" << toDegree(mesg.getFieldValue(6).toInt());
+
+            lap.type = CFitData::eTypeLap;
 
             if(mesg.isFieldValueValid(eLapMessageIndex))
             {
@@ -404,15 +409,18 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
                 lap.energy = mesg.getFieldValue(eLapTotalCalories).toUInt(); // uint16, kcalorie
                 qDebug() << "eLapTotalCalories=" << lap.energy;
             }
-            trk.getFitData().setLap(lap);
+            getFitData().setLap(lap);
         }
         else if(mesg.getGlobalMesgNr() == eMesgNumSession)
         {
             qDebug() << "\n";
 
-            struct CTrackData::fitdata_t::lap_t session;
+            CFitData::lap_t session;
 
-            session.type = CTrackData::fitdata_t::eTypeSession;
+//            qDebug() << "Start pt.lon=" << toDegree(mesg.getFieldValue(3).toInt());
+//            qDebug() << "Start pt.lat=" << toDegree(mesg.getFieldValue(4).toInt());
+
+            session.type = CFitData::eTypeSession;
 
             if(mesg.isFieldValueValid(eSessionNumLaps))
             {
@@ -536,7 +544,7 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
                 session.energy = mesg.getFieldValue(eSessionTotalCalories).toUInt(); // uint16, kcalorie
                 qDebug() << "eSessionTotalCalories=" << session.energy;
             }
-            trk.getFitData().setLap(session);
+            getFitData().setLap(session);
         }
     }
     while (stream.hasMoreMesg());

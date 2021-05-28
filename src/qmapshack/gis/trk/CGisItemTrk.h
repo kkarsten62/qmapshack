@@ -24,6 +24,7 @@
 #include "gis/IGisLine.h"
 #include "gis/trk/CActivityTrk.h"
 #include "gis/trk/CEnergyCycling.h"
+#include "gis/trk/CFitData.h"
 #include "gis/trk/CTrackData.h"
 #include "gis/trk/filter/CFilterSpeed.h"
 #include "gis/trk/filter/CFilterSpeedCycle.h"
@@ -199,7 +200,7 @@ public:
     }
 
     CEnergyCycling& getEnergyCycling() { return energyCycling; }
-    CTrackData::fitdata_t& getFitdata() { return trk.fitdata; }
+    CFitData& getFitData() { return fitdata; }
 
     /// returns "true" when trk has no time-related invalid points
     bool isTrkTimeValid() const { return (allValidFlags& CTrackData::trkpt_t::eInvalidTime) == 0; }
@@ -854,6 +855,7 @@ private:
     qreal totalElapsedSecondsMoving = 0;
     quint32 numberOfAttachedWpt = 0;
     CEnergyCycling energyCycling {*this};
+    CFitData fitdata {*this};
 
     void checkForInvalidPoints();
     /**@}*/

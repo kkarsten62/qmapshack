@@ -541,20 +541,20 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e)
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t &f)
+QDataStream& operator<<(QDataStream& stream, const CFitData& f)
 {
     stream  << VER_FITDATA << f.isValid << f.product << f.laps;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t &f)
+QDataStream& operator>>(QDataStream& stream, CFitData& f)
 {
     quint8 version;
     stream  >> version >> f.isValid >> f.product >> f.laps;
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t::lap_t &l)
+QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 {
     stream  << l.type << l.no << l.comment << l.elapsedTime
             << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
@@ -566,7 +566,7 @@ QDataStream& operator<<(QDataStream& stream, const CTrackData::fitdata_t::lap_t 
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, CTrackData::fitdata_t::lap_t &l)
+QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
 {
     stream  >> l.type >> l.no >> l.comment >> l.elapsedTime
             >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
@@ -610,7 +610,7 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
 
     out << energyCycling.getEnergyTrkSet();
 
-    out << trk.fitdata;
+    out << fitdata;
 
     out << trk.segs;
 
@@ -704,7 +704,7 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream)
 
     if(version > 7)
     {
-        in >> trk.fitdata;
+        in >> fitdata;
     }
 
     trk.segs.clear();

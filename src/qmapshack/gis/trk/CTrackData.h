@@ -221,62 +221,6 @@ public:
         }
     };
 
-    struct fitdata_t
-    {
-        enum lapType_e
-        {
-            eTypeUnknown   = 0
-            , eTypeLap     = 1
-            , eTypeSession = 2
-        };
-        struct lap_t
-        {
-            qint32 type = lapType_e::eTypeUnknown;
-            qint32 no = NOIDX;
-            QString comment = "-";
-            quint32 elapsedTime = 0;
-            quint32 timerTime = 0;
-            quint32 distance = 0;
-            quint16 avgSpeed = 0;
-            quint16 maxSpeed = 0;
-            quint8 avgHr = 0;
-            quint8 maxHr = 0;
-            quint8 avgCad = 0;
-            quint8 maxCad = 0;
-            quint16 ascent = 0;
-            quint16 descent = 0;
-            quint16 avgPower = 0;
-            quint16 maxPower = 0;
-            quint16 normPower = 0;
-            qreal rightBalance = 0;
-            qreal leftBalance = 0;
-            quint8 leftPedalSmooth = 0;
-            quint8 rightPedalSmooth = 0;
-            quint8 leftTorqueEff = 0;
-            quint8 rightTorqueEff = 0;
-            qreal intensity = 0;
-            qreal trainStress = 0;
-            quint32 work = 0;
-            quint16 energy = 0;
-        };
-        bool isValid = false;
-        quint16 product = 0;
-        QList<struct lap_t> laps;
-
-        bool getIsValid() const { return isValid; }
-        void setIsValid(bool isValid) { this->isValid = isValid; }
-        QList<struct lap_t>& getLaps() { return laps; }
-        void setLap(struct lap_t& lap) { laps << lap; }
-        struct lap_t& getLap(quint32 index) { return laps[index]; }
-        void clear() { laps.clear(); isValid = false; }
-        quint16 getProduct() const { return product; }
-        void setProduct(quint16 product) { this->product = product; }
-        void setLapComment(qint32 index, const QString& comment) { laps[index].comment = comment; }
-        qint32 getLapNo(qint32 index) const { return laps[index].no; }
-    };
-    struct fitdata_t fitdata;
-    struct fitdata_t &getFitData() { return fitdata; }
-
     CTrackData() {}
 
     CTrackData(const QString& name, const CTrackData& other, qint32 rangeStart, qint32 rangeEnd);

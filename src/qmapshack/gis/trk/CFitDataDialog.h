@@ -18,10 +18,10 @@
 #ifndef CFITDATADIALOG_H
 #define CFITDATADIALOG_H
 
-#include "gis/trk/CGisItemTrk.h"
 #include "ui_IFitDataDialog.h"
 
-// class CGisItemTrk;
+class CGisItemTrk;
+class CFitData;
 
 /** @brief GUI Dialog class to modify the CEnergyCycling parameter set
  */
@@ -30,7 +30,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     Q_OBJECT
 
 public:
-    explicit CFitDataDialog(CTrackData::fitdata_t &fitdata, QWidget *parent);
+    explicit CFitDataDialog(CFitData &fitdata, QWidget *parent);
     ~CFitDataDialog();
 
 private slots:
@@ -43,7 +43,7 @@ private slots:
     void slotShowHelp();
 
 private:
-    CTrackData::fitdata_t &fitdata;
+    CFitData& fitdata;
 
     QMap<quint16, QString> productName = {
         {1836, "Garmin Edge 1000"}
@@ -117,7 +117,7 @@ private:
         , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
     };
 
-    quint32 checkstates; //Bitmask to store checkbox states, 31 columns max
+    quint32 checkstates; // Bitmask to store checkbox states, 31 columns max
     bool isChanged = false;
 };
 
