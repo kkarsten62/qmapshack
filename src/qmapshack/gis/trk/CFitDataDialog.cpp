@@ -45,12 +45,15 @@ CFitDataDialog::CFitDataDialog(CFitData& fitdata, QWidget* parent) :
                 QString("%1 (%2) %3").arg(prefix).arg(product).arg(tr("Unknown device"));
     label->setText(labelTxt);
 
+    checkShowTrkptInfo->setChecked(fitdata.getIsTrkptInfo());
+
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
     buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
     buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save to csv"));
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
+    connect(checkShowTrkptInfo, &QCheckBox::clicked, this, &CFitDataDialog::slotShowTrkptInfo);
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
@@ -209,7 +212,6 @@ CFitDataDialog::CFitDataDialog(CFitData& fitdata, QWidget* parent) :
         QCheckBox *checkbox = new QCheckBox(columns[(columns_t)i].label, this);
         checkbox->setProperty("index", i);
 
-        qDebug() << "checkstates=" << checkstates;
         bool checked = (checkstates >> i) & 0x1;
         checkbox->setChecked(checked);
 
@@ -376,6 +378,19 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
         fitdata.setLapComment(index, comNew);
         isChanged = true;
         treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
+    }
+}
+
+void CFitDataDialog::slotShowTrkptInfo(bool checked)
+{
+    fitdata.setIsTrkptInfo(checked);
+    if(checked)
+    {
+        fitdata.setTrkPtDesc();
+    }
+    else
+    {
+        fitdata.delTrkPtDesc();
     }
 }
 

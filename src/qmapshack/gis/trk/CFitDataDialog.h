@@ -40,6 +40,7 @@ private slots:
     void slotCheckColumns(bool checked);
     void slotSave2Csv(bool);
     void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
+    void slotShowTrkptInfo(bool checked);
     void slotShowHelp();
 
 private:

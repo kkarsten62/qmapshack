@@ -16,6 +16,7 @@
 **********************************************************************************************/
 
 #include "gis/trk/CFitData.h"
+#include "gis/trk/CGisItemTrk.h"
 
 CFitData::CFitData(CGisItemTrk& trk) :
     trk(trk)
@@ -51,6 +52,9 @@ void CFitData::clear()
 {
     laps.clear();
     isValid = false;
+    delTrkPtDesc();
+    idxDescs.clear();
+    isTrkptInfo = false;
 }
 
 quint16 CFitData::getProduct() const
@@ -71,4 +75,60 @@ void CFitData::setLapComment(qint32 index, const QString& comment)
 qint32 CFitData::getLapNo(qint32 index) const
 {
     return laps[index].no;
+}
+
+void CFitData::assignTimeToIdx()
+{
+    if (!idxDescs.isEmpty())
+    {
+        return;
+    }
+    for (const struct lap_t lap : laps)
+    {
+        if (lap.type != eTypeLap || !lap.endTime.isValid())
+        {
+            continue;
+        }
+        for(const CTrackData::trkpt_t& pt : trk.getTrackData())
+        {
+            if (pt.time == lap.endTime)
+            {
+                idxDescs.insert(pt.idxTotal,
+                               QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no).arg(pt.idxTotal));
+            }
+        }
+    }
+}
+
+void CFitData::setTrkPtDesc()
+{
+    if (!isValid || laps.isEmpty())
+    {
+        return;
+    }
+
+    assignTimeToIdx();
+    trk.setTrkPtDesc(idxDescs);
+}
+
+void CFitData::delTrkPtDesc()
+{
+    if (!isValid || laps.isEmpty())
+    {
+        return;
+    }
+
+    assignTimeToIdx();
+    QList<qint32> idxTotals = idxDescs.keys();
+    trk.delTrkPtDesc(idxTotals);
+}
+
+bool CFitData::getIsTrkptInfo() const
+{
+    return isTrkptInfo;
+}
+
+void CFitData::setIsTrkptInfo(bool isTrkptInfo)
+{
+    this->isTrkptInfo = isTrkptInfo;
 }

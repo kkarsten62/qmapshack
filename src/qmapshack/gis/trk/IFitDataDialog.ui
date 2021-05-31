@@ -92,6 +92,17 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QCheckBox" name="checkShowTrkptInfo">
+       <property name="text">
+        <string>Show Trackpoint Info</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources.qrc">
+         <normaloff>:/icons/32x32/AddPointInfo.png</normaloff>:/icons/32x32/AddPointInfo.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="2" column="0">

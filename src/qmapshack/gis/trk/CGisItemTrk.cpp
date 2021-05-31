@@ -1612,6 +1612,21 @@ bool CGisItemTrk::setTrkPtDesc(int idxTotal, const QString& desc)
     return false;
 }
 
+bool CGisItemTrk::setTrkPtDesc(QMap<qint32, QString>& idxDescs)
+{
+    QMapIterator<qint32, QString> i(idxDescs);
+    while (i.hasNext())
+    {
+        i.next();
+        if(!trk.setTrkPtDesc(i.key(), i.value()))
+        {
+            return false;
+        }
+    }
+    changed(tr("Changed track point desc."), "://icons/48x48/I.png");
+    return true;
+}
+
 bool CGisItemTrk::delTrkPtDesc(const QList<int>& idxTotal)
 {
     if(trk.delTrkPtDesc(idxTotal))

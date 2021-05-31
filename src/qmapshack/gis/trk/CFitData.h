@@ -18,16 +18,16 @@
 #ifndef CFITDATA_H
 #define CFITDATA_H
 
-//#include "gis/trk/CGisItemTrk.h"
-
 #include "units/IUnit.h"
 
 #include <QDataStream>
 
 class CGisItemTrk;
 
-class CFitData
+class CFitData  : public QObject // for tr macro
 {
+    Q_OBJECT
+
 public:
     enum lapType_e
     {
@@ -39,6 +39,7 @@ public:
     struct lap_t
     {
         qint32 type = lapType_e::eTypeUnknown;
+        QDateTime endTime;
         qint32 no = NOIDX;
         QString comment = "-";
         quint32 elapsedTime = 0;
@@ -74,12 +75,17 @@ public:
     void setIsValid(bool isValid);
     QList<lap_t>& getLaps();
     void setLap(const struct lap_t& lap);
-    lap_t &getLap(quint32 index);
+    lap_t& getLap(quint32 index);
     void clear();
     quint16 getProduct() const;
     void setProduct(quint16 product);
     void setLapComment(qint32 index, const QString& comment);
     qint32 getLapNo(qint32 index) const;
+    void assignTimeToIdx();
+    void setTrkPtDesc();
+    void delTrkPtDesc();
+    bool getIsTrkptInfo() const;
+    void setIsTrkptInfo(bool isTrkptInfo);
 
 private:
     friend QDataStream& operator<<(QDataStream& stream, const CFitData& f);
@@ -90,6 +96,8 @@ private:
     bool isValid = false;
     quint16 product = 0;
     QList<struct lap_t> laps;
+    QMap<qint32, QString> idxDescs;
+    bool isTrkptInfo = false;
 };
 
 #endif // CFITDATA_H

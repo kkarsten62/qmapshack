@@ -421,6 +421,13 @@ public:
     bool setTrkPtDesc(int idxTotal, const QString& desc);
 
     /**
+       @brief Set a maplist of desc fields for track points referenced by it's total indeces
+       @param idxDescs  QMap of key/value pairs of index and string to set
+       @return Return true on success
+     */
+    bool setTrkPtDesc(QMap<qint32, QString>& idxDescs);
+
+    /**
        @brief Delete track point descriptions for one or several track points
        @param idxTotal  a list of total indices
      */

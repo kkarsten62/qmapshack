@@ -543,20 +543,20 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e)
 
 QDataStream& operator<<(QDataStream& stream, const CFitData& f)
 {
-    stream  << VER_FITDATA << f.isValid << f.product << f.laps;
+    stream  << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, CFitData& f)
 {
     quint8 version;
-    stream  >> version >> f.isValid >> f.product >> f.laps;
+    stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
     return stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 {
-    stream  << l.type << l.no << l.comment << l.elapsedTime
+    stream  << l.type << l.endTime << l.no << l.comment << l.elapsedTime
             << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
             << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
             << l.descent << l.avgPower << l.maxPower << l.normPower
@@ -568,7 +568,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
 {
-    stream  >> l.type >> l.no >> l.comment >> l.elapsedTime
+    stream  >> l.type >> l.endTime >> l.no >> l.comment >> l.elapsedTime
             >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
             >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
             >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
