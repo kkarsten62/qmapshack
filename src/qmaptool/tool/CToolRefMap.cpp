@@ -26,7 +26,7 @@
 #include "setup/IAppSetup.h"
 #include "shell/CShell.h"
 
-CToolRefMap::CToolRefMap(QWidget *parent)
+CToolRefMap::CToolRefMap(QWidget* parent)
     : IToolGui(parent)
 {
     setupUi(this);
@@ -57,6 +57,7 @@ CToolRefMap::CToolRefMap(QWidget *parent)
     itemList->loadSettings(cfg);
     checkCreateVrt->setChecked(cfg.value("createVrt", false).toBool());
     groupOverviews->loadSettings(cfg);
+    groupGDALParameters->loadSettings(cfg);
     checkAllFiles->setChecked(cfg.value("allFiles", false).toBool());
     lineSuffix->setText(cfg.value("suffix", "_ref").toString());
     cfg.endGroup();
@@ -74,6 +75,7 @@ CToolRefMap::~CToolRefMap()
     itemList->saveSettings(cfg);
     cfg.setValue("createVrt", checkCreateVrt->isChecked());
     groupOverviews->saveSettings(cfg);
+    groupGDALParameters->saveSettings(cfg);
     cfg.setValue("allFiles", checkAllFiles->isChecked());
     cfg.setValue("suffix", lineSuffix->text());
     cfg.endGroup();
@@ -96,9 +98,9 @@ void CToolRefMap::setupChanged()
     checkCreateVrt->setVisible(!IAppSetup::self().getGdalbuildvrt().isEmpty());
 }
 
-void CToolRefMap::slotAddItem(const QString& filename, QListWidget * list)
+void CToolRefMap::slotAddItem(const QString& filename, QListWidget* list)
 {
-    CItemRefMap * item = new CItemRefMap(filename, stackedWidget, list);
+    CItemRefMap* item = new CItemRefMap(filename, stackedWidget, list);
     connect(item, &CItemFile::sigChanged, itemList, &CItemListWidget::sigChanged);
 }
 
@@ -110,7 +112,7 @@ void CToolRefMap::slotMapSelectionChanged()
 
 void CToolRefMap::slotSomethingChanged()
 {
-    IItem * item = itemList->currentItem();
+    IItem* item = itemList->currentItem();
     if(item != nullptr)
     {
         bool ok = item->isOk();
@@ -126,9 +128,9 @@ void CToolRefMap::slotSomethingChanged()
     }
 }
 
-void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
+void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem* iitem)
 {
-    const CItemRefMap * item = dynamic_cast<const CItemRefMap*>(iitem);
+    const CItemRefMap* item = dynamic_cast<const CItemRefMap*>(iitem);
     if(nullptr == item)
     {
         return;
@@ -161,17 +163,16 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
         args << "0";
     }
 
-    QString tmpname1    = createTempFile("tif");
-    QString inFilename  = item->getFilename();
+    QString tmpname1 = createTempFile("tif");
+    QString inFilename = item->getFilename();
     args << inFilename << tmpname1;
     cmds << CShellCmd(IAppSetup::self().getGdaltranslate(), args);
 
     // ---- command 2 ----------------------
-    IDrawContext * context = item->getDrawContext();
-    args.clear();
+    IDrawContext* context = item->getDrawContext();
+
     // --- set re-sampling method ---
-    args << "-r";
-    args << (context->is32BitRgb() ? "cubic" : "near");
+    args = groupGDALParameters->getArgsResampling({"-r", context->is32BitRgb() ? "cubic" : "near"});
     // --- overwrite last output file ---
     args << "-overwrite";
     // --- use all CPU cores when possible ---
@@ -201,8 +202,11 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem *iitem)
     QFileInfo fi(inFilename);
     QString outFilename = fi.absoluteDir().absoluteFilePath(fi.completeBaseName() + lineSuffix->text() + "." + fi.suffix());
 
-    args.clear();
-    args << "-co" << "tiled=yes" << "-co" << "compress=deflate";
+    args = groupGDALParameters->getArgs();
+    if(args.isEmpty())
+    {
+        args << "-co" << "tiled=yes" << "-co" << "compress=deflate";
+    }
     args << tmpname2 << outFilename;
     cmds << CShellCmd(IAppSetup::self().getGdaltranslate(), args);
 
