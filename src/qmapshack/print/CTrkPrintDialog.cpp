@@ -389,7 +389,8 @@ void CTrkPrintDialog::slotUpdateMetrics()
     QString labelScaleInfoStr(tr("Zoom with mouse wheel on the map left<br>to change the printing scale.") + "<br><br>");
     labelScaleInfoStr += (tr("Scale of approx. 1:") + QString("%L1")).arg(qRound(scale)) + "<br>";
     labelScaleInfoStr += (tr("1cm on paper page equals %L1m in reality.")).arg(qRound(scale / 100)) + "<br>";
-    labelScaleInfoStr += (tr("Be aware, <b>%L1 pages</b> will be needed to print the track.")).arg(pages.size()) + "<br><br>";
+    labelScaleInfoStr += (tr("Be aware, <b>%L1 pages</b> will be needed to print the track."))
+            .arg(pages.size()) + "<br><br>";
     if (printer.outputFormat() == QPrinter::PdfFormat)
     {
         labelScaleInfoStr += (tr("Current printer: PDF file")) + "<br>";
@@ -419,6 +420,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     // Print scene on image
     QSize size = labelPlotTrack->size();
     QImage image(size.width(), size.height(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
     QPainter p;
     p.begin(&image);
     USE_ANTI_ALIASING(p, true);
