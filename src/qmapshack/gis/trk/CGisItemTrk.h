@@ -198,8 +198,8 @@ public:
         return trk.name.isEmpty() ? noName : trk.name;
     }
 
-    const CEnergyCycling &getEnergyCycling() const { return energyCycling; }
     CEnergyCycling& getEnergyCycling() { return energyCycling; }
+    const CEnergyCycling& getEnergyCycling() const { return energyCycling; }
 
     /// returns "true" when trk has no time-related invalid points
     bool isTrkTimeValid() const { return (allValidFlags& CTrackData::trkpt_t::eInvalidTime) == 0; }
