@@ -36,18 +36,8 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
 
     setWindowTitle(tr("Print Track"));
 
-    QList<CCanvas*> list = CMainWindow::self().getCanvas();
+    CCanvas* source = CMainWindow::self().getCanvas().at(0);
 
-    CCanvas *source = nullptr;
-    if (list.size())
-    {
-        source = list.at(0);
-    }
-    else
-    {
-        // Dialog
-        rejected();
-    }
     // clone canvas by a temporary configuration file
     QTemporaryFile temp;
     temp.open();
@@ -140,8 +130,6 @@ void CTrkPrintDialog::resizeEvent(QResizeEvent * e)
 void CTrkPrintDialog::slotUpdateMetrics()
 {
 //    qDebug() << "slotUpdateMetrics";
-    QTime timer;
-    timer.start();
 
     QRectF trkRectRad = trk.getBoundingRect();
 
@@ -202,7 +190,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     CTrackData::trkpt_t const *prevTrkpt  = nullptr;
     qint32 nextDistanceMarker = 1;  // The number of next distance marker
     distanceMarkerPts.clear();
-    for(const CTrackData::trkpt_t &trkpt : trk.getTrackData())
+    for(const CTrackData::trkpt_t& trkpt : trk.getTrackData())
     {
         if(trkpt.isInvalid(CTrackData::trkpt_t::invalid_e(invalidMask)) || trkpt.isHidden())
         {
@@ -440,7 +428,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     p.setPen(Qt::darkCyan);
     p.setOpacity(0.7); // Some opacity to see the prevoius page
     qint32 pageNo = 0;
-    for(const struct page_t page : pages)
+    for(const struct page_t& page : pages)
     {
         qreal p1x = 5 + offX + (page.x() - bbPages.x()) / scaleImg; // 5 pixel margin
         qreal p2y = 5 + offY + (page.y() - bbPages.y()) / scaleImg;
@@ -450,7 +438,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     p.setOpacity(1); // Print the track, no opacity
     p.setPen(QPen(Qt::darkBlue, 2));
     QPolygonF polyLine;
-    for(const struct pt_t pt : pts)
+    for(const struct pt_t& pt : pts)
     {
         qreal ptx = 5 + offX + (pt.x() - bbPages.x()) / scaleImg;
         qreal pty = 5 + offY + (pt.y() - bbPages.y()) / scaleImg;
@@ -461,7 +449,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     p.setPen(QPen());  // Print the pageNo, default pen
     if (pages.size() <= 50) // Max 50 pageNo shown
     {
-        for(const struct page_t page : pages)
+        for(const struct page_t& page : pages)
         {
             QPointF center = page.center(); // Center in pixel
             qreal p1x = 5 + offX + (center.x() - bbPages.x()) / scaleImg - 10; // 10 text rect 20x20 pixel
@@ -605,7 +593,7 @@ void CTrkPrintDialog::addPageMarkers(QPainter &p, const QRectF &currPage, const 
 
 void CTrkPrintDialog::addDistanceMarkers(QPainter &p, const QRectF &currPage)
 {
-    for (struct distanceMarkerPt_t dmPt : distanceMarkerPts)
+    for (struct distanceMarkerPt_t& dmPt : distanceMarkerPts)
     {
         if (currPage.contains(dmPt)) // Find the the best fitting postion from the line to the text box
         {

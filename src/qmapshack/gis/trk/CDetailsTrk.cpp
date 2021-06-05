@@ -543,6 +543,18 @@ void CDetailsTrk::updateData()
     }
     toolHeartRateZones->setToolTip(tooltip);
 
+    tooltip = tr("Print the track along its path");
+    if (CMainWindow::self().getCanvas().size())
+    {
+        toolTrkPrint->setEnabled(true);
+    }
+    else
+    {
+        tooltip += "<b style='color: red;'>" + tr(" - Dialog needs at least one map view.") + "</b>";
+        toolTrkPrint->setEnabled(false);
+    }
+    toolTrkPrint->setToolTip(tooltip);
+
     enableTabFilter();
     originator = false;
 }
