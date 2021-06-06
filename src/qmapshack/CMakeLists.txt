@@ -284,6 +284,18 @@ set( SRCS
     plot/CPlotTrack.cpp
     plot/IPlot.cpp
     plot/ITrack.cpp
+    poi/CPoiCategory.cpp
+    poi/CPoiDraw.cpp
+    poi/CPoiIconCategory.cpp
+    poi/CPoiItem.cpp
+    poi/CPoiList.cpp
+    poi/CPoiPathSetup.cpp
+    poi/CPoiPropSetup.cpp
+    poi/CPoiPOI.cpp
+    poi/CPoiPOI_TagMap.cpp
+    poi/CRawPoi.cpp
+    poi/IPoi.cpp
+    poi/IPoiProp.cpp
     print/CPrintDialog.cpp
     print/CScreenshotDialog.cpp
     print/CTrkPrintDialog.cpp
@@ -566,6 +578,7 @@ set( HDRS
     helpers/CSelectCopyAction.h
     helpers/CSelectProjectDialog.h
     helpers/CSettings.h
+    helpers/CTryMutexLocker.h
     helpers/CToolBarConfig.h
     helpers/CToolBarSetupDialog.h
     helpers/CValue.h
@@ -574,6 +587,7 @@ set( HDRS
     helpers/CWptIconManager.h
     helpers/Platform.h
     helpers/Signals.h
+    helpers/Tristate.h
     map/CMapDraw.h
     map/CMapGEMF.h
     map/CMapIMG.h
@@ -642,6 +656,17 @@ set( HDRS
     plot/CPlotTrack.h
     plot/IPlot.h
     plot/ITrack.h
+    poi/CPoiCategory.h
+    poi/CPoiDraw.h
+    poi/CPoiIconCategory.h
+    poi/CPoiItem.h
+    poi/CPoiList.h
+    poi/CPoiPathSetup.h
+    poi/CPoiPropSetup.h
+    poi/CPoiPOI.h
+    poi/CRawPoi.h
+    poi/IPoi.h
+    poi/IPoiProp.h
     print/CPrintDialog.h
     print/CScreenshotDialog.h
     print/CTrkPrintDialog.h
@@ -828,6 +853,9 @@ set( UIS
     mouse/IScrOptSelect.ui
     mouse/line/IScrOptEditLine.ui
     mouse/line/IScrOptRangeLine.ui
+    poi/IPoiList.ui
+    poi/IPoiPathSetup.ui
+    poi/IPoiPropSetup.ui
     print/IPrintDialog.ui
     print/IScreenshotDialog.ui
     print/ITrkPrintDialog.ui

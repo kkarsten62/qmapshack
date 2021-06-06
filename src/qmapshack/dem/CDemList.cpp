@@ -25,9 +25,9 @@
 
 #include <QtWidgets>
 
-void CDemTreeWidget::dragMoveEvent( QDragMoveEvent  * event )
+void CDemTreeWidget::dragMoveEvent( QDragMoveEvent* event )
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(itemAt(event->pos()));
+    CDemItem* item = dynamic_cast<CDemItem*>(itemAt(event->pos()));
 
     if(item && item->isActivated())
     {
@@ -40,9 +40,9 @@ void CDemTreeWidget::dragMoveEvent( QDragMoveEvent  * event )
     }
 }
 
-void CDemTreeWidget::dropEvent( QDropEvent  * event )
+void CDemTreeWidget::dropEvent( QDropEvent* event )
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(currentItem());
+    CDemItem* item = dynamic_cast<CDemItem*>(currentItem());
     if(item)
     {
         item->showChildren(false);
@@ -59,19 +59,19 @@ void CDemTreeWidget::dropEvent( QDropEvent  * event )
 }
 
 
-CDemList::CDemList(QWidget *parent)
+CDemList::CDemList(QWidget* parent)
     : QWidget(parent)
 {
     setupUi(this);
     lineFilter->addAction(actionClearFilter, QLineEdit::TrailingPosition);
 
-    connect(treeWidget,     &CDemTreeWidget::customContextMenuRequested, this, &CDemList::slotContextMenu);
-    connect(actionMoveUp,   &QAction::triggered,                         this, &CDemList::slotMoveUp);
-    connect(actionMoveDown, &QAction::triggered,                         this, &CDemList::slotMoveDown);
-    connect(actionActivate, &QAction::triggered,                         this, &CDemList::slotActivate);
-    connect(treeWidget,     &QTreeWidget::doubleClicked,                 this, &CDemList::slotActivate);
-    connect(actionReloadDem, &QAction::triggered,                        this, &CDemList::slotReloadDem);
-    connect(treeWidget,     &CDemTreeWidget::sigChanged,                 this, &CDemList::sigChanged);
+    connect(treeWidget, &CDemTreeWidget::customContextMenuRequested, this, &CDemList::slotContextMenu);
+    connect(actionMoveUp, &QAction::triggered, this, &CDemList::slotMoveUp);
+    connect(actionMoveDown, &QAction::triggered, this, &CDemList::slotMoveDown);
+    connect(actionActivate, &QAction::triggered, this, &CDemList::slotActivate);
+    connect(treeWidget, &QTreeWidget::doubleClicked, this, &CDemList::slotActivate);
+    connect(actionReloadDem, &QAction::triggered, this, &CDemList::slotReloadDem);
+    connect(treeWidget, &CDemTreeWidget::sigChanged, this, &CDemList::sigChanged);
     connect(labelHelpFillMapList, &QLabel::linkActivated, &CMainWindow::self(), static_cast<void (CMainWindow::*)(const QString&)>(&CMainWindow::slotLinkActivated));
     connect(lineFilter, &QLineEdit::textChanged, this, &CDemList::slotFilter);
 
@@ -99,7 +99,7 @@ void CDemList::sort()
     QList<CDemItem*> items1;
     while(treeWidget->topLevelItemCount())
     {
-        CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->takeTopLevelItem(0));
+        CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->takeTopLevelItem(0));
         if(item != nullptr)
         {
             items1 << item;
@@ -109,7 +109,7 @@ void CDemList::sort()
     qSort(items1.begin(), items1.end(), &sortByName<CDemItem>);
 
     QList<QTreeWidgetItem*> items2;
-    for(CDemItem * item : qAsConst(items1))
+    for(CDemItem* item : qAsConst(items1))
     {
         items2 << item;
     }
@@ -121,9 +121,9 @@ int CDemList::count()
     return treeWidget->topLevelItemCount();
 }
 
-CDemItem * CDemList::item(int i)
+CDemItem* CDemList::item(int i)
 {
-    return dynamic_cast<CDemItem *>(treeWidget->topLevelItem(i));
+    return dynamic_cast<CDemItem*>(treeWidget->topLevelItem(i));
 }
 
 void CDemList::updateHelpText()
@@ -138,7 +138,7 @@ void CDemList::updateHelpText()
     {
         labelHelpFillMapList->hide();
 
-        CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(0));
+        CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(0));
         bool haveActive = item && item->isActivated();
         labelIcon->setVisible(!haveActive);
         labelHelpActivateMap->setVisible(!haveActive);
@@ -147,7 +147,7 @@ void CDemList::updateHelpText()
 
 void CDemList::slotActivate()
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
+    CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
     if(nullptr == item)
     {
         return;
@@ -164,7 +164,7 @@ void CDemList::slotActivate()
 
 void CDemList::slotMoveUp()
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
+    CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
     if(item == nullptr)
     {
         return;
@@ -186,7 +186,7 @@ void CDemList::slotMoveUp()
 
 void CDemList::slotMoveDown()
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
+    CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
     if(item == nullptr)
     {
         return;
@@ -209,9 +209,9 @@ void CDemList::slotMoveDown()
 
 void CDemList::slotContextMenu(const QPoint& point)
 {
-    CDemItem * item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
+    CDemItem* item = dynamic_cast<CDemItem*>(treeWidget->currentItem());
 
-    bool itemIsSelected  = nullptr != item;
+    bool itemIsSelected = nullptr != item;
     bool itemIsActivated = item ? item->isActivated() : false;
 
     actionActivate->setEnabled(itemIsSelected);
@@ -223,7 +223,7 @@ void CDemList::slotContextMenu(const QPoint& point)
 
     if(itemIsSelected)
     {
-        CDemItem * item1 = dynamic_cast<CDemItem*>(treeWidget->itemBelow(item));
+        CDemItem* item1 = dynamic_cast<CDemItem*>(treeWidget->itemBelow(item));
         actionMoveUp->setEnabled(itemIsActivated && (treeWidget->itemAbove(item) != nullptr));
         actionMoveDown->setEnabled(itemIsActivated && item1 && item1->isActivated());
     }
@@ -279,7 +279,7 @@ void CDemList::slotFilter(const QString& str)
     {
         for(int n = 0; n < N; n++)
         {
-            CDemItem * dem = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(n));
+            CDemItem* dem = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(n));
             if(dem == nullptr)
             {
                 continue;
@@ -292,7 +292,7 @@ void CDemList::slotFilter(const QString& str)
         const QString& tmp = str.toUpper();
         for(int n = 0; n < N; n++)
         {
-            CDemItem * dem = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(n));
+            CDemItem* dem = dynamic_cast<CDemItem*>(treeWidget->topLevelItem(n));
             if(dem == nullptr)
             {
                 continue;
