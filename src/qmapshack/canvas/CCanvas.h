@@ -31,6 +31,7 @@ class IDrawContext;
 class CMapDraw;
 class CGrid;
 class CDemDraw;
+class CPoiDraw;
 class QGestureEvent;
 class CGisDraw;
 class CRtDraw;
@@ -99,7 +100,12 @@ public:
     void zoomTo(const QRectF& rect);
     void zoom(int index);
     void displayInfo(const QPoint& px);
-    poi_t findPOICloseBy(const QPoint& px) const;
+    ///The POIs can be clustered together, so the icon is not necessarily displayed where the POI is.
+    /// Thus the location where to draw the highlight is separately given
+    void findPoiCloseBy(const QPoint& px, QSet<poi_t>& poiItems, QList<QPointF>& posPoiHighlight) const;
+    ///The POIs can be clustered together, so the icon is not necessarily displayed where the POI is.
+    /// Thus the location where to draw the highlight is separately given
+    void findPoisIn(const QRectF& degRect, QSet<poi_t>& poiItems, QList<QPointF>& posPoiHighlight) const;
 
     enum redraw_e
     {
@@ -109,6 +115,7 @@ public:
         , eRedrawGis = 0x04
         , eRedrawMouse = 0x08
         , eRedrawRt = 0x10
+        , eRedrawPoi = 0x20
         , eRedrawAll = 0xFFFFFFFF
     };
 
@@ -250,6 +257,7 @@ private:
     redraw_e needsRedraw = eRedrawAll;  //< set true to initiate a complete redraw of the screen content
     CMapDraw* map;                      //< the map object attached to this canvas
     CDemDraw* dem;                      //< the elevation data layer attached to this canvas
+    CPoiDraw* poi;                      //< the poi database attached to this canvas
     CGisDraw* gis;                      //< the GIS data layer attached to this canvas
     CRtDraw* rt;                        //< the real time data layer attached to this canvas
     CGrid* grid;                        //< the grid attached to this canvas
@@ -274,6 +282,10 @@ private:
     /// load indicator for DEM
     QMovie* loadIndicator2;
     QLabel* demLoadIndicator;
+
+    /// load indicator for POI
+    QMovie* loadIndicator3;
+    QLabel* poiLoadIndicator;
 
     QPointer<CColorLegend> colorLegend;
 

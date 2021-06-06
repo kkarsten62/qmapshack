@@ -19,13 +19,18 @@
 #include "CMainWindow.h"
 #include "gis/CGisDraw.h"
 #include "gis/CGisWorkspace.h"
+#include "gis/Poi.h"
 #include "gis/trk/CActivityTrk.h"
+#include "helpers/CTryMutexLocker.h"
 #include "helpers/CWptIconManager.h"
 #include "mouse/CMouseSelect.h"
 #include "mouse/CScrOptSelect.h"
+
 #include <QtWidgets>
 
-CMouseSelect::CMouseSelect(CGisDraw *gis, CCanvas *canvas, CMouseAdapter *mouse)
+QMutex CMouseSelect::mutex(QMutex::NonRecursive);
+
+CMouseSelect::CMouseSelect(CGisDraw* gis, CCanvas* canvas, CMouseAdapter* mouse)
     : IMouseSelect(gis, canvas, mouse)
 {
     cursor = QCursor(QPixmap("://cursors/cursorSelectArea.png"), 0, 0);
@@ -36,19 +41,19 @@ CMouseSelect::CMouseSelect(CGisDraw *gis, CCanvas *canvas, CMouseAdapter *mouse)
                             "click. Adjust the selection by point-click-move on the corners.")
                          );
 
-    CScrOptSelect * scrOptSelect;
+    CScrOptSelect* scrOptSelect;
     scrOpt = scrOptSelect = new CScrOptSelect(this);
 
     connect(&CGisWorkspace::self(), &CGisWorkspace::sigChanged, this, &CMouseSelect::slotUpdate);
-    connect(scrOptSelect->toolCopy,         &QToolButton::clicked, this, &CMouseSelect::slotCopy);
-    connect(scrOptSelect->toolRoute,        &QToolButton::clicked, this, &CMouseSelect::slotRoute);
-    connect(scrOptSelect->toolEditPrxWpt,   &QToolButton::clicked, this, &CMouseSelect::slotEditPrxWpt);
-    connect(scrOptSelect->toolSymWpt,       &QToolButton::clicked, this, &CMouseSelect::slotSymWpt);
-    connect(scrOptSelect->toolEleWptTrk,    &QToolButton::clicked, this, &CMouseSelect::slotEleWptTrk);
-    connect(scrOptSelect->toolCombineTrk,   &QToolButton::clicked, this, &CMouseSelect::slotCombineTrk);
-    connect(scrOptSelect->toolActivityTrk,  &QToolButton::clicked, this, &CMouseSelect::slotActivityTrk);
-    connect(scrOptSelect->toolColorTrk,     &QToolButton::clicked, this, &CMouseSelect::slotColorTrk);
-    connect(scrOptSelect->toolDelete,       &QToolButton::clicked, this, &CMouseSelect::slotDelete);
+    connect(scrOptSelect->toolCopy, &QToolButton::clicked, this, &CMouseSelect::slotCopy);
+    connect(scrOptSelect->toolRoute, &QToolButton::clicked, this, &CMouseSelect::slotRoute);
+    connect(scrOptSelect->toolEditPrxWpt, &QToolButton::clicked, this, &CMouseSelect::slotEditPrxWpt);
+    connect(scrOptSelect->toolSymWpt, &QToolButton::clicked, this, &CMouseSelect::slotSymWpt);
+    connect(scrOptSelect->toolEleWptTrk, &QToolButton::clicked, this, &CMouseSelect::slotEleWptTrk);
+    connect(scrOptSelect->toolCombineTrk, &QToolButton::clicked, this, &CMouseSelect::slotCombineTrk);
+    connect(scrOptSelect->toolActivityTrk, &QToolButton::clicked, this, &CMouseSelect::slotActivityTrk);
+    connect(scrOptSelect->toolColorTrk, &QToolButton::clicked, this, &CMouseSelect::slotColorTrk);
+    connect(scrOptSelect->toolDelete, &QToolButton::clicked, this, &CMouseSelect::slotDelete);
 }
 
 CMouseSelect::~CMouseSelect()
@@ -60,7 +65,13 @@ CMouseSelect::~CMouseSelect()
 
 void CMouseSelect::findItems(QList<IGisItem*>& items)
 {
-    CScrOptSelect * scrOptSelect = dynamic_cast<CScrOptSelect*>((IScrOpt*)scrOpt);
+    CTryMutexLocker lock(mutex);
+    if(!lock.try_lock())
+    {
+        return;
+    }
+
+    CScrOptSelect* scrOptSelect = dynamic_cast<CScrOptSelect*>((IScrOpt*)scrOpt);
     IGisItem::selflags_t modeSelection = scrOptSelect->getModeSelection();
 
     if((rectSelection == rectLastSel) && (modeSelection == modeLastSel))
@@ -82,7 +93,7 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
         cntTrk = 0;
         cntRte = 0;
         cntOvl = 0;
-        for(IGisItem * item : qAsConst(items))
+        for(IGisItem* item : qAsConst(items))
         {
             itemKeys << item->getKey();
             switch(item->type())
@@ -105,6 +116,18 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
             }
         }
 
+        posPoiHighlight.clear();
+        poisFound.clear();
+        if(modeSelection & IGisItem::eSelectionPoi)
+        {
+            canvas->findPoisIn(area, poisFound, posPoiHighlight);
+        }
+        else
+        {
+            poisFound = {};
+        }
+        cntPoi = poisFound.count();
+
         QString msg = tr("<b>Selected:</b><br/>");
         if(scrOptSelect->toolItemTrk->isChecked())
         {
@@ -126,13 +149,18 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
             msg += tr("%1 areas<br/>").arg(cntOvl);
         }
 
+        if(scrOptSelect->toolItemPoi->isChecked())
+        {
+            msg += tr("%1 POIs<br/>").arg(cntPoi);
+        }
         canvas->reportStatus("CMouseSelect::Stat", msg);
 
         rectLastSel = rectSelection;
         modeLastSel = modeSelection;
     }
 
-    scrOptSelect->frameFunction->setDisabled(items.isEmpty());
+    scrOptSelect->frameFunction->setDisabled(items.isEmpty() && poisFound.isEmpty());
+    scrOptSelect->toolDelete->setDisabled(items.isEmpty());
     scrOptSelect->toolSymWpt->setEnabled(cntWpt);
     scrOptSelect->toolRoute->setEnabled(cntWpt > 1);
     scrOptSelect->toolEditPrxWpt->setEnabled(cntWpt);
@@ -142,7 +170,7 @@ void CMouseSelect::findItems(QList<IGisItem*>& items)
     scrOptSelect->toolEleWptTrk->setEnabled((cntWpt > 0) | (cntTrk > 0));
 }
 
-void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect &rect)
+void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect& rect)
 {
     if(rectSelection.isNull())
     {
@@ -152,9 +180,20 @@ void CMouseSelect::draw(QPainter& p, CCanvas::redraw_e needsRedraw, const QRect 
     QList<IGisItem*> items;
     findItems(items);
 
-    for(IGisItem * item : qAsConst(items))
+    for(IGisItem* item : qAsConst(items))
     {
         item->drawHighlight(p);
+    }
+
+    for(QPointF pos : qAsConst(posPoiHighlight))
+    {
+        if(pos != NOPOINTF)
+        {
+            gis->convertRad2Px(pos);
+            QRectF r(0, 0, 42, 42);
+            r.moveCenter(pos);
+            p.drawImage(r, QImage("://cursors/poiHighlightRed.png"));
+        }
     }
 
     IMouseSelect::draw(p, needsRedraw, rect);
@@ -168,48 +207,62 @@ void CMouseSelect::slotUpdate()
 
 void CMouseSelect::slotCopy() const
 {
-    CGisWorkspace::self().copyItemsByKey(itemKeys);
+    QMutexLocker lock(&mutex);
+
+    //Project is a nullptr if the user cancels the Dialog
+    IGisProject* project = CGisWorkspace::self().copyItemsByKey(itemKeys);
+    if(project != nullptr)
+    {
+        CGisWorkspace::self().addPoisAsWpt(poisFound, project);
+    }
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotDelete() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().delItemsByKey(itemKeys);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotRoute() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().makeRteFromWpt(itemKeys);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotEditPrxWpt() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().editPrxWpt(itemKeys);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotCombineTrk() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().combineTrkByKey(itemKeys, itemKeys);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotActivityTrk() const
 {
+    QMutexLocker lock(&mutex);
     CActivityTrk::getMenu(itemKeys, CMainWindow::self().getBestWidgetForParent(), true);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotColorTrk() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().colorTrkByKey(itemKeys);
     canvas->resetMouse();
 }
 
 void CMouseSelect::slotSymWpt() const
 {
+    QMutexLocker lock(&mutex);
     QString iconName = CWptIconManager::self().selectWptIcon(CMainWindow::self().getBestWidgetForParent());
     if(iconName.isEmpty())
     {
@@ -222,6 +275,7 @@ void CMouseSelect::slotSymWpt() const
 
 void CMouseSelect::slotEleWptTrk() const
 {
+    QMutexLocker lock(&mutex);
     CGisWorkspace::self().addEleToWptTrkByKey(itemKeys);
     canvas->resetMouse();
 }
