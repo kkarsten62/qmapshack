@@ -69,6 +69,7 @@ CDemList::CDemList(QWidget* parent)
     connect(actionMoveUp, &QAction::triggered, this, &CDemList::slotMoveUp);
     connect(actionMoveDown, &QAction::triggered, this, &CDemList::slotMoveDown);
     connect(actionActivate, &QAction::triggered, this, &CDemList::slotActivate);
+    connect(treeWidget, &QTreeWidget::doubleClicked, this, &CDemList::slotActivate);
     connect(actionReloadDem, &QAction::triggered, this, &CDemList::slotReloadDem);
     connect(treeWidget, &CDemTreeWidget::sigChanged, this, &CDemList::sigChanged);
     connect(labelHelpFillMapList, &QLabel::linkActivated, &CMainWindow::self(), static_cast<void (CMainWindow::*)(const QString&)>(&CMainWindow::slotLinkActivated));

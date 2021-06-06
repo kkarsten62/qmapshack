@@ -72,6 +72,7 @@ CMapList::CMapList(QWidget* parent)
     connect(treeWidget, &CMapTreeWidget::customContextMenuRequested, this, &CMapList::slotContextMenu);
     connect(treeWidget, &CMapTreeWidget::sigChanged, this, &CMapList::sigChanged);
     connect(actionActivate, &QAction::triggered, this, &CMapList::slotActivate);
+    connect(treeWidget, &QTreeWidget::doubleClicked, this, &CMapList::slotActivate);
     connect(actionMoveUp, &QAction::triggered, this, &CMapList::slotMoveUp);
     connect(actionMoveDown, &QAction::triggered, this, &CMapList::slotMoveDown);
     connect(actionReloadMaps, &QAction::triggered, this, &CMapList::slotReloadMaps);
