@@ -16,31 +16,43 @@
 
 **********************************************************************************************/
 
-#ifndef CTRYMUTEXLOCKER_H
-#define CTRYMUTEXLOCKER_H
+#ifndef CTRKTORTEDIALOG_H
+#define CTRKTORTEDIALOG_H
 
-#include <QMutex>
+#include "gis/prj/IGisProject.h"
+#include "gis/CGisWorkspace.h"
+#include "ui_ITrkToRteDialog.h"
 
-class CTryMutexLocker
+class QTreeWidget;
+
+/*
+ * Dialog Class for the track to route conversion.
+ */
+class CTrkToRteDialog : public QDialog, private Ui::ITrkToRteDialog
 {
+    Q_OBJECT
 public:
-    CTryMutexLocker(QMutex& mutex) : m_mutex(mutex){}
-    ~CTryMutexLocker()
-    {
-        if(needsUnlock)
-        {
-            m_mutex.unlock();
-        }
-    }
-    bool try_lock()
-    {
-        needsUnlock = m_mutex.tryLock();
-        return needsUnlock;
-    }
+    /**
+       @brief Shows the Dialog and preselects the project and route name
+     */
+    CTrkToRteDialog(IGisProject*& project, QString& routeName, bool& saveSubPoints);
+    virtual ~CTrkToRteDialog();
+
+public slots:
+    void accept() override;
+
+private slots:
+    void slotProject();
+    void slotRouteChanged(const QString& text);
+
 private:
-    QMutex& m_mutex;
-    bool needsUnlock {false};
+    void setType(IGisProject::type_e& t);
+    void buttonBoxEnabled();
+
+    IGisProject*& project;
+    QString& routeName;
+    bool& saveSubPoints;
 };
 
-#endif //CTRYMUTEXLOCKER_H
+#endif //CTRKTORTEDIALOG_H
 
