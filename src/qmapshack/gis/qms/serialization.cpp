@@ -28,7 +28,7 @@
 
 #include <QtWidgets>
 
-#define VER_TRK         quint8(8)
+#define VER_TRK         quint8(100)  // 100 = Kka_Dev: fitData
 #define VER_WPT         quint8(4)
 #define VER_RTE         quint8(4)
 #define VER_AREA        quint8(2)
@@ -702,7 +702,7 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream)
         energyCycling.setEnergyTrkSet(set, false);
     }
 
-    if(version > 7)
+    if(version > 99) // Kka_Dev: fitData
     {
         in >> fitdata;
     }
