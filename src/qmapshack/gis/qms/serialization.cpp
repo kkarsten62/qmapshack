@@ -28,7 +28,7 @@
 
 #include <QtWidgets>
 
-#define VER_TRK         quint8(7)
+#define VER_TRK         quint8(100)  // 100 = Kka_Dev: fitData
 #define VER_WPT         quint8(4)
 #define VER_RTE         quint8(4)
 #define VER_AREA        quint8(2)
@@ -50,6 +50,7 @@
 #define VER_CVALUE      quint8(1)
 #define VER_CLIMIT      quint8(1)
 #define VER_ENERGYCYCLE quint8(1)
+#define VER_FITDATA     quint8(1)
 
 #define MAGIC_SIZE      10
 #define MAGIC_TRK       "QMTrk     "
@@ -540,6 +541,43 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e)
     return stream;
 }
 
+QDataStream& operator<<(QDataStream& stream, const CFitData& f)
+{
+    stream  << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, CFitData& f)
+{
+    quint8 version;
+    stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+    return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
+{
+    stream  << l.type << l.endTime << l.no << l.comment << l.elapsedTime
+            << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
+            << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
+            << l.descent << l.avgPower << l.maxPower << l.normPower
+            << l.rightBalance << l.leftBalance << l.leftPedalSmooth
+            << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
+            << l.intensity << l.trainStress << l.work << l.energy;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
+{
+    stream  >> l.type >> l.endTime >> l.no >> l.comment >> l.elapsedTime
+            >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
+            >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
+            >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
+            >> l.rightBalance >> l.leftBalance >> l.leftPedalSmooth
+            >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
+            >> l.intensity >> l.trainStress >> l.work >> l.energy;
+    return stream;
+}
+
 // ---------------- main objects ---------------------------------
 
 QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
@@ -571,6 +609,8 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const
     out << limitsGraph3;
 
     out << energyCycling.getEnergyTrkSet();
+
+    out << fitdata;
 
     out << trk.segs;
 
@@ -660,6 +700,11 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream)
         CEnergyCycling::energy_set_t set;
         in >> set;
         energyCycling.setEnergyTrkSet(set, false);
+    }
+
+    if(version > 99) // Kka_Dev: fitData
+    {
+        in >> fitdata;
     }
 
     trk.segs.clear();

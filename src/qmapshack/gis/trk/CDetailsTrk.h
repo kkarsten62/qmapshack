@@ -54,6 +54,7 @@ private slots:
     void slotSetEnergyCycling();
     void slotHeartRateZones();
     void slotTrkPrint();
+    void slotFitData();
 
     void slotColorSourceChanged(int idx);
     void slotColorLimitHighChanged();

@@ -19,6 +19,7 @@
 #include "gis/proj_x.h"
 #include "gis/trk/CDetailsTrk.h"
 #include "gis/trk/CEnergyCyclingDialog.h"
+#include "gis/trk/CFitDataDialog.h"
 #include "gis/trk/CHeartRateZonesDialog.h"
 #include "gis/trk/CKnownExtension.h"
 #include "gis/trk/CPropertyTrk.h"
@@ -152,6 +153,7 @@ CDetailsTrk::CDetailsTrk(CGisItemTrk& trk)
     connect(toolSetEnergyCycling, &QPushButton::clicked, this, &CDetailsTrk::slotSetEnergyCycling);
     connect(toolHeartRateZones, &QPushButton::clicked, this, &CDetailsTrk::slotHeartRateZones);
     connect(toolTrkPrint, &QPushButton::clicked, this, &CDetailsTrk::slotTrkPrint);
+    connect(toolFitData, &QPushButton::clicked, this, &CDetailsTrk::slotFitData);
     connect(lineName, &QLineEdit::textEdited, this, &CDetailsTrk::slotNameChanged);
     connect(lineName, &QLineEdit::editingFinished, this, &CDetailsTrk::slotNameChangeFinished);
 
@@ -522,7 +524,6 @@ void CDetailsTrk::updateData()
         filterChangeStartPoint->updateUi();
     }
 
-
     QString tooltip = tr("Set parameters to compute \"Energy Use Cycling\" for a cycling tour");
     if(trk.getEnergyCycling().isValid())
     {
@@ -554,6 +555,24 @@ void CDetailsTrk::updateData()
         toolTrkPrint->setEnabled(false);
     }
     toolTrkPrint->setToolTip(tooltip);
+
+    if(trk.getFitData().getIsValid())
+    {
+        toolFitData->setEnabled(true);
+    }
+    else
+    {
+        toolFitData->setEnabled(false);
+    }
+
+    if(trk.getFitData().getIsValid())
+    {
+        toolFitData->setEnabled(true);
+    }
+    else
+    {
+        toolFitData->setEnabled(false);
+    }
 
     enableTabFilter();
     originator = false;
@@ -752,6 +771,7 @@ void CDetailsTrk::slotSetEnergyCycling()
     }
 }
 
+
 void CDetailsTrk::slotHeartRateZones()
 {
     CHeartRateZonesDialog heartRateZonesDialog(this, trk);
@@ -762,6 +782,21 @@ void CDetailsTrk::slotTrkPrint()
 {
     CTrkPrintDialog trkprintDialog(this, trk);
     trkprintDialog.exec();
+}
+
+void CDetailsTrk::slotFitData()
+{
+    CFitDataDialog fitDataDialog(trk.getFitData(), this);
+
+    qint32 ret = fitDataDialog.exec();
+
+//    trk.updateHistory(CGisItemTrk::eVisualDetails);
+    trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
+    if(ret == QDialog::Rejected)
+    {
+//        trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
+        trk.updateHistory(CGisItemTrk::eVisualDetails);
+    }
 }
 
 void CDetailsTrk::setupGraph(CPlot* plot, const CLimit& limit, const QString& source, QDoubleSpinBox* spinMin, QDoubleSpinBox* spinMax)

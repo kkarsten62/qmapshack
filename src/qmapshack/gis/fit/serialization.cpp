@@ -236,22 +236,31 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
     {
         timeCreated = fileIdMesg.getFieldValue(eFileIdTimeCreated).toUInt();
     }
+    if(fileIdMesg.isFieldValueValid(eFileIdProduct))
+    {
+        getFitData().setIsValid(true);
+        getFitData().setProduct(fileIdMesg.getFieldValue(eFileIdProduct).toUInt());
+    }
     stream.reset();
 
     // note to the FIT specification: the specification allows different ordering of the messages.
     // Record messages can either be at the beginning or in chronological order within the record
     // messages. Garmin devices uses the chronological ordering. We only consider the chronological
     // order, otherwise timestamps (of records and events) must be compared to each other.
+    QDateTime trkptTime;
+
     CTrackData::trkseg_t seg;
     do
     {
         const CFitMessage& mesg = stream.nextMesg();
+
         if(mesg.getGlobalMesgNr() == eMesgNumRecord)
         {
             // for documentation: MesgNumActivity, MesgNumSession, MesgNumLap, MesgNumLength could also contain data
             CTrackData::trkpt_t pt;
             if(readFitRecord(mesg, pt))
             {
+                trkptTime = pt.time;
                 seg.pts.append(std::move(pt));
             }
         }
@@ -276,7 +285,211 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream)
             if(readFitSegmentPoint(mesg, pt, timeCreated))
             {
                 seg.pts.append(std::move(pt));
+                trkptTime = pt.time;
             }
+        }
+        else if(mesg.getGlobalMesgNr() == eMesgNumLap)
+        {
+            CFitData::lap_t lap;
+
+            lap.type = CFitData::eTypeLap;
+            lap.endTime = trkptTime; // last trkpt
+
+            if(mesg.isFieldValueValid(eLapMessageIndex))
+            {
+                lap.no = mesg.getFieldValue(eLapMessageIndex).toUInt() + 1; // uint16
+            }
+            if(mesg.isFieldValueValid(eLapTotalElapsedTime))
+            {
+                lap.elapsedTime = mesg.getFieldValue(eLapTotalElapsedTime).toUInt(); // uint32, second
+            }
+            if(mesg.isFieldValueValid(eLapTotalTimerTime))
+            {
+                lap.timerTime = mesg.getFieldValue(eLapTotalTimerTime).toUInt(); // uint32, second
+            }
+            if(mesg.isFieldValueValid(eLapTotalDistance))
+            {
+                lap.distance = mesg.getFieldValue(eLapTotalDistance).toUInt(); // uint32, meter
+            }
+            if(mesg.isFieldValueValid(eLapAvgSpeed))
+            {
+                lap.avgSpeed = mesg.getFieldValue(eLapAvgSpeed).toUInt(); // uint16, meter/second
+            }
+            if(mesg.isFieldValueValid(eLapMaxSpeed))
+            {
+                lap.maxSpeed = mesg.getFieldValue(eLapMaxSpeed).toUInt(); // uint16, meter/second
+            }
+            if(mesg.isFieldValueValid(eLapAvgHeartRate))
+            {
+                lap.avgHr = mesg.getFieldValue(eLapAvgHeartRate).toUInt(); // uint8, beep/minute
+            }
+            if(mesg.isFieldValueValid(eLapMaxHeartRate))
+            {
+                lap.maxHr = mesg.getFieldValue(eLapMaxHeartRate).toUInt(); // uint8, beep/minute
+            }
+            if(mesg.isFieldValueValid(eLapAvgCadence))
+            {
+                lap.avgCad = mesg.getFieldValue(eLapAvgCadence).toUInt(); // uint8, revolution/minute
+            }
+            if(mesg.isFieldValueValid(eLapMaxCadence))
+            {
+                lap.maxCad = mesg.getFieldValue(eLapMaxCadence).toUInt(); // uint8, revolution/minute
+            }
+            if(mesg.isFieldValueValid(eLapTotalAscent))
+            {
+                lap.ascent = mesg.getFieldValue(eLapTotalAscent).toUInt(); // uint16, meter
+            }
+            if(mesg.isFieldValueValid(eLapTotalDescent))
+            {
+                lap.descent = mesg.getFieldValue(eLapTotalDescent).toUInt(); // uint16, meter
+            }
+            if(mesg.isFieldValueValid(eLapAvgPower))
+            {
+                lap.avgPower = mesg.getFieldValue(eLapAvgPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eLapMaxPower))
+            {
+                lap.maxPower = mesg.getFieldValue(eLapMaxPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eLapNormalizedPower))
+            {
+                lap.normPower = mesg.getFieldValue(eLapNormalizedPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eLapLeftRightBalance)) // uint16, bitmask
+            {
+                lap.rightBalance = (mesg.getFieldValue(eLapLeftRightBalance).toUInt() & 0x3FFF) / 100.;
+                lap.leftBalance = 100 - lap.rightBalance;
+            }
+            if(mesg.isFieldValueValid(eLapAvgLeftPedalSmoothness))
+            {
+                lap.leftPedalSmooth = mesg.getFieldValue(eLapAvgLeftPedalSmoothness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eLapAvgRightPedalSmoothness))
+            {
+                lap.rightPedalSmooth = mesg.getFieldValue(eLapAvgRightPedalSmoothness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eLapAvgLeftTorqueEffectiveness))
+            {
+                lap.leftTorqueEff = mesg.getFieldValue(eLapAvgLeftTorqueEffectiveness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eLapAvgRightTorqueEffectiveness))
+            {
+                lap.rightTorqueEff = mesg.getFieldValue(eLapAvgRightTorqueEffectiveness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eLapTotalWork))
+            {
+                lap.work = mesg.getFieldValue(eLapTotalWork).toUInt(); // uint32, joule
+            }
+            if(mesg.isFieldValueValid(eLapTotalCalories))
+            {
+                lap.energy = mesg.getFieldValue(eLapTotalCalories).toUInt(); // uint16, kcalorie
+            }
+            getFitData().setLap(lap);
+        }
+        else if(mesg.getGlobalMesgNr() == eMesgNumSession)
+        {
+            CFitData::lap_t session;
+
+            session.type = CFitData::eTypeSession;
+
+            if(mesg.isFieldValueValid(eSessionNumLaps))
+            {
+                session.no = mesg.getFieldValue(eSessionNumLaps).toUInt(); // uint16
+            }
+            if(mesg.isFieldValueValid(eSessionTotalElapsedTime))
+            {
+                session.elapsedTime = mesg.getFieldValue(eSessionTotalElapsedTime).toUInt(); // uint32, second
+            }
+            if(mesg.isFieldValueValid(eSessionTotalTimerTime))
+            {
+                session.timerTime = mesg.getFieldValue(eSessionTotalTimerTime).toUInt(); // uint32, second
+            }
+            if(mesg.isFieldValueValid(eSessionTotalDistance))
+            {
+                session.distance = mesg.getFieldValue(eSessionTotalDistance).toUInt(); // uint32, meter
+            }
+            if(mesg.isFieldValueValid(eSessionAvgSpeed))
+            {
+                session.avgSpeed = mesg.getFieldValue(eSessionAvgSpeed).toUInt(); // uint16, meter/second
+            }
+            if(mesg.isFieldValueValid(eSessionMaxSpeed))
+            {
+                session.maxSpeed = mesg.getFieldValue(eSessionMaxSpeed).toUInt(); // uint16, meter/second
+            }
+            if(mesg.isFieldValueValid(eSessionAvgHeartRate))
+            {
+                session.avgHr = mesg.getFieldValue(eSessionAvgHeartRate).toUInt(); // uint8, beep/minute
+            }
+            if(mesg.isFieldValueValid(eSessionMaxHeartRate))
+            {
+                session.maxHr = mesg.getFieldValue(eSessionMaxHeartRate).toUInt(); // uint8, beep/minute
+            }
+            if(mesg.isFieldValueValid(eSessionAvgCadence))
+            {
+                session.avgCad = mesg.getFieldValue(eSessionAvgCadence).toUInt(); // uint8, revolution/minute
+            }
+            if(mesg.isFieldValueValid(eSessionMaxCadence))
+            {
+                session.maxCad = mesg.getFieldValue(eSessionMaxCadence).toUInt(); // uint8, revolution/minute
+            }
+            if(mesg.isFieldValueValid(eSessionTotalAscent))
+            {
+                session.ascent = mesg.getFieldValue(eSessionTotalAscent).toUInt(); // uint16, meter
+            }
+            if(mesg.isFieldValueValid(eSessionTotalDescent))
+            {
+                session.descent = mesg.getFieldValue(eSessionTotalDescent).toUInt(); // uint16, meter
+            }
+            if(mesg.isFieldValueValid(eSessionAvgPower))
+            {
+                session.avgPower = mesg.getFieldValue(eSessionAvgPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eSessionMaxPower))
+            {
+                session.maxPower = mesg.getFieldValue(eSessionMaxPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eSessionNormalizedPower))
+            {
+                session.normPower = mesg.getFieldValue(eSessionNormalizedPower).toUInt(); // uint16, watt
+            }
+            if(mesg.isFieldValueValid(eSessionLeftRightBalance)) // uint16, bitmask
+            {
+                session.rightBalance = (mesg.getFieldValue(eSessionLeftRightBalance).toUInt() & 0x3FFF) / 100.;
+                session.leftBalance = 100 - session.rightBalance;
+            }
+            if(mesg.isFieldValueValid(eSessionAvgLeftPedalSmoothness))
+            {
+                session.leftPedalSmooth = mesg.getFieldValue(eSessionAvgLeftPedalSmoothness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eSessionAvgRightPedalSmoothness))
+            {
+                session.rightPedalSmooth = mesg.getFieldValue(eSessionAvgRightPedalSmoothness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eSessionAvgLeftTorqueEffectiveness))
+            {
+                session.leftTorqueEff = mesg.getFieldValue(eSessionAvgLeftTorqueEffectiveness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eSessionAvgRightTorqueEffectiveness))
+            {
+                session.rightTorqueEff = mesg.getFieldValue(eSessionAvgRightTorqueEffectiveness).toUInt(); // uint8, percent
+            }
+            if(mesg.isFieldValueValid(eSessionTrainingStressScore))
+            {
+                session.trainStress = mesg.getFieldValue(eSessionTrainingStressScore).toDouble(); // uint16
+            }
+            if(mesg.isFieldValueValid(eSessionIntensityFactor))
+            {
+                session.intensity = mesg.getFieldValue(eSessionIntensityFactor).toDouble(); // uint16
+            }
+            if(mesg.isFieldValueValid(eSessionTotalWork))
+            {
+                session.work = mesg.getFieldValue(eSessionTotalWork).toUInt(); // uint32, joule
+            }
+            if(mesg.isFieldValueValid(eSessionTotalCalories))
+            {
+                session.energy = mesg.getFieldValue(eSessionTotalCalories).toUInt(); // uint16, kcalorie
+            }
+            getFitData().setLap(session);
         }
     }
     while (stream.hasMoreMesg());

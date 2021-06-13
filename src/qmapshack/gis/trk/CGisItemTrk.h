@@ -24,6 +24,7 @@
 #include "gis/IGisLine.h"
 #include "gis/trk/CActivityTrk.h"
 #include "gis/trk/CEnergyCycling.h"
+#include "gis/trk/CFitData.h"
 #include "gis/trk/CTrackData.h"
 #include "gis/trk/filter/CFilterSpeed.h"
 #include "gis/trk/filter/CFilterSpeedCycle.h"
@@ -200,6 +201,7 @@ public:
 
     CEnergyCycling& getEnergyCycling() { return energyCycling; }
     const CEnergyCycling& getEnergyCycling() const { return energyCycling; }
+    CFitData& getFitData() { return fitdata; }
 
     /// returns "true" when trk has no time-related invalid points
     bool isTrkTimeValid() const { return (allValidFlags& CTrackData::trkpt_t::eInvalidTime) == 0; }
@@ -425,6 +427,13 @@ public:
        @return Return true on success
      */
     bool setTrkPtDesc(int idxTotal, const QString& desc);
+
+    /**
+       @brief Set a maplist of desc fields for track points referenced by it's total indeces
+       @param idxDescs  QMap of key/value pairs of index and string to set
+       @return Return true on success
+     */
+    bool setTrkPtDesc(QMap<qint32, QString>& idxDescs);
 
     /**
        @brief Delete track point descriptions for one or several track points
@@ -861,6 +870,7 @@ private:
     qreal totalElapsedSecondsMoving = 0;
     quint32 numberOfAttachedWpt = 0;
     CEnergyCycling energyCycling {*this};
+    CFitData fitdata {*this};
 
     void checkForInvalidPoints();
     /**@}*/
