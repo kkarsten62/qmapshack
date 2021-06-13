@@ -98,7 +98,7 @@ private:
         , {eColAvgSpeed, {tr("Avg. Speed"), Qt::AlignRight}}
         , {eColMaxSpeed, {tr("Max. Speed"), Qt::AlignRight}}
         , {eColAscent, {tr("Ascent"), Qt::AlignRight}}
-        , {eColDescent, {tr("Desent"), Qt::AlignRight}}
+        , {eColDescent, {tr("Descent"), Qt::AlignRight}}
         , {eColAvgHr, {tr("Avg. HR"), Qt::AlignRight}}
         , {eColMaxHr, {tr("Max. HR"), Qt::AlignRight}}
         , {eColAvgCad, {tr("Avg. Cad."), Qt::AlignRight}}

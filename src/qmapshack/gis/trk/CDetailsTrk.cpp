@@ -771,7 +771,6 @@ void CDetailsTrk::slotSetEnergyCycling()
     }
 }
 
-
 void CDetailsTrk::slotHeartRateZones()
 {
     CHeartRateZonesDialog heartRateZonesDialog(this, trk);
