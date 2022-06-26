@@ -1154,7 +1154,7 @@ void CGisItemTrk::deriveSecondaryData()
             // time moving
             trkpt.elapsedSecondsMoving = lastTrkpt->elapsedSecondsMoving;
             qreal dt = (trkpt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0;
-            if(dt > 0 && ((trkpt.deltaDistance / dt) > 0.2))
+            if(dt > 0 && ((trkpt.deltaDistance / dt) > 0.5)) // KKA: Edit from 0.2
             {
                 trkpt.elapsedSecondsMoving += dt;
             }
