@@ -106,7 +106,7 @@ void CDemList::sort()
         }
     }
 
-    qSort(items1.begin(), items1.end(), &sortByName<CDemItem>);
+    std::sort(items1.begin(), items1.end(), &sortByName<CDemItem>);
 
     QList<QTreeWidgetItem*> items2;
     for(CDemItem* item : qAsConst(items1))
