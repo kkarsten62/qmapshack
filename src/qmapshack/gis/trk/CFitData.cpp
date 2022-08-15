@@ -83,7 +83,7 @@ void CFitData::assignTimeToIdx()
     {
         return;
     }
-    for (const struct lap_t lap : laps)
+    for (const struct lap_t &lap : laps)
     {
         if (lap.type != eTypeLap || !lap.endTime.isValid())
         {

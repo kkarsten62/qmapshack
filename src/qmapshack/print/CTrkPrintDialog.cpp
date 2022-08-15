@@ -95,8 +95,10 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
 
     spinOverlap->setValue(overlap * 1000);
     printer.setOutputFileName(outputFileName);
-    printer.setPageSize((QPagedPaintDevice::PageSize)pageSize);
-    printer.setPageMargins(left, top, right, bottom, QPrinter::Millimeter);
+//    printer.setPageSize((QPagedPaintDevice::PageSize)pageSize); // Fix depreciation warning
+    printer.setPageSize((QPageSize)pageSize);
+//    printer.setPageMargins(left, top, right, bottom, QPrinter::Millimeter);  // Fix depreciation warning
+    printer.setPageMargins(QMarginsF(left, top, right, bottom),QPageLayout::Millimeter);
     checkScaleBar->setChecked(printScaleBar);
     checkPageMarkers->setChecked(printPageMarkers);
     comboDistanceMarker->setCurrentIndex(distanceMarker);
@@ -109,7 +111,8 @@ CTrkPrintDialog::~CTrkPrintDialog()
     SETTINGS;
     cfg.setValue("Print/Trk/overlap", overlap);
     cfg.setValue("Print/Trk/outputFileName", printer.outputFileName());
-    cfg.setValue("Print/Trk/pageSize", printer.pageSize());
+//    cfg.setValue("Print/Trk/pageSize", printer.pageSize());  // Fix depreciation warning
+    cfg.setValue("Print/Trk/pageSize", printer.pageLayout().pageSize().id());
     QMarginsF margins = printer.pageLayout().margins(QPageLayout::Millimeter);
     cfg.setValue("Print/Trk/marginLeft", margins.left());
     cfg.setValue("Print/Trk/marginTop", margins.top());
@@ -299,7 +302,8 @@ void CTrkPrintDialog::slotUpdateMetrics()
             {
                 QLineF pageLine = QLineF(pagePts[j - 1], pagePts[j]); // Build line from page rect
                 QPointF ipt; // The intersection point
-                QLineF::IntersectType type = pageLine.intersect(trkLine, &ipt); // Try to find an intersection
+//                QLineF::IntersectType type = pageLine.intersect(trkLine, &ipt); // Try to find an intersection  // Fix depreciation warning
+                QLineF::IntersectType type = pageLine.intersects(trkLine, &ipt); // Try to find an intersection
 
                 if (type == QLineF::BoundedIntersection) // There is an intersection
                 {
@@ -394,7 +398,8 @@ void CTrkPrintDialog::slotUpdateMetrics()
     {
         labelScaleInfoStr += (tr("Current printer: ")) + printer.printerName() + "<br>";
     }
-    labelScaleInfoStr += tr("Page Size: ") + QPageSize::name((QPageSize::PageSizeId)printer.pageSize()) + "<br>";
+//    labelScaleInfoStr += tr("Page Size: ") + QPageSize::name((QPageSize::PageSizeId)printer.pageSize()) + "<br>";  // Fix depreciation warning
+    labelScaleInfoStr += tr("Page Size: ") + QPageSize::name((QPageSize::PageSizeId)printer.pageLayout().pageSize().id()) + "<br>";
 
     QMarginsF margins = printer.pageLayout().margins(QPageLayout::Millimeter);
     labelScaleInfoStr += tr("Margin Left: %L1mm Top: %L2mm")
