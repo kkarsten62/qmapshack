@@ -188,6 +188,7 @@ set( SRCS
     gis/trk/filter/CFilterSpeedCycle.cpp
     gis/trk/filter/CFilterSpeedHike.cpp
     gis/trk/filter/CFilterSplitSegment.cpp
+    gis/trk/filter/CFilterSplitTrack.cpp
     gis/trk/filter/CFilterSubPt2Pt.cpp
     gis/trk/filter/CFilterTerrainSlope.cpp
     gis/trk/filter/CFilterZeroSpeedDriftCleaner.cpp
@@ -558,6 +559,7 @@ set( HDRS
     gis/trk/filter/CFilterSpeedCycle.h
     gis/trk/filter/CFilterSpeedHike.h
     gis/trk/filter/CFilterSplitSegment.h
+    gis/trk/filter/CFilterSplitTrack.h
     gis/trk/filter/CFilterSubPt2Pt.h
     gis/trk/filter/CFilterTerrainSlope.h
     gis/trk/filter/CFilterZeroSpeedDriftCleaner.h
@@ -833,6 +835,7 @@ set( UIS
     gis/trk/filter/IFilterSpeedCycle.ui
     gis/trk/filter/IFilterSpeedHike.ui
     gis/trk/filter/IFilterSplitSegment.ui
+    gis/trk/filter/IFilterSplitTrack.ui
     gis/trk/filter/IFilterSubPt2Pt.ui
     gis/trk/filter/IFilterTerrainSlope.ui
     gis/trk/filter/IFilterZeroSpeedDriftCleaner.ui
