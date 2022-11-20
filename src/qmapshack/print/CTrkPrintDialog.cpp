@@ -30,34 +30,40 @@
 CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     QDialog(parent)
     , trk(trk)
-//    , printer(QPrinter::HighResolution)
 {
     setupUi(this);
+    labelZoom->setText(tr("Zoom with mouse wheel on the view\nbelow to change the printing scale"));
+    canvasLayout = new QVBoxLayout(frameCanvas);
 
-    setWindowTitle(tr("Print Track"));
+    SETTINGS;
+    canvasName = cfg.value("Print/Trk/canvasName", "").toString();
+    overlap = cfg.value("Print/Trk/overlap", 0.005).toDouble();
+    QString outputFileName = cfg.value("Print/Trk/outputFileName", "").toString();
+    QPageSize::PageSizeId pageSize = (QPageSize::PageSizeId)cfg.value("Print/Trk/pageSize", QPageSize::A4).toInt();
+    qreal left = cfg.value("Print/Trk/marginLeft", 3.0).toDouble();
+    qreal top = cfg.value("Print/Trk/marginTop", 3.0).toDouble();
+    qreal right = cfg.value("Print/Trk/marginRight", 3.0).toDouble();
+    qreal bottom = cfg.value("Print/Trk/marginBottom", 3.0).toDouble();
+    printScaleBar = cfg.value("Print/Trk/printScaleBar", false).toBool();
+    printPageMarkers = cfg.value("Print/Trk/printPageMarkers", true).toBool();
+    distanceMarker = cfg.value("Print/Trk/distanceMarker", 0).toInt();
 
-    CCanvas* source = CMainWindow::self().getCanvas().at(0);
-
-    // clone canvas by a temporary configuration file
-    QTemporaryFile temp;
-    temp.open();
-    temp.close();
-
-    QSettings view(temp.fileName(), QSettings::IniFormat);
-    view.clear();
-
-    source->saveConfig(view);
-
-    canvas = new CCanvas(this, "print trk pages");
-    canvas->loadConfig(view);
-    canvas->show();
-    canvas->allowShowTrackOverlays(false);
-
-    // add canvas canvas to dialog
-    QLayout * layout = new QVBoxLayout(frameCanvas);
-    layout->addWidget(canvas);
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
+// Add canvas to comboBox
+    const QList<CCanvas*>& list = CMainWindow::self().getCanvas();
+    for(CCanvas* canvas : list)
+    {
+        comboCanvasList->addItem(canvas->objectName(), QVariant::fromValue<CCanvas*>(canvas));
+    }
+// Set previous canvas
+    if(!canvasName.isEmpty() && comboCanvasList->findText(canvasName) != -1)
+    {
+        comboCanvasList->setCurrentIndex(comboCanvasList->findText(canvasName));
+    }
+    else // Set the first one
+    {
+        comboCanvasList->setCurrentIndex(0);
+    }
+    setCanvas();
 
     for (qint32 distanceMarker : distanceMarkers) // Fill the distanceMarker combo
     {
@@ -71,33 +77,18 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
         }
     }
 
-    connect(canvas,              &CCanvas::sigZoom,     this, &CTrkPrintDialog::slotUpdateMetrics);
-    connect(canvas,              &CCanvas::sigMove,     this, &CTrkPrintDialog::slotUpdateMetrics);
-    connect(pushSetPrinter,      &QPushButton::pressed, this, &CTrkPrintDialog::slotSetPrinter);
-    connect(spinOverlap,         SIGNAL(valueChanged(int)), this, SLOT(slotSetOverlap(int)));
-    connect(checkScaleBar,       &QCheckBox::toggled,   this, &CTrkPrintDialog::slotScaleBar);
-    connect(checkPageMarkers,    &QCheckBox::toggled,   this, &CTrkPrintDialog::slotPageMarkers);
+    connect(comboCanvasList, SIGNAL(activated(int)), this, SLOT(slotCanvasList(int)));
+    connect(pushSetPrinter, &QPushButton::pressed, this, &CTrkPrintDialog::slotSetPrinter);
+    connect(spinOverlap, SIGNAL(valueChanged(int)), this, SLOT(slotSetOverlap(int)));
+    connect(checkScaleBar, &QCheckBox::toggled, this, &CTrkPrintDialog::slotScaleBar);
+    connect(checkPageMarkers, &QCheckBox::toggled, this, &CTrkPrintDialog::slotPageMarkers);
     connect(comboDistanceMarker, SIGNAL(activated(int)), this, SLOT(slotDistanceMarker(int)));
-    connect(pushPrint,           &QPushButton::pressed, this, &CTrkPrintDialog::slotPrint);
-    connect(pushLoadPdfFile,     &QPushButton::pressed, this, &CTrkPrintDialog::slotLoadPdfFile);
-
-    SETTINGS;
-    overlap = cfg.value("Print/Trk/overlap", 0.005).toDouble();
-    QString outputFileName = cfg.value("Print/Trk/outputFileName", "").toString();
-    QPageSize::PageSizeId pageSize = (QPageSize::PageSizeId)cfg.value("Print/Trk/pageSize", QPageSize::A4).toInt();
-    qreal left = cfg.value("Print/Trk/marginLeft", 3.0).toDouble();
-    qreal top = cfg.value("Print/Trk/marginTop", 3.0).toDouble();
-    qreal right = cfg.value("Print/Trk/marginRight", 3.0).toDouble();
-    qreal bottom = cfg.value("Print/Trk/marginBottom", 3.0).toDouble();
-    printScaleBar = cfg.value("Print/Trk/printScaleBar", false).toBool();
-    printPageMarkers = cfg.value("Print/Trk/printPageMarkers", true).toBool();
-    distanceMarker = cfg.value("Print/Trk/distanceMarker", 0).toInt();
+    connect(pushPrint, &QPushButton::pressed, this, &CTrkPrintDialog::slotPrint);
+    connect(pushLoadPdfFile, &QPushButton::pressed, this, &CTrkPrintDialog::slotLoadPdfFile);
 
     spinOverlap->setValue(overlap * 1000);
     printer.setOutputFileName(outputFileName);
-//    printer.setPageSize((QPagedPaintDevice::PageSize)pageSize); // Fix depreciation warning
     printer.setPageSize((QPageSize)pageSize);
-//    printer.setPageMargins(left, top, right, bottom, QPrinter::Millimeter);  // Fix depreciation warning
     printer.setPageMargins(QMarginsF(left, top, right, bottom),QPageLayout::Millimeter);
     checkScaleBar->setChecked(printScaleBar);
     checkPageMarkers->setChecked(printPageMarkers);
@@ -109,9 +100,9 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
 CTrkPrintDialog::~CTrkPrintDialog()
 {
     SETTINGS;
+    cfg.setValue("Print/Trk/canvasName", canvasName);
     cfg.setValue("Print/Trk/overlap", overlap);
     cfg.setValue("Print/Trk/outputFileName", printer.outputFileName());
-//    cfg.setValue("Print/Trk/pageSize", printer.pageSize());  // Fix depreciation warning
     cfg.setValue("Print/Trk/pageSize", printer.pageLayout().pageSize().id());
     QMarginsF margins = printer.pageLayout().margins(QPageLayout::Millimeter);
     cfg.setValue("Print/Trk/marginLeft", margins.left());
@@ -128,6 +119,51 @@ void CTrkPrintDialog::resizeEvent(QResizeEvent * e)
 //    qDebug() << "resizeEvent";
     QDialog::resizeEvent(e);
     slotUpdateMetrics();
+}
+
+void CTrkPrintDialog::setCanvas()
+{
+    canvasName = comboCanvasList->currentText();
+
+    // clone main canvas by a temporary configuration file
+    CCanvas* mainCanvas = comboCanvasList->currentData().value<CCanvas*>();
+
+    QTemporaryFile temp;
+    temp.open();
+    temp.close();
+
+    QSettings view(temp.fileName(), QSettings::IniFormat);
+    view.clear();
+
+    mainCanvas->saveConfig(view);
+
+    // Delete a previous canvas
+    if (nullptr != canvas)
+    {
+        canvasLayout->removeWidget(canvas);
+        disconnect(canvas, &CCanvas::sigZoom, this, &CTrkPrintDialog::slotUpdateMetrics);
+        disconnect(canvas, &CCanvas::sigMove, this, &CTrkPrintDialog::slotUpdateMetrics);
+        delete canvas;
+    }
+
+    canvas = new CCanvas(this, "print trk pages");
+    canvas->loadConfig(view);
+    canvas->show();
+    canvas->allowShowTrackOverlays(false);
+    connect(canvas, &CCanvas::sigZoom, this, &CTrkPrintDialog::slotUpdateMetrics);
+    connect(canvas, &CCanvas::sigMove, this, &CTrkPrintDialog::slotUpdateMetrics);
+
+    // Add canvas to dialog
+    canvasLayout->addWidget(canvas);
+    canvasLayout->setSpacing(0);
+    canvasLayout->setContentsMargins(0, 0, 0, 0);
+    slotUpdateMetrics();
+}
+
+void CTrkPrintDialog::slotCanvasList(int value)
+{
+    qWarning() << "slotCanvasList: " << value;
+    setCanvas();
 }
 
 void CTrkPrintDialog::slotUpdateMetrics()
@@ -156,7 +192,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     }
     else
     {
-        qDebug() << "CTrkPrintDialog::slotUpdateMetrics(): Divide by Zero, scaleTrkPx is 0, this should not happen!";
+        qWarning() << "CTrkPrintDialog::slotUpdateMetrics(): Divide by Zero, scaleTrkPx is 0, this should not happen!";
         return;
     }
 
@@ -172,7 +208,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     }
     else
     {
-        qDebug() << "CTrkPrintDialog::slotUpdateMetrics(): Divide by Zero, scalePagePx is 0, this should not happen!";
+        qWarning() << "CTrkPrintDialog::slotUpdateMetrics(): Divide by Zero, scalePagePx is 0, this should not happen!";
         return;
     }
 
@@ -378,8 +414,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     }
 
     // Update GUI
-    QString labelScaleInfoStr(tr("Zoom with mouse wheel on the map left<br>to change the printing scale.") + "<br><br>");
-    labelScaleInfoStr += (tr("Scale of approx. 1:") + QString("%L1")).arg(qRound(scale)) + "<br>";
+    QString labelScaleInfoStr = (tr("Scale of approx. 1:") + QString("%L1")).arg(qRound(scale)) + "<br>";
     labelScaleInfoStr += (tr("1cm on paper page equals %L1m in reality.")).arg(qRound(scale / 100)) + "<br>";
     labelScaleInfoStr += (tr("Be aware, <b>%L1 pages</b> will be needed to print the track."))
             .arg(pages.size()) + "<br><br>";
