@@ -1,10 +1,14 @@
-#!/bin/bash
+#!/bin/sh
+
+# DIR_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # absolute path to the dir of this script
+# source $DIR_SCRIPT/config.sh   # check for important paramters
+
+SRC_RESOURCES_DIR=$QMS_SRC_DIR/MacOSX/resources
 
 APP_VERSION=0
 BUILD_TIME=$(date +"%y-%m-%dT%H:%M:%S")
 BUILD_HASH_KEY=0
 COMMIT_STATUS=0
-
 
 function buildIcon {
     rm -rf $BUILD_BIN_DIR/$APP_NAME.iconset
@@ -37,6 +41,7 @@ function buildAppStructure {
     #         <libs>
     #      PlugIns
     #         <libs>
+    #      libs/
 
     rm -rf $BUILD_BUNDLE_DIR
     mkdir $BUILD_BUNDLE_DIR
@@ -46,6 +51,9 @@ function buildAppStructure {
     mkdir $BUILD_BUNDLE_RES_QM_DIR
     mkdir $BUILD_BUNDLE_FRW_DIR
     mkdir $BUILD_BUNDLE_PLUGIN_DIR
+    if [[ "$BREW_PACKAGE_BUILD" == "" ]] ; then
+        mkdir $BUILD_BUNDLE_EXTLIB_DIR
+    fi
 
     # TODO not all copied from predefined data is needed in every case (eg icon)
     # predefined data
@@ -144,27 +152,34 @@ function adjustLinking {
     for F in `find $BUILD_BUNDLE_PLUGIN_DIR -type f -type f \( -iname "*.dylib" -o -iname "*.so" \)`
     do
         adjustLinkQt $F "libq"
-        adjustLinkQt $F "/usr/local/"
+        adjustLinkQt $F "$HOMEBREW_PREFIX/"
     done
 
     for F in `find $BUILD_BUNDLE_FRW_DIR/Qt*.framework/Versions/5 -type f -maxdepth 1`
     do
-        #
-        #  2.12.20 switched off after using Qt5 from https://www.qt.io/offline-installers
-        #
-        #adjustLinkQt $F "Qt"
-        adjustLinkQt $F "/usr/local/"
+        adjustLinkQt $F "$HOMEBREW_PREFIX/"
     done
 
     for F in `find $BUILD_BUNDLE_FRW_DIR -type f -type f \( -iname "*.dylib" -o -iname "*.so" \)`
     do
         adjustLinkQt $F "Qt"
         adjustLinkQt $F "libroutino"
-        adjustLinkQt $F "/usr/local/"
+        adjustLinkQt $F "$HOMEBREW_PREFIX/"
     done
 
     adjustLinkQt $BUILD_BUNDLE_APP_FILE "Qt"
     adjustLinkQt $BUILD_BUNDLE_APP_FILE "libroutino"
+
+    # Special treatment for QtWebEngineCore
+    # QtWebEngineProcess.app is an app within QtWebEngineCore.framework, which references other Qt frameworks
+    PATH_TO_QTWEBENGINEPROCESS="QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app"
+    F=$BUILD_BUNDLE_FRW_DIR/$PATH_TO_QTWEBENGINEPROCESS/Contents/MacOS/QtWebEngineProcess
+    adjustLinkQt $F "$HOMEBREW_PREFIX/"
+    if [ -d "$BUILD_BUNDLE_FRW_DIR/$PATH_TO_QTWEBENGINEPROCESS/Contents" ]; then
+        pushd $BUILD_BUNDLE_FRW_DIR/$PATH_TO_QTWEBENGINEPROCESS/Contents
+        ln -s ../../../../../../../Frameworks .
+        popd
+    fi
 }
 
 
@@ -195,13 +210,13 @@ function adjustLinkQt {
             PREL="@executable_path/../PlugIns/$LIB"
         fi
 
-echo "-----"
-echo "F    = $F"
-echo "FREL = $FREL"
-echo "L    = $L"
-echo "P    = $P"
-echo "LIB  = $LIB"
-echo "PREL = $PREL"
+        echo "-----"
+        echo "F    = $F"
+        echo "FREL = $FREL"
+        echo "L    = $L"
+        echo "P    = $P"
+        echo "LIB  = $LIB"
+        echo "PREL = $PREL"
 
         if [[ "$P" == "$FREL" ]]; then
             echo "no update - is a relativ id"
@@ -214,6 +229,27 @@ echo "PREL = $PREL"
         fi
     done
 }
+
+
+function adjustLinkingExtTools {
+    echo "--------------------------------------------"
+    echo "Add rpath @executable_path/../Frameworks to "
+    for F in `find $BUILD_BUNDLE_RES_BIN_DIR -type f ! \( -name "*.py" \)`
+    do
+        echo "F    = $F"
+        install_name_tool -add_rpath @executable_path/../Frameworks $F
+    done
+    echo "--------------------------------------------"
+}
+
+
+function printLinkingExtTools {
+    for F in `find $BUILD_BUNDLE_RES_BIN_DIR -type f ! \( -name "*.py" \)`
+    do
+        printLinking $F
+    done
+}
+
 
 function checkLibraries {
 	F=$1 # file
@@ -273,13 +309,13 @@ function extractVersion {
 }
 
 function readRevisionHash {
-cd $QMS_SRC_DIR
-BUILD_HASH_KEY=$(git rev-parse HEAD)
-COMMIT_STATUS=$(git status -s -uno)
+    cd $QMS_SRC_DIR
+    BUILD_HASH_KEY=$(git rev-parse HEAD)
+    COMMIT_STATUS=$(git status -s -uno)
 
-if [[ "$COMMIT_STATUS" != "" ]]; then
-read -p "BEWARE - There are uncommited changes..."
-fi
+    if [[ "$COMMIT_STATUS" != "" ]]; then
+    read -p "BEWARE - There are uncommited changes..."
+    fi
 }
 
 function updateInfoPlist {
@@ -305,5 +341,5 @@ fi
 if [[ "$1" == "info-before" ]]; then
     printLinking $BUILD_RELEASE_DIR/$APP_NAME
     # TODO
-    printLinking $LIB_ROUTINO_LIB_DIR/libroutino.so
+    # printLinking $LOCAL_ENV/lib/libroutino.so
 fi
