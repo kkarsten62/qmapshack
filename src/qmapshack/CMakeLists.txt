@@ -324,6 +324,9 @@ set( SRCS
     realtime/gpstether/CRtGpsTether.cpp
     realtime/gpstether/CRtGpsTetherInfo.cpp
     realtime/gpstether/CRtGpsTetherRecord.cpp
+    realtime/ais/CRtAis.cpp
+    realtime/ais/CRtAisInfo.cpp
+    realtime/ais/CRtAisRecord.cpp
     realtime/opensky/CRtOpenSky.cpp
     realtime/opensky/CRtOpenSkyInfo.cpp
     realtime/opensky/CRtOpenSkyRecord.cpp
@@ -703,6 +706,9 @@ set( HDRS
     realtime/opensky/CRtOpenSky.h
     realtime/opensky/CRtOpenSkyInfo.h
     realtime/opensky/CRtOpenSkyRecord.h
+    realtime/ais/CRtAis.h
+    realtime/ais/CRtAisInfo.h
+    realtime/ais/CRtAisRecord.h
     setup/CAppOpts.h
     setup/CAppSetupLinux.h
     setup/CAppSetupMac.h
@@ -879,6 +885,7 @@ set( UIS
     realtime/IRtWorkspace.ui
     realtime/gpstether/IRtGpsTetherInfo.ui
     realtime/opensky/IRtOpenSkyInfo.ui
+    realtime/ais/IRtAisInfo.ui
     templates/Cycling_Tour_Summary.ui
     templates/Hiking_Tour_Summary.ui
     templates/Hiking_Tour_Summary_\(Advanced\).ui
