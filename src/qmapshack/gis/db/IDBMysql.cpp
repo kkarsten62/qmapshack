@@ -44,7 +44,15 @@ bool IDBMysql::setupDB(const QString& server, const QString& port, const QString
         db = QSqlDatabase::addDatabase("QMYSQL", connectionName);
         db.setDatabaseName(name);
         db.setHostName(server);
-        db.setConnectOptions("MYSQL_OPT_RECONNECT=1");
+        //        db.setConnectOptions("MYSQL_OPT_RECONNECT=1");
+// See https://www.cyberciti.biz/faq/how-to-setup-mariadb-ssl-and-secure-connections-from-clients/
+        QString connectOptions =
+                "MYSQL_OPT_RECONNECT=1;"
+                "SSL_KEY=/etc/mysql/ssl/client-key.pem;"
+                "SSL_CERT=/etc/mysql/ssl/client-cert.pem;"
+                "SSL_CA=/etc/mysql/ssl/ca-cert.pem;"
+                "CLIENT_IGNORE_SPACE=1";
+        db.setConnectOptions(connectOptions);
 
         if(!port.isEmpty())
         {
@@ -73,11 +81,16 @@ bool IDBMysql::setupDB(const QString& server, const QString& port, const QString
         }
 
         qDebug() << "open MySQL database" << name << "@" << server << ":" << port << "as user" << user;
+        qDebug() << "connectOptions set to SSL=" << connectOptions;
 
         if(!db.open())
         {
             qDebug() << "failed to open database" << db.lastError();
             return false;
+        }
+        else
+        {
+             db.setConnectOptions(); // clears the connect option string
         }
     }
     else
