@@ -37,6 +37,7 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
 
 private slots:
+    void slotCanvasList(int value);
     void slotUpdateMetrics();
     void slotPrint();
     void slotSetPrinter();
@@ -49,6 +50,9 @@ private slots:
 private:
     void addPageMarkers(QPainter &p, const QRectF &currPage, const QRectF &otherPage, qint32 pageNo);
     void addDistanceMarkers(QPainter &p, const QRectF &currPage);
+    void setCanvas();
+
+    QLayout* canvasLayout;
 
     void setPdfFileExists();
 
@@ -76,9 +80,11 @@ private:
     QList<struct distanceMarkerPt_t> distanceMarkerPts;
 
     CGisItemTrk &trk;
-    CCanvas *canvas;
+    CCanvas* source;
+    CCanvas* canvas = nullptr;
     QPrinter printer;
     qreal scale;
+    QString canvasName;
     qreal overlap; // Overlap for sequentially pages in meter on page
     bool printScaleBar = false;
     bool printPageMarkers = true;
