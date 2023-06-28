@@ -39,12 +39,16 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     canvasName = cfg.value("Print/Trk/canvasName", "").toString();
     overlap = cfg.value("Print/Trk/overlap", 0.005).toDouble();
     QString outputFileName = cfg.value("Print/Trk/outputFileName", "").toString();
-    QPageSize::PageSizeId pageSize = (QPageSize::PageSizeId)cfg.value("Print/Trk/pageSize", QPageSize::A4).toInt();
+    QString printerName = cfg.value("Print/Trk/printerName", "").toString();
+    QPrinter::OutputFormat outputFormat = (QPrinter::OutputFormat)cfg.value("Print/Trk/outputFormat", QPrinter::PdfFormat).toInt();
+    QPageSize::PageSizeId pageSizeId = (QPageSize::PageSizeId)cfg.value("Print/Trk/pageSizeId", QPageSize::Custom).toInt();
+    qreal pageSizeWitdh = cfg.value("Print/Trk/pageSizeWidth", 0).toDouble();
+    qreal pageSizeHeight = cfg.value("Print/Trk/pageSizeHeight", 0).toDouble();
     qreal left = cfg.value("Print/Trk/marginLeft", 3.0).toDouble();
     qreal top = cfg.value("Print/Trk/marginTop", 3.0).toDouble();
     qreal right = cfg.value("Print/Trk/marginRight", 3.0).toDouble();
     qreal bottom = cfg.value("Print/Trk/marginBottom", 3.0).toDouble();
-    printScaleBar = cfg.value("Print/Trk/printScaleBar", false).toBool();
+    printScaleBar = cfg.value("Print/Trk/printScaleBar", true).toBool();
     printPageMarkers = cfg.value("Print/Trk/printPageMarkers", true).toBool();
     distanceMarker = cfg.value("Print/Trk/distanceMarker", 0).toInt();
 
@@ -88,7 +92,10 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
 
     spinOverlap->setValue(overlap * 1000);
     printer.setOutputFileName(outputFileName);
-    printer.setPageSize((QPageSize)pageSize);
+    printer.setOutputFormat(outputFormat);
+    printer.setPrinterName(printerName);
+    printer.setPageSize(QPageSize(QSizeF(pageSizeWitdh, pageSizeHeight), QPageSize::Millimeter));
+    printer.setPageSize((QPageSize::PageSizeId)pageSizeId);
     printer.setPageMargins(QMarginsF(left, top, right, bottom),QPageLayout::Millimeter);
     checkScaleBar->setChecked(printScaleBar);
     checkPageMarkers->setChecked(printPageMarkers);
@@ -103,12 +110,18 @@ CTrkPrintDialog::~CTrkPrintDialog()
     cfg.setValue("Print/Trk/canvasName", canvasName);
     cfg.setValue("Print/Trk/overlap", overlap);
     cfg.setValue("Print/Trk/outputFileName", printer.outputFileName());
-    cfg.setValue("Print/Trk/pageSize", printer.pageLayout().pageSize().id());
+    cfg.setValue("Print/Trk/printerName", printer.printerName());
+    cfg.setValue("Print/Trk/outputFormat", printer.outputFormat());
+    cfg.setValue("Print/Trk/pageSizeId", printer.pageLayout().pageSize().id());
     QMarginsF margins = printer.pageLayout().margins(QPageLayout::Millimeter);
     cfg.setValue("Print/Trk/marginLeft", margins.left());
     cfg.setValue("Print/Trk/marginTop", margins.top());
     cfg.setValue("Print/Trk/marginRight", margins.right());
     cfg.setValue("Print/Trk/marginBottom", margins.bottom());
+    qreal pageSizeWidth = printer.pageLayout().pageSize().rect(QPageSize::Millimeter).width();
+    qreal pageSizeHeight = printer.pageLayout().pageSize().rect(QPageSize::Millimeter).height();
+    cfg.setValue("Print/Trk/pageSizeWidth", pageSizeWidth);
+    cfg.setValue("Print/Trk/pageSizeHeight", pageSizeHeight);
     cfg.setValue("Print/Trk/printScaleBar", printScaleBar);
     cfg.setValue("Print/Trk/printPageMarkers", printPageMarkers);
     cfg.setValue("Print/Trk/distanceMarker", distanceMarker);
@@ -338,7 +351,6 @@ void CTrkPrintDialog::slotUpdateMetrics()
             {
                 QLineF pageLine = QLineF(pagePts[j - 1], pagePts[j]); // Build line from page rect
                 QPointF ipt; // The intersection point
-//                QLineF::IntersectType type = pageLine.intersect(trkLine, &ipt); // Try to find an intersection  // Fix depreciation warning
                 QLineF::IntersectType type = pageLine.intersects(trkLine, &ipt); // Try to find an intersection
 
                 if (type == QLineF::BoundedIntersection) // There is an intersection
@@ -433,8 +445,7 @@ void CTrkPrintDialog::slotUpdateMetrics()
     {
         labelScaleInfoStr += (tr("Current printer: ")) + printer.printerName() + "<br>";
     }
-//    labelScaleInfoStr += tr("Page Size: ") + QPageSize::name((QPageSize::PageSizeId)printer.pageSize()) + "<br>";  // Fix depreciation warning
-    labelScaleInfoStr += tr("Page Size: ") + QPageSize::name((QPageSize::PageSizeId)printer.pageLayout().pageSize().id()) + "<br>";
+    labelScaleInfoStr += tr("Page Size: ") + printer.pageLayout().pageSize().name() + "<br>";
 
     QMarginsF margins = printer.pageLayout().margins(QPageLayout::Millimeter);
     labelScaleInfoStr += tr("Margin Left: %L1mm Top: %L2mm")
@@ -694,7 +705,6 @@ void CTrkPrintDialog::slotSetPrinter()
     QPrintDialog dlg(&printer, this);
     QDialogButtonBox *bbox = dlg.findChild<QDialogButtonBox *>();
     bbox->button(QDialogButtonBox::Ok)->setText(tr("OK")); // Instead of default text "Print"
-
     dlg.setWindowTitle(tr("Printer Properties..."));
     qint32 ret = dlg.exec();
 
