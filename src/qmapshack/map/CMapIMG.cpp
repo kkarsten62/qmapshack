@@ -1565,9 +1565,8 @@ void CMapIMG::drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale
   textpaths.clear();
   QFont font = CMainWindow::self().getMapFont();
 
-  font.setPixelSize(12);
+  font.setPointSize(9);
   font.setBold(false);
-  QFontMetricsF metrics(font);
 
   QVector<qreal> lengths;
   lengths.reserve(100);
@@ -1641,7 +1640,19 @@ void CMapIMG::drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale
           }
 
           if (scale.x() < STREETNAME_THRESHOLD && property.labelType != CGarminTyp::eNone) {
-            collectText(item, poly, font, metrics, h);
+            QFont f(font);
+            switch (property.labelType) {
+              case CGarminTyp::eSmall:
+                f.setPointSize(font.pointSize() - 2);
+                break;
+              case CGarminTyp::eLarge:
+                f.setPointSize(font.pointSize() + 2);
+                break;
+              default:;
+            }
+
+            collectText(item, poly, f, h,
+                        CMainWindow::self().isNight() ? property.colorLabelNight : property.colorLabelDay);
           }
 
           path.addPolygon(poly);
@@ -1681,7 +1692,7 @@ void CMapIMG::drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale
         QList<quint32>::const_iterator it = dict[type].constBegin();
         for (; it != dict[type].constEnd(); ++it) {
           // borderCount++;
-          drawLine(p, lines[*it], property, metrics, font, scale);
+          drawLine(p, lines[*it], property, font, scale);
         }
         // draw foreground line in a second run for nicer borders
       } else {
@@ -1690,7 +1701,7 @@ void CMapIMG::drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale
         QList<quint32>::const_iterator it = dict[type].constBegin();
         for (; it != dict[type].constEnd(); ++it) {
           // normalCount++;
-          drawLine(p, lines[*it], property, metrics, font, scale);
+          drawLine(p, lines[*it], property, font, scale);
         }
       }
     }
@@ -1724,8 +1735,8 @@ void CMapIMG::drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale
   //        << "deletedCount:" << deletedCount;
 }
 
-void CMapIMG::drawLine(QPainter& p, CGarminPolygon& l, const CGarminTyp::polyline_property& property,
-                       const QFontMetricsF& metrics, const QFont& font, const QPointF& scale) {
+void CMapIMG::drawLine(QPainter& p, CGarminPolygon& l, const CGarminTyp::polyline_property& property, const QFont& font,
+                       const QPointF& scale) {
   QPolygonF& poly = l.pixel;
   const int size = poly.size();
   const int lineWidth = p.pen().width();
@@ -1739,7 +1750,19 @@ void CMapIMG::drawLine(QPainter& p, CGarminPolygon& l, const CGarminTyp::polylin
   //    simplifyPolyline(line);
 
   if (scale.x() < STREETNAME_THRESHOLD && property.labelType != CGarminTyp::eNone) {
-    collectText(l, poly, font, metrics, lineWidth);
+    QFont f(font);
+    switch (property.labelType) {
+      case CGarminTyp::eSmall:
+        f.setPointSize(font.pointSize() - 2);
+        break;
+      case CGarminTyp::eLarge:
+        f.setPointSize(font.pointSize() + 2);
+        break;
+      default:;
+    }
+
+    collectText(l, poly, f, lineWidth,
+                CMainWindow::self().isNight() ? property.colorLabelNight : property.colorLabelDay);
   }
 
   p.drawPolyline(poly);
@@ -1758,8 +1781,8 @@ void CMapIMG::drawLine(QPainter& p, const CGarminPolygon& l) {
   p.drawPolyline(poly);
 }
 
-void CMapIMG::collectText(const CGarminPolygon& item, const QPolygonF& line, const QFont& font,
-                          const QFontMetricsF& metrics, qint32 lineWidth) {
+void CMapIMG::collectText(const CGarminPolygon& item, const QPolygonF& line, const QFont& font, qint32 lineWidth,
+                          const QColor& color) {
   QString str;
   if (item.hasLabel()) {
     str = item.getLabelText();
@@ -1774,6 +1797,7 @@ void CMapIMG::collectText(const CGarminPolygon& item, const QPolygonF& line, con
   tp.font = font;
   tp.text = str;
   tp.lineWidth = lineWidth;
+  tp.color = color;
 
   const int size = line.size();
   for (int i = 1; i < size; ++i) {
@@ -1797,7 +1821,8 @@ bool CMapIMG::intersectsWithExistingLabel(const QRect& rect) const {
   return false;
 }
 
-void CMapIMG::addLabel(const CGarminPoint& pt, const QRect& rect, CGarminTyp::label_type_e type) {
+void CMapIMG::addLabel(const CGarminPoint& pt, const QRect& rect, const CGarminTyp::point_property& property,
+                       bool isNight) {
   QString str;
   if (pt.hasLabel()) {
     str = pt.getLabelText();
@@ -1808,22 +1833,18 @@ void CMapIMG::addLabel(const CGarminPoint& pt, const QRect& rect, CGarminTyp::la
   strlbl.pt = pt.pos.toPoint();
   strlbl.str = str;
   strlbl.rect = rect;
-  strlbl.type = type;
+  strlbl.property = property;
+  strlbl.isNight = isNight;
 }
 
 void CMapIMG::drawPoints(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois) {
   pointtype_t::iterator pt = pts.begin();
   while (pt != pts.end()) {
-    //        if((pt->type > 0x1600) && (zoomFactor > CResources::self().getZoomLevelThresholdPois()))
-    //        {
-    //            ++pt;
-    //            continue;
-    //        };
-
     map->convertRad2Px(pt->pos);
 
-    const QImage& icon =
-        CMainWindow::self().isNight() ? pointProperties[pt->type].imgNight : pointProperties[pt->type].imgDay;
+    const CGarminTyp::point_property& property = pointProperties[pt->type];
+
+    const QImage& icon = CMainWindow::self().isNight() ? property.imgNight : property.imgDay;
     const QSizeF& size = icon.size();
 
     if (isCluttered(rectPois, QRectF(pt->pos, size))) {
@@ -1838,12 +1859,8 @@ void CMapIMG::drawPoints(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPoi
 
     bool showLabel = true;
 
-    if (pointProperties.contains(pt->type)) {
-      p.drawImage(pt->pos.x() - (size.width() / 2), pt->pos.y() - (size.height() / 2), icon);
-      showLabel = pointProperties[pt->type].labelType != CGarminTyp::eNone;
-    } else {
-      p.drawPixmap(pt->pos.x() - 4, pt->pos.y() - 4, QPixmap(":/icons/8x8/bullet_blue.png"));
-    }
+    p.drawImage(pt->pos.x() - (size.width() / 2), pt->pos.y() - (size.height() / 2), icon);
+    showLabel = property.labelType != CGarminTyp::eNone;
 
     if (CMainWindow::self().isPoiText() && showLabel) {
       // calculate bounding rectangle with a border of 2 px
@@ -1853,7 +1870,7 @@ void CMapIMG::drawPoints(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPoi
 
       // if no intersection was found, add label to list
       if (!intersectsWithExistingLabel(rect)) {
-        addLabel(*pt, rect, CGarminTyp::eStandard);
+        addLabel(*pt, rect, property, CMainWindow::self().isNight());
       }
     }
     ++pt;
@@ -1861,13 +1878,11 @@ void CMapIMG::drawPoints(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPoi
 }
 
 void CMapIMG::drawPois(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois) {
-  CGarminTyp::label_type_e labelType = CGarminTyp::eStandard;
-
   for (CGarminPoint& pt : pts) {
     map->convertRad2Px(pt.pos);
 
-    const QImage& icon =
-        CMainWindow::self().isNight() ? pointProperties[pt.type].imgNight : pointProperties[pt.type].imgDay;
+    const CGarminTyp::point_property& property = pointProperties[pt.type];
+    const QImage& icon = CMainWindow::self().isNight() ? property.imgNight : property.imgDay;
     const QSizeF& size = icon.size();
 
     if (isCluttered(rectPois, QRectF(pt.pos, size))) {
@@ -1879,13 +1894,7 @@ void CMapIMG::drawPois(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois)
       continue;
     }
 
-    labelType = CGarminTyp::eStandard;
-    if (pointProperties.contains(pt.type)) {
-      p.drawImage(pt.pos.x() - (size.width() / 2), pt.pos.y() - (size.height() / 2), icon);
-      labelType = pointProperties[pt.type].labelType;
-    } else {
-      p.drawPixmap(pt.pos.x() - 4, pt.pos.y() - 4, QPixmap(":/icons/8x8/bullet_red.png"));
-    }
+    p.drawImage(pt.pos.x() - (size.width() / 2), pt.pos.y() - (size.height() / 2), icon);
 
     if (CMainWindow::self().isPoiText()) {
       // calculate bounding rectangle with a border of 2 px
@@ -1895,7 +1904,7 @@ void CMapIMG::drawPois(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois)
 
       // if no intersection was found, add label to list
       if (!intersectsWithExistingLabel(rect)) {
-        addLabel(pt, rect, labelType);
+        addLabel(pt, rect, property, CMainWindow::self().isNight());
       }
     }
   }
@@ -1908,7 +1917,8 @@ void CMapIMG::drawLabels(QPainter& p, const QVector<strlbl_t>& lbls) {
   fonts[CGarminTyp::eLarge].setPointSize(f.pointSize() + 2);
 
   for (const strlbl_t& lbl : lbls) {
-    CDraw::text(lbl.str, p, lbl.pt, Qt::black, fonts[lbl.type]);
+    CDraw::text(lbl.str, p, lbl.pt, lbl.isNight ? lbl.property.colorLabelNight : lbl.property.colorLabelDay,
+                fonts[lbl.property.labelType]);
   }
 }
 
@@ -1928,17 +1938,17 @@ void CMapIMG::drawText(QPainter& p) {
 
     // adjust font size until string fits into polyline
     while (width > (length * 0.7)) {
-      font.setPixelSize(font.pixelSize() - 1);
+      font.setPointSize(font.pointSize() - 1);
       fm = QFontMetricsF(font);
       width = fm.width(textpath.text);
 
-      if ((font.pixelSize() < 8)) {
+      if ((font.pointSize() < 6)) {
         break;
       }
     }
 
     // no way to draw a readable string - skip
-    if ((font.pixelSize() < 8)) {
+    if ((font.pointSize() < 6)) {
       continue;
     }
 
@@ -2015,7 +2025,7 @@ void CMapIMG::drawText(QPainter& p) {
       p.drawText(0, +1, str);
       p.drawText(+1, +1, str);
 
-      p.setPen(Qt::black);
+      p.setPen(textpath.color);
       p.drawText(0, 0, str);
 
       p.restore();
