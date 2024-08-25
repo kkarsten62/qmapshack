@@ -78,19 +78,21 @@ CEnergyCyclingDialog::CEnergyCyclingDialog(CEnergyCycling& energyCycling, QWidge
           &CEnergyCyclingDialog::slotSetRollingCoeff);
   connect(spinPedalCadence, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
           &CEnergyCyclingDialog::slotSetPedalCadence);
+  connect(spinCrankLength, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &CEnergyCyclingDialog::slotSetCrankLength);
   connect(pushHelp, &QPushButton::clicked, this, &CEnergyCyclingDialog::slotShowHelp);
 
   energyTmpSet =
-      energyCycling.getEnergyTrkSet();  // put the track parameter set in a temporarily one, used by the dialog
+      energyCycling.getEnergyTrkSet(); //Put the track parameter set in a temporarily one, used by the dialog
   updateUi();
 
   if (energyCycling.getEnergyUseCycling() ==
-      NOFLOAT)  // No need to remove the "Energy Use Cycling" value from the status panel
+      NOFLOAT) //No need to remove the "Energy Use Cycling" value from the status panel
   {
     buttonBox->button(QDialogButtonBox::Reset)->setEnabled(false);
   }
 
-  slotApply(true);  // Compute "Energy Use Cycling" and put all results in the dialog output widgets
+  slotApply(true); //Compute "Energy Use Cycling" and put all results in the dialog output widgets
 }
 
 CEnergyCyclingDialog::~CEnergyCyclingDialog() {}
@@ -105,7 +107,7 @@ void CEnergyCyclingDialog::updateUi() {
 
   comboWindSpeed->setCurrentIndex(energyTmpSet.windSpeedIndex);
   if (energyTmpSet.windSpeedIndex > 0) {
-    spinWindSpeed->setValue(windSpeeds[energyTmpSet.windSpeedIndex].windSpeed * 3.6);  // m/s ==> km/h
+    spinWindSpeed->setValue(windSpeeds[energyTmpSet.windSpeedIndex].windSpeed * 3.6); //m/s ==> Km/h
   } else {
     spinWindSpeed->setValue(energyTmpSet.windSpeed * 3.6);
   }
@@ -129,6 +131,7 @@ void CEnergyCyclingDialog::updateUi() {
   }
 
   spinPedalCadence->setValue(energyTmpSet.pedalCadence);
+  spinCrankLength->setValue(energyTmpSet.crankLength);
 }
 
 /** @brief When "Ok" button is clicked:
@@ -160,6 +163,11 @@ void CEnergyCyclingDialog::slotApply(bool) {
   labelGravitySlopeForce->setText(QString("<b>%L1N</b>").arg(energyTmpSet.gravitySlopeForce, 0, 'f', 1));
   labelSumForce->setText(QString("<b>%L1N</b>").arg(energyTmpSet.sumForce, 0, 'f', 1));
 
+  labelPedalCadenceTrk->setText(QString("<b>%L1rpm</b>").arg(energyTmpSet.pedalCadenceTrk, 0, 'f', 0));
+  labelPedalForce->setText(QString("<b>%L1N</b>").arg(energyTmpSet.pedalForce, 0, 'f', 1));
+  labelPedalTorque->setText(QString("<b>%L1Nm</b>").arg(energyTmpSet.pedalTorque, 0, 'f', 1));
+  labelMaxPedalTorque->setText(QString("<b>%L1Nm</b>").arg(energyTmpSet.maxPedalTorque, 0, 'f', 1));
+
   QString val, unit;
   IUnit::self().seconds2time(energyTmpSet.powerMovingTime, val, unit);
   labelPowerMovingTime->setText(QString("<b>%L1%2</b>").arg(val, unit));
@@ -168,10 +176,8 @@ void CEnergyCyclingDialog::slotApply(bool) {
   labelPower->setText(QString("<b>%L1W</b>").arg(energyTmpSet.power, 0, 'f', 1));
   labelPositivePower->setText(QString("<b>%L1W</b>").arg(energyTmpSet.positivePower, 0, 'f', 1));
 
-  labelEnergyKJoule->setText(QString("<b>%L1kJ</b>").arg(energyTmpSet.energyKJoule, 0, 'f', 0));
-  labelEnergyKcal->setText(QString("<b><u>%L1kcal</u></b>").arg(energyTmpSet.energyKcal, 0, 'f', 0));
-
-  labelPositivePedalForce->setText(QString("<b>%L1N</b>").arg(energyTmpSet.positivePedalForce, 0, 'f', 1));
+  labelGenericEnergy->setText(QString("<b>%L1Wh</b>").arg(energyTmpSet.genericEnergy, 0, 'f', 0));
+  labelDriverEnergy->setText(QString("<b><u>%L1kcal</u></b>").arg(energyTmpSet.driverEnergy, 0, 'f', 0));
 }
 
 /** @brief Loads parameters from SETTINGS into the temporarily parameter for modifying in the dialog
@@ -288,7 +294,13 @@ void CEnergyCyclingDialog::slotSetRollingCoeff(qreal rollingCoeff) {
   }
 }
 
-void CEnergyCyclingDialog::slotSetPedalCadence(qreal pedalCadence) { energyTmpSet.pedalCadence = pedalCadence; }
+void CEnergyCyclingDialog::slotSetPedalCadence(qreal pedalCadence) {
+  energyTmpSet.pedalCadence = pedalCadence;
+}
+
+void CEnergyCyclingDialog::slotSetCrankLength(qreal crankLength) {
+  energyTmpSet.crankLength = crankLength;
+}
 
 void CEnergyCyclingDialog::slotShowHelp() {
   QString msg =
@@ -302,13 +314,14 @@ void CEnergyCyclingDialog::slotShowHelp() {
          "<li>Driver and bicycle weight</li>"
          "<li>Air density, wind speed and position to the wind to consider the wind drag resistance</li>"
          "<li>Ground situation (tyre and ground) to consider the rolling resistance</li>"
-         "<li>Average pedal cadence for the computation of pedal force</li>"
+         "<li>Average pedal cadence for the computation of pedal force. If the track contains cadence values recorded "
+         "by a cadence sensor, these values are used to calculate the pedal force.</li>"
          "</ul></p>"
          "<p>The individualize data will be defined in this dialog and more computed values will be shown here.</p>"
          "<p>When loading older tracks or switching in history to tracks with a different parameter set compared to "
          "the previous saved parameter set"
          ", the shown parameter set in this dialog can be replaced by the previous saved parameter set."
-         "<p>The energy use in unit \"kcal\" will be stored in the track (qms format only) and can be remove later on "
+         "<p>The driver energy use in unit \"kcal\" will be stored in the track (qms format only) and can be remove later on "
          "when no longer needed.</p>"
          "<p>For more information see tooltips on input and output values.</p>");
 

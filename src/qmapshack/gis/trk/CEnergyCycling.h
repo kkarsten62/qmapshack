@@ -54,17 +54,18 @@ class CEnergyCycling {
   /** @brief The parameter set structure (input and output values) to compute "Energy Use Cycling" value
    */
   struct energy_set_t {
-    qreal driverWeight = 75;
-    qreal bikeWeight = 15;
-    qreal airDensity = 1.2;
+    qreal driverWeight = 75; //kg
+    qreal bikeWeight = 15; //kg
+    qreal airDensity = 1.2; //kg/m3
     qint32 windSpeedIndex = 5;
-    qreal windSpeed = 0;
+    qreal windSpeed = 0; //m/s
     qint32 windPositionIndex = 2;
-    qreal frontalArea = 0.65;
+    qreal frontalArea = 0.65; //m2
     qreal windDragCoeff = 1.0;
     qint32 groundIndex = 3;
     qreal rollingCoeff = 0.005;
-    qreal pedalCadence = 75;
+    qreal pedalCadence = 75; //rpm
+    qreal crankLength = 170; //mm
     qreal airResistForce = NOFLOAT;
     qreal gravitySlopeForce = NOFLOAT;
     qreal rollResistForce = NOFLOAT;
@@ -72,10 +73,13 @@ class CEnergyCycling {
     qreal powerMovingTime = NOFLOAT;
     qreal power = NOFLOAT;
     qreal positivePower = NOFLOAT;
+    qreal pedalCadenceTrk = NOFLOAT;
+    qreal pedalForce = NOFLOAT;
+    qreal pedalTorque = NOFLOAT;
+    qreal maxPedalTorque = NOFLOAT;
     qreal powerMovingTimeRatio = NOFLOAT;
-    qreal energyKJoule = NOFLOAT;
-    qreal energyKcal = NOFLOAT;
-    qreal positivePedalForce = NOFLOAT;
+    qreal genericEnergy = NOFLOAT;
+    qreal driverEnergy = NOFLOAT;
   };
 
   CEnergyCycling(CGisItemTrk& trk);
@@ -93,7 +97,7 @@ class CEnergyCycling {
 
      @return The "Energy Use Cycling" value
    */
-  qreal getEnergyUseCycling() const { return energyTrkSet.energyKcal; }
+  qreal getEnergyUseCycling() const { return energyTrkSet.driverEnergy; }
 
   void compute();
   void compute(energy_set_t& energySet);
