@@ -165,7 +165,7 @@
         <widget class="QLabel" name="labelDriverEnergy">
          <property name="toolTip">
           <string>&lt;p&gt;The energy use (consumption) in kcal by transforming the positive power by the driver.&lt;/p&gt;
-&lt;p&gt;The muscle efficiency ratio ist considered by 23%.&lt;/p&gt;</string>
+&lt;p&gt;The human muscle efficiency ratio ist considered by 23%.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string notr="true">-</string>
@@ -294,7 +294,7 @@
        <item row="9" column="6">
         <widget class="QLabel" name="labelGenericEnergy">
          <property name="toolTip">
-          <string>&lt;p&gt;The generic energy use (consumption) in WattHour (Joule * 1h / 3600s) transforming the positive power.&lt;/p&gt;</string>
+          <string>&lt;p&gt;The generic energy use (consumption) in Watthour (Joule * 1h / 3600s) transforming the positive power.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string notr="true">-</string>
@@ -432,7 +432,8 @@
         <widget class="QDoubleSpinBox" name="spinPedalCadence">
          <property name="toolTip">
           <string>&lt;p&gt;The average pedal cadence in rpm is needed to calculate the Positive Pedal Force.&lt;/p&gt;
-&lt;p&gt;Realistic values are between 50 and 100 rpm.&lt;/p&gt;</string>
+&lt;p&gt;Realistic values are between 50 and 100 rpm.&lt;/p&gt;
+&lt;p&gt;This value is used if no cadence data are available in the track.&lt;/p&gt;</string>
          </property>
          <property name="suffix">
           <string>rpm</string>
@@ -672,7 +673,7 @@
         <widget class="QLabel" name="labelPowerMovingTimeRatio">
          <property name="toolTip">
           <string>&lt;p&gt;The ratio of the power moving time related to the track moving time in percent.&lt;/p&gt;
-&lt;p&gt;The lower the ratio the greater the influence of tailwind and/or downhill driving.&lt;/p&gt;</string>
+&lt;p&gt;The lower the ratio the greater is the influence of tailwind and/or downhill driving.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string notr="true">-</string>
@@ -744,7 +745,8 @@
        <item row="5" column="6">
         <widget class="QLabel" name="labelPedalCadenceTrk">
          <property name="toolTip">
-          <string>&lt;p&gt;If a cadence sensor is used and cadence values are stored in the track data then this values will be used instead of the pedal cadence value given by the user inside this dialog.&lt;/p&gt;&lt;p&gt;The pedal cadence track value is the average cadence in rpm of all track point with positve power and a cadence greater than zero.&lt;/p&gt;</string>
+          <string>&lt;p&gt;If a cadence sensor is used and cadence values are stored in the track data then this values will be used instead of the pedal cadence value given by the user inside this dialog.&lt;/p&gt;
+&lt;p&gt;The pedal cadence track value is the average cadence in rpm of all track point with positve power and a cadence greater than zero.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string notr="true">-</string>
@@ -757,7 +759,7 @@
        <item row="5" column="3">
         <widget class="QDoubleSpinBox" name="spinCrankLength">
          <property name="toolTip">
-          <string>&lt;p&gt;The crank length given in mm.&lt;/p&gt;</string>
+          <string>&lt;p&gt;The crank length from the bicycle in mm.&lt;/p&gt;</string>
          </property>
          <property name="whatsThis">
           <string/>
@@ -795,7 +797,11 @@
        <item row="5" column="8">
         <widget class="QLabel" name="labelPedalForce">
          <property name="toolTip">
-          <string>&lt;p&gt;The pedal force in Newton applied to the pedal on average over all track points.&lt;/p&gt;&lt;p&gt;Negative forces from strong tail wind or downhill driving are not considered.&lt;/p&gt;&lt;p&gt;This force must be applied to the pedal by the driver.&lt;/p&gt;&lt;p&gt;The higher the pedal cadence, the lower the pedal force.&lt;/p&gt;&lt;p&gt;The calculation is based on an even force distribution over the crank rotation without force peaks. &lt;/p&gt;</string>
+          <string>&lt;p&gt;The pedal force in Newton applied to the pedal on average over all track points.&lt;/p&gt;
+&lt;p&gt;Negative forces from strong tail wind or downhill driving are not considered.&lt;/p&gt;
+&lt;p&gt;This force must be applied to the pedal by the driver.&lt;/p&gt;
+&lt;p&gt;The higher the pedal cadence, the lower the pedal force.&lt;/p&gt;
+&lt;p&gt;The calculation is based on an even force distribution over the crank rotation without force peaks. &lt;/p&gt;</string>
          </property>
          <property name="text">
           <string notr="true">-</string>

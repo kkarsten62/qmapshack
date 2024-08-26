@@ -60,7 +60,7 @@ void CEnergyCycling::loadSettings(CEnergyCycling::energy_set_t& energySet) {
   SETTINGS;
   cfg.beginGroup("EnergyCycling");
 
-  energy_set_t energyDefaultSet;  // to get the default values defined in header
+  energy_set_t energyDefaultSet;  //To get the default values defined in header file
 
   energySet.driverWeight = cfg.value("personalWeight", energyDefaultSet.driverWeight).toDouble();
   energySet.bikeWeight = cfg.value("bikeWeight", energyDefaultSet.bikeWeight).toDouble();
@@ -119,14 +119,12 @@ void CEnergyCycling::compute() {
    Used by dialog to compute temporarily parameter set in all cases
 
    Related information for the computation process and used formulas:
-    - http://www.blog.ultracycle.net/2010/05/cycling-power-calculations (English)
-    - http://www.cptips.com/energy.htm  (English)
-    - http://www.tribology-abc.com/calculators/cycling.htm (English)
+    - https://www.cptips.com/energy.htm  (English)
+    - https://www.tribology-abc.com/calculators/cycling.htm (English)
     - http://www.kreuzotter.de/deutsch/speed.htm (German)
-    - http://horst-online.com/physik-des-fahrrads/index.html (German)
-    - http://www.helpster.de/wirkungsgrad-vom-mensch-erklaerung_198168 (German)
-    - http://www.wolfgang-menn.de/motion_d.htm (German)
-    - http://www.msporting.com/planung/5_3_6%20Aerodynamik.htm (German)
+    - https://horst-online.com/physik-des-fahrrads/index.html (German)
+    - https://www.helpster.de/wirkungsgrad-vom-mensch-erklaerung_198168 (German)
+    - https://www.msporting.com/planung/5_3_6%20Aerodynamik.htm (German)
 
    @param energySet The parameter set used for the computation algorithm (input and output values)
  */
@@ -135,22 +133,23 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
     return;
   }
 
-  // Input values
+  //Input values
   constexpr qreal joule2Calor = 4.1868;
-  constexpr qreal gravityAccel = 9.81; //kg * m / s2
+  constexpr qreal gravityAccel = 9.81; //m / s2
   constexpr qreal muscleCoeff = 23; //%
 
-  qreal totalWeight = energySet.driverWeight + energySet.bikeWeight;
+  qreal totalWeight = energySet.driverWeight + energySet.bikeWeight; //kg
   qreal airDensity = energySet.airDensity;
   qreal windSpeed = energySet.windSpeed;
   qreal frontalArea = energySet.frontalArea;
   qreal windDragCoeff = energySet.windDragCoeff;
   qreal rollingCoeff = energySet.rollingCoeff;
   qreal crankLength = energySet.crankLength;
+  qreal pedalCadence = energySet.pedalCadence; //By default use cadence given by user from dialog
 
   // Output values
   energySet.airResistForce = 0;
-  energySet.rollResistForce = totalWeight * gravityAccel * rollingCoeff;
+  energySet.rollResistForce = totalWeight * gravityAccel * rollingCoeff; //N (kg* m / s2)
   energySet.gravitySlopeForce = 0;
   energySet.sumForce = 0;
   energySet.pedalCadenceTrk = 0;
@@ -165,10 +164,9 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
   energySet.driverEnergy = 0;
 
   qint32 cntPowerPoints = 0; //Count the moving track points
-  qint32 cntPositivePowerPoints = 0;//Count the moving track point and positive power
+  qint32 cntPositivePowerPoints = 0; //Count the moving track point and positive power
   qint32 cntPositiveCadence = 0; //Count on positive power and positive cadence, driver is rotating the pedal
-  qreal sumPedalCadence = 0; //Sum of all cadence values
-  //qreal maxPedalTorque = 0;
+  qreal sumPedalCadence = 0; //Sum of all cadence values for all positive power track points
 
   const CTrackData::trkpt_t* lastTrkpt = nullptr;
 
@@ -179,51 +177,48 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
 
     if (lastTrkpt != nullptr) //First track point will not considered
     {
-      qreal deltaTime = (pt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0;
+      qreal deltaTime = (pt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0; //s
       if (deltaTime > 0 &&
           ((pt.deltaDistance / deltaTime) <= 0.2)) //0.2 ==> to be synchron with deriveSecondaryData()
       {
         lastTrkpt = &pt;
         continue; //Standstill - no moving, track point will not considered
       }
+      cntPowerPoints++; //Bicycle is moving
 
-      qreal slope = pt.slope1;
-      qreal speed = pt.speed;
+      qreal slope = pt.slope1; //Radians
+      qreal speed = pt.speed; //m / s
 
-      qreal airResistForce = 0.5 * windDragCoeff * frontalArea * airDensity * qPow(speed + windSpeed, 2);
+      qreal airResistForce = 0.5 * windDragCoeff * frontalArea * airDensity * qPow(speed + windSpeed, 2); //N
 
       if ((speed + windSpeed) < 0) {
-        airResistForce *= -1;
+        airResistForce *= -1; //Negative Air reststance force indicates that the tailwind is stronger than speedwind)
       }
-      qreal gravitySlopeForce = totalWeight * gravityAccel * qSin(slope * DEG_TO_RAD);
+      qreal gravitySlopeForce = totalWeight * gravityAccel * qSin(slope * DEG_TO_RAD); //N
       energySet.airResistForce += airResistForce;
       energySet.gravitySlopeForce += gravitySlopeForce;
-      energySet.sumForce += airResistForce + gravitySlopeForce + energySet.rollResistForce;
+      energySet.sumForce += airResistForce + gravitySlopeForce + energySet.rollResistForce; //N
 
-      qreal power =
+      qreal power = //Nm/s (kg / m / s2 * m / s)
           (qAbs(airResistForce) * (speed + windSpeed)) + ((energySet.rollResistForce + gravitySlopeForce) * speed);
-      energySet.power += power;  //Positive and negative power
+      energySet.power += power; //Positive and negative power
 
-      cntPowerPoints++;
-      if (power > 0) {
-
-        qreal pedalCadence = energySet.pedalCadence;
+      if (power > 0) { //Power is positive and must provide by user
         if (pt.extensions.contains("gpxtpx:TrackPointExtension|gpxtpx:cad")) {
-          pedalCadence = pt.extensions["gpxtpx:TrackPointExtension|gpxtpx:cad"].toDouble();
+          pedalCadence = pt.extensions["gpxtpx:TrackPointExtension|gpxtpx:cad"].toDouble(); //Use cadence from track point
         }
-        if (pedalCadence) {
-          qreal pedalSpeed = crankLength * pedalCadence * 2 * M_PI / 60 / 1000;
+        if (pedalCadence) { //Driver rotate the pedal and produce force and torque
+          qreal pedalSpeed = crankLength * pedalCadence * 2 * M_PI / 60 / 1000; //m / s
           qreal pedalForce = power / pedalSpeed;
           energySet.pedalForce += pedalForce;
           energySet.maxPedalTorque = qMax(energySet.maxPedalTorque, pedalForce * crankLength / 1000);
-          //qDebug() << "maxPedalTorque=" << maxPedalTorque;
           cntPositiveCadence++;
           sumPedalCadence += pedalCadence;
         }
 
-        energySet.powerMovingTime += deltaTime;
+        energySet.powerMovingTime += deltaTime; //Time for moving with positive power
         energySet.positivePower += power;  //Positive power only
-        energySet.genericEnergy += power * deltaTime / 3600;
+        energySet.genericEnergy += power * deltaTime / 3600; //N * m / s * s * 1h / 3600s [Wh]
         energySet.driverEnergy += power * deltaTime / muscleCoeff / 1000 * 100 / joule2Calor;
         cntPositivePowerPoints++;
       }
@@ -233,7 +228,7 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
 
   if (cntPowerPoints)  //For all moving points
   {
-    energySet.airResistForce /= cntPowerPoints;
+    energySet.airResistForce /= cntPowerPoints; //Average over all track point with positve and negative power
     energySet.gravitySlopeForce /= cntPowerPoints;
     energySet.sumForce /= cntPowerPoints;
     energySet.power /= cntPowerPoints;
@@ -250,9 +245,9 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
   }
 
   if (cntPositiveCadence) {  //For the moving points with positive power and driver has rotate the pedal
-    energySet.pedalForce /= cntPositiveCadence;
-    energySet.pedalCadenceTrk = sumPedalCadence / cntPositiveCadence;
-    energySet.pedalTorque = energySet.pedalForce * crankLength / 1000; //In Newtonmeter [Nm]
+    energySet.pedalForce /= cntPositiveCadence; //Average pedal force
+    energySet.pedalCadenceTrk = sumPedalCadence / cntPositiveCadence; //Average cadence for the track
+    energySet.pedalTorque = energySet.pedalForce * crankLength / 1000; //Average pedal torque
   }
 }
 

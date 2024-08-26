@@ -56,9 +56,9 @@ class CEnergyCycling {
   struct energy_set_t {
     qreal driverWeight = 75; //kg
     qreal bikeWeight = 15; //kg
-    qreal airDensity = 1.2; //kg/m3
+    qreal airDensity = 1.2; //kg / m3
     qint32 windSpeedIndex = 5;
-    qreal windSpeed = 0; //m/s
+    qreal windSpeed = 0; //m / s
     qint32 windPositionIndex = 2;
     qreal frontalArea = 0.65; //m2
     qreal windDragCoeff = 1.0;

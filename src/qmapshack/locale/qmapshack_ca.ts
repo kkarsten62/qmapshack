@@ -10826,62 +10826,86 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;Els valor normals per a bicicletes es situen entre 0,2 i 1,2.&lt;/p&gt;</translation>
     </message>
     <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="167"/>
+        <source>&lt;p&gt;The energy use (consumption) in kcal by transforming the positive power by the driver.&lt;/p&gt;
+&lt;p&gt;The human muscle efficiency ratio ist considered by 23%.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="297"/>
+        <source>&lt;p&gt;The generic energy use (consumption) in Watthour (Joule * 1h / 3600s) transforming the positive power.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="414"/>
         <source>Generic Energy Use:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="486"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="434"/>
+        <source>&lt;p&gt;The average pedal cadence in rpm is needed to calculate the Positive Pedal Force.&lt;/p&gt;
+&lt;p&gt;Realistic values are between 50 and 100 rpm.&lt;/p&gt;
+&lt;p&gt;This value is used if no cadence data are available in the track.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="487"/>
         <source>&lt;p&gt;The values for the type of seat position as pre-selection for the wind frontal area in m2 and the drag coefficient (cw value).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Els valors del tipus de posició de seient tenen preseleccionats valors per al vent a l&apos;àrea frontal en m2 i per al coeficient de resistència al vent (valor cw).&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="737"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="675"/>
+        <source>&lt;p&gt;The ratio of the power moving time related to the track moving time in percent.&lt;/p&gt;
+&lt;p&gt;The lower the ratio the greater is the influence of tailwind and/or downhill driving.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="738"/>
         <source>Pedal Cadence Track:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="747"/>
-        <source>&lt;p&gt;If a cadence sensor is used and cadence values are stored in the track data then this values will be used instead of the pedal cadence value given by the user inside this dialog.&lt;/p&gt;&lt;p&gt;The pedal cadence track value is the average cadence in rpm of all track point with positve power and a cadence greater than zero.&lt;/p&gt;</source>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="748"/>
+        <source>&lt;p&gt;If a cadence sensor is used and cadence values are stored in the track data then this values will be used instead of the pedal cadence value given by the user inside this dialog.&lt;/p&gt;
+&lt;p&gt;The pedal cadence track value is the average cadence in rpm of all track point with positve power and a cadence greater than zero.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="760"/>
-        <source>&lt;p&gt;The crank length given in mm.&lt;/p&gt;</source>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="762"/>
+        <source>&lt;p&gt;The crank length from the bicycle in mm.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="821"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="800"/>
+        <source>&lt;p&gt;The pedal force in Newton applied to the pedal on average over all track points.&lt;/p&gt;
+&lt;p&gt;Negative forces from strong tail wind or downhill driving are not considered.&lt;/p&gt;
+&lt;p&gt;This force must be applied to the pedal by the driver.&lt;/p&gt;
+&lt;p&gt;The higher the pedal cadence, the lower the pedal force.&lt;/p&gt;
+&lt;p&gt;The calculation is based on an even force distribution over the crank rotation without force peaks. &lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="827"/>
         <source>&lt;p&gt;The average pedal torque in Newtonmeter is derived from the average pedal force and the crank length.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="844"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="850"/>
         <source>&lt;p&gt;The maximum pedal torque in Newtonmeter is derived from the average pedal force and the crank length.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="788"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="790"/>
         <source>Pedal Force:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="297"/>
-        <source>&lt;p&gt;The generic energy use (consumption) in WattHour (Joule * 1h / 3600s) transforming the positive power.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="798"/>
-        <source>&lt;p&gt;The pedal force in Newton applied to the pedal on average over all track points.&lt;/p&gt;&lt;p&gt;Negative forces from strong tail wind or downhill driving are not considered.&lt;/p&gt;&lt;p&gt;This force must be applied to the pedal by the driver.&lt;/p&gt;&lt;p&gt;The higher the pedal cadence, the lower the pedal force.&lt;/p&gt;&lt;p&gt;The calculation is based on an even force distribution over the crank rotation without force peaks. &lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="811"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="817"/>
         <source>Avg Pedal Torque:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="834"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="840"/>
         <source>Max Pedal Torque:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -10893,12 +10917,12 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;Si bàsicament és un descens, la força de gravetat en pendent podria ser negativa.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="712"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="713"/>
         <source>Positive Power:</source>
         <translation>Potència Positiva:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="688"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="689"/>
         <source>Power:</source>
         <translation>Potència:</translation>
     </message>
@@ -10910,10 +10934,9 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;El valor pot esser negatiu en cas de vent d&apos;esquena i/o descens.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="434"/>
         <source>&lt;p&gt;The average pedal cadence in rpm is needed to calculate the Positive Pedal Force.&lt;/p&gt;
 &lt;p&gt;Realistic values are between 50 and 100 rpm.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;La mitjana de la cadència de pedalada en rpm és necessària per a calcular la Força Positiva feta sobre el Pedal.&lt;/p&gt;
+        <translation type="vanished">&lt;p&gt;La mitjana de la cadència de pedalada en rpm és necessària per a calcular la Força Positiva feta sobre el Pedal.&lt;/p&gt;
 &lt;p&gt;Els valors raonables estan entre 50 i 100 rpm.&lt;/p&gt;</translation>
     </message>
     <message>
@@ -10924,7 +10947,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;Els valors positius són per al vent de cara i els valors negatius per al vent d&apos;esquena.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="513"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="514"/>
         <source>&lt;p&gt;The wind speed in km/h is taken into account when calculating the force required to overcome the air drag.&lt;/p&gt;
 &lt;p&gt;Positive values for headwind and negative values for tailwind are taken into account.&lt;/p&gt;
 &lt;p&gt;The value can be changed independently of the Beaufort scale value.&lt;/p&gt;</source>
@@ -10938,7 +10961,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>&lt;p&gt;Pes del ciclista en kg incloent la roba.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="493"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="494"/>
         <source>Ground/Tyres:</source>
         <translation>Terreny/Cobertes:</translation>
     </message>
@@ -10950,7 +10973,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;S&apos;utilitza per a saber el coeficient de resistència al rodament.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="547"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="548"/>
         <source>&lt;p&gt;The rolling resistance coefficient (cr value) specifies the force used to overcome the rolling resistance.&lt;/p&gt;
 &lt;p&gt;The relevant factors are the road surface and the tyres.&lt;/p&gt;
 &lt;p&gt;The higher this value is, the more force is required to overcome the rolling resistance.&lt;/p&gt;</source>
@@ -10963,17 +10986,17 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation type="vanished">Energia Utilitzada:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="460"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="461"/>
         <source>&lt;p&gt;The rolling resistance force is the force in Newton required on average over all track points to overcome the rolling resistance.&lt;/p&gt;</source>
         <translation>&lt;p&gt;La força de resistència al rodament és la força en Newton que es requereix de mitjana a tots els puns del track per a vencer la resistència al rodament.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="503"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="504"/>
         <source>Rolling Coeff:</source>
         <translation>Coef. de Rodament:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="537"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="538"/>
         <source>Air Resistance Force:</source>
         <translation>Força de Resistència al Vent:</translation>
     </message>
@@ -10983,7 +11006,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>Estableix el Paràmetre d&apos;Energia Utilitzada En Ciclisme</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="580"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="581"/>
         <source>Bike Weight:</source>
         <translation>Pes de la Bicicleta:</translation>
     </message>
@@ -11004,12 +11027,12 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;El ràtio d&apos;eficiència muscular es considera a partir d&apos;un 23%.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="640"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="641"/>
         <source>Pos. Power Moving Time:</source>
         <translation>Potència Pos. en el Temps en Moviment:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="625"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="626"/>
         <source>&lt;p&gt;The air resistance force is the force in Newton required on average over all track points to overcome the air resistance.&lt;/p&gt;
 &lt;p&gt;The airstream, headwind and tailwind are taken into account.&lt;/p&gt;
 &lt;p&gt;With a strong tailwind this value can be negative.&lt;/p&gt;</source>
@@ -11028,15 +11051,14 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>Cadència de la Pedalada:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="590"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="591"/>
         <source>&lt;p&gt;The frontal area in m2 (driver, bicycle, bags, etc.) exposed to the wind.&lt;/p&gt;</source>
         <translation>&lt;p&gt;L&apos;àrea frontal en m2 exposada al vent (ciclista, bicicleta, equipatge, etc.).&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="167"/>
         <source>&lt;p&gt;The energy use (consumption) in kcal by transforming the positive power by the driver.&lt;/p&gt;
 &lt;p&gt;The muscle efficiency ratio ist considered by 23%.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;L&apos;energia utilitzada (consumida) en kcal transformant la potència positiva aplicada pel ciclista.&lt;/p&gt;
+        <translation type="vanished">&lt;p&gt;L&apos;energia utilitzada (consumida) en kcal transformant la potència positiva aplicada pel ciclista.&lt;/p&gt;
 &lt;p&gt;El ràtio d&apos;eficiència muscular es considera a partir d&apos;un 23%.&lt;/p&gt;</translation>
     </message>
     <message>
@@ -11055,12 +11077,12 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>&lt;p&gt;El pes total en kg del ciclista i la bicicleta incloent la roba i l&apos;equipatge.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="615"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="616"/>
         <source>Crank Length:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="650"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="651"/>
         <source>&lt;p&gt;The time in moving and with positive power by the driver.&lt;/p&gt;
 &lt;p&gt;Times with negative power in strong tail wind or downhill driving are not taken into account.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Temps en moviment i amb potència positiva aplicada pel ciclista.&lt;/p&gt;
@@ -11072,7 +11094,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>Velocitat del Vent km/h:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="664"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="665"/>
         <source>Ratio to Moving Time:</source>
         <translation>Ratio del Temps en Moviment:</translation>
     </message>
@@ -11082,19 +11104,19 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>Sum Forces:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="438"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="439"/>
         <source>rpm</source>
         <translation>rpm</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="698"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="699"/>
         <source>&lt;p&gt;The power in Watt on average over all track points.&lt;/p&gt;
 &lt;p&gt;Negative power from strong tailwind or downhill driving are taken into account.&lt;/p&gt;</source>
         <translation>&lt;p&gt;La mitjana de potència en Watt de tots els punts del track.&lt;/p&gt;
 &lt;p&gt;El temps amb potència negativa en cas de vent fort d&apos;esquena o en un descens es tenen en compte en el càlcul&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="476"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="477"/>
         <source>Driver Weight:</source>
         <translation>Pes del Ciclista:</translation>
     </message>
@@ -11104,7 +11126,7 @@ allunyament màxim en utilitzar dades DEM.</translation>
         <translation>Força de Resist. al Rodament:</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="722"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="723"/>
         <source>&lt;p&gt;The positive power in Watt that must be applied on average for all track points.&lt;/p&gt;
 &lt;p&gt;Negative power from strong tailwind or downhill driving are not taken into account.&lt;/p&gt;
 &lt;p&gt;This power must be applied by the driver on average for the track.&lt;/p&gt;</source>
@@ -11113,10 +11135,9 @@ allunyament màxim en utilitzar dades DEM.</translation>
 &lt;p&gt;Aquesta potència l&apos;ha d&apos;aplicar el ciclista de mitjana a tot el track.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="674"/>
         <source>&lt;p&gt;The ratio of the power moving time related to the track moving time in percent.&lt;/p&gt;
 &lt;p&gt;The lower the ratio the greater the influence of tailwind and/or downhill driving.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;El ratio en percentatge entre la potència del temps en moviment i el temps en moviment del track.&lt;/p&gt;
+        <translation type="vanished">&lt;p&gt;El ratio en percentatge entre la potència del temps en moviment i el temps en moviment del track.&lt;/p&gt;
 &lt;p&gt;Com més baix sigui el ratio més influencia haurà tingut el vent fort d&apos;esquena i/o el descens.&lt;/p&gt;</translation>
     </message>
     <message>
