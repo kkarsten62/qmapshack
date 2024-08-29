@@ -2680,6 +2680,7 @@ void CGisItemTrk::setupInterpolation(bool on, qint32 q) {
     y[trkpt.idxVisible] = trkpt.ele;
   }
 
+<<<<<<< HEAD
           /// @todo find a better way to scale the algorithm
   interp.m = interp.Q * 50;
   if (N < 400) {
@@ -2687,14 +2688,16 @@ void CGisItemTrk::setupInterpolation(bool on, qint32 q) {
   }
 
   interp.m &= 0xFFFFFFFE;
+=======
+  interp.m = interp.Q * N / 10;
+>>>>>>> upstream/dev
 
   try {
-    alglib::spline1dfitcubic(x, y, interp.m, interp.info, interp.p, interp.rep);
+    alglib::spline1dfit(x, y, interp.m, 0.00001, interp.p, interp.rep);
+    interp.valid = true;
   } catch (const alglib::ap_error& e) {
     qWarning() << "Error from alglib: " << e.msg.c_str();
   }
-
-  interp.valid = interp.info > 0;
 
   updateVisuals(eVisualPlot, "setupInterpolation()");
 }
