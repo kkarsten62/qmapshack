@@ -142,11 +142,13 @@ void CHeartRateZonesDialog::computeCells()
         {
             continue;
         }
-
-        qreal hr = trkpt.extensions["gpxtpx:TrackPointExtension|gpxtpx:hr"].toDouble();
+        qreal hr = 0;
+        if (trkpt.extensions.contains("gpxtpx:TrackPointExtension|gpxtpx:hr")) {
+          hr = trkpt.extensions["gpxtpx:TrackPointExtension|gpxtpx:hr"].toDouble();
+        }
         if (hr <= 0)
         {
-            continue;
+          continue;
         }
         minTrkHr = qMin(minTrkHr, hr);
         maxTrkHr = qMax(maxTrkHr, hr);
