@@ -3711,13 +3711,13 @@ Zeile %2, Spalte %3:
         <location filename="../gis/trk/CKnownExtension.cpp" line="89"/>
         <source>Power</source>
         <comment>extShortName</comment>
-        <translation>Kraft</translation>
+        <translation>Leistung</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="89"/>
         <source>Power</source>
         <comment>extLongName</comment>
-        <translation>Kraft</translation>
+        <translation>Leistung</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="105"/>
@@ -3877,25 +3877,25 @@ Zeile %2, Spalte %3:
         <location filename="../gis/trk/CKnownExtension.cpp" line="191"/>
         <source>Power*</source>
         <comment>extShortName</comment>
-        <translation type="unfinished"></translation>
+        <translation>Leistung*</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="191"/>
         <source>Power*</source>
         <comment>extLongName</comment>
-        <translation type="unfinished"></translation>
+        <translation>Leistung*</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="195"/>
         <source>Torque*</source>
         <comment>extShortName</comment>
-        <translation type="unfinished"></translation>
+        <translation>Drehmoment*</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="195"/>
         <source>Torque*</source>
         <comment>extLongName</comment>
-        <translation type="unfinished"></translation>
+        <translation>Drehmoment*</translation>
     </message>
     <message>
         <location filename="../gis/trk/CKnownExtension.cpp" line="159"/>

@@ -172,19 +172,19 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
   qreal sumPedalCadence = 0; //Sum of all cadence values for all positive power track points
 
   const CTrackData::trkpt_t* lastTrkpt = nullptr;
-  //const QStringList& extensionKeys = trk.getExistingDataSources();
-  //bool hasExtensionPower = extensionKeys.contains(CKnownExtension::internalEnergyPower);
-  //bool hasExtensionTorque = extensionKeys.contains(CKnownExtension::internalEnergyTorque);
 
-  //for (const CTrackData::trkpt_t& pt : trk.getTrackData()) {
-  for (CTrackData::trkpt_t& pt : trk.getTrackData()) {
+  for (CTrackData::trkpt_t& pt : trk.getTrackData()) { //We have to modify the trkpts
     if (pt.isHidden()) {
       continue;
     }
 
-    if (lastTrkpt != nullptr) //First track point will not considered
+    if (lastTrkpt != nullptr) //First track point will not be considered
     {
       qreal deltaTime = (pt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0; //s
+      if (createExtensions) { //Checkbox is set
+        pt.extensions[CKnownExtension::internalEnergyPower] = 0; //Then set the exteension as least to 0
+        pt.extensions[CKnownExtension::internalEnergyTorque] = 0;
+      }
       if (deltaTime > 0 &&
           ((pt.deltaDistance / deltaTime) <= 0.2)) //0.2 ==> to be synchron with deriveSecondaryData()
       {
@@ -194,7 +194,6 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
       cntPowerPoints++; //Bicycle is moving
 
       qreal slope = pt.slope1; //Degree (°)
-      qreal slope2 = pt.slope2; //%
       qreal speed = pt.speed; //m / s
 
       qreal airResistForce = 0.5 * windDragCoeff * frontalArea * airDensity * qPow(speed + windSpeed, 2); //N
@@ -216,10 +215,6 @@ void CEnergyCycling::compute(CEnergyCycling::energy_set_t& energySet) {
       qreal pedalCadence = energySet.pedalCadence; //By default the cadence given by user from dialog will be used
       if (pt.extensions.contains("gpxtpx:TrackPointExtension|gpxtpx:cad")) {
         pedalCadence = pt.extensions["gpxtpx:TrackPointExtension|gpxtpx:cad"].toDouble(); //Cadence from track point will be used
-      }
-      if (createExtensions) {
-        pt.extensions[CKnownExtension::internalEnergyPower] = 0;
-        pt.extensions[CKnownExtension::internalEnergyTorque] = 0;
       }
       if (power > 0 && pedalCadence > 0) { //Power is positive and driver is pedaling
         qreal pedalSpeed = crankLength * pedalCadence * 2 * M_PI / 60 / 1000; //m / s
