@@ -829,100 +829,100 @@ Om dit conflict op te lossen kan een kloon gemaakt en opgelagen worden, forceer 
 <context>
     <name>CEnergyCyclingDialog</name>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="62"/>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="79"/>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="91"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="63"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="80"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="92"/>
         <source>User defined</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="63"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="64"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="65"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="66"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="67"/>
         <source>Tailwind</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="67"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="68"/>
         <source>No Wind</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="68"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="69"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="70"/>
         <location filename="../gis/trk/CEnergyCyclingDialog.h" line="71"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="72"/>
         <source>Headwind</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="80"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="81"/>
         <source>City</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="81"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="82"/>
         <source>Trekking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="82"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="83"/>
         <source>Trekking w. Bags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="83"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="84"/>
         <source>Sportive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="84"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="85"/>
         <source>Race</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="85"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="86"/>
         <source>Mountain</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="92"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="93"/>
         <source>Cycling race track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="92"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="93"/>
         <source>Asphalt, small tyres</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="93"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="94"/>
         <source>Asphalt, normal tyres</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="93"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="94"/>
         <source>Mix Asphalt+Forest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="94"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="95"/>
         <source>Mountain Bike Trail</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="94"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="95"/>
         <source>Hard Forest Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="95"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="96"/>
         <source>Soft Forest Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="95"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.h" line="96"/>
         <source>Sand</source>
         <translation type="unfinished"></translation>
     </message>
@@ -957,12 +957,12 @@ Om dit conflict op te lossen kan een kloon gemaakt en opgelagen worden, forceer 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.cpp" line="307"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.cpp" line="313"/>
         <source>&lt;p&gt;&lt;b&gt;Set Energy Use for Cycling&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Within this dialog your personal energy use (consumption) for a cycling tour can be computed.&lt;/p&gt;&lt;p&gt;The computed value of &quot;Energy Use Cycling&quot; can be see as an indicator for the exertion of a cycling tour.&lt;/p&gt;&lt;p&gt;The tour length, speed and slope values will be taken into account.&lt;/p&gt;&lt;p&gt;To individualize your personal energy use the following input data are more needed:&lt;ul&gt;&lt;li&gt;Driver and bicycle weight&lt;/li&gt;&lt;li&gt;Air density, wind speed and position to the wind to consider the wind drag resistance&lt;/li&gt;&lt;li&gt;Ground situation (tyre and ground) to consider the rolling resistance&lt;/li&gt;&lt;li&gt;Average pedal cadence for the computation of pedal force. If the track contains cadence values recorded by a cadence sensor, these values are used to calculate the pedal force.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;&lt;p&gt;The individualize data will be defined in this dialog and more computed values will be shown here.&lt;/p&gt;&lt;p&gt;When loading older tracks or switching in history to tracks with a different parameter set compared to the previous saved parameter set, the shown parameter set in this dialog can be replaced by the previous saved parameter set.&lt;p&gt;The driver energy use in unit &quot;kcal&quot; will be stored in the track (qms format only) and can be remove later on when no longer needed.&lt;/p&gt;&lt;p&gt;For more information see tooltips on input and output values.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CEnergyCyclingDialog.cpp" line="328"/>
+        <location filename="../gis/trk/CEnergyCyclingDialog.cpp" line="334"/>
         <source>Help</source>
         <translation type="unfinished">Help</translation>
     </message>
@@ -1973,22 +1973,22 @@ You can modify both parameters to customize the behavior of the filter. For the 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1274"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1285"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1382"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1421"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1580"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2820"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1287"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1298"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1395"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1434"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1593"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2828"/>
         <source>track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1504"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1517"/>
         <source>Hide point %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1506"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1519"/>
         <source>Hide points %1..%2.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2000,13 +2000,13 @@ You can modify both parameters to customize the behavior of the filter. For the 
     </message>
     <message>
         <location filename="../gis/trk/CGisItemTrk.cpp" line="351"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1757"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1770"/>
         <source>min.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../gis/trk/CGisItemTrk.cpp" line="351"/>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1757"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1770"/>
         <source>max.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2111,87 +2111,87 @@ You can modify both parameters to customize the behavior of the filter. For the 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1321"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1334"/>
         <source>Permanently removed points %1..%2</source>
         <translation>Permanent verwijderde punten %1..%2</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1332"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1345"/>
         <source>Track Point Info...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1333"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1346"/>
         <source>Enter some text to be attached to this track point:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1340"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1353"/>
         <source>Add track point desc.: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1348"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1361"/>
         <source>Changed track point desc.: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1366"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1379"/>
         <source>Changed track point desc.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1373"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1386"/>
         <source>Removed track point desc.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1542"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1555"/>
         <source>Delete point %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1544"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1557"/>
         <source>Delete points %1..%2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="1567"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="1580"/>
         <source>Show points.</source>
         <translation>Toon punten.</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2192"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2205"/>
         <source>Changed name</source>
         <translation>Naam aangepast</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2197"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2210"/>
         <source>Changed comment</source>
         <translation>Notitie aangepast</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2202"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2215"/>
         <source>Changed description</source>
         <translation>Beschrijving aangepast</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2207"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2220"/>
         <source>Changed links</source>
         <translation>Link aangepast</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2215"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2228"/>
         <source>Changed elevation of point %1 to %2 %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2238"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2251"/>
         <source>Changed activity to &apos;%1&apos; for complete track.</source>
         <translation>Activiteit aangepast naar &apos;%1&apos; voor gehele track.</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CGisItemTrk.cpp" line="2264"/>
+        <location filename="../gis/trk/CGisItemTrk.cpp" line="2277"/>
         <source>Changed activity to &apos;%1&apos; for range(%2..%3).</source>
         <translation>Activiteit aangepast naar &apos;%1&apos; voor bereik(%2..%3).</translation>
     </message>
@@ -3108,17 +3108,17 @@ You can modify both parameters to customize the behavior of the filter. For the 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1057"/>
+        <location filename="../gis/CGisListWks.cpp" line="1047"/>
         <source>Waypoints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1062"/>
+        <location filename="../gis/CGisListWks.cpp" line="1052"/>
         <source>Wayp. &amp; Tracks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1064"/>
+        <location filename="../gis/CGisListWks.cpp" line="1054"/>
         <source>Tracks</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3168,8 +3168,8 @@ You can modify both parameters to customize the behavior of the filter. For the 
         <translation>Bewerk gebied punten</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="980"/>
-        <location filename="../gis/CGisListWks.cpp" line="1068"/>
+        <location filename="../gis/CGisListWks.cpp" line="970"/>
+        <location filename="../gis/CGisListWks.cpp" line="1058"/>
         <source>Set Track Color</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3179,44 +3179,43 @@ You can modify both parameters to customize the behavior of the filter. For the 
         <translation>Elementen wissen...</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1060"/>
+        <location filename="../gis/CGisListWks.cpp" line="1050"/>
         <source>Change Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="635"/>
-        <location filename="../gis/CGisListWks.cpp" line="1838"/>
-        <location filename="../gis/CGisListWks.cpp" line="1900"/>
+        <location filename="../gis/CGisListWks.cpp" line="1835"/>
+        <location filename="../gis/CGisListWks.cpp" line="1897"/>
         <source>&lt;b&gt;Update devices&lt;/b&gt;&lt;p&gt;Update %1&lt;br/&gt;Please wait...&lt;/p&gt;</source>
         <translation>&lt;b&gt;Updaten GPS&lt;/b&gt;&lt;p&gt;Updaten %1&lt;br/&gt;Moment geduld...&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="741"/>
+        <location filename="../gis/CGisListWks.cpp" line="731"/>
         <source>Saving workspace. Please wait.</source>
         <translation>Werkruimte opslaan. Moment geduld.</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="790"/>
+        <location filename="../gis/CGisListWks.cpp" line="780"/>
         <source>Loading workspace. Please wait.</source>
         <translation>Laden werkruimte. Moment geduld.</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1336"/>
+        <location filename="../gis/CGisListWks.cpp" line="1326"/>
         <source>Close all projects...</source>
         <translation>Sluit alle projecten...</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1336"/>
+        <location filename="../gis/CGisListWks.cpp" line="1326"/>
         <source>This will remove all projects from the workspace.</source>
         <translation>Dit zal alle projecten uit de werkruimte verwijderen.</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1359"/>
+        <location filename="../gis/CGisListWks.cpp" line="1349"/>
         <source>Delete project...</source>
         <translation>Project verwijderen...</translation>
     </message>
     <message>
-        <location filename="../gis/CGisListWks.cpp" line="1360"/>
+        <location filename="../gis/CGisListWks.cpp" line="1350"/>
         <source>Do you really want to delete %1?</source>
         <translation>Moet %1 werkelijk verwijderd worden?</translation>
     </message>
@@ -3405,29 +3404,29 @@ lijn %2, kolom %3:
     <name>CHeartRateZonesDialog</name>
     <message>
         <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="109"/>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="297"/>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="298"/>
         <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="299"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="300"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="301"/>
         <source>bpm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="280"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="282"/>
         <source>Max:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="284"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="286"/>
         <source>Avg:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="313"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="315"/>
         <source>&lt;p&gt;&lt;b&gt;Set Energy Use for Cycling&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Within this dialog your personal energy use (consumption) for a cycling tour can be computed.&lt;/p&gt;&lt;p&gt;The computed value of &quot;Energy Use Cycling&quot; can be see as an indicator for the exertion of a cycling tour.&lt;/p&gt;&lt;p&gt;The tour length, speed and slope values will be taken into account.&lt;/p&gt;&lt;p&gt;To individualize your personal energy use the following input data are more needed:&lt;ul&gt;&lt;li&gt;Driver and bicyle weight&lt;/li&gt;&lt;li&gt;Air density, wind speed and position to the wind to consider the wind drag resistance&lt;/li&gt;&lt;li&gt;Ground situation (tyre and ground) to consider the rolling resistance&lt;/li&gt;&lt;li&gt;Average pedal cadence for the computation of pedal force&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;&lt;p&gt;The individualize data will be defined in this dialog and more computed values will be shown here.&lt;/p&gt;&lt;p&gt;When loading older tracks or switching in history to tracks with a different parameter set compared to the previous saved parameter set, the shown parameter set in this dialog can be replaced by the previous saved parameter set.&lt;p&gt;The energy use in unit &quot;kcal&quot; will be stored in the track (qms format only) and can be remove later on when no longer needed.&lt;/p&gt;&lt;p&gt;For more information see tooltips on input and output values.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="330"/>
+        <location filename="../gis/trk/CHeartRateZonesDialog.cpp" line="332"/>
         <source>Help</source>
         <translation type="unfinished">Help</translation>
     </message>
@@ -3538,246 +3537,270 @@ lijn %2, kolom %3:
 <context>
     <name>CKnownExtension</name>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="103"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="144"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="105"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="146"/>
         <source>Speed</source>
         <comment>extLongName</comment>
         <translation type="unfinished">Snelheid</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="83"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="99"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="118"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="85"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="101"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="120"/>
         <source>Cadence</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Cadans</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="62"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="64"/>
         <source>Air Temp.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="62"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="64"/>
         <source>Air Temperature</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="67"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="69"/>
         <source>Water Temp.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="67"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="69"/>
         <source>Water Temperature</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="72"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="74"/>
         <source>Depth</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Diepte</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="72"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="74"/>
         <source>Depth</source>
         <comment>extLongName</comment>
         <translation type="unfinished">Diepte</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="78"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="95"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="80"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="97"/>
         <source>Heart R.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="78"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="95"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="80"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="97"/>
         <source>Heart Rate</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="83"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="99"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="118"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="85"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="101"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="120"/>
         <source>Cadence</source>
         <comment>extLongName</comment>
         <translation type="unfinished">Cadans</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="87"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="89"/>
         <source>Power</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="87"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="89"/>
         <source>Power</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="103"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="144"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="164"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="169"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="105"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="146"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="166"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="171"/>
         <source>Speed</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Snelheid</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="106"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="108"/>
         <source>Accel.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="106"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="108"/>
         <source>Acceleration</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="112"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="114"/>
         <source>Course</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Richting</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="112"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="114"/>
         <source>Course</source>
         <comment>extLongName</comment>
         <translation type="unfinished">Richting</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="122"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="124"/>
         <source>Temp.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="122"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="124"/>
         <source>Temperature</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="127"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="129"/>
         <source>Dist.</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Afstand.</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="127"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="129"/>
         <source>Distance</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="132"/>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="174"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="134"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="176"/>
         <source>Ele.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="132"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="134"/>
         <source>Elevation</source>
         <comment>extLongName</comment>
         <translation type="unfinished">Hoogte</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="136"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="138"/>
         <source>Energy</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="136"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="138"/>
         <source>Energy</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="141"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="143"/>
         <source>Sea Lev. Pres.</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="141"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="143"/>
         <source>Sea Level Pressure</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="150"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="152"/>
         <source>v. Speed</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="150"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="152"/>
         <source>Vertical Speed</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="157"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="159"/>
         <source>Slope</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Helling</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="164"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="166"/>
         <source>Speed over Distance*</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="169"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="171"/>
         <source>Speed over Time*</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="174"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="176"/>
         <source>Elevation*</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="179"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="181"/>
         <source>Progress</source>
         <comment>extShortName</comment>
         <translation type="unfinished">Voortgang</translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="179"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="181"/>
         <source>Progress*</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="184"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="186"/>
         <source>Terr. Slope</source>
         <comment>extShortName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="184"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="186"/>
         <source>Terrain Slope*</source>
         <comment>extLongName</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/CKnownExtension.cpp" line="157"/>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="191"/>
+        <source>Power*</source>
+        <comment>extShortName</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="191"/>
+        <source>Power*</source>
+        <comment>extLongName</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="195"/>
+        <source>Torque*</source>
+        <comment>extShortName</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="195"/>
+        <source>Torque*</source>
+        <comment>extLongName</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/CKnownExtension.cpp" line="159"/>
         <source>Slope*</source>
         <translation type="unfinished"></translation>
     </message>
@@ -10687,22 +10710,22 @@ zoom-out for use of the DEM data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="246"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="272"/>
         <source>Gravity Slope Force:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="202"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="228"/>
         <source>Frontal Area:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="396"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="422"/>
         <source>Total Weight:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="256"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="282"/>
         <source>&lt;p&gt;The air density depends on barometric air pressure, altitude and temperature.&lt;/p&gt;
 &lt;p&gt;Examples:
 &lt;ul&gt;
@@ -10713,69 +10736,81 @@ zoom-out for use of the DEM data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="88"/>
+        <source>&lt;p&gt;If this option is checked, extension data for Positive Power and Pedal Torque will be calculated.&lt;/p&gt;
+&lt;p&gt;The extension data is used for Graph diagrams and output as Min./Max. Labels.&lt;/p&gt;
+&lt;p&gt;The extension data can be deleted again in Filter/Miscellaneous for the track. This option must then also be unchecked in order to avoid recalculation of the extension data when the track is changed.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="93"/>
+        <source>Create Extensions for Graph and Min./Max. Labels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="119"/>
         <source>Driver Energy Use:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="116"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="142"/>
         <source>&lt;p&gt;The wind drag coefficient (cw value) indicates the wind slip of the driver and bicycle in relation to the air (wind).&lt;/p&gt;
 &lt;p&gt;The greater this value, the more force is required to overcome the wind force.&lt;/p&gt;
 &lt;p&gt;Typical values for bicycles are between 0.2 and 1.2.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="167"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="193"/>
         <source>&lt;p&gt;The energy use (consumption) in kcal by transforming the positive power by the driver.&lt;/p&gt;
 &lt;p&gt;The human muscle efficiency ratio ist considered by 23%.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="297"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="323"/>
         <source>&lt;p&gt;The generic energy use (consumption) in Watthour (Joule * 1h / 3600s) transforming the positive power.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="414"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="440"/>
         <source>Generic Energy Use:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="434"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="460"/>
         <source>&lt;p&gt;The average pedal cadence in rpm is needed to calculate the Positive Pedal Force.&lt;/p&gt;
 &lt;p&gt;Realistic values are between 50 and 100 rpm.&lt;/p&gt;
 &lt;p&gt;This value is used if no cadence data are available in the track.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="487"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="513"/>
         <source>&lt;p&gt;The values for the type of seat position as pre-selection for the wind frontal area in m2 and the drag coefficient (cw value).&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="675"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="701"/>
         <source>&lt;p&gt;The ratio of the power moving time related to the track moving time in percent.&lt;/p&gt;
 &lt;p&gt;The lower the ratio the greater is the influence of tailwind and/or downhill driving.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="738"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="764"/>
         <source>Pedal Cadence Track:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="748"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="774"/>
         <source>&lt;p&gt;If a cadence sensor is used and cadence values are stored in the track data then this values will be used instead of the pedal cadence value given by the user inside this dialog.&lt;/p&gt;
 &lt;p&gt;The pedal cadence track value is the average cadence in rpm of all track point with positve power and a cadence greater than zero.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="762"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="788"/>
         <source>&lt;p&gt;The crank length from the bicycle in mm.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="800"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="826"/>
         <source>&lt;p&gt;The pedal force in Newton applied to the pedal on average over all track points.&lt;/p&gt;
 &lt;p&gt;Negative forces from strong tail wind or downhill driving are not considered.&lt;/p&gt;
 &lt;p&gt;This force must be applied to the pedal by the driver.&lt;/p&gt;
@@ -10784,100 +10819,100 @@ zoom-out for use of the DEM data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="827"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="853"/>
         <source>&lt;p&gt;The average pedal torque in Newtonmeter is derived from the average pedal force and the crank length.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="850"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="876"/>
         <source>&lt;p&gt;The maximum pedal torque in Newtonmeter is derived from the average pedal force and the crank length.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="790"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="816"/>
         <source>Pedal Force:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="817"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="843"/>
         <source>Avg Pedal Torque:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="840"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="866"/>
         <source>Max Pedal Torque:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="212"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="238"/>
         <source>&lt;p&gt;The gravity slope force is the force in Newton needed on average over all track points to overcome the slope on downhill or uphill.&lt;/p&gt;
 &lt;p&gt;When mostly downhill driving, the gravity slope force can be negative.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="713"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="739"/>
         <source>Positive Power:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="689"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="715"/>
         <source>Power:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="153"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="179"/>
         <source>&lt;p&gt;The sum of the average force required for the track to overcome wind resistance, rolling resistance and slope.&lt;/p&gt;
 &lt;p&gt;This value can be negative for strong tailwind and/or downhill.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="406"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="432"/>
         <source>&lt;p&gt;The values for the wind speed in Beaufort scale for specifying the wind speed in km/h.&lt;/p&gt;
 &lt;p&gt;Positive values for headwind and negative values for tailwind.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="514"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="540"/>
         <source>&lt;p&gt;The wind speed in km/h is taken into account when calculating the force required to overcome the air drag.&lt;/p&gt;
 &lt;p&gt;Positive values for headwind and negative values for tailwind are taken into account.&lt;/p&gt;
 &lt;p&gt;The value can be changed independently of the Beaufort scale value.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="330"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="356"/>
         <source>&lt;p&gt;The weight of the driver in kg including clothes.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="494"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="520"/>
         <source>Ground/Tyres:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="194"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="220"/>
         <source>&lt;p&gt;The predefined selection for the type of ground surface and the tyres.&lt;/p&gt;
 &lt;p&gt;To be used to determine the rolling resistance coefficient.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="548"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="574"/>
         <source>&lt;p&gt;The rolling resistance coefficient (cr value) specifies the force used to overcome the rolling resistance.&lt;/p&gt;
 &lt;p&gt;The relevant factors are the road surface and the tyres.&lt;/p&gt;
 &lt;p&gt;The higher this value is, the more force is required to overcome the rolling resistance.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="461"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="487"/>
         <source>&lt;p&gt;The rolling resistance force is the force in Newton required on average over all track points to overcome the rolling resistance.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="504"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="530"/>
         <source>Rolling Coeff:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="538"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="564"/>
         <source>Air Resistance Force:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -10887,113 +10922,113 @@ zoom-out for use of the DEM data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="581"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="607"/>
         <source>Bike Weight:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="641"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="667"/>
         <source>Pos. Power Moving Time:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="626"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="652"/>
         <source>&lt;p&gt;The air resistance force is the force in Newton required on average over all track points to overcome the air resistance.&lt;/p&gt;
 &lt;p&gt;The airstream, headwind and tailwind are taken into account.&lt;/p&gt;
 &lt;p&gt;With a strong tailwind this value can be negative.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="368"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="394"/>
         <source>&lt;p&gt;The weight of the bicycle in kg including luggage.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="358"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="384"/>
         <source>Pedal Cadence:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="591"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="617"/>
         <source>&lt;p&gt;The frontal area in m2 (driver, bicycle, bags, etc.) exposed to the wind.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="320"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="346"/>
         <source>Air Density:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="143"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="169"/>
         <source>Wind Drag Coeff:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="103"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="129"/>
         <source>&lt;p&gt;The total weight in kg of driver and bike including clothes and luggage.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="616"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="642"/>
         <source>Crank Length:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="651"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="677"/>
         <source>&lt;p&gt;The time in moving and with positive power by the driver.&lt;/p&gt;
 &lt;p&gt;Times with negative power in strong tail wind or downhill driving are not taken into account.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="287"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="313"/>
         <source>Wind Speed km/h:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="665"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="691"/>
         <source>Ratio to Moving Time:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="226"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="252"/>
         <source>Sum Forces:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="439"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="465"/>
         <source>rpm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="699"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="725"/>
         <source>&lt;p&gt;The power in Watt on average over all track points.&lt;/p&gt;
 &lt;p&gt;Negative power from strong tailwind or downhill driving are taken into account.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="477"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="503"/>
         <source>Driver Weight:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="236"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="262"/>
         <source>Rolling Resist. Force:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="723"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="749"/>
         <source>&lt;p&gt;The positive power in Watt that must be applied on average for all track points.&lt;/p&gt;
 &lt;p&gt;Negative power from strong tailwind or downhill driving are not taken into account.&lt;/p&gt;
 &lt;p&gt;This power must be applied by the driver on average for the track.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="310"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="336"/>
         <source>Position in Wind:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="424"/>
+        <location filename="../gis/trk/IEnergyCyclingDialog.ui" line="450"/>
         <source>Wind Speed Bft:</source>
         <translation type="unfinished"></translation>
     </message>

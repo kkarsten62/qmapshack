@@ -81,6 +81,7 @@ CEnergyCyclingDialog::CEnergyCyclingDialog(CEnergyCycling& energyCycling, QWidge
   connect(spinCrankLength, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
           &CEnergyCyclingDialog::slotSetCrankLength);
   connect(pushHelp, &QPushButton::clicked, this, &CEnergyCyclingDialog::slotShowHelp);
+  connect(checkCreateExtensions, &QCheckBox::toggled, this, &CEnergyCyclingDialog::slotCreateExtensions);
 
   energyTmpSet =
       energyCycling.getEnergyTrkSet(); //Put the track parameter set in a temporarily one, used by the dialog
@@ -132,6 +133,7 @@ void CEnergyCyclingDialog::updateUi() {
 
   spinPedalCadence->setValue(energyTmpSet.pedalCadence);
   spinCrankLength->setValue(energyTmpSet.crankLength);
+  checkCreateExtensions->setChecked(energyTmpSet.createExtensions);
 }
 
 /** @brief When "Ok" button is clicked:
@@ -300,6 +302,10 @@ void CEnergyCyclingDialog::slotSetPedalCadence(qreal pedalCadence) {
 
 void CEnergyCyclingDialog::slotSetCrankLength(qreal crankLength) {
   energyTmpSet.crankLength = crankLength;
+}
+
+void CEnergyCyclingDialog::slotCreateExtensions(bool checked) {
+  energyTmpSet.createExtensions = checked;
 }
 
 void CEnergyCyclingDialog::slotShowHelp() {

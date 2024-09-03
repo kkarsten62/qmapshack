@@ -28,6 +28,8 @@ const QString CKnownExtension::internalSpeedTime = "ql:speedtime";
 const QString CKnownExtension::internalEle = "ql:ele";
 const QString CKnownExtension::internalProgress = "ql:progress";
 const QString CKnownExtension::internalTerrainSlope = "ql:terrainslope";
+const QString CKnownExtension::internalEnergyPower = "ql:energypower"; //KKA: new
+const QString CKnownExtension::internalEnergyTorque = "ql:energytorque"; //KKA: new
 
 QHash<QString, CKnownExtension> CKnownExtension::knownExtensions;
 QSet<QString> CKnownExtension::registeredNS;
@@ -182,7 +184,18 @@ void CKnownExtension::init(const IUnit& units) {
 
       {internalTerrainSlope,
        {tr("Terr. Slope", "extShortName"), tr("Terrain Slope*", "extLongName"), -1, 0, 90., 1., "°",
-        "://icons/32x32/CSrcSlope.png", true, false, getExtensionValueFunc(internalTerrainSlope)}}};
+        "://icons/32x32/CSrcSlope.png", true, false, getExtensionValueFunc(internalTerrainSlope)}}, //KKA: changed
+
+  //KKA: new start
+      {internalEnergyPower,
+       {tr("Power*", "extShortName"), tr("Power*", "extLongName"), -1, 0, 10000., 1., "Watt",
+        "://icons/32x32/CSrcPower.png", true, false, getExtensionValueFunc(internalEnergyPower)}},
+
+      {internalEnergyTorque,
+       {tr("Torque*", "extShortName"), tr("Torque*", "extLongName"), -1, 0, 10000., 1., "Nm",
+        "://icons/32x32/CSrcTorque.png", true, false, getExtensionValueFunc(internalEnergyTorque)}}
+  };
+  //KKA: new end
 
   initGarminTPXv1(units, "gpxtpx");
   initGarminTPXv1(units, "tp1");
@@ -226,6 +239,12 @@ QString CKnownExtension::toString(qreal value, bool withName, const QString& key
     QString v, u;
     IUnit::self().slope2string(value, v, u);
     str = v + u;
+  //KKA: new start
+  } else if (key == CKnownExtension::internalEnergyPower) {
+    str = QString("%1%2").arg(value * factor, 0, 'f', 0).arg(unit);
+  } else if (key == CKnownExtension::internalEnergyTorque) {
+    str = QString("%1%2").arg(value * factor, 0, 'f', 1).arg(unit);
+  //KKA: new end
   } else {
     str = QString("%1%2").arg(value * factor).arg(unit);
   }

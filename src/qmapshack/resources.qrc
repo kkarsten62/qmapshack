@@ -86,6 +86,7 @@
         <file>../icons/32x32/CSrcSlope.png</file>
         <file>../icons/32x32/CSrcSolid.png</file>
         <file>../icons/32x32/CSrcSpeed.png</file>
+        <file>../icons/32x32/CSrcTorque.png</file>
         <file>../icons/32x32/CSrcUnknown.png</file>
         <file>../icons/32x32/CSrcVertSpeed.png</file>
         <file>../icons/32x32/CSrcWTemp.png</file>
@@ -370,6 +371,7 @@
         <file>../icons/48x48/CSrcSlope.png</file>
         <file>../icons/48x48/CSrcSolid.png</file>
         <file>../icons/48x48/CSrcSpeed.png</file>
+        <file>../icons/48x48/CSrcTorque.png</file>
         <file>../icons/48x48/CSrcUnknown.png</file>
         <file>../icons/48x48/CSrcVertSpeed.png</file>
         <file>../icons/48x48/CSrcWTemp.png</file>

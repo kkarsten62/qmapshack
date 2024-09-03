@@ -276,6 +276,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @{
   */
  public:
+  void doUpdateExtremaAndExtensions(); //KKA: new
+
   static const struct ColorizeSource unknownColorizeSource;
 
   /** @brief Set the colorize source to the source specified.
@@ -759,6 +761,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @return
    */
   const CTrackData& getTrackData() const { return trk; }
+  CTrackData& getTrackData() { return trk; } //KKA: new for EnergyCycling, add power and torque to extensions
 
   void updateFromDB(quint64 id, QSqlDatabase& db) override;
 
@@ -924,7 +927,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   /**@{*/
  public:
-  enum quality_e { eQualityFine = 8, eQualityMedium = 4, eQualityCoarse = 2 };
+  //enum quality_e { eQualityFine = 8, eQualityMedium = 4, eQualityCoarse = 2 }; //KKA: changed
+  enum quality_e { eQualityFine = 7, eQualityMedium = 6, eQualityCoarse = 5 }; //KKA: new
 
   void setupInterpolation(bool on, qint32 q);
   bool isInterpolationEnabled() const { return interp.valid; }

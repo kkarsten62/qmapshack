@@ -52,6 +52,7 @@ class CEnergyCyclingDialog : public QDialog, private Ui::IEnergyCyclingDialog {
   void slotSetRollingCoeff(qreal rollingCoeff);
   void slotSetPedalCadence(qreal pedalCadence);
   void slotSetCrankLength(qreal crankLength);
+  void slotCreateExtensions(bool checked);
   void slotShowHelp();
 
  private:

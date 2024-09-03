@@ -80,6 +80,7 @@ class CEnergyCycling {
     qreal powerMovingTimeRatio = NOFLOAT;
     qreal genericEnergy = NOFLOAT;
     qreal driverEnergy = NOFLOAT;
+    bool createExtensions = false;
   };
 
   CEnergyCycling(CGisItemTrk& trk);

@@ -53,7 +53,7 @@
 #define VER_ITEM quint8(3)
 #define VER_CVALUE quint8(1)
 #define VER_CLIMIT quint8(1)
-#define VER_ENERGYCYCLE quint8(2)
+#define VER_ENERGYCYCLE quint8(3) //KKA changed, version 2 cranklength added, version 3 createExtensions added
 
 // KKA start
 #define VER_FITDATA quint8(1)
@@ -482,7 +482,7 @@ QDataStream& operator>>(QDataStream& stream, CLimit& l) {
 QDataStream& operator<<(QDataStream& stream, const CEnergyCycling::energy_set_t& e) {
   stream << VER_ENERGYCYCLE << e.driverWeight << e.bikeWeight << e.airDensity << e.windSpeedIndex << e.windSpeed
          << e.windPositionIndex << e.frontalArea << e.windDragCoeff << e.groundIndex << e.rollingCoeff << e.pedalCadence
-         << e.driverEnergy << e.crankLength;
+         << e.driverEnergy << e.crankLength << e.createExtensions;
   return stream;
 }
 
@@ -493,6 +493,9 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e) {
       e.driverEnergy;
   if (version > 1) {
     stream >> e.crankLength;
+  }
+  if (version > 2) {
+    stream >> e.createExtensions;
   }
   return stream;
 }

@@ -47,6 +47,10 @@ class CKnownExtension {
   static const QString internalEle;           //< name of internally derived elevation (DEM)
   static const QString internalProgress;      //< name of internally derived progress
   static const QString internalTerrainSlope;  //< name of internally derived terrain slope
+  //KKA: new start
+  static const QString internalEnergyPower;   //< name of internally computed power in EnergyCycling
+  static const QString internalEnergyTorque;  //< name of internally computed torque in EnergyCycling
+  //KKA: new end
 
   /**
      @brief Get extension descriptor for name

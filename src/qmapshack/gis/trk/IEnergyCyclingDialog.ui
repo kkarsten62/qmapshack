@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>851</width>
-    <height>367</height>
+    <height>408</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,6 +67,32 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_4">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QCheckBox" name="checkCreateExtensions">
+       <property name="toolTip">
+        <string>&lt;p&gt;If this option is checked, extension data for Positive Power and Pedal Torque will be calculated.&lt;/p&gt;
+&lt;p&gt;The extension data is used for Graph diagrams and output as Min./Max. Labels.&lt;/p&gt;
+&lt;p&gt;The extension data can be deleted again in Filter/Miscellaneous for the track. This option must then also be unchecked in order to avoid recalculation of the extension data when the track is changed.&lt;/p&gt;</string>
+       </property>
+       <property name="text">
+        <string>Create Extensions for Graph and Min./Max. Labels</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

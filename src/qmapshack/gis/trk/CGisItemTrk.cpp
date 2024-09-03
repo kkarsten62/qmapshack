@@ -1067,9 +1067,9 @@ void CGisItemTrk::deriveSecondaryData() {
 
   setupInterpolation(interp.valid, interp.Q);
 
-  energyCycling.compute();
-
   updateVisuals(eVisualAll, "deriveSecondaryData()");
+
+  energyCycling.compute();
 
           //    qDebug() << "--------------" << getName() << "------------------";
           //    qDebug() << "allValidFlags" << Qt::hex << allValidFlags;
@@ -1079,6 +1079,19 @@ void CGisItemTrk::deriveSecondaryData() {
           //    qDebug() << "totalElapsedSeconds" << totalElapsedSeconds;
           //    qDebug() << "totalElapsedSecondsMoving" << totalElapsedSecondsMoving;
 }
+
+//KKA: new start
+void CGisItemTrk::doUpdateExtremaAndExtensions() {
+  updateExtremaAndExtensions();
+  if (propHandler == nullptr) {
+    propHandler = new CPropertyTrk(*this);
+    limitsGraph1.setSource(CKnownExtension::internalEle);
+  } else {
+    propHandler->setupData();
+  }
+  updateVisuals(eVisualAll, "deriveSecondaryData()");
+}
+//KKA: new end
 
 void CGisItemTrk::findWaypointsCloseBy(CProgressDialog& progress, quint32& current) {
   IGisProject* project = getParentProject();
@@ -2680,10 +2693,12 @@ void CGisItemTrk::setupInterpolation(bool on, qint32 q) {
     y[trkpt.idxVisible] = trkpt.ele;
   }
 
-  interp.m = interp.Q * N / 10;
-
+  //interp.m = interp.Q * N / 10; //KKA: changed
+  interp.m = N; //KKA: new
+  qreal lambdans = qPow(10, interp.Q * -1); //KKA: new
   try {
-    alglib::spline1dfit(x, y, interp.m, 0.00001, interp.p, interp.rep);
+    //alglib::spline1dfit(x, y, interp.m, 0.00001, interp.p, interp.rep); //KKA: changed
+      alglib::spline1dfit(x, y, interp.m, lambdans, interp.p, interp.rep); //KKA: new
     interp.valid = true;
   } catch (const alglib::ap_error& e) {
     qWarning() << "Error from alglib: " << e.msg.c_str();
