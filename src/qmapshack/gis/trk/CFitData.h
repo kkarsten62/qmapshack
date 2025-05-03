@@ -90,6 +90,8 @@ public:
 private:
     friend QDataStream& operator<<(QDataStream& stream, const CFitData& f);
     friend QDataStream& operator>>(QDataStream& stream, CFitData& f);
+    friend QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l);
+    friend QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l);
 
     CGisItemTrk& trk;
 
