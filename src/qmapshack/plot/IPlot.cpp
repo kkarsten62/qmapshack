@@ -221,7 +221,7 @@ void IPlot::leaveEvent(QEvent* /*e*/) {
   update();
 }
 
-void IPlot::enterEvent(QEvent* /*e*/) {
+void IPlot::enterEvent(QEnterEvent* /*e*/) {
   needsRedraw = true;
   QCursor cursor = QCursor(QPixmap(":/cursors/cursorArrow.png"), 0, 0);
   CCanvas::setOverrideCursor(cursor, "IPlot::enterEvent");
@@ -1007,7 +1007,7 @@ void IPlot::drawDecoration(QPainter& p) {
 
       // check if the mouse is near a waypoint
       if (!showWptLabels) {
-        for (const CPlotData::point_t& tag : qAsConst(data->tags)) {
+        for (const CPlotData::point_t& tag : std::as_const(data->tags)) {
           int ptx = left + data->x().val2pt(tag.point.x());
 
           if (qAbs(x - ptx) >= 10) {
@@ -1085,7 +1085,7 @@ void IPlot::drawTags(QPainter& p) {
   CPlotAxis& xaxis = data->x();
   CPlotAxis& yaxis = data->y();
 
-  for (const CPlotData::point_t& tag : qAsConst(data->tags)) {
+  for (const CPlotData::point_t& tag : std::as_const(data->tags)) {
     int ptx = left + xaxis.val2pt(tag.point.x());
     int pty = bottom - yaxis.val2pt(tag.point.y());
 
@@ -1130,7 +1130,7 @@ void IPlot::drawTagLabels(QPainter& p) {
 
   CPlotAxis& xaxis = data->x();
 
-  for (const CPlotData::point_t& tag : qAsConst(data->tags)) {
+  for (const CPlotData::point_t& tag : std::as_const(data->tags)) {
     int ptx = left + xaxis.val2pt(tag.point.x());
 
     if (!((left < ptx) && (ptx < right))) {
@@ -1183,8 +1183,8 @@ void IPlot::drawActivities(QPainter& p) {
     const CTrackData::trkpt_t* trkptEnd = trkData.getTrkPtByTotalIndex(range.idxTotalEnd);
 
     if (data->axisType == CPlotData::eAxisTime) {
-      x1 = data->x().val2pt(trkptBeg->time.toTime_t());
-      x2 = data->x().val2pt(trkptEnd->time.toTime_t());
+      x1 = data->x().val2pt(trkptBeg->time.toSecsSinceEpoch());
+      x2 = data->x().val2pt(trkptEnd->time.toSecsSinceEpoch());
     } else {
       x1 = data->x().val2pt(trkptBeg->distance);
       x2 = data->x().val2pt(trkptEnd->distance);

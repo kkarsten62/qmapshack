@@ -31,7 +31,7 @@ void CMapTreeWidget::dragEnterEvent(QDragEnterEvent* e) {
 }
 
 void CMapTreeWidget::dragMoveEvent(QDragMoveEvent* e) {
-  CMapItem* item = dynamic_cast<CMapItem*>(itemAt(e->pos()));
+  CMapItem* item = dynamic_cast<CMapItem*>(itemAt(e->position().toPoint()));
 
   if (item && item->isActivated()) {
     e->setDropAction(Qt::MoveAction);
@@ -100,7 +100,7 @@ void CMapList::sort() {
   std::sort(items1.begin(), items1.end(), &sortByName<CMapItem>);
 
   QList<QTreeWidgetItem*> items2;
-  for (CMapItem* item : qAsConst(items1)) {
+  for (CMapItem* item : std::as_const(items1)) {
     items2 << item;
   }
   treeWidget->addTopLevelItems(items2);

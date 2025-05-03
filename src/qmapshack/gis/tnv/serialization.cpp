@@ -72,7 +72,7 @@ static QStringList writeCompeTime(const QDateTime& t, bool isTrack) {
     return result;
   }
 
-  QDateTime timestamp = t.toTimeSpec(Qt::UTC);
+  QDateTime timestamp = t.toTimeZone(QTimeZone::UTC);
 
   QString monthStrs[] = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
   QString monthStr = monthStrs[timestamp.date().month()];
@@ -96,10 +96,11 @@ static QStringList writeCompeTime(const QDateTime& t, bool isTrack) {
 
 static QDateTime readCompeTime(QString str, bool isTrack) {
   QDateTime timestamp;
-  QRegExp re("([0-9]{2})-([A-Za-z]{3})-.*");
+  static const QRegularExpression re(QRegularExpression::anchoredPattern("([0-9]{2})-([A-Za-z]{3})-.*"));
 
-  if (re.exactMatch(str)) {
-    QString monthStr = re.cap(2);
+  const QRegularExpressionMatch& match = re.match(str);
+  if (match.hasMatch()) {
+    QString monthStr = match.captured(2);
 
     QHash<QString, QString> monthStr2Num{{"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
                                          {"MAY", "05"}, {"JUN", "06"}, {"JUL", "07"}, {"AUG", "08"},
@@ -117,7 +118,7 @@ static QDateTime readCompeTime(QString str, bool isTrack) {
     }
   }
 
-  timestamp.setTimeSpec(Qt::UTC);
+  timestamp.setTimeZone(QTimeZone::UTC);
   return timestamp;
 }
 
@@ -172,7 +173,7 @@ bool CGisItemTrk::saveTwoNav(const QString& filename) {
   IGisProject* project = getParentProject();
 
   QTextStream out(&file);
-  out.setCodec(QTextCodec::codecForName("UTF-8"));
+  out.setEncoding(QStringConverter::Utf8);
   out << Qt::bom;
   out << "B  UTF-8" << Qt::endl;
   out << "G  WGS 84" << Qt::endl;
@@ -195,7 +196,7 @@ bool CGisItemTrk::saveTwoNav(const QString& filename) {
   out << "s " << name << Qt::endl;
   out << "y " << getKey().item << Qt::endl;
 
-  for (const CTrackData::trkseg_t& seg : qAsConst(trk.segs)) {
+  for (const CTrackData::trkseg_t& seg : std::as_const(trk.segs)) {
     for (const CTrackData::trkpt_t& trkpt : seg.pts) {
       list.clear();
 
@@ -294,7 +295,7 @@ bool CGisItemTrk::readTwoNav(const QString& filename) {
     return false;
   }
   QTextStream in(&file);
-  in.setCodec(QTextCodec::codecForName("UTF-8"));
+  in.setEncoding(QStringConverter::Utf8);
 
   CTrackData::trkseg_t seg;
 
@@ -303,9 +304,9 @@ bool CGisItemTrk::readTwoNav(const QString& filename) {
     switch (line[0].toLatin1()) {
       case 'B': {
         QString name = line.mid(1).simplified();
-        QTextCodec* codec = QTextCodec::codecForName(name.toLatin1());
-        if (codec) {
-          in.setCodec(codec);
+        auto codec = QStringConverter::encodingForName(name.toLatin1());
+        if (codec.has_value()) {
+          in.setEncoding(codec.value());
         }
         break;
       }
@@ -471,7 +472,7 @@ void CGisItemWpt::saveTwoNav(QTextStream& out, const QDir& dir) {
     out << "a .\\" << filenameCmt << ",0" << Qt::endl;
   }
 
-  for (const image_t& img : qAsConst(images)) {
+  for (const image_t& img : std::as_const(images)) {
     QString fn = img.info;
     if (fn.isEmpty()) {
       fn = QString("picture.png");
@@ -511,7 +512,7 @@ bool CTwoNavProject::loadWpts(const QString& filename, const QDir& dir) {
     return false;
   }
   QTextStream in(&file);
-  in.setCodec(QTextCodec::codecForName("UTF-8"));
+  in.setEncoding(QStringConverter::Utf8);
 
   while (!line.isEmpty()) {
     line = in.readLine();
@@ -519,9 +520,9 @@ bool CTwoNavProject::loadWpts(const QString& filename, const QDir& dir) {
     switch (line[0].toLatin1()) {
       case 'B': {
         QString name = line.mid(1).simplified();
-        QTextCodec* codec = QTextCodec::codecForName(name.toLatin1());
-        if (codec) {
-          in.setCodec(codec);
+        auto codec = QStringConverter::encodingForName(name.toLatin1());
+        if (codec.has_value()) {
+          in.setEncoding(codec.value());
         }
         break;
       }
@@ -631,10 +632,7 @@ bool CTwoNavProject::loadWpts(const QString& filename, const QDir& dir) {
           str += line;
         }
 
-        QString errorMsg;
-        int errorLine = 0;
-        int errorColumn = 0;
-        wpt.gpx.setContent(str, &errorMsg, &errorLine, &errorColumn);
+        wpt.gpx.setContent(str);
         break;
       }
 

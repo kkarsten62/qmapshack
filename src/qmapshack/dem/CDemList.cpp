@@ -27,7 +27,7 @@
 #include "units/IUnit.h"
 
 void CDemTreeWidget::dragMoveEvent(QDragMoveEvent* event) {
-  CDemItem* item = dynamic_cast<CDemItem*>(itemAt(event->pos()));
+  CDemItem* item = dynamic_cast<CDemItem*>(itemAt(event->position().toPoint()));
 
   if (item && item->isActivated()) {
     event->setDropAction(Qt::MoveAction);
@@ -96,7 +96,7 @@ void CDemList::sort() {
   std::sort(items1.begin(), items1.end(), &sortByName<CDemItem>);
 
   QList<QTreeWidgetItem*> items2;
-  for (CDemItem* item : qAsConst(items1)) {
+  for (CDemItem* item : std::as_const(items1)) {
     items2 << item;
   }
   treeWidget->addTopLevelItems(items2);

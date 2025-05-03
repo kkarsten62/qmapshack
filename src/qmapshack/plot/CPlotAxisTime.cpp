@@ -89,8 +89,8 @@ const CPlotAxis::tic_t* CPlotAxisTime::ticmark(const tic_t* t) /* override */
 {
   const tic_t* _tic_ = CPlotAxis::ticmark(t);
   if (_tic_) {
-    QDateTime time = QDateTime::fromTime_t(tic.val);
-    time.setTimeSpec(Qt::LocalTime);
+    QDateTime time = QDateTime::fromSecsSinceEpoch(tic.val);
+    time.setTimeZone(QTimeZone::LocalTime);
     tic.lbl = time.toString(strFormat);
   }
 

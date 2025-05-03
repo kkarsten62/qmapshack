@@ -195,7 +195,8 @@ QString CRouterBRouter::getOptions() {
 void CRouterBRouter::routerSelected() { getBRouterVersion(); }
 
 bool CRouterBRouter::hasFastRouting() {
-  return setup->installMode == CRouterBRouterSetup::eModeLocal && setup->isLocalBRouterValid && checkFastRecalc->isChecked();
+  return setup->installMode == CRouterBRouterSetup::eModeLocal && setup->isLocalBRouterValid &&
+         checkFastRecalc->isChecked();
 }
 
 QNetworkRequest CRouterBRouter::getRequest(const QVector<QPointF>& routePoints, const QList<IGisItem*>& nogos) const {
@@ -235,7 +236,7 @@ QNetworkRequest CRouterBRouter::getRequest(const QVector<QPointF>& routePoints, 
         QPolygonF polygon;
         line->getPolylineDegFromData(polygon);
         QString nogoPoints;
-        for (const QPointF point : qAsConst(polygon)) {
+        for (const QPointF point : std::as_const(polygon)) {
           if (!nogoPoints.isEmpty()) {
             nogoPoints.append(",");
           }
@@ -340,7 +341,7 @@ int CRouterBRouter::synchronousRequest(const QVector<QPointF>& points, const QLi
     const QDomElement& xmlGpx = xml.documentElement();
 
     if (xmlGpx.isNull() || xmlGpx.tagName() != "gpx") {
-      throw QString(res);
+      throw QString(res.data());
     }
     setup->parseBRouterVersion(xmlGpx.attribute("creator"));
 
@@ -365,13 +366,13 @@ int CRouterBRouter::synchronousRequest(const QVector<QPointF>& points, const QLi
         }
         const QString& commentTxt = node.toComment().data();
         // ' track-length = 180864 filtered ascend = 428 plain-ascend = -172 cost=270249 '
-        const QRegExp rxAscDes(
+        static const QRegularExpression rxAscDes(
             "(\\s*track-length\\s*=\\s*)(-?\\d+)(\\s*)(filtered "
             "ascend\\s*=\\s*-?\\d+)(\\s*)(plain-ascend\\s*=\\s*-?\\d+)(\\s*)(cost\\s*=\\s*)(-?\\d+)(\\s*)");
-        int pos = rxAscDes.indexIn(commentTxt);
-        if (pos > -1) {
+        const QRegularExpressionMatch& match = rxAscDes.match(commentTxt);
+        if (match.hasMatch()) {
           bool ok;
-          *costs = rxAscDes.cap(9).toDouble(&ok);
+          *costs = match.captured(9).toDouble(&ok);
           if (!ok) {
             *costs = -1;
           }
@@ -468,7 +469,7 @@ void CRouterBRouter::slotRequestFinished(QNetworkReply* reply) {
 
     const QDomElement& xmlGpx = xml.documentElement();
     if (xmlGpx.isNull() || xmlGpx.tagName() != "gpx") {
-      throw QString(res);
+      throw QString(res.data());
     }
 
     IGisItem::key_t key;

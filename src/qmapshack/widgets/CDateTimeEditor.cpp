@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2015 Florian Pigorsch <mail@florian-pigorsch.de> 
+    Copyright (C) 2015 Florian Pigorsch <mail@florian-pigorsch.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -126,7 +126,7 @@ void CDateTimeEditor::paintEvent(QPaintEvent* /*event*/) {
   }
 
   painter.setRenderHint(QPainter::Antialiasing);
-  for (const CharacterInfo& c : qAsConst(m_characters)) {
+  for (const CharacterInfo& c : std::as_const(m_characters)) {
     const QRect r = getCharacterRect(c.m_position);
     if (c.m_position == m_selectedPosition) {
       painter.setPen(pal.highlightedText().color());
@@ -225,14 +225,14 @@ bool CDateTimeEditor::focusNextPrevChild(bool next) {
 const QSize& CDateTimeEditor::getCharSize() const {
   if (m_font != font() || m_charSize.isEmpty()) {
     m_font = font();
-    const QFontMetrics metrics = fontMetrics();
+    const QFontMetrics fm = fontMetrics();
 
     m_charSize.setWidth(0);
     m_charSize.setHeight(0);
 
     const QString& chars = "0123456789-: YMDHS";
     for (const QChar& c : chars) {
-      const QSize cSize = metrics.size(0, c);
+      const QSize cSize = fm.size(Qt::TextSingleLine, c);
       m_charSize = m_charSize.expandedTo(cSize);
     }
   }
@@ -326,7 +326,7 @@ bool CDateTimeEditor::selectFirstPosition() {
   m_selectedPosition = -1;
   m_selectedGroup = NONE;
 
-  for (const CharacterInfo& c : qAsConst(m_characters)) {
+  for (const CharacterInfo& c : std::as_const(m_characters)) {
     if (c.isEditable()) {
       found = true;
       m_selectedPosition = c.m_position;

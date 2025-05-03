@@ -142,7 +142,7 @@ IGisItem* CGisItemRte::createClone() {
 
 bool CGisItemRte::isCalculated() {
   bool yes = true;
-  for (const rtept_t& pt : qAsConst(rte.pts)) {
+  for (const rtept_t& pt : std::as_const(rte.pts)) {
     if ((pt.fakeSubpt.lat == NOFLOAT) || (pt.fakeSubpt.lon == NOFLOAT)) {
       yes = false;
       break;
@@ -366,12 +366,12 @@ QString CGisItemRte::getInfo(quint32 feature) const {
   }
 
   QString desc = removeHtml(rte.desc).simplified();
-  if (desc.count()) {
+  if (desc.length()) {
     if (!str.isEmpty()) {
       str += "<br/>\n";
     }
 
-    if ((feature & eFeatureShowFullText) || (desc.count() < 300)) {
+    if ((feature & eFeatureShowFullText) || (desc.length() < 300)) {
       str += desc;
     } else {
       str += desc.left(297) + "...";
@@ -379,12 +379,12 @@ QString CGisItemRte::getInfo(quint32 feature) const {
   }
 
   QString cmt = removeHtml(rte.cmt).simplified();
-  if ((cmt != desc) && cmt.count()) {
+  if ((cmt != desc) && cmt.length()) {
     if (!str.isEmpty()) {
       str += "<br/>\n";
     }
 
-    if ((feature & eFeatureShowFullText) || cmt.count() < 300) {
+    if ((feature & eFeatureShowFullText) || cmt.length() < 300) {
       str += cmt;
     } else {
       str += cmt.left(297) + "...";
@@ -417,7 +417,7 @@ QPointF CGisItemRte::getPointCloseBy(const QPoint& screenPos) {
 
   qint32 d = NOINT;
   QPointF pt = NOPOINTF;
-  for (const QPointF& point : qAsConst(line)) {
+  for (const QPointF& point : std::as_const(line)) {
     int tmp = (screenPos - point).manhattanLength();
     if (tmp < d) {
       pt = point;
@@ -467,7 +467,7 @@ void CGisItemRte::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>
   QVector<QPixmap> icons;
   QVector<QPointF> focus;
 
-  for (const rtept_t& rtept : qAsConst(rte.pts)) {
+  for (const rtept_t& rtept : std::as_const(rte.pts)) {
     QPointF pt(rtept.lon * DEG_TO_RAD, rtept.lat * DEG_TO_RAD);
 
     gis->convertRad2Px(pt);
@@ -556,7 +556,7 @@ void CGisItemRte::drawItem(QPainter& p, const QRectF& /*viewport*/, CGisDraw* gi
     p.drawEllipse(anchor, 5, 5);
 
     QString str, val, unit;
-    IUnit::self().seconds2time((mouseMoveFocus->time.toTime_t() - startTime.toTime_t()), val, unit);
+    IUnit::self().seconds2time((mouseMoveFocus->time.toSecsSinceEpoch() - startTime.toSecsSinceEpoch()), val, unit);
     str += tr("Time: %1%2").arg(val, unit) + " ";
     IUnit::self().meter2distance(mouseMoveFocus->distance, val, unit);
     str += tr("Distance: %1%2").arg(val, unit);
@@ -588,7 +588,7 @@ void CGisItemRte::drawLabel(QPainter& p, const QPolygonF& viewport, QList<QRectF
     return;
   }
 
-  for (const rtept_t& rtept : qAsConst(rte.pts)) {
+  for (const rtept_t& rtept : std::as_const(rte.pts)) {
     QPointF pt(rtept.lon * DEG_TO_RAD, rtept.lat * DEG_TO_RAD);
 
     gis->convertRad2Px(pt);
@@ -737,7 +737,7 @@ QPointF CGisItemRte::setMouseFocusByPoint(const QPoint& pt, focusmode_e fmode, c
     quint32 i = 0;
     qint32 d1 = NOINT;
 
-    for (const QPointF& point : qAsConst(line)) {
+    for (const QPointF& point : std::as_const(line)) {
       int tmp = (pt - point).manhattanLength();
       if (tmp <= d1) {
         idx = i;
@@ -760,7 +760,7 @@ QPointF CGisItemRte::setMouseFocusByPoint(const QPoint& pt, focusmode_e fmode, c
 
 const CGisItemRte::subpt_t* CGisItemRte::getSubPtByIndex(quint32 idx) {
   quint32 cnt = 0;
-  for (const rtept_t& rtept : qAsConst(rte.pts)) {
+  for (const rtept_t& rtept : std::as_const(rte.pts)) {
     if (cnt == idx) {
       return &rtept.fakeSubpt;
     }
@@ -803,7 +803,7 @@ void CGisItemRte::setResult(Routino_Output* route, const QString& options) {
       rtept->fakeSubpt.instruction = QString(next->desc1) + ".\n" + QString(next->desc2) + ".";
 
       rte.totalDistance = rtept->fakeSubpt.distance;
-      rte.totalTime = rtept->fakeSubpt.time.toTime_t() - time.toTime_t();
+      rte.totalTime = rtept->fakeSubpt.time.toSecsSinceEpoch() - time.toSecsSinceEpoch();
     } else if (rtept != nullptr) {
       rtept->subpts << subpt_t();
       subpt_t& subpt = rtept->subpts.last();
@@ -826,7 +826,7 @@ void CGisItemRte::setResult(Routino_Output* route, const QString& options) {
       }
 
       rte.totalDistance = subpt.distance;
-      rte.totalTime = subpt.time.toTime_t() - time.toTime_t();
+      rte.totalTime = subpt.time.toSecsSinceEpoch() - time.toSecsSinceEpoch();
       subpt.instruction = QString(next->desc1) + ".\n" + QString(next->desc2) + ".";
     }
 
@@ -1096,13 +1096,13 @@ void CGisItemRte::setResultFromBRouter(const QDomDocument& xml, const QString& o
     if (node.isComment()) {
       const QString& commentTxt = node.toComment().data();
       // ' track-length = 180864 filtered ascend = 428 plain-ascend = -172 cost=270249 '
-      const QRegExp rxAscDes(
+      static const QRegularExpression rxAscDes(
           "(\\s*track-length\\s*=\\s*)(-?\\d+)(\\s*)(filtered "
           "ascend\\s*=\\s*-?\\d+)(\\s*)(plain-ascend\\s*=\\s*-?\\d+)(\\s*)(cost\\s*=\\s*-?\\d+)(\\s*)");
-      int pos = rxAscDes.indexIn(commentTxt);
-      if (pos > -1) {
-        rte.totalDistance = rxAscDes.cap(2).toFloat();
-        rte.cmt = QString("%1, %2, %3").arg(rxAscDes.cap(4), rxAscDes.cap(6), rxAscDes.cap(8));
+      const QRegularExpressionMatch& match = rxAscDes.match(commentTxt);
+      if (match.hasMatch()) {
+        rte.totalDistance = match.captured(2).toFloat();
+        rte.cmt = QString("%1, %2, %3").arg(match.captured(4), match.captured(6), match.captured(8));
       }
       break;
     }

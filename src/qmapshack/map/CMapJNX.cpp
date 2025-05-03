@@ -18,6 +18,7 @@
 
 #include "map/CMapJNX.h"
 
+#include <QtCore5Compat/QTextCodec>
 #include <QtGui>
 
 #include "helpers/CDraw.h"
@@ -276,7 +277,7 @@ void CMapJNX::draw(IDrawContext::buffer_t& buf) /* override */
   p.setOpacity(getOpacity() / 100.0);
   p.translate(-pp);
 
-  for (const file_t& mapFile : qAsConst(files)) {
+  for (const file_t& mapFile : std::as_const(files)) {
     if (!viewport.intersects(mapFile.bbox)) {
       continue;
     }

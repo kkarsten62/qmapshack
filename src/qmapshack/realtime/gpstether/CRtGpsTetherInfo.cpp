@@ -257,7 +257,7 @@ bool CRtGpsTetherInfo::verifyLine(const QString& line) {
     cs ^= data[i];
   }
 
-  return line.rightRef(2).toInt(0, 16) == cs;
+  return line.right(2).toInt(0, 16) == cs;
 }
 
 void CRtGpsTetherInfo::nmeaGSV(const QStringList& /*tokens*/) {}
@@ -294,7 +294,7 @@ void CRtGpsTetherInfo::nmeaRMC(const QStringList& tokens) {
   }
   rmc.isValid = true;
   rmc.datetime = QDateTime::fromString(tokens[9] + tokens[1], "ddMMyyhhmmss.z").addYears(100);
-  rmc.datetime.setTimeSpec(Qt::UTC);
+  rmc.datetime.setTimeZone(QTimeZone::UTC);
 
   {
     qreal tmp = tokens[3].toDouble();
@@ -331,7 +331,7 @@ void CRtGpsTetherInfo::nmeaGGA(const QStringList& tokens) {
   gga.isValid = true;
   gga.datetime.setTime(QTime::fromString(tokens[1], "hhmmss.z"));
   gga.datetime.setDate(QDate::currentDate());
-  gga.datetime.setTimeSpec(Qt::UTC);
+  gga.datetime.setTimeZone(QTimeZone::UTC);
 
   {
     qreal tmp = tokens[2].toDouble();

@@ -41,15 +41,17 @@ CMapWMTS::CMapWMTS(const QString& filename, CMapDraw* parent) : IMapOnline(paren
     return;
   }
 
-  QString msg;
-  int line, column;
   QDomDocument dom;
-  if (!dom.setContent(&file, true, &msg, &line, &column)) {
+  const QDomDocument::ParseResult& result = dom.setContent(&file, QDomDocument::ParseOption::UseNamespaceProcessing);
+  if (!result) {
     file.close();
-    QMessageBox::critical(
-        CMainWindow::getBestWidgetForParent(), tr("Error..."),
-        tr("Failed to read: %1\nline %2, column %3:\n %4").arg(filename).arg(line).arg(column).arg(msg),
-        QMessageBox::Abort, QMessageBox::Abort);
+    QMessageBox::critical(CMainWindow::getBestWidgetForParent(), tr("Error..."),
+                          tr("Failed to read: %1\nline %2, column %3:\n %4")
+                              .arg(filename)
+                              .arg(result.errorLine)
+                              .arg(result.errorColumn)
+                              .arg(result.errorMessage),
+                          QMessageBox::Abort, QMessageBox::Abort);
     return;
   }
   file.close();
@@ -258,7 +260,7 @@ void CMapWMTS::getLayers(QListWidget& list) {
   list.clear();
   if (layers.size() > 1) {
     int i = 0;
-    for (const layer_t& layer : qAsConst(layers)) {
+    for (const layer_t& layer : std::as_const(layers)) {
       QListWidgetItem* item = new QListWidgetItem(layer.title, &list);
       bool enabled = layer.enabled;
       item->setData(Qt::UserRole, i++);
@@ -307,7 +309,7 @@ void CMapWMTS::loadConfig(QSettings& cfg) /* override */
 
   // enable layers stored in configuration
   enabled = cfg.value("enabledLayers", enabled).toStringList();
-  for (const QString& str : qAsConst(enabled)) {
+  for (const QString& str : std::as_const(enabled)) {
     int idx = str.toInt();
     if (idx < layers.size()) {
       layers[idx].enabled = true;
@@ -381,7 +383,7 @@ void CMapWMTS::draw(IDrawContext::buffer_t& buf) /* override */
   QRectF viewport(QPointF(x1, y1) * RAD_TO_DEG, QPointF(x2, y2) * RAD_TO_DEG);
 
   // draw layers
-  for (const layer_t& layer : qAsConst(layers)) {
+  for (const layer_t& layer : std::as_const(layers)) {
     if (!layer.boundingBox.intersects(viewport) || !layer.enabled) {
       continue;
     }

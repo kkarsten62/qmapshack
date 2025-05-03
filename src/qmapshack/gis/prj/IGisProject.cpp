@@ -467,7 +467,7 @@ QString IGisProject::getInfo() const {
   if (!desc.isEmpty()) {
     str += "<br/>\n";
 
-    if (desc.count() < 100) {
+    if (desc.length() < 100) {
       str += desc;
     } else {
       str += desc.left(97) + "...";
@@ -893,7 +893,7 @@ void IGisProject::sortItems() {
 
   QList<QTreeWidgetItem*> items = takeChildren();
   QList<QTreeWidgetItem*> others;  // For example Search
-  for (QTreeWidgetItem* item : qAsConst(items)) {
+  for (QTreeWidgetItem* item : std::as_const(items)) {
     CGisItemTrk* trk = dynamic_cast<CGisItemTrk*>(item);
     if (trk != nullptr) {
       trks << trk;
@@ -928,16 +928,16 @@ void IGisProject::sortItems() {
 
   items.clear();
   items << others;
-  for (IGisItem* item : qAsConst(trks)) {
+  for (IGisItem* item : std::as_const(trks)) {
     items << item;
   }
-  for (IGisItem* item : qAsConst(rtes)) {
+  for (IGisItem* item : std::as_const(rtes)) {
     items << item;
   }
-  for (IGisItem* item : qAsConst(wpts)) {
+  for (IGisItem* item : std::as_const(wpts)) {
     items << item;
   }
-  for (IGisItem* item : qAsConst(ovls)) {
+  for (IGisItem* item : std::as_const(ovls)) {
     items << item;
   }
 

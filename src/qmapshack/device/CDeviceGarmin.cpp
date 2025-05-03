@@ -40,12 +40,13 @@ CDeviceGarmin::CDeviceGarmin(const QString& path, const QString& key, const QStr
   }
 
   QDomDocument dom;
-  QString msg;
-  int line;
-  int column;
-  if (!dom.setContent(&file, false, &msg, &line, &column)) {
-    qDebug()
-        << QString("Failed to read: %1\nline %2, column %3:\n %4").arg(file.fileName()).arg(line).arg(column).arg(msg);
+  const QDomDocument::ParseResult& result = dom.setContent(&file);
+  if (!result) {
+    qDebug() << QString("Failed to read: %1\nline %2, column %3:\n %4")
+                    .arg(file.fileName())
+                    .arg(result.errorLine)
+                    .arg(result.errorColumn)
+                    .arg(result.errorMessage);
   }
 
   file.close();
@@ -185,8 +186,8 @@ void CDeviceGarmin::reorderProjects(IGisProject* project) {
 }
 
 QString CDeviceGarmin::simplifiedName(IGisProject* project) {
-  QString name = project->getName();
-  return name.remove(QRegExp("[^A-Za-z0-9_]"));
+  static const QRegularExpression re("[^A-Za-z0-9_]");
+  return project->getName().remove(re);
 }
 
 QString CDeviceGarmin::createFileName(IGisProject* project, const QString& path, const QString& suffix) {
@@ -256,9 +257,10 @@ void CDeviceGarmin::saveImages(CGisItemWpt& wpt) {
     }
 
     QString filename;
+    static const QRegularExpression re("[^A-Za-z0-9_]");
     for (const CGisItemWpt::image_t& image : images) {
       filename = image.info;
-      filename = filename.remove(QRegExp("[^A-Za-z0-9_]"));
+      filename = filename.remove(re);
 
       if (!filename.endsWith("jpg")) {
         filename += ".jpg";

@@ -93,12 +93,14 @@ void CTcxProject::loadTcx(const QString& filename, CTcxProject* project) {
   }
 
   QDomDocument xml;
-  QString msg;
-  int line;
-  int column;
-  if (!xml.setContent(&file, false, &msg, &line, &column)) {
+  const QDomDocument::ParseResult& result = xml.setContent(&file);
+  if (!result) {
     file.close();
-    throw tr("Failed to read: %1\nline %2, column %3:\n %4").arg(filename).arg(line).arg(column).arg(msg);
+    throw tr("Failed to read: %1\nline %2, column %3:\n %4")
+        .arg(filename)
+        .arg(result.errorLine)
+        .arg(result.errorColumn)
+        .arg(result.errorMessage);
   }
   file.close();
 
@@ -323,7 +325,7 @@ bool CTcxProject::saveAs(const QString& fn, IGisProject& project) {
 
     // load file content to xml document
     QDomDocument xmlTcx;
-    if (xmlTcx.setContent(&file, false)) {
+    if (xmlTcx.setContent(&file)) {
       const QDomNodeList& tcxAuthor = xmlTcx.elementsByTagName("Author");
       if (tcxAuthor.item(0).isElement()) {
         const QDomNodeList& tcxAuthorName = tcxAuthor.item(0).toElement().elementsByTagName("Name");
@@ -462,7 +464,7 @@ bool CTcxProject::saveAs(const QString& fn, IGisProject& project) {
   if (activityTrks.size() != 0) {
     tcx.appendChild(activitiesNode);
   }
-  for (CGisItemTrk* trkToBeSaved : qAsConst(activityTrks)) {
+  for (CGisItemTrk* trkToBeSaved : std::as_const(activityTrks)) {
     trkToBeSaved->saveTCXactivity(activitiesNode);
   }
 
@@ -470,7 +472,7 @@ bool CTcxProject::saveAs(const QString& fn, IGisProject& project) {
   if (courseTrks.size() != 0) {
     tcx.appendChild(coursesNode);
   }
-  for (CGisItemTrk* trkToBeSaved : qAsConst(courseTrks)) {
+  for (CGisItemTrk* trkToBeSaved : std::as_const(courseTrks)) {
     trkToBeSaved->saveTCXcourse(coursesNode);
   }
 
@@ -497,7 +499,7 @@ bool CTcxProject::saveAs(const QString& fn, IGisProject& project) {
     res = false;
   }
   QTextStream out(&file);
-  out.setCodec("UTF-8");
+  out.setEncoding(QStringConverter::Utf8);
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << Qt::endl;
 
   out << doc.toString();

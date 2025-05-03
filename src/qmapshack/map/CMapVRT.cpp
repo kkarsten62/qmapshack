@@ -157,13 +157,17 @@ bool CMapVRT::testForOverviews(const QString& filename) {
   }
 
   QDomDocument xml;
-  QString msg;
-  int line;
-  int column;
-  if (!xml.setContent(&file, false, &msg, &line, &column)) {
+  const QDomDocument::ParseResult& result = xml.setContent(&file);
+  if (!result) {
     file.close();
-    throw tr("Failed to read: %1\nline %2, column %3:\n %4").arg(filename).arg(line).arg(column).arg(msg);
-    qDebug() << "Failed to read:" << filename << Qt::endl << "line" << line << ", column" << column << Qt::endl << msg;
+    throw tr("Failed to read: %1\nline %2, column %3:\n %4")
+        .arg(filename)
+        .arg(result.errorLine)
+        .arg(result.errorColumn)
+        .arg(result.errorMessage);
+    qDebug() << "Failed to read:" << filename << Qt::endl
+             << "line" << result.errorLine << ", column" << result.errorColumn << Qt::endl
+             << result.errorMessage;
     return false;
   }
   file.close();
@@ -210,7 +214,7 @@ bool CMapVRT::testForOverviews(const QString& filename) {
     return false;
   }
 
-  for (const QString& file : qAsConst(files)) {
+  for (const QString& file : std::as_const(files)) {
     using pGDALDataset = QSharedPointer<GDALDataset>;
     pGDALDataset _dataset = pGDALDataset((GDALDataset*)GDALOpen(file.toUtf8(), GA_ReadOnly), GDALClose);
     // _dataset will be destroyed automatically by shared pointer.

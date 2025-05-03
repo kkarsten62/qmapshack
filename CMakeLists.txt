@@ -1,7 +1,7 @@
 ###############################################################################################
 # CMake compatibility requirements
 ###############################################################################################
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.20.0)
 
 # Needed to properly handle extract translations strings when using the Ninja
 # generator.
@@ -42,8 +42,6 @@ endif(WIN32)
 # all binaries are collected in the ./bin directory
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-include(TranslateTs)
-include(TranslateDesktop)
 include(DefineCMakeDefaults)
 include(DefineCompilerFlags)
 include(DefineInstallationPaths)
@@ -54,29 +52,18 @@ include(ConfigureChecks.cmake)
 # All boolean options
 ###############################################################################################
 
-# Translation related
-option(UPDATE_TRANSLATIONS  "Update source translation translations/*.ts files"     OFF)
-option(KEEP_OLD_TRANSLATIONS "Keep obsolete translations"                           ON)
-
 # Feature related
 option(BUILD_QMAPSHACK      "Build QMapShack Binary"                                ON)
 option(BUILD_QMAPTOOL       "Build QMapTool Binary including command line tools"    ON)
 
 if(WIN32)
-option(USE_QT5DBus          "Enable device detection via DBus"                      OFF)
+option(USE_QT6DBus          "Enable device detection via DBus"                      OFF)
 else(WIN32)
-option(USE_QT5DBus          "Enable device detection via DBus"                      ON)
+option(USE_QT6DBus          "Enable device detection via DBus"                      ON)
 endif(WIN32)
 
 # Compiler related
 option(BUILD_FOR_LOCAL_SYSTEM "Build for local system ONLY (resulting binary might not work on other systems!)" OFF)
-
-if(KEEP_OLD_TRANSLATIONS)
-    set(KEEP_OLD_TRANSLATIONS "")
-else(KEEP_OLD_TRANSLATIONS)
-    set(KEEP_OLD_TRANSLATIONS "-no-obsolete")
-endif(KEEP_OLD_TRANSLATIONS)
-
 
 ###############################################################################################
 # All OS and compiler specific tweaks
@@ -90,7 +77,7 @@ if (APPLE)
     if(NOT DEFINED QT_DEV_PATH)
         message(FATAL_ERROR "QT_DEV_PATH not set!!!")
     endif()
-    # set(QT_DEV_PATH   ${QT_DEV_PATH} CACHE PATH "Path to directory containing Qt5 include and lib")
+    # set(QT_DEV_PATH   ${QT_DEV_PATH} CACHE PATH "Path to directory containing Qt6 include and lib")
     message("QT_DEV_PATH = ${QT_DEV_PATH}")
 
     if(NOT DEFINED ROUTINO_DEV_PATH)
@@ -99,11 +86,11 @@ if (APPLE)
     # set(ROUTINO_DEV_PATH ${ROUTINO_DEV_PATH} CACHE PATH "Path to directory containing routino include and lib")
     message("ROUTINO_DEV_PATH = ${ROUTINO_DEV_PATH}")
     
-    if(NOT DEFINED QuaZip-Qt5_DIR)
-        message(FATAL_ERROR "QuaZip-Qt5_DIR not set!!!")
-    endif(NOT DEFINED QuaZip-Qt5_DIR)
-    # set(QuaZip-Qt5_DIR ${QuaZip-Qt5_DIR} CACHE PATH "Path to directory containing quazip cmake config files")
-    message("QuaZip-Qt5_DIR = ${QuaZip-Qt5_DIR}")
+    if(NOT DEFINED QuaZip-Qt6_DIR)
+        message(FATAL_ERROR "QuaZip-Qt6_DIR not set!!!")
+    endif(NOT DEFINED QuaZip-Qt6_DIR)    
+    # set(QuaZip-Qt6_DIR ${QuaZip-Qt6_DIR} CACHE PATH "Path to directory containing quazip cmake config files")
+    message("QuaZip-Qt6_DIR = ${QuaZip-Qt6_DIR}")
 
     if(NOT DEFINED PROJ_DEV_PATH)
         message(FATAL_ERROR "PROJ_DEV_PATH not set!!!")
@@ -123,11 +110,11 @@ if (APPLE)
 endif(APPLE)
 
 if(WIN32)
-    set(QT_DEV_PATH   "C:\\Qt\\5.12.11\\msvc2017_64" CACHE PATH "Path to directory containing Qt5 include and lib, e.g. C:\\Qt\\5.12.10\\msvc2017_64")
+    set(QT_DEV_PATH   "C:\\Qt\\5.12.11\\msvc2017_64" CACHE PATH "Path to directory containing Qt6 include and lib, e.g. C:\\Qt\\5.12.10\\msvc2017_64")
     set(GDAL_DEV_PATH "C:\\GDAL" CACHE PATH "Path to directory containing GDAL include and lib, e.g. M:\\lib\\gdal")
     set(PROJ_DEV_PATH "C:\\PROJ8" CACHE PATH "Path to directory containing PROJ include and lib, e.g. M:\\lib\\PROJ8")
     set(ROUTINO_DEV_PATH "C:\\routino" CACHE PATH "Path to directory containing routino include and lib, e.g. M:\\lib\\routino")
-    set(QuaZip-Qt5_DIR "C:\\quazip" CACHE PATH "Path to directory containing quazip cmake config files, e.g. M:\\lib2017\\QUAZIP_1\\lib\\cmake\\QuaZip-Qt5-1.1")
+    set(QuaZip-Qt6_DIR "C:\\quazip" CACHE PATH "Path to directory containing quazip cmake config files, e.g. M:\\lib2017\\QUAZIP_1\\lib\\cmake\\QuaZip-Qt5-1.1")
     set(JPEG_DEV_PATH "C:\\JPEG" CACHE PATH "Path to directory containing JPEG include and lib, e.g. M:\\lib\\JPEG")
     set(CMAKE_PREFIX_PATH ${QT_DEV_PATH})
     if(POLICY CMP0074)
@@ -177,39 +164,46 @@ cxx_add_flag_if_supported(-Woverloaded-virtual)
 ###############################################################################################
 # Find all required packages and setup internal variables
 ###############################################################################################
-find_package(Qt5Widgets             REQUIRED)
-find_package(Qt5Core                REQUIRED)
-find_package(Qt5Xml                 REQUIRED)
-find_package(Qt5Sql                 REQUIRED)
-find_package(Qt5LinguistTools       REQUIRED)
-find_package(Qt5PrintSupport        REQUIRED)
-find_package(Qt5UiTools             REQUIRED)
-find_package(Qt5Network             REQUIRED)
-find_package(Qt5WebEngineWidgets    REQUIRED)
-find_package(Qt5Qml                 REQUIRED)
-find_package(Qt5Help                REQUIRED)
+find_package(Qt6Core                REQUIRED)
+
+
+if (Qt6Core_VERSION VERSION_LESS 6.8.0)
+        message(FATAL_ERROR "Qt 6.8.0 or later is required.")
+endif()
+
+
+find_package(Qt6Widgets             REQUIRED)
+find_package(Qt6Xml                 REQUIRED)
+find_package(Qt6Sql                 REQUIRED)
+find_package(Qt6LinguistTools       REQUIRED)
+find_package(Qt6PrintSupport        REQUIRED)
+find_package(Qt6UiTools             REQUIRED)
+find_package(Qt6Network             REQUIRED)
+find_package(Qt6WebEngineWidgets    REQUIRED)
+find_package(Qt6Qml                 REQUIRED)
+find_package(Qt6Help                REQUIRED)
+find_package(Qt6Core5Compat         REQUIRED)
 find_package(GDAL                   REQUIRED)
 find_package(PROJ                   REQUIRED)
 find_package(JPEG                   REQUIRED)
 find_package(ROUTINO                REQUIRED)
-find_package(QuaZip-Qt5             REQUIRED)
+find_package(QuaZip-Qt6             REQUIRED)
 find_package(ALGLIB                         ) # optional as we can use our local version
 
-
-if(${Qt5Widgets_VERSION} VERSION_LESS 5.15.2)
-    message( SEND_ERROR "You need at least Qt5.15.2 or newer.")
-endif()
+qt_standard_project_setup(
+    I18N_TRANSLATED_LANGUAGES ca cs de es fr it nl ru
+)
 
 if(${PROJ_VERSION} VERSION_LESS 8.0.0)
     message( SEND_ERROR "You need at least PROJ 8.0.0 or newer.")
 endif()
 
-if(USE_QT5DBus)
-    find_package(Qt5DBus REQUIRED)
-    if(Qt5DBus_FOUND)
+if(USE_QT6DBus)
+    find_package(Qt6DBus REQUIRED)
+    if(Qt6DBus_FOUND)
         add_definitions(-DHAVE_DBUS)
-    endif(Qt5DBus_FOUND)
-endif(USE_QT5DBus)
+    endif(Qt6DBus_FOUND)
+endif(USE_QT6DBus)
 
 # Everything included. Let's finetune the mess a bit more
 
@@ -258,6 +252,7 @@ endif(BUILD_QMAPTOOL)
 ###############################################################################################
 if (UNIX AND NOT WIN32 AND NOT APPLE)
 if(BUILD_QMAPSHACK)
+    install( FILES        qmapshack.desktop                 DESTINATION     ${XDG_APPS_DIR} )
     install( FILES        src/icons/48x48/QMapShack.png     DESTINATION     ${DATA_INSTALL_PREFIX}/pixmaps )
     install( DIRECTORY    src/icons/qmapshack/hicolor       DESTINATION     ${ICON_INSTALL_DIR} )
     install( FILES        qmapshack.1                       DESTINATION     ${MAN_INSTALL_DIR}/man1  )
@@ -266,6 +261,7 @@ if(BUILD_QMAPSHACK)
 endif(BUILD_QMAPSHACK)
 
 if(BUILD_QMAPTOOL)
+    install( FILES        qmaptool.desktop                  DESTINATION     ${XDG_APPS_DIR} )
     install( FILES        src/icons/48x48/QMapTool.png      DESTINATION     ${DATA_INSTALL_PREFIX}/pixmaps )
     install( DIRECTORY    src/icons/qmaptool/hicolor        DESTINATION     ${ICON_INSTALL_DIR} )
     install( FILES        qmaptool.1                        DESTINATION     ${MAN_INSTALL_DIR}/man1  )
@@ -279,5 +275,3 @@ endif (UNIX AND NOT WIN32 AND NOT APPLE)
 # this is used by the uninstall target
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-
-

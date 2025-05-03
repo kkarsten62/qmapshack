@@ -354,7 +354,7 @@ QString CGisItemTrk::getInfoLimits() const {
   QStringList keys = extrema.keys();
   std::sort(keys.begin(), keys.end(), sortByString);
 
-  for (const QString& key : qAsConst(keys)) {
+  for (const QString& key : std::as_const(keys)) {
     if (key == CKnownExtension::internalSpeedTime)  // Output of "Speed*" will already be covered by internalSpeedDist
     {                                               // No need to show it twice
       continue;
@@ -487,7 +487,7 @@ QString CGisItemTrk::getInfo(quint32 feature) const {
     }
 
     QString desc = removeHtml(trk.desc).simplified();
-    if (desc.count()) {
+    if (desc.length()) {
       if (!str.isEmpty()) {
         str += "<br/>\n";
       }
@@ -495,7 +495,7 @@ QString CGisItemTrk::getInfo(quint32 feature) const {
     }
 
     QString cmt = removeHtml(trk.cmt).simplified();
-    if ((cmt != desc) && cmt.count()) {
+    if ((cmt != desc) && cmt.length()) {
       if (!str.isEmpty()) {
         str += "<br/>\n";
       }
@@ -537,14 +537,14 @@ QString CGisItemTrk::getInfoRange() const {
   }
 
   bool timeIsValid = pt1->time.isValid() && pt2->time.isValid();
-  qreal deltaTime = pt2->time.toTime_t() - pt1->time.toTime_t();
+  qreal deltaTime = pt2->time.toSecsSinceEpoch() - pt1->time.toSecsSinceEpoch();
 
   const qreal distance = pt2->distance - pt1->distance;
 
   IUnit::self().meter2distance(distance, val, unit);
   str += QString("%3 %1%2 ").arg(val, unit).arg(QChar(0x21A6));
   if (timeIsValid) {
-    quint32 t = pt2->time.toTime_t() - pt1->time.toTime_t();
+    quint32 t = pt2->time.toSecsSinceEpoch() - pt1->time.toSecsSinceEpoch();
     quint32 hh = t / 3600;
     quint32 mm = (t % 3600) / 60;
     quint32 ss = t % 60;
@@ -624,7 +624,7 @@ QString CGisItemTrk::getInfoTrkPt(const CTrackData::trkpt_t& pt) const {
     keys = keys.mid(0, 10);
   }
 
-  for (const QString& key : qAsConst(keys)) {
+  for (const QString& key : std::as_const(keys)) {
     const CKnownExtension& ext = CKnownExtension::get(key);
     if (ext.known) {
       str +=
@@ -686,7 +686,7 @@ QString CGisItemTrk::getInfoRange(const CTrackData::trkpt_t& trkpt1, const CTrac
   }
 
   if (pt1.time.isValid() && pt2.time.isValid()) {
-    dt = pt2.time.toTime_t() - pt1.time.toTime_t();
+    dt = pt2.time.toSecsSinceEpoch() - pt1.time.toSecsSinceEpoch();
   }
 
   QString asc = tr("Ascent: -");
@@ -1167,11 +1167,11 @@ void CGisItemTrk::findWaypointsCloseBy(CProgressDialog& progress, quint32& curre
 
   bool doDeriveData = false;
   numberOfAttachedWpt = 0;
-  for (const trkwpt_t& trkwpt : qAsConst(trkwpts)) {
+  for (const trkwpt_t& trkwpt : std::as_const(trkwpts)) {
     qreal minD = WPT_FOCUS_DIST_IN;
     qint32 index = NOIDX;
 
-    for (const pointDP& pt : qAsConst(line)) {
+    for (const pointDP& pt : std::as_const(line)) {
       ++current;
       qreal d = (trkwpt.x - pt.x) * (trkwpt.x - pt.x) + (trkwpt.y - pt.y) * (trkwpt.y - pt.y);
 
@@ -1320,7 +1320,7 @@ bool CGisItemTrk::cut() {
                  isInRange(removeEnd, seg.pts.first().idxTotal, seg.pts.last().idxTotal)) {
         QVector<CTrackData::trkpt_t> pts;
 
-        for (const CTrackData::trkpt_t& pt : qAsConst(seg.pts)) {
+        for (const CTrackData::trkpt_t& pt : std::as_const(seg.pts)) {
           if (!(removeStart <= pt.idxTotal && pt.idxTotal <= removeEnd)) {
             pts << pt;
           }
@@ -1408,7 +1408,7 @@ void CGisItemTrk::reverse() {
   trk1->key.clear();
   trk1->history.events.clear();
 
-  for (const CTrackData::trkseg_t& seg : qAsConst(trk.segs)) {
+  for (const CTrackData::trkseg_t& seg : std::as_const(trk.segs)) {
     CTrackData::trkseg_t seg1;
     for (const CTrackData::trkpt_t& pt : seg.pts) {
       CTrackData::trkpt_t pt1 = pt;
@@ -1535,7 +1535,7 @@ void CGisItemTrk::deleteSelectedPoints() {
 
   for (CTrackData::trkseg_t& seg : trk.segs) {
     QVector<CTrackData::trkpt_t> pts;
-    for (const CTrackData::trkpt_t& pt : qAsConst(seg.pts)) {
+    for (const CTrackData::trkpt_t& pt : std::as_const(seg.pts)) {
       if (idx1 < pt.idxTotal && pt.idxTotal < idx2) {
         continue;
       }
@@ -1658,12 +1658,12 @@ void CGisItemTrk::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>
 
     p.setPen(QPen(Qt::lightGray, penWidthBg, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
-    for (const QPolygonF& l : qAsConst(lines)) {
+    for (const QPolygonF& l : std::as_const(lines)) {
       p.drawPolyline(l);
     }
 
     QPixmap bullet("://icons/8x8/bullet_dark_gray.png");
-    for (const QPolygonF& l : qAsConst(lines)) {
+    for (const QPolygonF& l : std::as_const(lines)) {
       for (const QPointF& pt : l) {
         p.drawPixmap(pt.x() - 3, pt.y() - 3, bullet);
       }
@@ -1678,14 +1678,14 @@ void CGisItemTrk::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>
   const CMainWindow& w = CMainWindow::self();
   if (key == keyUserFocus && w.isShowTrackHighlight()) {
     p.setPen(QPen(Qt::red, penWidthHi, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    for (const QPolygonF& l : qAsConst(lines)) {
+    for (const QPolygonF& l : std::as_const(lines)) {
       p.drawPolyline(l);
     }
   }
 
   p.setBrush(color);
   p.setPen(penBackground);
-  for (const QPolygonF& l : qAsConst(lines)) {
+  for (const QPolygonF& l : std::as_const(lines)) {
     p.drawPolyline(l);
     const QRectF& bounding = l.boundingRect();
     auto area = bounding.width() * bounding.height();
@@ -1698,7 +1698,7 @@ void CGisItemTrk::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>
     // use the track's ordinary color
     penForeground.setColor(color);
     p.setPen(penForeground);
-    for (const QPolygonF& l : qAsConst(lines)) {
+    for (const QPolygonF& l : std::as_const(lines)) {
       p.drawPolyline(l);
     }
   } else if (getColorizeSource() == "activity") {
@@ -1708,7 +1708,7 @@ void CGisItemTrk::drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>
   }
 
   if (isNogo()) {
-    for (const QPolygonF& l : qAsConst(lines)) {
+    for (const QPolygonF& l : std::as_const(lines)) {
       CDraw::nogos(l, extViewport, p, 80);
     }
   }
@@ -2128,7 +2128,7 @@ void CGisItemTrk::drawHighlight(QPainter& p) {
 
   p.setPen(QPen(QColor(255, 0, 0, 100), penWidthHi, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
-  for (const QPolygonF& line : qAsConst(lines)) {
+  for (const QPolygonF& line : std::as_const(lines)) {
     p.drawPolyline(line);
   }
 }
@@ -2344,7 +2344,7 @@ bool CGisItemTrk::setMouseFocusByTime(quint32 time, focusmode_e fmode, const QSt
         continue;
       }
 
-      qreal d = qAbs(qreal(pt.time.toTime_t()) - qreal(time));
+      qreal d = qAbs(qreal(pt.time.toSecsSinceEpoch()) - qreal(time));
       if (d <= delta) {
         newPointOfFocus = &pt;
         delta = d;
@@ -2623,7 +2623,7 @@ void CGisItemTrk::updateVisuals(quint32 visuals, const QString& who) {
     dlgDetails->updateData();
   }
 
-  for (INotifyTrk* visual : qAsConst(registeredVisuals)) {
+  for (INotifyTrk* visual : std::as_const(registeredVisuals)) {
     if (visuals & visual->mask) {
       visual->updateData();
     }
@@ -2641,7 +2641,7 @@ void CGisItemTrk::setMouseFocusVisuals(const CTrackData::trkpt_t* pt) {
     dlgDetails->setMouseFocus(pt);
   }
 
-  for (INotifyTrk* visual : qAsConst(registeredVisuals)) {
+  for (INotifyTrk* visual : std::as_const(registeredVisuals)) {
     visual->setMouseFocus(pt);
   }
 }
@@ -2651,7 +2651,7 @@ void CGisItemTrk::setMouseRangeFocusVisuals(const CTrackData::trkpt_t* pt1, cons
     dlgDetails->setMouseRangeFocus(pt1, pt2);
   }
 
-  for (INotifyTrk* visual : qAsConst(registeredVisuals)) {
+  for (INotifyTrk* visual : std::as_const(registeredVisuals)) {
     visual->setMouseRangeFocus(pt1, pt2);
   }
 }
@@ -2661,7 +2661,7 @@ void CGisItemTrk::setMouseClickFocusVisuals(const CTrackData::trkpt_t* pt) {
     dlgDetails->setMouseClickFocus(pt);
   }
 
-  for (INotifyTrk* visual : qAsConst(registeredVisuals)) {
+  for (INotifyTrk* visual : std::as_const(registeredVisuals)) {
     visual->setMouseClickFocus(pt);
   }
 }
