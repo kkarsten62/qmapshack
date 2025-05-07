@@ -621,22 +621,23 @@ void CTrkPrintDialog::addPageMarkers(QPainter &p, const QRectF &currPage, const 
             QPointF currPt = otherPts[i] - currPage.topLeft(); // Adjust coordinates of other point to the 1st page
             QPointF nextPt = otherPts[i + 1] - currPage.topLeft();
             QLineF lineNext(currPt, nextPt); // Build next line
-            lineNext.setLength(20); // And shorten the line
+            lineNext.setLength(40); // And shorten the line
             p.drawLine(lineNext); // Draw with the painter
 
             qint32 prev = (i == 0) ? otherPts.size() - 2 : i - 1; // Special for first point, prev point is the last point of rect
             QPointF prevPt = otherPts[prev] - currPage.topLeft();
             QLineF linePrev(currPt, prevPt); // Build previous line
-            linePrev.setLength(20);
+            linePrev.setLength(40);
             p.drawLine(linePrev);
 
-            QRectF textRect(linePrev.p2(), lineNext.p2());
+            QRectF textRect(linePrev.p2(), lineNext.p2()); // Create the text rectangle
+            QRectF textRectN = textRect.normalized(); // And normalize it
             QString pageNoStr = QString("%1").arg(pageNo);
             p.setOpacity(0.7); // Some opacity to see a bit the underlaying map
-            p.fillRect(p.boundingRect(textRect, Qt::AlignCenter, pageNoStr), Qt::white); // Fill text box with a white rect
+            p.fillRect(p.boundingRect(textRectN, Qt::AlignCenter, pageNoStr), Qt::white); // Fill text box with a white rect
             p.setOpacity(1);
-            p.drawText(textRect, Qt::AlignCenter, pageNoStr); // Print the page number between the marker lines
-            p.setBrush(Qt::cyan); // And a small filled circle in the origin
+            p.drawText(textRectN, Qt::AlignCenter, pageNoStr); // Print the page number between the marker lines
+            p.setBrush(Qt::red); // And a small filled circle in the origin
             p.drawEllipse(currPt, 3, 3);
         }
     }
