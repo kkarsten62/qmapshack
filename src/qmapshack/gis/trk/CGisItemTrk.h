@@ -54,7 +54,6 @@ class CQlgtTrack;
 class IQlgtOverlay;
 class CProgressDialog;
 class CPropertyTrk;
-class CFitStream;
 class CCanvas;
 
 #define ASCENT_THRESHOLD 5
@@ -121,8 +120,6 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @param project  The project this track belongs to
    */
   CGisItemTrk(CTrackData& trkdata, IGisProject* project);
-
-  CGisItemTrk(CFitStream& stream, IGisProject* project);
 
   virtual ~CGisItemTrk();
 
@@ -648,11 +645,6 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @param filename
    */
   bool readTwoNav(const QString& filename);
-  /**
-     @brief Read serialized track data from a FIT file stream
-     @param stream
-   */
-  void readTrkFromFit(CFitStream& stream);
 
   /**
      @brief Consolidate points and subpoints
