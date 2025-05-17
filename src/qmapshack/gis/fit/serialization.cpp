@@ -196,11 +196,13 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream) {
   }
 
   // KKA start
+  /*
   if(fileIdMesg.isFieldValueValid(eFileIdProduct))
   {
     getFitData().setIsValid(true);
     getFitData().setProduct(fileIdMesg.getFieldValue(eFileIdProduct).toUInt());
   }
+  */
   // KKA end
 
   stream.reset();
@@ -223,7 +225,7 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream) {
       if (readFitRecord(mesg, pt)) {
 
         // KKA start
-        trkptTime = pt.time;
+        // trkptTime = pt.time;
         // KKA end
 
         seg.pts.append(std::move(pt));
@@ -244,12 +246,13 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream) {
         seg.pts.append(std::move(pt));
 
         // KKA start
-        trkptTime = pt.time;
+        // trkptTime = pt.time;
         // KKA end
       }
     }
 
     // KKA start
+    /*
     else if(mesg.getGlobalMesgNr() == eMesgNumLap)
     {
       CFitData::lap_t lap;
@@ -453,6 +456,7 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream) {
       }
       getFitData().setLap(session);
     }
+    */
     // KKA end
 
   } while (stream.hasMoreMesg());
