@@ -16,6 +16,7 @@
 **********************************************************************************************/
 
 #include "CMainWindow.h"
+#include "gis/trk/CGisItemTrk.h"
 #include "gis/trk/CFitData.h"
 #include "gis/trk/CFitDataDialog.h"
 #include "helpers/CSettings.h"
@@ -29,23 +30,24 @@
    @param xxx yyy
    @param xxx yyy
  */
-CFitDataDialog::CFitDataDialog(CFitData& fitdata, QWidget* parent) :
+//CFitDataDialog::CFitDataDialog(CFitData& fitdata, CGisItemTrk& trk, QWidget* parent) :
+CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     QDialog(parent)
-    , fitdata(fitdata)
+    , trk(trk)
 {
     setupUi(this);
 
     widgetHeaderCb->hide();
 
     // Show product name in GUI label
-    quint16 product = fitdata.getProduct();
+    quint16 product = trk.getFitData().getProduct();
     QString prefix(tr("FIT data from device:"));
     QString labelTxt = productName.contains(product) ?
                 QString("%1 (%2) %3").arg(prefix).arg(product).arg(productName[product]) :
                 QString("%1 (%2) %3").arg(prefix).arg(product).arg(tr("Unknown device"));
     label->setText(labelTxt);
 
-    checkShowTrkptInfo->setChecked(fitdata.getIsTrkptInfo());
+    checkShowTrkptInfo->setChecked(trk.getFitData().getIsTrkptInfo());
 
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
     buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
@@ -76,18 +78,18 @@ CFitDataDialog::CFitDataDialog(CFitData& fitdata, QWidget* parent) :
     // Add values to treeTable
     qint32 index = 0;
     QList<QTreeWidgetItem*> items;
-    for(CFitData::lap_t& lap : fitdata.getLaps())
+    for(CFitData::lap_t& lap : trk.getFitData().getLaps())
     {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         if (lap.type == CFitData::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
-            item->setText(eColIndex, QString("%1").arg(lap.no));
+            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
         }
         else if (lap.type == CFitData::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
-            item->setText(eColIndex, QString("%1").arg(lap.no));
+            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
         }
         item->setTextAlignment(eColType, columns[eColType].alignment);
         item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
@@ -249,7 +251,7 @@ void CFitDataDialog::slotReset(bool)
 
     if (ret == QMessageBox::Yes)
     {
-        fitdata.clear();
+        trk.getFitData().clear(trk);
         reject();
     }
 }
@@ -304,7 +306,7 @@ void CFitDataDialog::slotSave2Csv(bool)
         stream << strList.join(";") + "\n"; // Separeted by semicolon!
 
         // Put values into stream
-        for (const CFitData::lap_t& lap : fitdata.getLaps())
+        for (const CFitData::lap_t& lap : trk.getFitData().getLaps())
         {
             strList.clear();
             strList << QString("%L1").arg(lap.type)
@@ -355,8 +357,7 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
     QString comCur = item->text(eColComment);
 
     qint32 index = item->data(eColComment, Qt::UserRole).toInt();
-
-    CFitData::lap_t &lap = fitdata.getLap(index);
+    CFitData::lap_t &lap = trk.getFitData().getLap(index);
 
     QString str = tr("Comment for") + " ";
     if (lap.type == CFitData::eTypeLap)
@@ -367,7 +368,7 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
     {
         str += tr("session");
     }
-    str += QString(" %1").arg(fitdata.getLapNo(index));
+    str += QString(" %1").arg(trk.getFitData().getLapNo(index));
 
     QString comNew = QInputDialog::getText(this, tr("Edit comment"),
                         str, QLineEdit::Normal, comCur, &ok);
@@ -375,7 +376,7 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
     if (ok && comNew != comCur)
     {
         item->setText(eColComment, comNew);
-        fitdata.setLapComment(index, comNew);
+        trk.getFitData().setLapComment(index, comNew);
         isChanged = true;
         treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
     }
@@ -383,14 +384,14 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
 
 void CFitDataDialog::slotShowTrkptInfo(bool checked)
 {
-    fitdata.setIsTrkptInfo(checked);
+    trk.getFitData().setIsTrkptInfo(checked);
     if(checked)
     {
-        fitdata.setTrkPtDesc();
+        trk.getFitData().setTrkPtDesc(trk);
     }
     else
     {
-        fitdata.delTrkPtDesc();
+        trk.getFitData().delTrkPtDesc(trk);
     }
 }
 

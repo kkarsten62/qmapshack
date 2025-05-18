@@ -213,7 +213,7 @@ void CGisItemTrk::readTrkFromFit(CFitStream& stream) {
           // order, otherwise timestamps (of records and events) must be compared to each other.
 
   // KKA start
-  QDateTime trkptTime;
+  // QDateTime trkptTime;
   // KKA end
 
   CTrackData::trkseg_t seg;

@@ -227,6 +227,16 @@ CGisItemTrk::CGisItemTrk(CTrackData& trkdata, IGisProject* project)
   checkForInvalidPoints();
 }
 
+//KKA start
+CGisItemTrk::CGisItemTrk(CTrackData& trkdata, CFitData& fitData, IGisProject* project)
+    : IGisItem(project, eTypeTrk, NOIDX),  trk(std::move(trkdata)), fitData(std::move(fitData)) {
+  setupHistory();
+  deriveSecondaryData();
+  updateDecoration(eMarkNone, eMarkNone);
+
+  checkForInvalidPoints();
+}
+//KKA end
 
 CGisItemTrk::~CGisItemTrk() {
   // reset user focus if focused on this track

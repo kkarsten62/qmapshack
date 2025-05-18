@@ -136,9 +136,14 @@ void CFit2Project::createTrack(const QString& name, const QString& comment) {
   }
 
   track.cmt = comment;
-  new CGisItemTrk(track, this);
+  //KKA start
+  //new CGisItemTrk(track, this); // KKA: Original
+  new CGisItemTrk(track, fitData, this);
 
   track = CTrackData();
+  //KKA start
+  fitData = CFitData();
+  //KKA end
 }
 
 void CFit2Project::OnMesg(fit::Mesg& mesg) {
@@ -152,7 +157,16 @@ void CFit2Project::OnMesg(fit::Mesg& mesg) {
   }
 }
 
-void CFit2Project::OnMesg(fit::FileIdMesg& mesg) { /*qDebug() << mesg.GetName();*/ }
+// KKA start
+//void CFit2Project::OnMesg(fit::FileIdMesg& mesg) { /*qDebug() << mesg.GetName();*/ } //Original
+void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
+  qDebug() << "Product:" << mesg.GetProduct();
+  if (mesg.IsProductValid()) {
+    fitData.setProduct(mesg.GetProduct());
+    fitData.setIsValid(true);
+  }
+}
+// KKA end
 
 void CFit2Project::OnMesg(fit::DeviceInfoMesg& mesg) {
   // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp());
@@ -168,6 +182,9 @@ void CFit2Project::OnMesg(fit::RecordMesg& mesg) {
   CTrackData::trkpt_t trkpt;
   if (mesg.IsTimestampValid()) {
     trkpt.time = dateTimeFromFitToQt(mesg.GetTimestamp());
+    //KKA start
+    trkptTime = trkpt.time; //To be saved to get the last time for a lap
+    //KKA end
   }
   if (mesg.IsPositionLatValid() && mesg.IsPositionLongValid()) {
     trkpt.lon = semicircleToDegree(mesg.GetPositionLong());
@@ -298,6 +315,98 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
     track.segs.append(segment);
     segment.pts.clear();
   }
+  CFitData::lap_t lap;
+
+  //KKA start
+  lap.type = CFitData::eTypeLap;
+
+  if (mesg.IsStartTimeValid()) {
+    lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime());
+  }
+  if (mesg.IsMessageIndexValid()) {
+    lap.no = mesg.GetMessageIndex(); // uint32, second
+  }
+  if (mesg.IsTotalElapsedTimeValid()) {
+    lap.elapsedTime = mesg.GetTotalElapsedTime(); // uint32, second
+  }
+  if (mesg.IsTotalTimerTimeValid()) {
+    lap.timerTime = mesg.GetTotalTimerTime(); // uint32, second
+  }
+  if (mesg.IsTotalDistanceValid()) {
+    lap.distance = mesg.GetTotalDistance(); // uint32, second
+  }
+  if (mesg.IsAvgSpeedValid()) {
+    lap.avgSpeed = mesg.GetAvgSpeed(); // uint32, second
+  }
+  if (mesg.IsEnhancedAvgSpeedValid()) {
+    lap.avgSpeed = mesg.GetEnhancedAvgSpeed(); // uint32, second
+  }
+  if (mesg.IsMaxSpeedValid()) {
+    lap.maxSpeed = mesg.GetMaxSpeed(); // uint32, second
+  }
+  if (mesg.IsEnhancedMaxSpeedValid()) {
+    lap.maxSpeed = mesg.GetEnhancedMaxSpeed(); // uint32, second
+  }
+  if (mesg.IsTotalAscentValid()) {
+    lap.ascent = mesg.GetTotalAscent(); // uint32, second
+  }
+  if (mesg.IsTotalDescentValid()) {
+    lap.descent = mesg.GetTotalDescent(); // uint32, second
+  }
+  if (mesg.IsAvgHeartRateValid()) {
+    lap.avgHr = mesg.GetAvgHeartRate(); // uint32, second
+  }
+  if (mesg.IsMaxHeartRateValid()) {
+    lap.maxHr = mesg.GetMaxHeartRate(); // uint32, second
+  }
+  if (mesg.IsAvgCadenceValid()) {
+    lap.avgCad = mesg.GetAvgCadence(); // uint32, second
+  }
+  if (mesg.IsMaxCadenceValid()) {
+    lap.maxCad = mesg.GetMaxCadence(); // uint32, second
+  }
+  if (mesg.IsAvgPowerValid()) {
+    lap.avgPower = mesg.GetAvgPower(); // uint32, second
+  }
+  if (mesg.IsMaxPowerValid()) {
+    lap.maxPower = mesg.GetMaxPower(); // uint32, second
+  }
+  if (mesg.IsNormalizedPowerValid()) {
+    lap.normPower = mesg.GetNormalizedPower(); // uint32, second
+  }
+  //Left and right balance missing, only one value "LeftRightBalance"
+  if (mesg.IsLeftRightBalanceValid()) {
+    lap.leftBalance = mesg.GetLeftRightBalance(); // uint32, second
+  }
+  if (mesg.IsLeftRightBalanceValid()) {
+    lap.rightBalance = mesg.GetLeftRightBalance(); // uint32, second
+  }
+  if (mesg.IsAvgLeftPedalSmoothnessValid()) {
+    lap.leftPedalSmooth = mesg.GetAvgLeftPedalSmoothness(); // uint32, second
+  }
+  if (mesg.IsAvgRightPedalSmoothnessValid()) {
+    lap.rightPedalSmooth = mesg.GetAvgRightPedalSmoothness(); // uint32, second
+  }
+  if (mesg.IsAvgLeftTorqueEffectivenessValid()) {
+    lap.leftTorqueEff = mesg.GetAvgLeftTorqueEffectiveness(); // uint32, second
+  }
+  if (mesg.IsAvgRightTorqueEffectivenessValid()) {
+    lap.rightTorqueEff = mesg.GetAvgRightTorqueEffectiveness(); // uint32, second
+  }
+  //Training stress missing
+  if (mesg.IsIntensityValid()) {
+    lap.intensity = mesg.GetIntensity(); // uint32, second
+  }
+  if (mesg.IsTotalWorkValid()) {
+    lap.work = mesg.GetTotalWork(); // uint32, second
+  }
+  if (mesg.IsTotalCaloriesValid()) {
+    lap.energy = mesg.GetTotalCalories(); // uint32, second
+  }
+  fitData.setLap(lap);
+
+  //Original, all commented
+  /*
   if (recordType == eRecordType::Course) {
     QString val, unit;
     QString comment = "<div>";
@@ -325,11 +434,12 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
     comment += "<div>";
     track.cmt = comment;
   }
+  */
+  //KKA end
 }
 
 void CFit2Project::OnMesg(fit::EventMesg& mesg) {
   // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp()) << mesg.GetEventType();
-
   if (mesg.IsEventTypeValid()) {
     switch (mesg.GetEventType()) {
       case FIT_EVENT_TYPE_START:

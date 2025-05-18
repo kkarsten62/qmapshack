@@ -20,13 +20,14 @@
 
 #include "units/IUnit.h"
 
+#include <QCoreApplication>
 #include <QDataStream>
 
 class CGisItemTrk;
 
-class CFitData  : public QObject // for tr macro
+class CFitData
 {
-    Q_OBJECT
+  Q_DECLARE_TR_FUNCTIONS(CFitData)
 
 public:
     enum lapType_e
@@ -39,14 +40,14 @@ public:
     struct lap_t
     {
         qint32 type = lapType_e::eTypeUnknown;
-        QDateTime endTime;
-        qint32 no = NOIDX;
+        QDateTime startTime;
+        quint16 no = NOIDX;
         QString comment = "-";
-        quint32 elapsedTime = 0;
-        quint32 timerTime = 0;
-        quint32 distance = 0;
-        quint16 avgSpeed = 0;
-        quint16 maxSpeed = 0;
+        qreal elapsedTime = 0;
+        qreal timerTime = 0;
+        qreal distance = 0;
+        qreal avgSpeed = 0;
+        qreal maxSpeed = 0;
         quint8 avgHr = 0;
         quint8 maxHr = 0;
         quint8 avgCad = 0;
@@ -58,17 +59,17 @@ public:
         quint16 normPower = 0;
         qreal rightBalance = 0;
         qreal leftBalance = 0;
-        quint8 leftPedalSmooth = 0;
-        quint8 rightPedalSmooth = 0;
-        quint8 leftTorqueEff = 0;
-        quint8 rightTorqueEff = 0;
-        qreal intensity = 0;
+        qreal leftPedalSmooth = 0;
+        qreal rightPedalSmooth = 0;
+        qreal leftTorqueEff = 0;
+        qreal rightTorqueEff = 0;
         qreal trainStress = 0;
+        qreal intensity = 0;
         quint32 work = 0;
         quint16 energy = 0;
     };
 
-    CFitData(CGisItemTrk& trk);
+    CFitData() {}
     virtual ~CFitData() = default;
 
     bool getIsValid() const;
@@ -76,25 +77,22 @@ public:
     QList<lap_t>& getLaps();
     void setLap(const struct lap_t& lap);
     lap_t& getLap(quint32 index);
-    void clear();
+    void clear(CGisItemTrk &trk);
     quint16 getProduct() const;
     void setProduct(quint16 product);
     void setLapComment(qint32 index, const QString& comment);
     qint32 getLapNo(qint32 index) const;
-    void assignTimeToIdx();
-    void setTrkPtDesc();
-    void delTrkPtDesc();
+    void assignTimeToIdx(CGisItemTrk &trk);
+    void setTrkPtDesc(CGisItemTrk &trk);
+    void delTrkPtDesc(CGisItemTrk &trk);
     bool getIsTrkptInfo() const;
     void setIsTrkptInfo(bool isTrkptInfo);
 
 private:
-// KKA start
     friend QDataStream& operator<<(QDataStream& stream, const CFitData& f);
     friend QDataStream& operator>>(QDataStream& stream, CFitData& f);
     friend QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l);
     friend QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l);
-// KKA end
-    CGisItemTrk& trk;
 
     bool isValid = false;
     quint16 product = 0;

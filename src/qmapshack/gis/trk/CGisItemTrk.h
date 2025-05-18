@@ -120,6 +120,9 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @param project  The project this track belongs to
    */
   CGisItemTrk(CTrackData& trkdata, IGisProject* project);
+  //KKA start
+  CGisItemTrk(CTrackData& trkdata, CFitData& fitData, IGisProject* project);
+  //KKA end
 
   virtual ~CGisItemTrk();
 
@@ -186,10 +189,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   CEnergyCycling& getEnergyCycling() { return energyCycling; }
 
-  // KKA start
+  //KKA start
   const CEnergyCycling& getEnergyCycling() const { return energyCycling; }
-  CFitData& getFitData() { return fitdata; }
-  // KKA end
+  CFitData& getFitData() { return fitData; }
+  //KKA end
 
           /// returns "true" when trk has no time-related invalid points
   bool isTrkTimeValid() const { return (allValidFlags & CTrackData::trkpt_t::eInvalidTime) == 0; }
@@ -810,7 +813,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   CEnergyCycling energyCycling{*this};
 
   // KKA start
-  CFitData fitdata {*this};
+  CFitData fitData;
   // KKA end
 
   void checkForInvalidPoints();

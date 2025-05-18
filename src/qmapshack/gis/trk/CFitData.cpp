@@ -18,11 +18,6 @@
 #include "gis/trk/CFitData.h"
 #include "gis/trk/CGisItemTrk.h"
 
-CFitData::CFitData(CGisItemTrk& trk) :
-    trk(trk)
-{
-}
-
 bool CFitData::getIsValid() const
 {
     return isValid;
@@ -48,12 +43,12 @@ CFitData::lap_t& CFitData::getLap(quint32 index)
     return laps[index];
 }
 
-void CFitData::clear()
+void CFitData::clear(CGisItemTrk& trk)
 {
+    delTrkPtDesc(trk); // Must be done first
     laps.clear();
-    isValid = false;
-    delTrkPtDesc();
     idxDescs.clear();
+    isValid = false;
     isTrkptInfo = false;
 }
 
@@ -77,7 +72,7 @@ qint32 CFitData::getLapNo(qint32 index) const
     return laps[index].no;
 }
 
-void CFitData::assignTimeToIdx()
+void CFitData::assignTimeToIdx(CGisItemTrk& trk)
 {
     if (!idxDescs.isEmpty())
     {
@@ -85,40 +80,40 @@ void CFitData::assignTimeToIdx()
     }
     for (const struct lap_t &lap : laps)
     {
-        if (lap.type != eTypeLap || !lap.endTime.isValid())
+        if (lap.type != eTypeLap || !lap.startTime.isValid())
         {
             continue;
         }
         for(const CTrackData::trkpt_t& pt : trk.getTrackData())
         {
-            if (pt.time == lap.endTime)
+            if (pt.time == lap.startTime)
             {
                 idxDescs.insert(pt.idxTotal,
-                               QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no).arg(pt.idxTotal));
+                               QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no + 1).arg(pt.idxTotal));
             }
         }
     }
 }
 
-void CFitData::setTrkPtDesc()
+void CFitData::setTrkPtDesc(CGisItemTrk& trk)
 {
     if (!isValid || laps.isEmpty())
     {
         return;
     }
 
-    assignTimeToIdx();
+    assignTimeToIdx(trk);
     trk.setTrkPtDesc(idxDescs);
 }
 
-void CFitData::delTrkPtDesc()
+void CFitData::delTrkPtDesc(CGisItemTrk& trk)
 {
     if (!isValid || laps.isEmpty())
     {
         return;
     }
 
-    assignTimeToIdx();
+    assignTimeToIdx(trk);
     QList<qint32> idxTotals = idxDescs.keys();
     trk.delTrkPtDesc(idxTotals);
 }

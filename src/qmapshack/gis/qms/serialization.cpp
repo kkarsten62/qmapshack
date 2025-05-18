@@ -516,7 +516,7 @@ QDataStream& operator>>(QDataStream& stream, CFitData& f)
 
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 {
-  stream  << l.type << l.endTime << l.no << l.comment << l.elapsedTime
+  stream  << l.type << l.startTime << l.no << l.comment << l.elapsedTime
          << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
          << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
          << l.descent << l.avgPower << l.maxPower << l.normPower
@@ -528,7 +528,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
 {
-  stream  >> l.type >> l.endTime >> l.no >> l.comment >> l.elapsedTime
+  stream  >> l.type >> l.startTime >> l.no >> l.comment >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
       >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
       >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
@@ -571,7 +571,7 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const {
   out << energyCycling.getEnergyTrkSet();
 
   // KKA start
-  out << fitdata;
+  out << fitData;
   // KKA end
 
   out << trk.segs;
@@ -658,7 +658,7 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream) {
   // KKA start
   if(version > 99) // Kka_Dev: fitData
   {
-    in >> fitdata;
+    in >> fitData;
   }
   // KKA end
 

@@ -732,7 +732,7 @@ void CDetailsTrk::slotSetEnergyCycling() {
   }
 }
 
-// KKA start
+//KKA start
 void CDetailsTrk::slotHeartRateZones()
 {
   CHeartRateZonesDialog heartRateZonesDialog(this, trk);
@@ -747,19 +747,20 @@ void CDetailsTrk::slotTrkPrint()
 
 void CDetailsTrk::slotFitData()
 {
-  CFitDataDialog fitDataDialog(trk.getFitData(), this);
+  CFitDataDialog fitDataDialog(this, trk);
 
   qint32 ret = fitDataDialog.exec();
 
-          //    trk.updateHistory(CGisItemTrk::eVisualDetails);
+  //trk.updateHistory(CGisItemTrk::eVisualDetails);
   trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
+
   if(ret == QDialog::Rejected)
   {
-    //        trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
+    //trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
     trk.updateHistory(CGisItemTrk::eVisualDetails);
   }
+//KKA end
 }
-// KKA end
 
 void CDetailsTrk::setupGraph(CPlot* plot, const CLimit& limit, const QString& source, QDoubleSpinBox* spinMin,
                              QDoubleSpinBox* spinMax) {
