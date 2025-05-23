@@ -51,6 +51,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   QMap<quint16, QString> productName = {
       {0, "Unknown"}
       , {1836, "GARMIN Edge 1000"}
+      , {3011, "GARMIN Edge Explore"}
       , {4440, "GARMIN Edge 1050"}
   };
 

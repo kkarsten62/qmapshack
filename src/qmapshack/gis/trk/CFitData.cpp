@@ -84,14 +84,24 @@ void CFitData::assignTimeToIdx(CGisItemTrk& trk)
         {
             continue;
         }
+        //Naive approach to find closest startTime next to a track point
+        //See https://www.geeksforgeeks.org/find-closest-number-array/
+        qint32 idx = 0;
+        CTrackData::trkpt_t ptClosedBy;
         for(const CTrackData::trkpt_t& pt : trk.getTrackData())
         {
-            if (pt.time == lap.startTime)
-            {
-                idxDescs.insert(pt.idxTotal,
-                               QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no + 1).arg(pt.idxTotal));
-            }
+          if (idx++ == 0) {
+            ptClosedBy = pt;
+            continue;
+          }
+          if (qAbs(pt.time.toSecsSinceEpoch() - lap.startTime.toSecsSinceEpoch())
+              <= qAbs(ptClosedBy.time.toSecsSinceEpoch() - lap.startTime.toSecsSinceEpoch())) {
+            ptClosedBy = pt;
+          }
         }
+        qDebug() << "ptClosedBy.idxTotal:" << ptClosedBy.idxTotal << "lap.startTime:" << lap.startTime.toString() << "ptClosedBy.time:" << ptClosedBy.time.toString();
+        idxDescs.insert(ptClosedBy.idxTotal,
+        QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no + 1).arg(ptClosedBy.idxTotal));
     }
 }
 
