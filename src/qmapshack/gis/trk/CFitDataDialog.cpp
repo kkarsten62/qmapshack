@@ -154,10 +154,16 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         item->setText(eColNormPower, QString("%L1%2").arg(lap.normPower).arg("Watt"));
         item->setTextAlignment(eColNormPower, columns[eColNormPower].alignment);
 
-        item->setText(eColLeftBalance, QString("%L1%").arg(lap.leftBalance, 0, 'f', 2));
+        qreal rightBalance = 0;
+        qreal leftBalance = 0;
+        if (lap.leftRightBalance & 0x8000) { //According to FIT type "left_right_balance_100"
+          rightBalance = (lap.leftRightBalance & 0x3FFF) / 100.;
+          leftBalance = 100. - rightBalance;
+        }
+        item->setText(eColLeftBalance, QString("%L1%").arg(leftBalance, 0, 'f', 2));
         item->setTextAlignment(eColLeftBalance, columns[eColLeftBalance].alignment);
 
-        item->setText(eColRightBalance, QString("%L1%").arg(lap.rightBalance, 0, 'f', 2));
+        item->setText(eColRightBalance, QString("%L1%").arg(rightBalance, 0, 'f', 2));
         item->setTextAlignment(eColRightBalance, columns[eColRightBalance].alignment);
 
         item->setText(eColLeftPedalSmooth, QString("%L1%").arg(lap.leftPedalSmooth));
@@ -172,11 +178,13 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         item->setText(eColRightTorqueEff, QString("%L1%").arg(lap.rightTorqueEff));
         item->setTextAlignment(eColRightTorqueEff, columns[eColRightTorqueEff].alignment);
 
-        item->setText(eColTrainStress, lap.trainStress ? QString("%L1").arg(lap.trainStress, 0, 'f', 2) : "-");
-        item->setTextAlignment(eColTrainStress, columns[eColTrainStress].alignment);
+        item->setText(eColTrainStressScore, lap.trainStressScore ? QString("%L1").arg(lap.trainStressScore, 0, 'f', 2) : "-");
+        //item->setText(eColTrainStress, lap.trainStressScore ? QString("%L1").arg(lap.trainStressScore) : "-");
+        item->setTextAlignment(eColTrainStressScore, columns[eColTrainStressScore].alignment);
 
-        item->setText(eColIntensity, lap.intensity ? QString("%L1").arg(lap.intensity, 0, 'f', 2) : "-");
-        item->setTextAlignment(eColIntensity, columns[eColIntensity].alignment);
+        item->setText(eColIntensityFactor, lap.intensityFactor ? QString("%L1").arg(lap.intensityFactor, 0, 'f', 2) : "-");
+        //item->setText(eColIntensity, lap.intensityFactor ? QString("%L1").arg(lap.intensityFactor) : "-");
+        item->setTextAlignment(eColIntensityFactor, columns[eColIntensityFactor].alignment);
 
         item->setText(eColWork, QString("%L1%2").arg(lap.work / 1000).arg("kJ"));
         item->setTextAlignment(eColWork, columns[eColWork].alignment);
@@ -327,14 +335,16 @@ void CFitDataDialog::slotSave2Csv(bool)
                 << QString("%L1").arg(lap.avgPower)
                 << QString("%L1").arg(lap.maxPower)
                 << QString("%L1").arg(lap.normPower)
-                << QString("%L1").arg(lap.rightBalance, 0, 'f', 2)
-                << QString("%L1").arg(lap.leftBalance, 0, 'f', 2)
+                //<< QString("%L1").arg(lap.rightBalance, 0, 'f', 2)
+                //<< QString("%L1").arg(lap.leftRightBalance, 0, 'f', 2)
                 << QString("%L1").arg(lap.leftPedalSmooth)
                 << QString("%L1").arg(lap.rightPedalSmooth)
                 << QString("%L1").arg(lap.leftTorqueEff)
                 << QString("%L1").arg(lap.rightTorqueEff)
-                << QString("%L1").arg(lap.intensity, 0, 'f', 2)
-                << QString("%L1").arg(lap.trainStress, 0, 'f', 2)
+                //<< QString("%L1").arg(lap.intensityFactor, 0, 'f', 2)
+                << QString("%L1").arg(lap.intensityFactor)
+                //<< QString("%L1").arg(lap.trainStressScore, 0, 'f', 2)
+                << QString("%L1").arg(lap.trainStressScore)
                 << QString("%L1").arg(lap.work / 1000)
                 << QString("%L1").arg(lap.energy);
              stream << strList.join(";") + "\n"; // Separeted by semicolon!

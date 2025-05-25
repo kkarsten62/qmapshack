@@ -28,10 +28,10 @@
 #include "helpers/CLimit.h"
 #include "helpers/CValue.h"
 
-// KKA start
-// #define VER_TRK quint8(7)
-#define VER_TRK quint8(100)  // 100 = Kka_Dev: fitData
-// KKA end
+//KKA start
+//#define VER_TRK quint8(7)
+#define VER_TRK quint8(100)  // 100 = Kka_Dev: Add fitData
+//KKA end
 
 #define VER_WPT quint8(4)
 #define VER_RTE quint8(4)
@@ -56,7 +56,8 @@
 #define VER_ENERGYCYCLE quint8(3) //KKA changed, version 2 cranklength added, version 3 createExtensions added
 
 // KKA start
-#define VER_FITDATA quint8(1)
+//#define VER_FITDATA quint8(1) //FIT data based on FIT API version 1
+#define VER_FITDATA quint8(2) //FIT data based on FIT API version 2
 // KKA end
 
 #define MAGIC_SIZE 10
@@ -500,44 +501,51 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e) {
   return stream;
 }
 
-// KKA start
+//KKA start
 QDataStream& operator<<(QDataStream& stream, const CFitData& f)
 {
-  stream  << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
+  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
   return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, CFitData& f)
 {
   quint8 version;
-  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+  stream >> version;
+  if (version == 1) { //Data with FIT API version 1
+    return stream; //Do not read FIT data from version 1, skip it
+  } else {
+    stream >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+  }
   return stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
 {
-  stream  << l.type << l.startTime << l.no << l.comment << l.elapsedTime
-         << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
-         << l.avgHr << l.maxHr << l.avgCad << l.maxCad << l.ascent
-         << l.descent << l.avgPower << l.maxPower << l.normPower
-         << l.rightBalance << l.leftBalance << l.leftPedalSmooth
-         << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
-         << l.intensity << l.trainStress << l.work << l.energy;
+  stream << l.startTime << l.type << l.no << l.comment << l.elapsedTime
+      << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
+      << l.ascent << l.descent << l.avgHr << l.maxHr
+      << l.avgCad << l.maxCad
+      << l.avgPower << l.maxPower << l.normPower
+      << l.leftRightBalance << l.leftPedalSmooth
+      << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
+      << l.intensityFactor << l.trainStressScore << l.work << l.energy;
   return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
 {
-  stream  >> l.type >> l.startTime >> l.no >> l.comment >> l.elapsedTime
+  stream >> l.startTime >> l.type >> l.no >> l.comment >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
-      >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
-      >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
-      >> l.rightBalance >> l.leftBalance >> l.leftPedalSmooth
+      >> l.ascent >> l.descent >> l.avgHr >> l.maxHr
+      >> l.avgCad >> l.maxCad
+      >> l.avgPower >> l.maxPower >> l.normPower
+      >> l.leftRightBalance >> l.leftPedalSmooth
       >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
-      >> l.intensity >> l.trainStress >> l.work >> l.energy;
+      >> l.intensityFactor >> l.trainStressScore >> l.work >> l.energy;
   return stream;
 }
-// KKA end
+//KKA end
 
 // ---------------- main objects ---------------------------------
 

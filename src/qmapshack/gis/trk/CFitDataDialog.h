@@ -81,8 +81,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     , eColRightPedalSmooth
     , eColLeftTorqueEff
     , eColRightTorqueEff
-    , eColTrainStress
-    , eColIntensity
+    , eColTrainStressScore
+    , eColIntensityFactor
     , eColWork
     , eColEnergy
     , eColMax
@@ -117,8 +117,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColRightPedalSmooth, {tr("Right Pedal Smooth."), Qt::AlignRight}}
       , {eColLeftTorqueEff, {tr("Left Torque Eff."), Qt::AlignRight}}
       , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
-      , {eColTrainStress, {tr("Training Stress"), Qt::AlignRight}}
-      , {eColIntensity, {tr("Intensity"), Qt::AlignRight}}
+      , {eColTrainStressScore, {tr("Training Stress Core"), Qt::AlignRight}}
+      , {eColIntensityFactor, {tr("Intensity Factor"), Qt::AlignRight}}
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };

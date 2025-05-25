@@ -250,6 +250,17 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   //   qDebug() << "  " << filed->GetName();
   // }
 
+  //KKA start
+  if(mesg.IsTrainingStressScoreValid())
+  {
+  qDebug() << "TrainingStressScore=" << mesg.GetTrainingStressScore(); // uint16 => float, scaled by 10
+  }
+  if(mesg.IsIntensityFactorValid())
+  {
+    qDebug() << "IntensityFactor=" << mesg.GetIntensityFactor(); //uint16 => float, scaled by 1000
+  }
+  //KKA end
+
   QString comment = "<div><b>Device Statistic</b><br/>";
   QString val, unit;
   if (mesg.IsTotalElapsedTimeValid()) {
@@ -321,87 +332,80 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   lap.type = CFitData::eTypeLap;
 
   if (mesg.IsStartTimeValid()) {
-    lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime());
+    lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
   }
   if (mesg.IsMessageIndexValid()) {
-    lap.no = mesg.GetMessageIndex(); // uint32, second
+    lap.no = mesg.GetMessageIndex(); //uint16
   }
   if (mesg.IsTotalElapsedTimeValid()) {
-    lap.elapsedTime = mesg.GetTotalElapsedTime(); // uint32, second
+    lap.elapsedTime = mesg.GetTotalElapsedTime(); //uint32, second => float
   }
   if (mesg.IsTotalTimerTimeValid()) {
-    lap.timerTime = mesg.GetTotalTimerTime(); // uint32, second
+    lap.timerTime = mesg.GetTotalTimerTime(); //uint32, second => float
   }
   if (mesg.IsTotalDistanceValid()) {
-    lap.distance = mesg.GetTotalDistance(); // uint32, second
+    lap.distance = mesg.GetTotalDistance(); //uint32, meter => float
   }
   if (mesg.IsAvgSpeedValid()) {
-    lap.avgSpeed = mesg.GetAvgSpeed(); // uint32, second
+    lap.avgSpeed = mesg.GetAvgSpeed(); //uint32, meter/second => float
   }
   if (mesg.IsEnhancedAvgSpeedValid()) {
-    lap.avgSpeed = mesg.GetEnhancedAvgSpeed(); // uint32, second
+    lap.avgSpeed = mesg.GetEnhancedAvgSpeed(); //uint32, meter/second => float
   }
   if (mesg.IsMaxSpeedValid()) {
-    lap.maxSpeed = mesg.GetMaxSpeed(); // uint32, second
+    lap.maxSpeed = mesg.GetMaxSpeed(); //uint32, meter/second => float
   }
   if (mesg.IsEnhancedMaxSpeedValid()) {
-    lap.maxSpeed = mesg.GetEnhancedMaxSpeed(); // uint32, second
+    lap.maxSpeed = mesg.GetEnhancedMaxSpeed();//uint32, second => float
   }
   if (mesg.IsTotalAscentValid()) {
-    lap.ascent = mesg.GetTotalAscent(); // uint32, second
+    lap.ascent = mesg.GetTotalAscent(); //uint16, meter
   }
   if (mesg.IsTotalDescentValid()) {
-    lap.descent = mesg.GetTotalDescent(); // uint32, second
+    lap.descent = mesg.GetTotalDescent(); //uint16, meter
   }
   if (mesg.IsAvgHeartRateValid()) {
-    lap.avgHr = mesg.GetAvgHeartRate(); // uint32, second
+    lap.avgHr = mesg.GetAvgHeartRate(); //uint8, beep/minute
   }
   if (mesg.IsMaxHeartRateValid()) {
-    lap.maxHr = mesg.GetMaxHeartRate(); // uint32, second
+    lap.maxHr = mesg.GetMaxHeartRate(); //uint8, beep/minute
   }
   if (mesg.IsAvgCadenceValid()) {
-    lap.avgCad = mesg.GetAvgCadence(); // uint32, second
+    lap.avgCad = mesg.GetAvgCadence(); //uint8, revolution/minute
   }
   if (mesg.IsMaxCadenceValid()) {
-    lap.maxCad = mesg.GetMaxCadence(); // uint32, second
+    lap.maxCad = mesg.GetMaxCadence(); //uint8, revolution/minute
   }
   if (mesg.IsAvgPowerValid()) {
-    lap.avgPower = mesg.GetAvgPower(); // uint32, second
+    lap.avgPower = mesg.GetAvgPower(); //uint16, watt
   }
   if (mesg.IsMaxPowerValid()) {
-    lap.maxPower = mesg.GetMaxPower(); // uint32, second
+    lap.maxPower = mesg.GetMaxPower(); //uint16, watt
   }
   if (mesg.IsNormalizedPowerValid()) {
-    lap.normPower = mesg.GetNormalizedPower(); // uint32, second
+    lap.normPower = mesg.GetNormalizedPower(); //uint16, watt
   }
   //Left and right balance missing, only one value "LeftRightBalance"
   if (mesg.IsLeftRightBalanceValid()) {
-    lap.leftBalance = mesg.GetLeftRightBalance(); // uint32, second
-  }
-  if (mesg.IsLeftRightBalanceValid()) {
-    lap.rightBalance = mesg.GetLeftRightBalance(); // uint32, second
+    lap.leftRightBalance = mesg.GetLeftRightBalance(); // uint16, bitfield FIT_LEFT_RIGHT_BALANCE_100
   }
   if (mesg.IsAvgLeftPedalSmoothnessValid()) {
-    lap.leftPedalSmooth = mesg.GetAvgLeftPedalSmoothness(); // uint32, second
+    lap.leftPedalSmooth = mesg.GetAvgLeftPedalSmoothness(); //uint8, percent => float
   }
   if (mesg.IsAvgRightPedalSmoothnessValid()) {
-    lap.rightPedalSmooth = mesg.GetAvgRightPedalSmoothness(); // uint32, second
+    lap.rightPedalSmooth = mesg.GetAvgRightPedalSmoothness(); //uint8, percent => float
   }
   if (mesg.IsAvgLeftTorqueEffectivenessValid()) {
-    lap.leftTorqueEff = mesg.GetAvgLeftTorqueEffectiveness(); // uint32, second
+    lap.leftTorqueEff = mesg.GetAvgLeftTorqueEffectiveness(); //uint8, percent => float
   }
   if (mesg.IsAvgRightTorqueEffectivenessValid()) {
-    lap.rightTorqueEff = mesg.GetAvgRightTorqueEffectiveness(); // uint32, second
-  }
-  //Training stress missing
-  if (mesg.IsIntensityValid()) {
-    lap.intensity = mesg.GetIntensity(); // uint32, second
+    lap.rightTorqueEff = mesg.GetAvgRightTorqueEffectiveness(); //uint8, percent => float
   }
   if (mesg.IsTotalWorkValid()) {
-    lap.work = mesg.GetTotalWork(); // uint32, second
+    lap.work = mesg.GetTotalWork(); // uint32, joule
   }
   if (mesg.IsTotalCaloriesValid()) {
-    lap.energy = mesg.GetTotalCalories(); // uint32, second
+    lap.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
   fitData.setLap(lap);
 
