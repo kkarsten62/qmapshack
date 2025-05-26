@@ -954,10 +954,10 @@ void CGisItemTrk::deriveSecondaryData() {
       trkpt.elapsedSecondsMoving = lastTrkpt->elapsedSecondsMoving;
       qreal dt = (trkpt.time.toMSecsSinceEpoch() - lastTrkpt->time.toMSecsSinceEpoch()) / 1000.0;
 
-      // KKA start
+      //KKA start
       // if (dt > 0 && ((trkpt.deltaDistance / dt) > 0.2)) { Edit from 0.2
         if (dt > 0 && ((trkpt.deltaDistance / dt) > 0.5)) {
-      // KKA end
+      //KKA end
 
         trkpt.elapsedSecondsMoving += dt;
       }
@@ -1361,7 +1361,7 @@ bool CGisItemTrk::setTrkPtDesc(int idxTotal, const QString& desc) {
   return false;
 }
 
-// KKA start
+//KKA start
 bool CGisItemTrk::setTrkPtDesc(QMap<qint32, QString>& idxDescs)
 {
   QMapIterator<qint32, QString> i(idxDescs);
@@ -1376,7 +1376,7 @@ bool CGisItemTrk::setTrkPtDesc(QMap<qint32, QString>& idxDescs)
   changed(tr("Changed track point desc."), "://icons/48x48/I.png");
   return true;
 }
-// KKA end
+//KKA end
 
 bool CGisItemTrk::delTrkPtDesc(const QList<int>& idxTotal) {
   if (trk.delTrkPtDesc(idxTotal)) {

@@ -29,8 +29,9 @@
 #include "helpers/CValue.h"
 
 //KKA start
-//#define VER_TRK quint8(7)
-#define VER_TRK quint8(100)  // 100 = Kka_Dev: Add fitData
+//#define VER_TRK quint8(7) //The official trk version
+//#define VER_TRK quint8(100) //100 = FitData version 1 based on old FIT API
+#define VER_TRK quint8(101) //101 = FitData version 2 based on new FIT API from May 2025
 //KKA end
 
 #define VER_WPT quint8(4)
@@ -502,25 +503,37 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e) {
 }
 
 //KKA start
-QDataStream& operator<<(QDataStream& stream, const CFitData& f)
+//FIT version 1
+QDataStream& operator>>(QDataStream& stream, CFitDataV1& f) //Read
+{
+  quint8 version;
+  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+  return stream;
+}
+QDataStream& operator>>(QDataStream& stream, CFitDataV1::lap_t& l) //Read
+{
+  stream  >> l.type >> l.endTime >> l.no >> l.comment >> l.elapsedTime
+      >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
+      >> l.avgHr >> l.maxHr >> l.avgCad >> l.maxCad >> l.ascent
+      >> l.descent >> l.avgPower >> l.maxPower >> l.normPower
+      >> l.rightBalance >> l.leftBalance >> l.leftPedalSmooth
+      >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
+      >> l.intensity >> l.trainStress >> l.work >> l.energy;
+  return stream;
+}
+//FIT version 2
+QDataStream& operator<<(QDataStream& stream, const CFitData& f) //Write
 {
   stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
   return stream;
 }
-
-QDataStream& operator>>(QDataStream& stream, CFitData& f)
+QDataStream& operator>>(QDataStream& stream, CFitData& f) //Read
 {
   quint8 version;
-  stream >> version;
-  if (version == 1) { //Data with FIT API version 1
-    return stream; //Do not read FIT data from version 1, skip it
-  } else {
-    stream >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
-  }
+  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
   return stream;
 }
-
-QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
+QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 {
   stream << l.startTime << l.type << l.no << l.comment << l.elapsedTime
       << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
@@ -532,8 +545,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l)
       << l.intensityFactor << l.trainStressScore << l.work << l.energy;
   return stream;
 }
-
-QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l)
+QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
 {
   stream >> l.startTime >> l.type >> l.no >> l.comment >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
@@ -663,12 +675,14 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream) {
     energyCycling.setEnergyTrkSet(set, false);
   }
 
-  // KKA start
-  if(version > 99) // Kka_Dev: fitData
+  //KKA start
+  if(version == 100) //Read from old FIT version 1
   {
+    in >> fitDataV1;
+  } else if (version == 101) { //Read from new FIT version 2 from May 2025
     in >> fitData;
   }
-  // KKA end
+  //KKA end
 
   trk.segs.clear();
   in >> trk.segs;

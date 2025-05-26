@@ -58,7 +58,6 @@ public:
         quint16 maxPower = 0;
         quint16 normPower = 0;
         quint16 leftRightBalance = 0;
-        //qreal rightBalance = 0;
         qreal leftPedalSmooth = 0;
         qreal rightPedalSmooth = 0;
         qreal leftTorqueEff = 0;
@@ -98,6 +97,56 @@ private:
     quint16 product = 0;
     QList<struct lap_t> laps;
     QMap<qint32, QString> idxDescs;
+    bool isTrkptInfo = false;
+};
+
+/*
+ * Old data structure for FIT version 1
+ * Will not be used
+ * Read in qms serialization only
+ */
+class CFitDataV1
+{
+public:
+    struct lap_t
+    {
+       qint32 type = 0;
+       QDateTime endTime;
+       qint32 no = NOIDX;
+       QString comment = "-";
+       quint32 elapsedTime = 0;
+       quint32 timerTime = 0;
+       quint32 distance = 0;
+       quint16 avgSpeed = 0;
+       quint16 maxSpeed = 0;
+       quint8 avgHr = 0;
+       quint8 maxHr = 0;
+       quint8 avgCad = 0;
+       quint8 maxCad = 0;
+       quint16 ascent = 0;
+       quint16 descent = 0;
+       quint16 avgPower = 0;
+       quint16 maxPower = 0;
+       quint16 normPower = 0;
+       qreal rightBalance = 0;
+       qreal leftBalance = 0;
+       quint8 leftPedalSmooth = 0;
+       quint8 rightPedalSmooth = 0;
+       quint8 leftTorqueEff = 0;
+       quint8 rightTorqueEff = 0;
+       qreal intensity = 0;
+       qreal trainStress = 0;
+       quint32 work = 0;
+       quint16 energy = 0;
+    };
+private:
+    friend QDataStream& operator>>(QDataStream& stream, CFitDataV1& f);
+    friend QDataStream& operator>>(QDataStream& stream, CFitDataV1::lap_t& l);
+
+    bool isValid = false;
+    quint16 product = 0;
+    QList<struct lap_t> laps;
+    //QMap<qint32, QString> idxDescs;
     bool isTrkptInfo = false;
 };
 

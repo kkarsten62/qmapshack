@@ -33,9 +33,9 @@
 #include "gis/trk/CEnergyCycling.h"
 #include "gis/trk/CTrackData.h"
 
-// KKA start
+//KKA start
 #include "gis/trk/CFitData.h"
-// KKA end
+//KKA end
 
 #include "gis/trk/filter/CFilterSpeedCycle.h"
 #include "gis/trk/filter/CFilterSpeedHike.h"
@@ -408,14 +408,14 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   bool setTrkPtDesc(int idxTotal, const QString& desc);
 
-    // KKA start
+    //KKA start
   /**
     @brief Set a maplist of desc fields for track points referenced by it's total indeces
     @param idxDescs  QMap of key/value pairs of index and string to set
     @return Return true on success
   */
   bool setTrkPtDesc(QMap<qint32, QString>& idxDescs);
-  // KKA end
+  //KKA end
 
 
   /**
@@ -812,9 +812,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   quint32 numberOfAttachedWpt = 0;
   CEnergyCycling energyCycling{*this};
 
-  // KKA start
-  CFitData fitData;
-  // KKA end
+  //KKA start
+  CFitDataV1 fitDataV1; //To be used to read the old data structure based on FIT API version 1
+  CFitData fitData; //Based on FIT API version 2 from May 2025
+  //KKA end
 
   void checkForInvalidPoints();
   /**@}*/
