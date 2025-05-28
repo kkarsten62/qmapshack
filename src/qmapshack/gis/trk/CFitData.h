@@ -72,8 +72,6 @@ public:
          * 12-15 rightPowerPhasePeak
          */
         QList<qreal> powerPhases;
-        qreal trainStressScore = 0;
-        qreal intensityFactor = 0;
         quint32 work = 0;
         quint16 energy = 0;
     };
@@ -98,11 +96,22 @@ public:
     bool getIsTrkptInfo() const;
     void setIsTrkptInfo(bool isTrkptInfo);
 
+    qreal getFunctionalThresholdPower() const;
+    void setFunctionalThresholdPower(qreal functionalThresholdPower);
+    qreal getIntensityFactor() const;
+    void setIntensityFactor(qreal intensityFactor);
+    qreal getTrainingStressScore() const;
+    void setTrainingStressScore(qreal trainStressScore);
+
 private:
     friend QDataStream& operator<<(QDataStream& stream, const CFitData& f);
     friend QDataStream& operator>>(QDataStream& stream, CFitData& f);
     friend QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l);
     friend QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l);
+
+    quint16 functionalThresholdPower = 0;
+    qreal intensityFactor = 0;
+    qreal trainStressScore = 0;
 
     bool isValid = false;
     quint16 product = 0;

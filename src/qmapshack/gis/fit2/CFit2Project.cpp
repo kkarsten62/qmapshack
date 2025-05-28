@@ -262,21 +262,20 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
     session.no = mesg.GetNumLaps(); //uint16
     qDebug() << "Session no=" << session.no;
   }
-  if(mesg.IsMessageIndexValid())
-  {
-    qDebug() << "Session MessageIndex=" << mesg.GetMessageIndex();
-  }
-  if(mesg.IsTrainingStressScoreValid())
-  {
-    qDebug() << "Session TrainingStressScore=" << mesg.GetTrainingStressScore();
-  }
   if(mesg.IsThresholdPowerValid())
   {
+    fitData.setFunctionalThresholdPower(mesg.GetThresholdPower());
     qDebug() << "Session ThresholdPower=" << mesg.GetThresholdPower();
   }
   if(mesg.IsIntensityFactorValid())
   {
+    fitData.setIntensityFactor(mesg.GetIntensityFactor());
     qDebug() << "Session IntensityFactor=" << mesg.GetIntensityFactor();
+  }
+  if(mesg.IsTrainingStressScoreValid())
+  {
+    fitData.setTrainingStressScore(mesg.GetTrainingStressScore());
+    qDebug() << "Session TrainingStressScore=" << mesg.GetTrainingStressScore();
   }
   fitData.setLap(fitData.getNoOfLaps(), session); //Set the session always at the end of laps list
   //KKA end

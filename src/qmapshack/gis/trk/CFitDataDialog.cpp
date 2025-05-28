@@ -45,7 +45,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     QString labelTxt = productName.contains(product) ?
                 QString("%1 (%2) %3").arg(prefix).arg(product).arg(productName[product]) :
                 QString("%1 (%2) %3").arg(prefix).arg(product).arg(tr("Unknown device"));
-    label->setText(labelTxt);
+    labelProductName->setText(labelTxt);
 
     checkShowTrkptInfo->setChecked(trk.getFitData().getIsTrkptInfo());
 
@@ -63,8 +63,15 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
+    //Set the overall session data, this values are in session only, not in laps
+    labelFto->setText(tr("Functional Threshold Power:"));
+    labelFtoValue->setText(QString("%L1%L2").arg(trk.getFitData().getFunctionalThresholdPower()).arg("Watt"));
+    labelIf->setText(tr("Intensity Factor:"));
+    labelIfValue->setText(QString("%L1").arg(trk.getFitData().getIntensityFactor(), 0, 'f', 3));
+    labelTss->setText(tr("Training Stress Score:"));
+    labelTssValue->setText(QString("%L1").arg(trk.getFitData().getTrainingStressScore(), 0, 'f', 1));
 
-    // Add Header labels to treeTable
+    // Add Header labels to treeTable for laps and session values
     QTreeWidgetItem* item = new QTreeWidgetItem();
     QMapIterator<columns_t, struct columnLabel_t> col(columns);
     while (col.hasNext())
@@ -89,7 +96,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         else if (lap.type == CFitData::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
-            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
+            item->setText(eColIndex, QString("%1").arg(lap.no));
         }
         item->setTextAlignment(eColType, columns[eColType].alignment);
         item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
@@ -101,6 +108,10 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         item->setTextAlignment(eColComment, columns[eColComment].alignment);
 
         QString val, unit;
+        val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
+        item->setText(eColStartTime, QString("%L1").arg(val));
+        item->setTextAlignment(eColStartTime, columns[eColStartTime].alignment);
+
         IUnit::self().seconds2time(lap.elapsedTime, val, unit);
         item->setText(eColElapsedTime, QString("%1%2").arg(val).arg(unit));
         item->setTextAlignment(eColElapsedTime, columns[eColElapsedTime].alignment);
@@ -177,14 +188,6 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
 
         item->setText(eColRightTorqueEff, QString("%L1%").arg(lap.rightTorqueEff));
         item->setTextAlignment(eColRightTorqueEff, columns[eColRightTorqueEff].alignment);
-
-        item->setText(eColTrainStressScore, lap.trainStressScore ? QString("%L1").arg(lap.trainStressScore, 0, 'f', 2) : "-");
-        //item->setText(eColTrainStress, lap.trainStressScore ? QString("%L1").arg(lap.trainStressScore) : "-");
-        item->setTextAlignment(eColTrainStressScore, columns[eColTrainStressScore].alignment);
-
-        item->setText(eColIntensityFactor, lap.intensityFactor ? QString("%L1").arg(lap.intensityFactor, 0, 'f', 2) : "-");
-        //item->setText(eColIntensity, lap.intensityFactor ? QString("%L1").arg(lap.intensityFactor) : "-");
-        item->setTextAlignment(eColIntensityFactor, columns[eColIntensityFactor].alignment);
 
         item->setText(eColWork, QString("%L1%2").arg(lap.work / 1000).arg("kJ"));
         item->setTextAlignment(eColWork, columns[eColWork].alignment);
@@ -342,9 +345,9 @@ void CFitDataDialog::slotSave2Csv(bool)
                 << QString("%L1").arg(lap.leftTorqueEff)
                 << QString("%L1").arg(lap.rightTorqueEff)
                 //<< QString("%L1").arg(lap.intensityFactor, 0, 'f', 2)
-                << QString("%L1").arg(lap.intensityFactor)
+                //<< QString("%L1").arg(lap.intensityFactor)
                 //<< QString("%L1").arg(lap.trainStressScore, 0, 'f', 2)
-                << QString("%L1").arg(lap.trainStressScore)
+                //<< QString("%L1").arg(lap.trainStressScore)
                 << QString("%L1").arg(lap.work / 1000)
                 << QString("%L1").arg(lap.energy);
              stream << strList.join(";") + "\n"; // Separeted by semicolon!

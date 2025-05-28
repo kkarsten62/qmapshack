@@ -524,13 +524,15 @@ QDataStream& operator>>(QDataStream& stream, CFitDataV1::lap_t& l) //Read
 //FIT version 2
 QDataStream& operator<<(QDataStream& stream, const CFitData& f) //Write
 {
-  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
+  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo
+         << f.functionalThresholdPower << f.intensityFactor << f.trainStressScore;
   return stream;
 }
 QDataStream& operator>>(QDataStream& stream, CFitData& f) //Read
 {
   quint8 version;
-  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo
+         >> f.functionalThresholdPower >> f.intensityFactor >> f.trainStressScore;
   return stream;
 }
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
@@ -543,7 +545,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
       << l.leftRightBalance << l.leftPedalSmooth
       << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
       << l.leftPco << l.rightPco << l.powerPhases
-      << l.intensityFactor << l.trainStressScore << l.work << l.energy;
+      << l.work << l.energy;
   return stream;
 }
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
@@ -556,7 +558,7 @@ QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
       >> l.leftRightBalance >> l.leftPedalSmooth
       >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
       >> l.leftPco >> l.rightPco >> l.powerPhases
-      >> l.intensityFactor >> l.trainStressScore >> l.work >> l.energy;
+      >> l.work >> l.energy;
   return stream;
 }
 //KKA end

@@ -60,6 +60,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     eColType
     , eColIndex
     , eColComment
+    , eColStartTime
     , eColElapsedTime
     , eColTimerTime
     , eColPause
@@ -81,8 +82,6 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     , eColRightPedalSmooth
     , eColLeftTorqueEff
     , eColRightTorqueEff
-    , eColTrainStressScore
-    , eColIntensityFactor
     , eColWork
     , eColEnergy
     , eColMax
@@ -96,6 +95,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       {eColType, {tr("Type"), Qt::AlignLeft}}
       , {eColIndex, {"#", Qt::AlignRight}}
       , {eColComment, {tr("Comment"), Qt::AlignLeft}}
+      , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
       , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignRight}}
       , {eColTimerTime, {tr("Timer Time"), Qt::AlignRight}}
       , {eColPause, {tr("Pause"), Qt::AlignRight}}
@@ -117,13 +117,11 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColRightPedalSmooth, {tr("Right Pedal Smooth."), Qt::AlignRight}}
       , {eColLeftTorqueEff, {tr("Left Torque Eff."), Qt::AlignRight}}
       , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
-      , {eColTrainStressScore, {tr("Training Stress Core"), Qt::AlignRight}}
-      , {eColIntensityFactor, {tr("Intensity Factor"), Qt::AlignRight}}
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
 
-  quint32 checkstates; // Bitmask to store checkbox states, 31 columns max
+  quint32 checkstates; // Bitmask to store checkbox states, 32 columns max
   bool isChanged = false;
 };
 

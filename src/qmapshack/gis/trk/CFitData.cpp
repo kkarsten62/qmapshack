@@ -48,6 +48,25 @@ CFitData::lap_t& CFitData::getLap(quint32 index)
     return laps[index];
 }
 
+qreal CFitData::getFunctionalThresholdPower() const {
+  return functionalThresholdPower;
+}
+void CFitData::setFunctionalThresholdPower(qreal functionalThresholdPower) {
+  this->functionalThresholdPower = functionalThresholdPower;
+}
+qreal CFitData::getIntensityFactor() const {
+  return intensityFactor;
+}
+void CFitData::setIntensityFactor(qreal intensityFactor) {
+  this->intensityFactor = intensityFactor;
+}
+qreal CFitData::getTrainingStressScore() const {
+  return trainStressScore;
+}
+void CFitData::setTrainingStressScore(qreal trainStressScore) {
+  this->trainStressScore = trainStressScore;
+}
+
 void CFitData::clear(CGisItemTrk& trk)
 {
     delTrkPtDesc(trk); // Must be done first
