@@ -747,6 +747,10 @@ QString IUnit::datetime2string(const QDateTime& time, time_format_e format, cons
       return tmp.toString(QLocale().dateTimeFormat(QLocale::ShortFormat));
     case eTimeFormatIso:
       return tmp.toString(Qt::ISODate);
+  //KKA start
+    case eTimeFormatShortWithSecs:
+      return tmp.toString("yyyy-MM-dd hh:mm:ss");
+  //KKA end
   }
 
   return tmp.toString(QLocale().dateTimeFormat(QLocale::LongFormat));

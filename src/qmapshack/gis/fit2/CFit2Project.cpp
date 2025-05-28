@@ -157,7 +157,7 @@ void CFit2Project::OnMesg(fit::Mesg& mesg) {
   }
 }
 
-// KKA start
+//KKA start
 //void CFit2Project::OnMesg(fit::FileIdMesg& mesg) { /*qDebug() << mesg.GetName();*/ } //Original
 void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
   qDebug() << "Product:" << mesg.GetProduct();
@@ -166,7 +166,7 @@ void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
     fitData.setIsValid(true);
   }
 }
-// KKA end
+//KKA end
 
 void CFit2Project::OnMesg(fit::DeviceInfoMesg& mesg) {
   // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp());
@@ -251,14 +251,34 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   // }
 
   //KKA start
+  CFitData::lap_t session;
+
+  session.type = CFitData::eTypeSession;
+  if (mesg.IsStartTimeValid()) {
+    session.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
+    qDebug() << "Session startTime=" << session.startTime;
+  }
+  if (mesg.IsNumLapsValid()) {
+    session.no = mesg.GetNumLaps(); //uint16
+    qDebug() << "Session no=" << session.no;
+  }
+  if(mesg.IsMessageIndexValid())
+  {
+    qDebug() << "Session MessageIndex=" << mesg.GetMessageIndex();
+  }
   if(mesg.IsTrainingStressScoreValid())
   {
-  qDebug() << "TrainingStressScore=" << mesg.GetTrainingStressScore(); // uint16 => float, scaled by 10
+    qDebug() << "Session TrainingStressScore=" << mesg.GetTrainingStressScore();
+  }
+  if(mesg.IsThresholdPowerValid())
+  {
+    qDebug() << "Session ThresholdPower=" << mesg.GetThresholdPower();
   }
   if(mesg.IsIntensityFactorValid())
   {
-    qDebug() << "IntensityFactor=" << mesg.GetIntensityFactor(); //uint16 => float, scaled by 1000
+    qDebug() << "Session IntensityFactor=" << mesg.GetIntensityFactor();
   }
+  fitData.setLap(fitData.getNoOfLaps(), session); //Set the session always at the end of laps list
   //KKA end
 
   QString comment = "<div><b>Device Statistic</b><br/>";
@@ -330,9 +350,10 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
 
   //KKA start
   lap.type = CFitData::eTypeLap;
-
   if (mesg.IsStartTimeValid()) {
     lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
+    qDebug() << "Lap startTime=" << lap.startTime;
+    qDebug() << "Lap startTime=" << IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
   }
   if (mesg.IsMessageIndexValid()) {
     lap.no = mesg.GetMessageIndex(); //uint16
@@ -401,13 +422,39 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   if (mesg.IsAvgRightTorqueEffectivenessValid()) {
     lap.rightTorqueEff = mesg.GetAvgRightTorqueEffectiveness(); //uint8, percent => float
   }
+  if (mesg.IsAvgLeftPcoValid()) {
+    lap.leftPco = mesg.GetAvgLeftPco(); //uint8, mm
+  }
+  if (mesg.IsAvgRightPcoValid()) {
+    lap.rightPco = mesg.GetAvgRightPco(); //uint8, mm
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgLeftPowerPhaseValid(i)) {
+        lap.powerPhases.append(mesg.GetAvgLeftPowerPhase(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgLeftPowerPhasePeakValid(i)) {
+        lap.powerPhases.append(mesg.GetAvgLeftPowerPhasePeak(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgRightPowerPhaseValid(i)) {
+        lap.powerPhases.append(mesg.GetAvgRightPowerPhase(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgRightPowerPhasePeakValid(i)) {
+        lap.powerPhases.append(mesg.GetAvgRightPowerPhasePeak(i)); //float
+    }
+  }
   if (mesg.IsTotalWorkValid()) {
     lap.work = mesg.GetTotalWork(); // uint32, joule
   }
   if (mesg.IsTotalCaloriesValid()) {
     lap.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
-  fitData.setLap(lap);
+  fitData.setLap(lap.no, lap);
 
   //Original, all commented
   /*

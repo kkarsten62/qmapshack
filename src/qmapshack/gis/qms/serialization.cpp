@@ -542,6 +542,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
       << l.avgPower << l.maxPower << l.normPower
       << l.leftRightBalance << l.leftPedalSmooth
       << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
+      << l.leftPco << l.rightPco << l.powerPhases
       << l.intensityFactor << l.trainStressScore << l.work << l.energy;
   return stream;
 }
@@ -554,6 +555,7 @@ QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
       >> l.avgPower >> l.maxPower >> l.normPower
       >> l.leftRightBalance >> l.leftPedalSmooth
       >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
+      >> l.leftPco >> l.rightPco >> l.powerPhases
       >> l.intensityFactor >> l.trainStressScore >> l.work >> l.energy;
   return stream;
 }

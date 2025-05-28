@@ -37,9 +37,9 @@
 #include "gis/trk/CTrackData.h"
 #include "gis/wpt/CGisItemWpt.h"
 
-// KKA start
+//KKA start
 #include "gis/trk/CFitData.h"
-// KKA end
+//KKA end
 
 class CFit2Project : public fit::FileIdMesgListener,
                      public fit::DeviceInfoMesgListener,
@@ -97,10 +97,10 @@ class CFit2Project : public fit::FileIdMesgListener,
   eRecordType recordType{eRecordType::Activity};
   CTrackData track;
   CTrackData::trkseg_t segment;
-  // KKA start
+  //KKA start
   CFitData fitData;
   QDateTime trkptTime;
-  // KKA end
+  //KKA end
 
 };
 

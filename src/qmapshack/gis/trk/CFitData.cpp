@@ -33,9 +33,14 @@ QList<CFitData::lap_t>& CFitData::getLaps()
     return laps;
 }
 
-void CFitData::setLap(const lap_t& lap)
+quint32 CFitData::getNoOfLaps() {
+  return laps.size();
+}
+
+void CFitData::setLap(quint32 index, const lap_t& lap)
 {
-    laps << lap;
+    //laps << lap;
+  laps.insert(index, lap);
 }
 
 CFitData::lap_t& CFitData::getLap(quint32 index)

@@ -62,6 +62,16 @@ public:
         qreal rightPedalSmooth = 0;
         qreal leftTorqueEff = 0;
         qreal rightTorqueEff = 0;
+        quint8 leftPco = 0;
+        quint8 rightPco = 0;
+        /*
+         *  16 values in QList for powerPhases
+         *  0-3  leftPowerPhase
+         *  4-7  leftPowerPhasePeak
+         *  8-11 rightPowerPhase
+         * 12-15 rightPowerPhasePeak
+         */
+        QList<qreal> powerPhases;
         qreal trainStressScore = 0;
         qreal intensityFactor = 0;
         quint32 work = 0;
@@ -74,7 +84,8 @@ public:
     bool getIsValid() const;
     void setIsValid(bool isValid);
     QList<lap_t>& getLaps();
-    void setLap(const struct lap_t& lap);
+    quint32 getNoOfLaps();
+    void setLap(quint32 index, const struct lap_t& lap);
     lap_t& getLap(quint32 index);
     void clear(CGisItemTrk &trk);
     quint16 getProduct() const;
