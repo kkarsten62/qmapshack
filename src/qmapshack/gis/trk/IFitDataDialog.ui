@@ -14,19 +14,6 @@
    <string>Show FIT data</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="6" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="toolTip">
-      <string/>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::RestoreDefaults|QDialogButtonBox::StandardButton::Save</set>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="1" column="0">
@@ -85,6 +72,44 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="line_3">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QTreeWidget" name="treeTable">
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QWidget" name="widgetHeaderCb" native="true">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridHeaderCb"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="Line" name="line">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -153,42 +178,70 @@
      </item>
     </layout>
    </item>
-   <item row="4" column="0">
-    <widget class="QTreeWidget" name="treeTable">
-     <column>
+   <item row="7" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::RestoreDefaults|QDialogButtonBox::StandardButton::Save</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="showGrid">
+      <bool>true</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="rowCount">
+      <number>4</number>
+     </property>
+     <property name="columnCount">
+      <number>7</number>
+     </property>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <item row="0" column="0">
       <property name="text">
-       <string notr="true">1</string>
+       <string>hallo11</string>
       </property>
-     </column>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="Line" name="line_3">
-     <property name="lineWidth">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QWidget" name="widgetHeaderCb" native="true">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gridHeaderCb"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="Line" name="line">
-     <property name="lineWidth">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
+     </item>
+     <item row="0" column="1">
+      <property name="text">
+       <string>hallo12</string>
+      </property>
+     </item>
+     <item row="1" column="0">
+      <property name="text">
+       <string>hallo21</string>
+      </property>
+     </item>
+     <item row="1" column="1">
+      <property name="text">
+       <string>hallo22</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

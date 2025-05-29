@@ -40,7 +40,9 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void slotButtonColumns(bool);
   void slotCheckColumns(bool checked);
   void slotSave2Csv(bool);
+  void slotSave2SessionDb(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
+  void slotTableItemClicked(QTableWidgetItem *item);
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
 

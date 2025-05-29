@@ -24,6 +24,10 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include "gis/db/macros.h"
 
 /** @brief Constructor - Initiate the dialog GUI
 
@@ -36,8 +40,9 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     , trk(trk)
 {
     setupUi(this);
-
     widgetHeaderCb->hide();
+
+    tableWidget->item(1,1)->setText("Hallo");
 
     // Show product name in GUI label
     quint16 product = trk.getFitData().getProduct();
@@ -50,8 +55,10 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     checkShowTrkptInfo->setChecked(trk.getFitData().getIsTrkptInfo());
 
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
-    buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/show columns"));
-    buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save to csv"));
+    buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/Show Columns"));
+    buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
+    QPushButton* buttonSaveToDb = buttonBox->addButton("buttonSaveToDb", QDialogButtonBox::ActionRole); //Add a 2nd save button to the buttonBox
+    buttonSaveToDb->setText(tr("Save Session to DB"));
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
@@ -59,9 +66,12 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
+    connect(buttonSaveToDb, &QPushButton::clicked, this, &CFitDataDialog::slotSave2SessionDb);
     connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
     connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
+
+    connect(tableWidget, &QTableWidget::itemClicked, this, &CFitDataDialog::slotTableItemClicked);
 
     //Set the overall session data, this values are in session only, not in laps
     labelFto->setText(tr("Functional Threshold Power:"));
@@ -212,7 +222,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     // Read checkstates from setting file
     SETTINGS;
     cfg.beginGroup("FitData");
-    checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns
+    checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns, default all "on"
     cfg.endGroup();
 
     // Put checkboxes on checkbox widget
@@ -290,6 +300,30 @@ void CFitDataDialog::slotCheckColumns(bool checked)
     cfg.beginGroup("FitData");
     cfg.setValue("checkstates", checkstates);
     cfg.endGroup();
+}
+
+void CFitDataDialog::slotSave2SessionDb(bool)
+{
+  qDebug() << "Hallo Session DB";
+  QStringList list = QSqlDatabase::connectionNames();
+  //if (QSqlDatabase::contains("karlkarsten_qms")) {
+    //qDebug() << "connectionName found!";
+    QSqlDatabase db = QSqlDatabase::database("karlkarsten_qms_local");
+    if (db.isValid()) {
+        qDebug() << "connection is valid!";
+    } else {
+        qDebug() << "connection is NOT valid!";
+    }
+  //}
+  QSqlQuery query(db);
+  query.prepare("SELECT * FROM fitDataSessions ");
+  //query.bindValue(":id", id);
+  QUERY_EXEC(return);
+  while (query.next()) {
+    qint32 id = query.value(0).toInt();
+    QDateTime startTime = query.value(1).toDateTime();
+    qreal distance = query.value(2).toReal();
+  }
 }
 
 void CFitDataDialog::slotSave2Csv(bool)
@@ -406,6 +440,10 @@ void CFitDataDialog::slotShowTrkptInfo(bool checked)
     {
         trk.getFitData().delTrkPtDesc(trk);
     }
+}
+
+void CFitDataDialog::slotTableItemClicked(QTableWidgetItem *item) {
+  qint32 col = item->column();
 }
 
 void CFitDataDialog::slotShowHelp()
