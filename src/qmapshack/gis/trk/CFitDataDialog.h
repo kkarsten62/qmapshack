@@ -30,7 +30,6 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   Q_OBJECT
 
  public:
-  //explicit CFitDataDialog(CFitData &fitdata, CGisItemTrk& trk, QWidget *parent);
   explicit CFitDataDialog(QWidget *parent, CGisItemTrk& trk);
   ~CFitDataDialog();
 
@@ -40,15 +39,14 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void slotButtonColumns(bool);
   void slotCheckColumns(bool checked);
   void slotSave2Csv(bool);
-  void slotSave2SessionDb(bool);
+  void slotToogleView(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
-  void slotTableItemClicked(QTableWidgetItem *item);
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
+  void paintGraphics();
 
  private:
   CGisItemTrk& trk;
-  //CFitData& fitdata;
 
   QMap<quint16, QString> productName = {
       {0, "Unknown"}
@@ -93,6 +91,11 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     QString label;
     Qt::AlignmentFlag alignment;
   };
+  /*
+   * Information:
+   * Structure is:
+   * enum column, text in header column cell, alignment in header colum cell, shown in lap view, shown in session db view
+   */
   QMap<columns_t, struct columnLabel_t> columns = {
       {eColType, {tr("Type"), Qt::AlignLeft}}
       , {eColIndex, {"#", Qt::AlignRight}}

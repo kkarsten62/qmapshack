@@ -20,6 +20,9 @@
 #include "gis/trk/CFitData.h"
 #include "gis/trk/CFitDataDialog.h"
 #include "helpers/CSettings.h"
+#include "helpers/CDraw.h"
+#include "gis/db/macros.h"
+
 #include <QCheckBox>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -27,7 +30,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
-#include "gis/db/macros.h"
+#include <QPainter>
 
 /** @brief Constructor - Initiate the dialog GUI
 
@@ -42,8 +45,6 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     setupUi(this);
     widgetHeaderCb->hide();
 
-    tableWidget->item(1,1)->setText("Hallo");
-
     // Show product name in GUI label
     quint16 product = trk.getFitData().getProduct();
     QString prefix(tr("FIT data from device:"));
@@ -57,8 +58,8 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
     buttonBox->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Hide/Show Columns"));
     buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
-    QPushButton* buttonSaveToDb = buttonBox->addButton("buttonSaveToDb", QDialogButtonBox::ActionRole); //Add a 2nd save button to the buttonBox
-    buttonSaveToDb->setText(tr("Save Session to DB"));
+    QPushButton* buttonAddSessionToDb = buttonBox->addButton(tr("Add Session to DB"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
+    QPushButton* buttonToogleView = buttonBox->addButton(tr("Show Sessions DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
@@ -66,12 +67,10 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
-    connect(buttonSaveToDb, &QPushButton::clicked, this, &CFitDataDialog::slotSave2SessionDb);
+    connect(buttonToogleView, &QPushButton::clicked, this, &CFitDataDialog::slotToogleView);
     connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
     connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
-
-    connect(tableWidget, &QTableWidget::itemClicked, this, &CFitDataDialog::slotTableItemClicked);
 
     //Set the overall session data, this values are in session only, not in laps
     labelFto->setText(tr("Functional Threshold Power:"));
@@ -101,12 +100,13 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         if (lap.type == CFitData::eTypeLap)
         {
             item->setText(eColType, tr("Lap"));
-            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
+            item->setIcon(eColIndex, QIcon("://icons/32x32/DeleteOne.png"));
+            //item->setText(eColIndex, QString("%1").arg(lap.no + 1));
         }
         else if (lap.type == CFitData::eTypeSession)
         {
             item->setText(eColType, tr("Session"));
-            item->setText(eColIndex, QString("%1").arg(lap.no));
+            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
         }
         item->setTextAlignment(eColType, columns[eColType].alignment);
         item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
@@ -244,6 +244,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
 
         gridHeaderCb->addWidget(checkbox, row, col);
     }
+    paintGraphics();
 }
 
 CFitDataDialog::~CFitDataDialog()
@@ -302,7 +303,7 @@ void CFitDataDialog::slotCheckColumns(bool checked)
     cfg.endGroup();
 }
 
-void CFitDataDialog::slotSave2SessionDb(bool)
+void CFitDataDialog::slotToogleView(bool)
 {
   qDebug() << "Hallo Session DB";
   QStringList list = QSqlDatabase::connectionNames();
@@ -442,10 +443,6 @@ void CFitDataDialog::slotShowTrkptInfo(bool checked)
     }
 }
 
-void CFitDataDialog::slotTableItemClicked(QTableWidgetItem *item) {
-  qint32 col = item->column();
-}
-
 void CFitDataDialog::slotShowHelp()
 {
     QString msg = tr("<p><b>Show FIT data</b></p>"
@@ -457,4 +454,18 @@ void CFitDataDialog::slotShowHelp()
                      );
 
     QMessageBox::information(CMainWindow::getBestWidgetForParent(), tr("Help"), msg);
+}
+
+void CFitDataDialog::paintGraphics()
+{
+  QSize size = labelGraphics->size();
+  QImage image(size.width(), size.height(), QImage::Format_ARGB32);
+  //image.fill(Qt::white);
+  QPainter p;
+  p.begin(&image);
+  USE_ANTI_ALIASING(p, true);
+  p.setBrush(Qt::red); // And a small filled circle in the origin
+  p.drawEllipse(0, 0, 20, 20);
+
+  labelGraphics->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
 }
