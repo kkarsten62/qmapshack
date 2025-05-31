@@ -460,12 +460,56 @@ void CFitDataDialog::paintGraphics()
 {
   QSize size = labelGraphics->size();
   QImage image(size.width(), size.height(), QImage::Format_ARGB32);
-  //image.fill(Qt::white);
+  image.fill(Qt::lightGray);
   QPainter p;
   p.begin(&image);
   USE_ANTI_ALIASING(p, true);
-  p.setBrush(Qt::red); // And a small filled circle in the origin
-  p.drawEllipse(0, 0, 20, 20);
+  //p.setBrush(Qt::red); // And a small filled circle in the origin
+  //p.drawEllipse(0, 0, 20, 20);
+
+  p.translate(20, 90);
+
+  for (qint32 i = 0; i < 2; ++i) {
+    if (i == 1) {
+      p.translate(270, 0);
+      p.scale(-1, 1);
+    }
+    p.setPen(QPen(QColor(Qt::black), 1, Qt::SolidLine,
+                        Qt::FlatCap, Qt::MiterJoin));
+    p.setBrush(QColor(Qt::darkGray));
+    p.drawRect(5, -6, 75, 12);
+    QPainterPath path;
+    path.addRoundedRect(0, -30, 60, 60, 3, 3);
+    path.addRect(5, -18, 50, 36);
+    p.drawPath(path);
+    p.drawRect(60, -15, 7, 30);
+    p.setPen(QPen(Qt::DashDotDotLine));
+    p.drawLine(30, -40, 30, 40);
+    p.setPen(QPen(QColor(Qt::red), 1, Qt::SolidLine));
+    p.drawLine(30 + 2 * 10, -40, 30 +2 * 10, 40);
+  }
+  p.scale(-1, 1);
+  p.translate(-270, 0);
+  p.setPen(QPen(QColor(Qt::black)));
+  p.drawText(0, 60, "Balance: 50%");
+  p.drawText(190, 60, "Balance: 50%");
+  p.drawText(0, 80, "Pedal Smoothness: 50%");
+  p.drawText(190, 80, "Pedal Smoothness: 50%");
+  p.drawText(0, 100, "Torque Efficiency: 50%");
+  p.drawText(190, 100, "Torque Efficiency: 50%");
+  p.drawText(30 + 2 * 10, -45, "PCO: 10mm");
+  p.drawText(240 - 2 * 10, -45, "PCO: 10mm");
+
+  p.translate(0, -90);
+  QFont font = QFont();
+  font.setBold(true);
+  font.setUnderline(true);
+  p.setFont(font);
+  p.drawText(0, 20, "Left Pedal");
+  p.drawText(190, 20, "Right Pedal");
+
+  p.translate(400, 100);
+  p.drawEllipse(0, -70, 140, 140);
 
   labelGraphics->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
 }
