@@ -464,52 +464,102 @@ void CFitDataDialog::paintGraphics()
   QPainter p;
   p.begin(&image);
   USE_ANTI_ALIASING(p, true);
-  //p.setBrush(Qt::red); // And a small filled circle in the origin
-  //p.drawEllipse(0, 0, 20, 20);
 
-  p.translate(20, 90);
+  p.save(); //Save to initial state=0
+  p.translate(20, 0); //Move to left border
+  p.save(); //Save to state=1
+  p.translate(0, 90); //Move down to center of pedal
 
   for (qint32 i = 0; i < 2; ++i) {
-    if (i == 1) {
-      p.translate(270, 0);
-      p.scale(-1, 1);
+    if (i == 1) { //Print right pedal moved and mirrored
+      p.save(); //Save to state=2
+      p.translate(270, 0); //Move to right edge of right pedal
+      p.scale(-1, 1); //Mirrored by y-axis
     }
     p.setPen(QPen(QColor(Qt::black), 1, Qt::SolidLine,
                         Qt::FlatCap, Qt::MiterJoin));
     p.setBrush(QColor(Qt::darkGray));
-    p.drawRect(5, -6, 75, 12);
+    p.drawRect(5, -6, 75, 12); //Center axis of pedal
     QPainterPath path;
-    path.addRoundedRect(0, -30, 60, 60, 3, 3);
+    path.addRoundedRect(0, -30, 60, 60, 3, 3); //Outer pedal rects
     path.addRect(5, -18, 50, 36);
     p.drawPath(path);
-    p.drawRect(60, -15, 7, 30);
+    p.drawRect(60, -15, 7, 30); //Pedal flange
     p.setPen(QPen(Qt::DashDotDotLine));
-    p.drawLine(30, -40, 30, 40);
+    p.drawLine(30, -40, 30, 40); //Center line of pedal
     p.setPen(QPen(QColor(Qt::red), 1, Qt::SolidLine));
-    p.drawLine(30 + 2 * 10, -40, 30 +2 * 10, 40);
+    p.drawLine(30 + 2 * 10, -40, 30 +2 * 10, 40); //PCO line
   }
-  p.scale(-1, 1);
-  p.translate(-270, 0);
+  p.restore(); //Back to state=2
   p.setPen(QPen(QColor(Qt::black)));
   p.drawText(0, 60, "Balance: 50%");
-  p.drawText(190, 60, "Balance: 50%");
   p.drawText(0, 80, "Pedal Smoothness: 50%");
-  p.drawText(190, 80, "Pedal Smoothness: 50%");
   p.drawText(0, 100, "Torque Efficiency: 50%");
-  p.drawText(190, 100, "Torque Efficiency: 50%");
+  p.save(); //Save to a next state=3
+  p.translate(190, 0); //Move to left edge of right pedal
+  p.drawText(0, 60, "Balance: 50%");
+  p.drawText(0, 80, "Pedal Smoothness: 50%");
+  p.drawText(0, 100, "Torque Efficiency: 50%");
+  p.restore(); //Back to state=2
   p.drawText(30 + 2 * 10, -45, "PCO: 10mm");
   p.drawText(240 - 2 * 10, -45, "PCO: 10mm");
 
-  p.translate(0, -90);
+  p.restore(); //Back to state=1
   QFont font = QFont();
   font.setBold(true);
   font.setUnderline(true);
   p.setFont(font);
-  p.drawText(0, 20, "Left Pedal");
-  p.drawText(190, 20, "Right Pedal");
+  p.drawText(0, 20, tr("Left Pedal"));
+  p.drawText(190, 20, tr("Right Pedal"));
+  p.restore(); //Back to initial state=0
 
-  p.translate(400, 100);
-  p.drawEllipse(0, -70, 140, 140);
+  //Power Phases
+  p.translate(450, 100);
+  p.rotate(-90);
+  for (qint32 i = 0; i < 2; ++i) {
+    if (i == 1) { //Print right pedal moved and mirrored
+      p.translate(0, 200); //Due to rotation x and y are swapped
+    }
+    p.setBrush(QColor(Qt::darkBlue));
+    p.drawPie(-70, -70, 140, 140, -45 * 16, -90 * 16);
+    p.setBrush(QColor(Qt::darkGreen));
+    p.drawPie(-60, -60, 120, 120, -350 * 16, -200 * 16);
+    p.setBrush(QColor(Qt::darkGray));
+    p.drawEllipse(-50, -50, 100, 100);
 
+    p.save(); //Save to state=1
+    p.rotate(45);
+    p.setPen(QPen(Qt::DashDotDotLine));
+    p.drawLine(0, 0, 75, 0);
+    p.drawText(75, 0, "45°");
+    p.restore(); //Back to state=1
+    p.save(); //Save to state=1
+    p.rotate(135);
+    p.setPen(QPen(Qt::DashDotDotLine));
+    p.drawLine(0, 0, 75, 0);
+    p.drawText(75, 0, "135°");
+    p.restore(); //Back to state=1
+    p.save(); //Save to state=1
+    p.rotate(350);
+    p.setPen(QPen(Qt::DashDotDotLine));
+    p.drawLine(0, 0, 65, 0);
+    p.drawText(65, 0, "350°");
+    p.restore(); //Back to state=1
+    p.save(); //Save to state=1
+    p.rotate(190);
+    p.setPen(QPen(Qt::DashDotDotLine));
+    p.drawLine(0, 0, 65, 0);
+    p.drawText(65, 0, "190°");
+    p.restore(); //Back to state=1
+    //p.translate(75, 0);
+    //p.save(); //Save to state=2
+    //QRectF textRect(0,0,50,50);
+    //p.rotate(-190 + 90);
+    //p.setOpacity(0.7); // Some opacity to see a bit the underlaying map
+    //p.fillRect(p.boundingRect(textRect, Qt::AlignCenter, "190°"), Qt::white); // Fill text box with a white rect
+    //p.setOpacity(1);
+    //p.drawText(textRect, Qt::AlignCenter, "190°");
+    //p.restore(); //Back to state=2
+  }
   labelGraphics->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
 }
