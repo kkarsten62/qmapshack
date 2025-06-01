@@ -40,14 +40,16 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void slotCheckColumns(bool checked);
   void slotSave2Csv(bool);
   void slotToogleView(bool);
+  void slotSettingsDialog(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
   void paintGraphics();
 
  private:
+  void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
   CGisItemTrk& trk;
-
+  QList<QVariant> shownTableCols;
   QMap<quint16, QString> productName = {
       {0, "Unknown"}
       , {1836, "GARMIN Edge 1000"}
@@ -124,6 +126,35 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
+  };
+  QList<struct columnLabel_t> columns1 = {
+      {"#", Qt::AlignRight} //0
+      , {tr("Type"), Qt::AlignLeft} //1
+      , {tr("Comment"), Qt::AlignLeft} //2
+      , {tr("Start Time"), Qt::AlignLeft} //3
+      , {tr("Elaps. Time"), Qt::AlignRight} //4
+      , {tr("Timer Time"), Qt::AlignRight} //5
+      , {tr("Pause"), Qt::AlignRight} //6
+      , {tr("Distance"), Qt::AlignRight} //7
+      , {tr("Avg. Speed"), Qt::AlignRight} //8
+      , {tr("Max. Speed"), Qt::AlignRight}
+      , {tr("Ascent"), Qt::AlignRight}
+      , {tr("Descent"), Qt::AlignRight}
+      , {tr("Avg. HR"), Qt::AlignRight}
+      , {tr("Max. HR"), Qt::AlignRight}
+      , {tr("Avg. Cad."), Qt::AlignRight}
+      , {tr("Max. Cad."), Qt::AlignRight}
+      , {tr("Avg. Power"), Qt::AlignRight}
+      , {tr("Max. Power"), Qt::AlignRight}
+      , {tr("Norm. Power"), Qt::AlignRight}
+      , {tr("Left Balance"), Qt::AlignRight}
+      , {tr("Right Balance"), Qt::AlignRight}
+      , {tr("Left Pedal Smooth."), Qt::AlignRight}
+      , {tr("Right Pedal Smooth."), Qt::AlignRight}
+      , {tr("Left Torque Eff."), Qt::AlignRight}
+      , {tr("Right Torque Eff."), Qt::AlignRight}
+      , {tr("Work"), Qt::AlignRight}
+      , {tr("Energy Use"), Qt::AlignRight}
   };
 
   quint32 checkstates; // Bitmask to store checkbox states, 32 columns max

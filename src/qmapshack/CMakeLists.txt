@@ -131,6 +131,7 @@ set( SRCS
     gis/trk/CEnergyCyclingDialog.cpp
     gis/trk/CFitData.cpp
     gis/trk/CFitDataDialog.cpp
+    gis/trk/CFitDataSettingsDialog.cpp
     gis/trk/CGisItemTrk.cpp
     gis/trk/CHeartRateZonesDialog.cpp
     gis/trk/CInvalidTrk.cpp
@@ -493,6 +494,7 @@ set( HDRS
     gis/trk/CEnergyCyclingDialog.h
     gis/trk/CFitData.h
     gis/trk/CFitDataDialog.h
+    gis/trk/CFitDataSettingsDialog.h
     gis/trk/CGisItemTrk.h
     gis/trk/CHeartRateZonesDialog.h
     gis/trk/CInvalidTrk.h
@@ -789,6 +791,7 @@ set( UIS
     gis/trk/IDetailsTrk.ui
     gis/trk/IEnergyCyclingDialog.ui
     gis/trk/IFitDataDialog.ui
+    gis/trk/IFitDataSettingsDialog.ui
     gis/trk/IHeartRateZonesDialog.ui
     gis/trk/IInvalidTrk.ui
     gis/trk/IListTrkPts.ui

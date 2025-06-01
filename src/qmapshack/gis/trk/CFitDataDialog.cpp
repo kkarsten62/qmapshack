@@ -19,6 +19,7 @@
 #include "gis/trk/CGisItemTrk.h"
 #include "gis/trk/CFitData.h"
 #include "gis/trk/CFitDataDialog.h"
+#include "gis/trk/CFitDataSettingsDialog.h"
 #include "helpers/CSettings.h"
 #include "helpers/CDraw.h"
 #include "gis/db/macros.h"
@@ -60,6 +61,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
     QPushButton* buttonAddSessionToDb = buttonBox->addButton(tr("Add Session to DB"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
     QPushButton* buttonToogleView = buttonBox->addButton(tr("Show Sessions DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
+    QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings ..."), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
@@ -68,6 +70,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, &CFitDataDialog::slotButtonColumns);
     connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
     connect(buttonToogleView, &QPushButton::clicked, this, &CFitDataDialog::slotToogleView);
+    connect(buttonSettingsDialog, &QPushButton::clicked, this, &CFitDataDialog::slotSettingsDialog);
     connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
     connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
@@ -80,8 +83,89 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     labelTss->setText(tr("Training Stress Score:"));
     labelTssValue->setText(QString("%L1").arg(trk.getFitData().getTrainingStressScore(), 0, 'f', 1));
 
-    // Add Header labels to treeTable for laps and session values
+    //Read checkstates from setting file
+    SETTINGS;
+    cfg.beginGroup("FitData");
+    checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns, default all "on"
+    shownTableCols = cfg.value("shownTableCols").toList();
+    cfg.endGroup();
+    for(QVariant& colNo : shownTableCols) { //Convert from string to int
+        colNo = colNo.toInt();
+    }
+
+    //Add Header labels to treeTable for laps and session values
     QTreeWidgetItem* item = new QTreeWidgetItem();
+    qint32 treeCol = 0;
+    for (QVariant shownTableCol : shownTableCols) {
+      struct columnLabel_t col = columns1.at(shownTableCol.toInt());
+      item->setText(treeCol++, col.label);
+    }
+    treeTable->setHeaderItem(item);
+
+    //Add values to treeTable
+    QString val, unit;
+    QList<QTreeWidgetItem*> items;
+    for(CFitData::lap_t& lap : trk.getFitData().getLaps()) { //For all laps/session
+      treeCol = 0;
+      QTreeWidgetItem *item = new QTreeWidgetItem();
+      for (QVariant shownTableCol : shownTableCols) { //For all shown tree columns
+        //struct columnLabel_t col = columns1.at(shownTableCol.toInt());
+        //item->setText(treeCol++, col.label);
+        //struct columnLabel_t col = columns1.at(shownTableCol.toInt());
+        QString cellStr;
+        getCellString(lap, shownTableCol.toInt(), cellStr);
+        item->setText(treeCol, cellStr);
+        /*
+        switch (shownTableCol.toInt()) {
+          case 0: //#
+            item->setText(treeCol, QString("%1").arg(lap.no + 1));
+            break;
+          case 1: //type
+            if (lap.type == CFitData::eTypeLap) {
+              item->setText(treeCol, tr("Lap"));
+            } else if (lap.type == CFitData::eTypeSession) {
+              item->setText(treeCol, tr("Session"));
+            }
+            break;
+          case 2: //comment
+            item->setText(treeCol, lap.comment);
+            item->setToolTip(treeCol, tr("Double click to edit comment"));
+            break;
+          case 3: //startTime
+            val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
+            item->setText(treeCol, QString("%L1").arg(val));
+            break;
+          case 4: //elapsedTime
+            IUnit::self().seconds2time(lap.elapsedTime, val, unit);
+            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+            break;
+          case 5: //timerTime
+            IUnit::self().seconds2time(lap.timerTime, val, unit);
+            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+            break;
+          case 6: //pause
+            IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
+            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+            break;
+          case 7: //distance
+            IUnit::self().meter2distance(lap.distance, val, unit);
+            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+            break;
+          case 8: //avgSpeed
+            IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
+            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+            break;
+        }
+*/
+        item->setTextAlignment(treeCol, columns1.at(treeCol).alignment);
+        treeCol++;
+      }
+    items << item;
+    }
+    treeTable->clear();
+    treeTable->addTopLevelItems(items);
+
+    /*
     QMapIterator<columns_t, struct columnLabel_t> col(columns);
     while (col.hasNext())
     {
@@ -89,8 +173,9 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         item->setText(col.key(), col.value().label);
         item->setTextAlignment(col.key(), col.value().alignment);
     }
-    treeTable->setHeaderItem(item);
-
+*/
+    //treeTable->setHeaderItem(item);
+/*
     // Add values to treeTable
     qint32 index = 0;
     QList<QTreeWidgetItem*> items;
@@ -217,14 +302,10 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     }
     treeTable->clear();
     treeTable->addTopLevelItems(items);
+    */
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 
-    // Read checkstates from setting file
-    SETTINGS;
-    cfg.beginGroup("FitData");
-    checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns, default all "on"
-    cfg.endGroup();
-
+    /*
     // Put checkboxes on checkbox widget
     const quint8 noOfGridCols = 5; // Five checkboxes in one row
     for (qint32 i = 0; i < eColMax; ++i)
@@ -244,15 +325,69 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
 
         gridHeaderCb->addWidget(checkbox, row, col);
     }
-    paintGraphics();
+*/
+  paintGraphics();
 }
 
 CFitDataDialog::~CFitDataDialog()
 {
 }
 
-void CFitDataDialog::slotOk(bool)
-{
+void CFitDataDialog::getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr) {
+  QString val, unit;
+  switch (shownTableCol) {
+    case 0: //no
+      cellStr = QString("%1").arg(lap.no + 1);
+      //item->setText(treeCol, QString("%1").arg(lap.no + 1));
+      break;
+    case 1: //type
+      if (lap.type == CFitData::eTypeLap) {
+        cellStr = tr("Lap");
+        //item->setText(treeCol, tr("Lap"));
+      } else if (lap.type == CFitData::eTypeSession) {
+        cellStr = tr("Session");
+        //item->setText(treeCol, tr("Session"));
+      }
+      break;
+    case 2: //comment
+      //item->setText(treeCol, lap.comment);
+      cellStr = lap.comment;
+      //item->setToolTip(treeCol, tr("Double click to edit comment"));
+      break;
+    case 3: //startTime
+      val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
+      cellStr = QString("%L1").arg(val);
+      //item->setText(treeCol, QString("%L1").arg(val));
+      break;
+    case 4: //elapsedTime
+      IUnit::self().seconds2time(lap.elapsedTime, val, unit);
+      cellStr = QString("%1%2").arg(val).arg(unit);
+      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      break;
+    case 5: //timerTime
+      IUnit::self().seconds2time(lap.timerTime, val, unit);
+      cellStr = QString("%1%2").arg(val).arg(unit);
+      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      break;
+    case 6: //pause
+      IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
+      cellStr = QString("%1%2").arg(val).arg(unit);
+      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      break;
+    case 7: //distance
+      IUnit::self().meter2distance(lap.distance, val, unit);
+      cellStr = QString("%1%2").arg(val).arg(unit);
+      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      break;
+    case 8: //avgSpeed
+      IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
+      cellStr = QString("%1%2").arg(val).arg(unit);
+      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      break;
+  }
+}
+
+void CFitDataDialog::slotOk(bool) {
     if (isChanged)
     {
         reject();
@@ -297,10 +432,22 @@ void CFitDataDialog::slotCheckColumns(bool checked)
     treeTable->setColumnHidden(index, !checked);
 
     checkstates ^= 1 << index; // Toogle bit
+    QList<QVariant> list;
+    list << 1 << 3 << 4;
+
+
     SETTINGS;
     cfg.beginGroup("FitData");
     cfg.setValue("checkstates", checkstates);
+    cfg.setValue("list", list);
     cfg.endGroup();
+}
+
+void CFitDataDialog::slotSettingsDialog(bool)
+{
+  CFitDataSettingsDialog fitDataSettingsDialog(this);
+
+  qint32 ret = fitDataSettingsDialog.exec();
 }
 
 void CFitDataDialog::slotToogleView(bool)
