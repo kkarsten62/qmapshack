@@ -45,7 +45,20 @@ void CFitData::setLap(quint32 index, const lap_t& lap)
 
 CFitData::lap_t& CFitData::getLap(quint32 index)
 {
+  if (laps.size()) {
     return laps[index];
+  } else {
+    //return nullptr;
+  }
+}
+
+CFitData::lap_t& CFitData::getSession()
+{
+  if (laps.size() > 2) { //At last one lap and the session
+    return laps[laps.size() - 1]; //The latest lap is the session
+  } else {
+    //return nullptr;
+  }
 }
 
 qreal CFitData::getFunctionalThresholdPower() const {

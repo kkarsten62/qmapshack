@@ -15,4 +15,17 @@ class CFitDataSettingsDialog : public QDialog, private Ui::IFitDataSettingsDialo
  private:
 };
 
+class CFitDataSettingsSelectCols : public QWidget {
+  Q_OBJECT
+ public:
+  explicit CFitDataSettingsSelectCols(QWidget *parent = nullptr);
+  ~CFitDataSettingsSelectCols();
+
+private:
+  QList<qint32> availableCols;
+  QList<qint32> selectedCols;
+
+
+};
+
 #endif  // CFITDATASETTINGSDIALOG_H

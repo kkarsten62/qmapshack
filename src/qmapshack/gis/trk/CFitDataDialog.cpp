@@ -76,127 +76,112 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
     //Set the overall session data, this values are in session only, not in laps
-    labelFto->setText(tr("Functional Threshold Power:"));
-    labelFtoValue->setText(QString("%L1%L2").arg(trk.getFitData().getFunctionalThresholdPower()).arg("Watt"));
-    labelIf->setText(tr("Intensity Factor:"));
-    labelIfValue->setText(QString("%L1").arg(trk.getFitData().getIntensityFactor(), 0, 'f', 3));
-    labelTss->setText(tr("Training Stress Score:"));
-    labelTssValue->setText(QString("%L1").arg(trk.getFitData().getTrainingStressScore(), 0, 'f', 1));
+    //labelFto->setText(tr("Functional Threshold Power:"));
+    //labelFtoValue->setText(QString("%L1%L2").arg(trk.getFitData().getFunctionalThresholdPower()).arg("Watt"));
+    //labelIf->setText(tr("Intensity Factor:"));
+    //labelIfValue->setText(QString("%L1").arg(trk.getFitData().getIntensityFactor(), 0, 'f', 3));
+    //labelTss->setText(tr("Training Stress Score:"));
+    //labelTssValue->setText(QString("%L1").arg(trk.getFitData().getTrainingStressScore(), 0, 'f', 1));
 
-    //Read checkstates from setting file
+    //Read settings
     SETTINGS;
     cfg.beginGroup("FitData");
     checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns, default all "on"
-    shownTableCols = cfg.value("shownTableCols").toList();
+    shownTableCols = cfg.value("shownTableCols").value<QList<qint32>>();
+    shownMostImportantValues = cfg.value("shownMostImportantValues").value<QList<qint32>>();
     cfg.endGroup();
-    for(QVariant& colNo : shownTableCols) { //Convert from string to int
-        colNo = colNo.toInt();
-    }
 
     //Add Header labels to treeTable for laps and session values
     QTreeWidgetItem* item = new QTreeWidgetItem();
     qint32 treeCol = 0;
-    for (QVariant shownTableCol : shownTableCols) {
-      struct columnLabel_t col = columns1.at(shownTableCol.toInt());
-      item->setText(treeCol++, col.label);
+    for (qint32 shownTableCol : shownTableCols) {
+      struct column_t& column = columns[shownTableCol];
+      item->setText(treeCol++, column.label);
     }
     treeTable->setHeaderItem(item);
 
     //Add values to treeTable
-    QString val, unit;
     QList<QTreeWidgetItem*> items;
+    qint32 treeRow = 0;
     for(CFitData::lap_t& lap : trk.getFitData().getLaps()) { //For all laps/session
       treeCol = 0;
       QTreeWidgetItem *item = new QTreeWidgetItem();
-      for (QVariant shownTableCol : shownTableCols) { //For all shown tree columns
-        //struct columnLabel_t col = columns1.at(shownTableCol.toInt());
-        //item->setText(treeCol++, col.label);
-        //struct columnLabel_t col = columns1.at(shownTableCol.toInt());
+      for (qint32 shownTableCol : shownTableCols) { //For all shown tree columns
         QString cellStr;
-        getCellString(lap, shownTableCol.toInt(), cellStr);
+        getCellString(lap, shownTableCol, cellStr);
         item->setText(treeCol, cellStr);
-        /*
-        switch (shownTableCol.toInt()) {
-          case 0: //#
-            item->setText(treeCol, QString("%1").arg(lap.no + 1));
-            break;
-          case 1: //type
-            if (lap.type == CFitData::eTypeLap) {
-              item->setText(treeCol, tr("Lap"));
-            } else if (lap.type == CFitData::eTypeSession) {
-              item->setText(treeCol, tr("Session"));
-            }
-            break;
-          case 2: //comment
-            item->setText(treeCol, lap.comment);
-            item->setToolTip(treeCol, tr("Double click to edit comment"));
-            break;
-          case 3: //startTime
-            val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
-            item->setText(treeCol, QString("%L1").arg(val));
-            break;
-          case 4: //elapsedTime
-            IUnit::self().seconds2time(lap.elapsedTime, val, unit);
-            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
-            break;
-          case 5: //timerTime
-            IUnit::self().seconds2time(lap.timerTime, val, unit);
-            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
-            break;
-          case 6: //pause
-            IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
-            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
-            break;
-          case 7: //distance
-            IUnit::self().meter2distance(lap.distance, val, unit);
-            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
-            break;
-          case 8: //avgSpeed
-            IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
-            item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
-            break;
-        }
-*/
-        item->setTextAlignment(treeCol, columns1.at(treeCol).alignment);
-        treeCol++;
+        item->setTextAlignment(treeCol, columns[shownTableCol].alignment);
+        item->setData(treeCol, Qt::UserRole, shownTableCol);
+        item->setData(treeCol, Qt::UserRole + 1, treeRow);
+        ++treeCol;
       }
-    items << item;
+      items << item;
+      ++treeRow;
     }
     treeTable->clear();
     treeTable->addTopLevelItems(items);
 
-    /*
-    QMapIterator<columns_t, struct columnLabel_t> col(columns);
-    while (col.hasNext())
-    {
-        col.next();
-        item->setText(col.key(), col.value().label);
-        item->setTextAlignment(col.key(), col.value().alignment);
-    }
-*/
-    //treeTable->setHeaderItem(item);
-/*
-    // Add values to treeTable
-    qint32 index = 0;
-    QList<QTreeWidgetItem*> items;
-    for(CFitData::lap_t& lap : trk.getFitData().getLaps())
-    {
-        QTreeWidgetItem *item = new QTreeWidgetItem();
-        if (lap.type == CFitData::eTypeLap)
-        {
-            item->setText(eColType, tr("Lap"));
-            item->setIcon(eColIndex, QIcon("://icons/32x32/DeleteOne.png"));
-            //item->setText(eColIndex, QString("%1").arg(lap.no + 1));
-        }
-        else if (lap.type == CFitData::eTypeSession)
-        {
-            item->setText(eColType, tr("Session"));
-            item->setText(eColIndex, QString("%1").arg(lap.no + 1));
-        }
-        item->setTextAlignment(eColType, columns[eColType].alignment);
-        item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
+    //Put the labels in the most important values
+    qint32 row = 0;
+    for (qint32 i = 0; i < numOfMivRows; ++i) {
+      QLabel* labelMivName = new QLabel();
+      QLabel* labelMivValue = new QLabel();
+      mivLabels << labelMivName << labelMivValue;
+      gridLayoutMiv->addWidget(labelMivName, row, 0);
+      gridLayoutMiv->addWidget(labelMivValue, row, 1);
+      ++row;
+  }
+  row = 0;
+  CFitData::lap_t& session = trk.getFitData().getSession();
+  for (qint32 mivCol : shownMostImportantValues) { //For all shown miv
+    struct column_t column = columns[mivCol];
+    QLabel* labelMivName = mivLabels[2 * row];
+    QLabel* labelMivValue = mivLabels[2 * row + 1];
+    labelMivName->setText(column.label + ":");
+    QString mivValueStr;
+    getCellString(session, mivCol, mivValueStr);
+    labelMivValue->setText(mivValueStr);
+    ++row;
+  }
+  for (qint32 i = row; i < numOfMivRows; ++i) {
+    QLabel* labelMivName = mivLabels[2 * i];
+    QLabel* labelMivValue = mivLabels[2 * i + 1];
+    labelMivName->setEnabled(false);
+    labelMivValue->setEnabled(false);
+  }
 
-        item->setText(eColComment, lap.comment);
+/*
+  QMapIterator<columns_t, struct columnLabel_t> col(columns);
+  while (col.hasNext())
+  {
+      col.next();
+      item->setText(col.key(), col.value().label);
+      item->setTextAlignment(col.key(), col.value().alignment);
+  }
+l*/
+  //treeTable->setHeaderItem(item);
+/*
+  // Add values to treeTable
+  qint32 index = 0;
+  QList<QTreeWidgetItem*> items;
+  for(CFitData::lap_t& lap : trk.getFitData().getLaps())
+  {
+      QTreeWidgetItem *item = new QTreeWidgetItem();
+      if (lap.type == CFitData::eTypeLap)
+      {
+          item->setText(eColType, tr("Lap"));
+          item->setIcon(eColIndex, QIcon("://icons/32x32/DeleteOne.png"));
+          //item->setText(eColIndex, QString("%1").arg(lap.no + 1));
+      }
+      else if (lap.type == CFitData::eTypeSession)
+      {
+          item->setText(eColType, tr("Session"));
+          item->setText(eColIndex, QString("%1").arg(lap.no + 1));
+      }
+      item->setTextAlignment(eColType, columns[eColType].alignment);
+      item->setTextAlignment(eColIndex, columns[eColIndex].alignment);
+
+      item->setText(eColComment, lap.comment);
         item->setToolTip(eColComment, tr("Double click to edit comment"));
 
         item->setData(eColComment, Qt::UserRole, QVariant(index++));
@@ -305,7 +290,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     */
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 
-    /*
+/*
     // Put checkboxes on checkbox widget
     const quint8 noOfGridCols = 5; // Five checkboxes in one row
     for (qint32 i = 0; i < eColMax; ++i)
@@ -336,11 +321,11 @@ CFitDataDialog::~CFitDataDialog()
 void CFitDataDialog::getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr) {
   QString val, unit;
   switch (shownTableCol) {
-    case 0: //no
+    case eColNo: //no
       cellStr = QString("%1").arg(lap.no + 1);
       //item->setText(treeCol, QString("%1").arg(lap.no + 1));
       break;
-    case 1: //type
+    case eColType: //type
       if (lap.type == CFitData::eTypeLap) {
         cellStr = tr("Lap");
         //item->setText(treeCol, tr("Lap"));
@@ -349,37 +334,37 @@ void CFitDataDialog::getCellString(const CFitData::lap_t& lap, qint32 shownTable
         //item->setText(treeCol, tr("Session"));
       }
       break;
-    case 2: //comment
+    case eColComment: //comment
       //item->setText(treeCol, lap.comment);
       cellStr = lap.comment;
       //item->setToolTip(treeCol, tr("Double click to edit comment"));
       break;
-    case 3: //startTime
+    case eColStartTime: //startTime
       val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
       cellStr = QString("%L1").arg(val);
       //item->setText(treeCol, QString("%L1").arg(val));
       break;
-    case 4: //elapsedTime
+    case eColElapsedTime: //elapsedTime
       IUnit::self().seconds2time(lap.elapsedTime, val, unit);
       cellStr = QString("%1%2").arg(val).arg(unit);
       //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
       break;
-    case 5: //timerTime
+    case eColTimerTime: //timerTime
       IUnit::self().seconds2time(lap.timerTime, val, unit);
       cellStr = QString("%1%2").arg(val).arg(unit);
       //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
       break;
-    case 6: //pause
+    case eColPause: //pause
       IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
       cellStr = QString("%1%2").arg(val).arg(unit);
       //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
       break;
-    case 7: //distance
+    case eColDistance: //distance
       IUnit::self().meter2distance(lap.distance, val, unit);
       cellStr = QString("%1%2").arg(val).arg(unit);
       //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
       break;
-    case 8: //avgSpeed
+    case eColAvgSpeed: //avgSpeed
       IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
       cellStr = QString("%1%2").arg(val).arg(unit);
       //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
@@ -415,6 +400,17 @@ void CFitDataDialog::slotReset(bool)
 
 void CFitDataDialog::slotButtonColumns(bool)
 {
+    QList<qint32> list;
+    list << eColNo << eColComment << eColType << eColStartTime << eColElapsedTime << eColPause << eColAvgCad;
+
+    SETTINGS;
+    cfg.beginGroup("FitData");
+    cfg.setValue("shownTableCols", QVariant::fromValue(list));
+    cfg.setValue("shownMostImportantValues", QVariant::fromValue(list));
+    cfg.endGroup();
+
+    return;
+
     bool isEnabled = buttonBox->button(QDialogButtonBox::Reset)->isEnabled();
 
     buttonBox->button(QDialogButtonBox::Reset)->setEnabled(!isEnabled);
@@ -427,20 +423,9 @@ void CFitDataDialog::slotButtonColumns(bool)
 
 void CFitDataDialog::slotCheckColumns(bool checked)
 {
-    QWidget *widget = qApp->focusWidget();
-    quint8 index = widget->property("index").toInt();
-    treeTable->setColumnHidden(index, !checked);
-
-    checkstates ^= 1 << index; // Toogle bit
-    QList<QVariant> list;
-    list << 1 << 3 << 4;
-
-
-    SETTINGS;
-    cfg.beginGroup("FitData");
-    cfg.setValue("checkstates", checkstates);
-    cfg.setValue("list", list);
-    cfg.endGroup();
+//QWidget *widget = qApp->focusWidget();
+//quint8 index = widget->property("index").toInt();
+//treeTable->setColumnHidden(index, !checked);
 }
 
 void CFitDataDialog::slotSettingsDialog(bool)
@@ -476,6 +461,7 @@ void CFitDataDialog::slotToogleView(bool)
 
 void CFitDataDialog::slotSave2Csv(bool)
 {
+  /*
     SETTINGS;
     cfg.beginGroup("FitData");
     QString path = cfg.value("csvPath", QDir::homePath()).toString();
@@ -539,20 +525,22 @@ void CFitDataDialog::slotSave2Csv(bool)
     path = QFileInfo(filename).absolutePath();
     cfg.setValue("csvPath", path);
     cfg.endGroup();
+*/
 }
 
 void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
 {
-    if (column != eColComment)
+  qint32 treeCol = item->data(column, Qt::UserRole).toInt();
+    if (treeCol != eColComment)
     {
       return;
     }
 
     bool ok;
-    QString comCur = item->text(eColComment);
+    QString curComment = item->text(column);
 
-    qint32 index = item->data(eColComment, Qt::UserRole).toInt();
-    CFitData::lap_t &lap = trk.getFitData().getLap(index);
+    qint32 treeRow = item->data(eColComment, Qt::UserRole + 1).toInt();
+    CFitData::lap_t &lap = trk.getFitData().getLap(treeRow);
 
     QString str = tr("Comment for") + " ";
     if (lap.type == CFitData::eTypeLap)
@@ -563,15 +551,15 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
     {
         str += tr("session");
     }
-    str += QString(" %1").arg(trk.getFitData().getLapNo(index));
+    str += QString(" %1").arg(trk.getFitData().getLapNo(treeRow));
 
-    QString comNew = QInputDialog::getText(this, tr("Edit comment"),
-                        str, QLineEdit::Normal, comCur, &ok);
+    QString newComment = QInputDialog::getText(this, tr("Edit comment"),
+                        str, QLineEdit::Normal, curComment, &ok);
 
-    if (ok && comNew != comCur)
+    if (ok && newComment != curComment)
     {
-        item->setText(eColComment, comNew);
-        trk.getFitData().setLapComment(index, comNew);
+        item->setText(column, newComment);
+        trk.getFitData().setLapComment(treeRow, newComment);
         isChanged = true;
         treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
     }

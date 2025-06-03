@@ -85,6 +85,7 @@ public:
     quint32 getNoOfLaps();
     void setLap(quint32 index, const struct lap_t& lap);
     lap_t& getLap(quint32 index);
+    lap_t& getSession();
     void clear(CGisItemTrk &trk);
     quint16 getProduct() const;
     void setProduct(quint16 product);

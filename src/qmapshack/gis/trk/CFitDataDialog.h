@@ -1,17 +1,17 @@
 /**********************************************************************************************
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  **********************************************************************************************/
 
@@ -47,9 +47,6 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void paintGraphics();
 
  private:
-  void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
-  CGisItemTrk& trk;
-  QList<QVariant> shownTableCols;
   QMap<quint16, QString> productName = {
       {0, "Unknown"}
       , {1836, "GARMIN Edge 1000"}
@@ -59,8 +56,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
 
   enum columns_t
   {
-    eColType
-    , eColIndex
+    eColNo
+    , eColType
     , eColComment
     , eColStartTime
     , eColElapsedTime
@@ -86,9 +83,12 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     , eColRightTorqueEff
     , eColWork
     , eColEnergy
-    , eColMax
+    , eColCount //The number of the enum items
   };
-  struct columnLabel_t
+  QList<qint32> shownTableCols;
+  QList<qint32> shownMostImportantValues;
+
+  struct column_t
   {
     QString label;
     Qt::AlignmentFlag alignment;
@@ -98,36 +98,38 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
    * Structure is:
    * enum column, text in header column cell, alignment in header colum cell, shown in lap view, shown in session db view
    */
-  QMap<columns_t, struct columnLabel_t> columns = {
-      {eColType, {tr("Type"), Qt::AlignLeft}}
-      , {eColIndex, {"#", Qt::AlignRight}}
-      , {eColComment, {tr("Comment"), Qt::AlignLeft}}
-      , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
-      , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignRight}}
-      , {eColTimerTime, {tr("Timer Time"), Qt::AlignRight}}
-      , {eColPause, {tr("Pause"), Qt::AlignRight}}
-      , {eColDistance, {tr("Distance"), Qt::AlignRight}}
-      , {eColAvgSpeed, {tr("Avg. Speed"), Qt::AlignRight}}
-      , {eColMaxSpeed, {tr("Max. Speed"), Qt::AlignRight}}
-      , {eColAscent, {tr("Ascent"), Qt::AlignRight}}
-      , {eColDescent, {tr("Descent"), Qt::AlignRight}}
-      , {eColAvgHr, {tr("Avg. HR"), Qt::AlignRight}}
-      , {eColMaxHr, {tr("Max. HR"), Qt::AlignRight}}
-      , {eColAvgCad, {tr("Avg. Cad."), Qt::AlignRight}}
-      , {eColMaxCad, {tr("Max. Cad."), Qt::AlignRight}}
-      , {eColAvgPower, {tr("Avg. Power"), Qt::AlignRight}}
-      , {eColMaxPower, {tr("Max. Power"), Qt::AlignRight}}
-      , {eColNormPower, {tr("Norm. Power"), Qt::AlignRight}}
-      , {eColLeftBalance, {tr("Left Balance"), Qt::AlignRight}}
-      , {eColRightBalance, {tr("Right Balance"), Qt::AlignRight}}
-      , {eColLeftPedalSmooth, {tr("Left Pedal Smooth."), Qt::AlignRight}}
-      , {eColRightPedalSmooth, {tr("Right Pedal Smooth."), Qt::AlignRight}}
-      , {eColLeftTorqueEff, {tr("Left Torque Eff."), Qt::AlignRight}}
-      , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
-      , {eColWork, {tr("Work"), Qt::AlignRight}}
-      , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
-  };
-  QList<struct columnLabel_t> columns1 = {
+
+   QMap<qint32, struct column_t> columns = {
+       {eColNo, {"#", Qt::AlignRight}}
+       , {eColType, {tr("Type"), Qt::AlignLeft}}
+       , {eColComment, {tr("Comment"), Qt::AlignLeft}}
+       , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
+       , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignRight}}
+       , {eColTimerTime, {tr("Timer Time"), Qt::AlignRight}}
+       , {eColPause, {tr("Pause"), Qt::AlignRight}}
+       , {eColDistance, {tr("Distance"), Qt::AlignRight}}
+       , {eColAvgSpeed, {tr("Avg. Speed"), Qt::AlignRight}}
+       , {eColMaxSpeed, {tr("Max. Speed"), Qt::AlignRight}}
+       , {eColAscent, {tr("Ascent"), Qt::AlignRight}}
+       , {eColDescent, {tr("Descent"), Qt::AlignRight}}
+       , {eColAvgHr, {tr("Avg. HR"), Qt::AlignRight}}
+       , {eColMaxHr, {tr("Max. HR"), Qt::AlignRight}}
+       , {eColAvgCad, {tr("Avg. Cad."), Qt::AlignRight}}
+       , {eColMaxCad, {tr("Max. Cad."), Qt::AlignRight}}
+       , {eColAvgPower, {tr("Avg. Power"), Qt::AlignRight}}
+       , {eColMaxPower, {tr("Max. Power"), Qt::AlignRight}}
+       , {eColNormPower, {tr("Norm. Power"), Qt::AlignRight}}
+       , {eColLeftBalance, {tr("Left Balance"), Qt::AlignRight}}
+       , {eColRightBalance, {tr("Right Balance"), Qt::AlignRight}}
+       , {eColLeftPedalSmooth, {tr("Left Pedal Smooth."), Qt::AlignRight}}
+       , {eColRightPedalSmooth, {tr("Right Pedal Smooth."), Qt::AlignRight}}
+       , {eColLeftTorqueEff, {tr("Left Torque Eff."), Qt::AlignRight}}
+       , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
+       , {eColWork, {tr("Work"), Qt::AlignRight}}
+       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
+   };
+
+  QList<struct column_t> columns1 = {
       {"#", Qt::AlignRight} //0
       , {tr("Type"), Qt::AlignLeft} //1
       , {tr("Comment"), Qt::AlignLeft} //2
@@ -156,7 +158,11 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {tr("Work"), Qt::AlignRight}
       , {tr("Energy Use"), Qt::AlignRight}
   };
-
+   void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
+  CGisItemTrk& trk;
+  //QList<qint32> shownTableCols;
+  const qint32 numOfMivRows = 8;
+  QList<QLabel *> mivLabels;
   quint32 checkstates; // Bitmask to store checkbox states, 32 columns max
   bool isChanged = false;
 };

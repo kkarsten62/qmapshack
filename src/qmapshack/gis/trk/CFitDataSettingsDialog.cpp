@@ -14,3 +14,13 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(QWidget *parent) : QDialog(parent
 }
 
 CFitDataSettingsDialog::~CFitDataSettingsDialog() { }
+
+/*
+ *
+ */
+
+CFitDataSettingsSelectCols::CFitDataSettingsSelectCols(QWidget *parent) : QWidget(parent) {
+
+}
+
+CFitDataSettingsSelectCols::~CFitDataSettingsSelectCols() { }
