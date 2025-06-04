@@ -73,9 +73,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
 
  private slots:
   void slotOk(bool);
+  void slotCancel(bool);
   void slotReset(bool);
-  void slotButtonColumns(bool);
-  void slotCheckColumns(bool checked);
   void slotSave2Csv(bool);
   void slotToogleView(bool);
   void slotSettingsDialog(bool);
@@ -94,17 +93,6 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
 
   QList<qint32> shownTableCols;
   QList<qint32> shownMivs;
-
-//  struct column_t
-//  {
-//    QString label;
-//    Qt::AlignmentFlag alignment;
-//  };
-  /*
-   * Information:
-   * Structure is:
-   * enum column, text in header column cell, alignment in header colum cell, shown in lap view, shown in session db view
-   */
 
   QMap<qint32, struct column_t> columns = {
       {eColNo, {"#", Qt::AlignRight}}
@@ -167,13 +155,13 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {tr("Energy Use"), Qt::AlignRight}
   };
 */
+  void updateData();
   void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
   CGisItemTrk& trk;
   //QList<qint32> shownTableCols;
-  const qint32 maxMivs = 8;
+  const qint32 maxMivs = 10;
   QList<QLabel *> mivLabels;
   quint32 checkstates; // Bitmask to store checkbox states, 32 columns max
-  bool isChanged = false;
 };
 
 #endif // CFITDATADIALOG_H

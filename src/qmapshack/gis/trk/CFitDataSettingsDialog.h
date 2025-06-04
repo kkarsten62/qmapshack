@@ -20,7 +20,7 @@ class CFitDataSettingsDialog : public QDialog, private Ui::IFitDataSettingsDialo
       , const QMap<qint32, CFitDataDialog::column_t>& columns
       , QList<qint32> &shownTableCols
       , QList<qint32> &shownMivs
-      , qint32 maxMivs);
+      , qint32 maxMivs = -1);
 
   ~CFitDataSettingsDialog();
 
@@ -45,7 +45,7 @@ class CFitDataSettingsSelectWidget : public QHBoxLayout {
       QHBoxLayout* hBoxParent
       , const QMap<qint32, CFitDataDialog::column_t>& columns
       , const QList<qint32>& shownCols
-      , qint32 maxMivCols = -1);
+      , qint32 maxMivs = -1);
 
   void getSelectedCols(QList<qint32>& selectedCols);
 

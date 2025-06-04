@@ -35,7 +35,8 @@ void CFitDataSettingsDialog::slotOk() {
   mivsWidget->getSelectedCols(shownMivs);
 }
 
-CFitDataSettingsDialog::~CFitDataSettingsDialog() { }
+CFitDataSettingsDialog::~CFitDataSettingsDialog() {
+}
 
 
 //Methods for class CFitDataSettingsSelectWidget
@@ -43,14 +44,13 @@ CFitDataSettingsSelectWidget::CFitDataSettingsSelectWidget(
     QHBoxLayout *hBoxParent
     , const QMap<qint32, struct CFitDataDialog::column_t>& columns
     , const QList<qint32>& shownCols
-    , qint32 maxMivCols) : maxMivs(maxMivCols) {
+    , qint32 maxMivs) : maxMivs(maxMivs) {
 
   //Left listWidget
   QVBoxLayout* vBoxAvailList = new QVBoxLayout();
   vBoxAvailList->addWidget(new QLabel(tr("Available Columns")));
   listAvailable = new QListWidget();
   listAvailable->setSortingEnabled(true);
-  listAvailable->resize(250, 250);
 
   QMapIterator<qint32, struct CFitDataDialog::column_t> column(columns);
   while (column.hasNext())
@@ -143,13 +143,11 @@ void CFitDataSettingsSelectWidget::getSelectedCols(QList<qint32>& selectedCols) 
 }
 
 void CFitDataSettingsSelectWidget::slotSelectionChanged() {
-  if (maxMivs != -1) { //There is a maximum for the selected values
-    if (listSelected->count() >= maxMivs) {
-      toolSelect->setEnabled(false); //Disable when maximum reached
-    } else {
+  if (maxMivs == -1 || listSelected->count() < maxMivs) {
       QListWidgetItem* item = listAvailable->currentItem();
       toolSelect->setEnabled(item != nullptr); //Enable when a item is selected
-    }
+    } else {
+      toolSelect->setEnabled(false); //Disable when maximum reached
   }
 
   QListWidgetItem* item = listSelected->currentItem();
@@ -221,4 +219,5 @@ void CFitDataSettingsSelectWidget::slotDown() {
   }
 }
 
-CFitDataSettingsSelectWidget::~CFitDataSettingsSelectWidget() { }
+CFitDataSettingsSelectWidget::~CFitDataSettingsSelectWidget() {
+}
