@@ -54,7 +54,7 @@ CFitData::lap_t& CFitData::getLap(quint32 index)
 
 CFitData::lap_t& CFitData::getSession()
 {
-  if (laps.size() > 2) { //At last one lap and the session
+  if (laps.size() >= 2) { //Minimum one lap and the session
     return laps[laps.size() - 1]; //The latest lap is the session
   } else {
     //return nullptr;

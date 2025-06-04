@@ -14,7 +14,7 @@
    <string>Show FIT data</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="8" column="0">
+   <item row="7" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="toolTip">
       <string/>
@@ -28,40 +28,6 @@
      <property name="standardButtons">
       <set>QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::RestoreDefaults|QDialogButtonBox::StandardButton::Save</set>
      </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QTreeWidget" name="treeTable">
-     <property name="sortingEnabled">
-      <bool>false</bool>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="Line" name="lineTop">
-     <property name="lineWidth">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
-    <widget class="QWidget" name="widgetHeaderCb" native="true">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gridHeaderCb"/>
-      </item>
-     </layout>
     </widget>
    </item>
    <item row="2" column="0">
@@ -102,6 +68,13 @@
      <property name="lineWidth">
       <number>5</number>
      </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="Line" name="lineBottom">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
@@ -174,8 +147,26 @@
      </item>
     </layout>
    </item>
-   <item row="6" column="0">
-    <widget class="Line" name="lineBottom">
+   <item row="5" column="0">
+    <widget class="QTreeWidget" name="treeTable">
+     <property name="sortingEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="lineTop">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>

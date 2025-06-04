@@ -24,27 +24,19 @@
 #include "helpers/CDraw.h"
 #include "gis/db/macros.h"
 
-#include <QCheckBox>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
-#include <QPainter>
 
 /** @brief Constructor - Initiate the dialog GUI
 
    @param xxx yyy
    @param xxx yyy
  */
-//CFitDataDialog::CFitDataDialog(CFitData& fitdata, CGisItemTrk& trk, QWidget* parent) :
 CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     QDialog(parent)
     , trk(trk)
 {
     setupUi(this);
-    widgetHeaderCb->hide();
 
     // Show product name in GUI label
     quint16 product = trk.getFitData().getProduct();
@@ -61,7 +53,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
     QPushButton* buttonAddSessionToDb = buttonBox->addButton(tr("Add Session to DB"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
     QPushButton* buttonToogleView = buttonBox->addButton(tr("Show Sessions DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
-    QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings ..."), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
+    QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings..."), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
 
     buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
 
@@ -75,20 +67,12 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
     connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
-    //Set the overall session data, this values are in session only, not in laps
-    //labelFto->setText(tr("Functional Threshold Power:"));
-    //labelFtoValue->setText(QString("%L1%L2").arg(trk.getFitData().getFunctionalThresholdPower()).arg("Watt"));
-    //labelIf->setText(tr("Intensity Factor:"));
-    //labelIfValue->setText(QString("%L1").arg(trk.getFitData().getIntensityFactor(), 0, 'f', 3));
-    //labelTss->setText(tr("Training Stress Score:"));
-    //labelTssValue->setText(QString("%L1").arg(trk.getFitData().getTrainingStressScore(), 0, 'f', 1));
-
     //Read settings
     SETTINGS;
     cfg.beginGroup("FitData");
     checkstates = cfg.value("checkstates", 0xFFFFFFFF).toUInt(); // for max 32 columns, default all "on"
     shownTableCols = cfg.value("shownTableCols").value<QList<qint32>>();
-    shownMostImportantValues = cfg.value("shownMostImportantValues").value<QList<qint32>>();
+    shownMivs = cfg.value("shownMostImportantValues").value<QList<qint32>>();
     cfg.endGroup();
 
     //Add Header labels to treeTable for laps and session values
@@ -113,6 +97,9 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
         item->setTextAlignment(treeCol, columns[shownTableCol].alignment);
         item->setData(treeCol, Qt::UserRole, shownTableCol);
         item->setData(treeCol, Qt::UserRole + 1, treeRow);
+        if (shownTableCol == eColComment) {
+          item->setToolTip(treeCol, tr("Double click to edit comment"));
+        }
         ++treeCol;
       }
       items << item;
@@ -123,7 +110,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
 
     //Put the labels in the most important values
     qint32 row = 0;
-    for (qint32 i = 0; i < numOfMivRows; ++i) {
+    for (qint32 i = 0; i < maxMivs; ++i) {
       QLabel* labelMivName = new QLabel();
       QLabel* labelMivValue = new QLabel();
       mivLabels << labelMivName << labelMivValue;
@@ -133,7 +120,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   }
   row = 0;
   CFitData::lap_t& session = trk.getFitData().getSession();
-  for (qint32 mivCol : shownMostImportantValues) { //For all shown miv
+  for (qint32 mivCol : shownMivs) { //For all shown miv
     struct column_t column = columns[mivCol];
     QLabel* labelMivName = mivLabels[2 * row];
     QLabel* labelMivValue = mivLabels[2 * row + 1];
@@ -143,7 +130,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     labelMivValue->setText(mivValueStr);
     ++row;
   }
-  for (qint32 i = row; i < numOfMivRows; ++i) {
+  for (qint32 i = row; i < maxMivs; ++i) {
     QLabel* labelMivName = mivLabels[2 * i];
     QLabel* labelMivValue = mivLabels[2 * i + 1];
     labelMivName->setEnabled(false);
@@ -290,27 +277,6 @@ l*/
     */
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 
-/*
-    // Put checkboxes on checkbox widget
-    const quint8 noOfGridCols = 5; // Five checkboxes in one row
-    for (qint32 i = 0; i < eColMax; ++i)
-    {
-        quint8 row = i / noOfGridCols;
-        quint8 col = i - row * noOfGridCols;
-
-        QCheckBox *checkbox = new QCheckBox(columns[(columns_t)i].label, this);
-        checkbox->setProperty("index", i);
-
-        bool checked = (checkstates >> i) & 0x1;
-        checkbox->setChecked(checked);
-
-        treeTable->setColumnHidden(i, !checked);
-
-        connect(checkbox, &QCheckBox::clicked, this, &CFitDataDialog::slotCheckColumns);
-
-        gridHeaderCb->addWidget(checkbox, row, col);
-    }
-*/
   paintGraphics();
 }
 
@@ -409,8 +375,7 @@ void CFitDataDialog::slotButtonColumns(bool)
     cfg.setValue("shownMostImportantValues", QVariant::fromValue(list));
     cfg.endGroup();
 
-    return;
-
+    /*
     bool isEnabled = buttonBox->button(QDialogButtonBox::Reset)->isEnabled();
 
     buttonBox->button(QDialogButtonBox::Reset)->setEnabled(!isEnabled);
@@ -419,20 +384,21 @@ void CFitDataDialog::slotButtonColumns(bool)
     widgetHeaderCb->setVisible(isEnabled);
 
     treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
-}
+  */
+ }
 
 void CFitDataDialog::slotCheckColumns(bool checked)
 {
-//QWidget *widget = qApp->focusWidget();
-//quint8 index = widget->property("index").toInt();
-//treeTable->setColumnHidden(index, !checked);
 }
 
 void CFitDataDialog::slotSettingsDialog(bool)
 {
-  CFitDataSettingsDialog fitDataSettingsDialog(this);
+  CFitDataSettingsDialog dialog = CFitDataSettingsDialog(this, columns, shownTableCols, shownMivs, maxMivs);
+  qint32 ret = dialog.exec();
+  //qint32 ret = fitDataSettingsDialog.exec();
+  if (ret == QDialog::Accepted) {
 
-  qint32 ret = fitDataSettingsDialog.exec();
+  }
 }
 
 void CFitDataDialog::slotToogleView(bool)
