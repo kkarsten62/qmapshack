@@ -60,7 +60,7 @@ CFitData::lap_t& CFitData::getSession()
     //return nullptr;
   }
 }
-
+/*
 qreal CFitData::getFunctionalThresholdPower() const {
   return functionalThresholdPower;
 }
@@ -79,7 +79,7 @@ qreal CFitData::getTrainingStressScore() const {
 void CFitData::setTrainingStressScore(qreal trainStressScore) {
   this->trainStressScore = trainStressScore;
 }
-
+*/
 void CFitData::clear(CGisItemTrk& trk)
 {
     delTrkPtDesc(trk); // Must be done first

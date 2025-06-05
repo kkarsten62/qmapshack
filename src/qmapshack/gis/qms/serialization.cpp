@@ -524,20 +524,18 @@ QDataStream& operator>>(QDataStream& stream, CFitDataV1::lap_t& l) //Read
 //FIT version 2
 QDataStream& operator<<(QDataStream& stream, const CFitData& f) //Write
 {
-  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo
-         << f.functionalThresholdPower << f.intensityFactor << f.trainStressScore;
+  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
   return stream;
 }
 QDataStream& operator>>(QDataStream& stream, CFitData& f) //Read
 {
   quint8 version;
-  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo
-         >> f.functionalThresholdPower >> f.intensityFactor >> f.trainStressScore;
+  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
   return stream;
 }
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 {
-  stream << l.startTime << l.type << l.no << l.comment << l.elapsedTime
+  stream << l.no << l.type << l.comment << l.startTime << l.elapsedTime
       << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
       << l.ascent << l.descent << l.avgHr << l.maxHr
       << l.avgCad << l.maxCad
@@ -545,12 +543,13 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
       << l.leftRightBalance << l.leftPedalSmooth
       << l.rightPedalSmooth << l.leftTorqueEff << l.rightTorqueEff
       << l.leftPco << l.rightPco << l.powerPhases
+      << l.functionalThresholdPower << l.intensityFactor << l.trainingStressScore
       << l.work << l.energy;
   return stream;
 }
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
 {
-  stream >> l.startTime >> l.type >> l.no >> l.comment >> l.elapsedTime
+  stream >> l.no >> l.type >> l.comment >> l.startTime >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
       >> l.ascent >> l.descent >> l.avgHr >> l.maxHr
       >> l.avgCad >> l.maxCad
@@ -558,6 +557,7 @@ QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
       >> l.leftRightBalance >> l.leftPedalSmooth
       >> l.rightPedalSmooth >> l.leftTorqueEff >> l.rightTorqueEff
       >> l.leftPco >> l.rightPco >> l.powerPhases
+      >> l.functionalThresholdPower >> l.intensityFactor >> l.trainingStressScore
       >> l.work >> l.energy;
   return stream;
 }

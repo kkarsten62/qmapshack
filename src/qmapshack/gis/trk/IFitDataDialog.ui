@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1072</width>
+    <width>1026</width>
     <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Show FIT data</string>
+   <string>FIT Data</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

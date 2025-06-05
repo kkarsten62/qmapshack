@@ -37,7 +37,6 @@ class CFitDataSettingsDialog : public QDialog, private Ui::IFitDataSettingsDialo
 
 
 //Widget class CFitDataSettingsSelectWidget
-
 class CFitDataSettingsSelectWidget : public QHBoxLayout {
   Q_OBJECT
  public:

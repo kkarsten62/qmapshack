@@ -23,7 +23,7 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(
 
   labelTreeTableCols->setText(tr("Select Table Columns:"));
   labelMiv->setText(QString(tr("Select Most Important Values")
-                            + ((maxMivs == -1) ? (":") : QString(tr(" (max. %L1 Values)")).arg(maxMivs))));
+                            + ((maxMivs == -1) ? (":") : QString(tr(" (max. %L1 Values:)")).arg(maxMivs))));
 
   connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataSettingsDialog::slotOk);
 }

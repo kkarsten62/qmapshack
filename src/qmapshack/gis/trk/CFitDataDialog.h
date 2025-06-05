@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CGisItemTrk;
 class CFitData;
 
-/** @brief GUI Dialog class to modify the CEnergyCycling parameter set
- */
 class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
 {
   Q_OBJECT
@@ -39,8 +37,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     Qt::AlignmentFlag alignment;
   };
 
-  enum columnTypes_e
-  {
+  enum columnTypes_e {
     eColNo
     , eColType
     , eColComment
@@ -66,6 +63,15 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     , eColRightPedalSmooth
     , eColLeftTorqueEff
     , eColRightTorqueEff
+    , eColLeftPco
+    , eColRightPco
+    , eColLeftPp
+    , eColLeftPpPeak
+    , eColRightPp
+    , eColRightPpPeak
+    , eColFtp
+    , eColIf
+    , eColTss
     , eColWork
     , eColEnergy
     , eColCount //The number of the enum items
@@ -92,17 +98,14 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {4440, "GARMIN Edge 1050"}
   };
 
-  QList<qint32> shownTableCols;
-  QList<qint32> shownMivs;
-
   QMap<qint32, struct column_t> columns = {
       {eColNo, {"#", Qt::AlignRight}}
       , {eColType, {tr("Type"), Qt::AlignLeft}}
       , {eColComment, {tr("Comment"), Qt::AlignLeft}}
       , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
-      , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignRight}}
-      , {eColTimerTime, {tr("Timer Time"), Qt::AlignRight}}
-      , {eColPause, {tr("Pause"), Qt::AlignRight}}
+      , {eColElapsedTime, {tr("Elaps. Time"), Qt::AlignLeft}}
+      , {eColTimerTime, {tr("Timer Time"), Qt::AlignLeft}}
+      , {eColPause, {tr("Pause"), Qt::AlignLeft}}
       , {eColDistance, {tr("Distance"), Qt::AlignRight}}
       , {eColAvgSpeed, {tr("Avg. Speed"), Qt::AlignRight}}
       , {eColMaxSpeed, {tr("Max. Speed"), Qt::AlignRight}}
@@ -121,49 +124,29 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColRightPedalSmooth, {tr("Right Pedal Smooth."), Qt::AlignRight}}
       , {eColLeftTorqueEff, {tr("Left Torque Eff."), Qt::AlignRight}}
       , {eColRightTorqueEff, {tr("Right Torque Eff."), Qt::AlignRight}}
+      , {eColLeftPco, {tr("Left PCO"), Qt::AlignRight}}
+      , {eColRightPco, {tr("Right PCO"), Qt::AlignRight}}
+      , {eColLeftPp, {tr("Left Power Phase"), Qt::AlignLeft}}
+      , {eColLeftPpPeak, {tr("Left Power Phase Peak"), Qt::AlignLeft}}
+      , {eColRightPp, {tr("Right Power Phase"), Qt::AlignLeft}}
+      , {eColRightPpPeak, {tr("Right Power Phase Peak"), Qt::AlignLeft}}
+      , {eColFtp, {tr("Func. Thresh. Power"), Qt::AlignRight}}
+      , {eColIf, {tr("Intensity Factor"), Qt::AlignRight}}
+      , {eColTss, {tr("Training Stress Score"), Qt::AlignRight}}
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
 
-  /*
-  QList<struct column_t> columns1 = {
-      {"#", Qt::AlignRight} //0
-      , {tr("Type"), Qt::AlignLeft} //1
-      , {tr("Comment"), Qt::AlignLeft} //2
-      , {tr("Start Time"), Qt::AlignLeft} //3
-      , {tr("Elaps. Time"), Qt::AlignRight} //4
-      , {tr("Timer Time"), Qt::AlignRight} //5
-      , {tr("Pause"), Qt::AlignRight} //6
-      , {tr("Distance"), Qt::AlignRight} //7
-      , {tr("Avg. Speed"), Qt::AlignRight} //8
-      , {tr("Max. Speed"), Qt::AlignRight}
-      , {tr("Ascent"), Qt::AlignRight}
-      , {tr("Descent"), Qt::AlignRight}
-      , {tr("Avg. HR"), Qt::AlignRight}
-      , {tr("Max. HR"), Qt::AlignRight}
-      , {tr("Avg. Cad."), Qt::AlignRight}
-      , {tr("Max. Cad."), Qt::AlignRight}
-      , {tr("Avg. Power"), Qt::AlignRight}
-      , {tr("Max. Power"), Qt::AlignRight}
-      , {tr("Norm. Power"), Qt::AlignRight}
-      , {tr("Left Balance"), Qt::AlignRight}
-      , {tr("Right Balance"), Qt::AlignRight}
-      , {tr("Left Pedal Smooth."), Qt::AlignRight}
-      , {tr("Right Pedal Smooth."), Qt::AlignRight}
-      , {tr("Left Torque Eff."), Qt::AlignRight}
-      , {tr("Right Torque Eff."), Qt::AlignRight}
-      , {tr("Work"), Qt::AlignRight}
-      , {tr("Energy Use"), Qt::AlignRight}
-  };
-*/
   void updateData();
   void updateDataMivs();
-  void getCellString(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
+  QString getPowerPhaseStr(const QList<qreal> &powerPhases, qint32 phase);
+  void getCellStr(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
+
   CGisItemTrk& trk;
-  //QList<qint32> shownTableCols;
+  QList<qint32> shownTableCols;
+  QList<qint32> shownMivs;
   const qint32 maxMivs = 8;
-  QList<QLabel *> mivLabels;
-  quint32 checkstates; // Bitmask to store checkbox states, 32 columns max
+  QList<QLabel*> mivLabels;
 };
 
 #endif // CFITDATADIALOG_H

@@ -251,33 +251,125 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   // }
 
   //KKA start
+  //********************
   CFitData::lap_t session;
 
+  if (mesg.IsNumLapsValid()) {
+    session.no = mesg.GetNumLaps(); //uint16
+  }
   session.type = CFitData::eTypeSession;
   if (mesg.IsStartTimeValid()) {
     session.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
-    qDebug() << "Session startTime=" << session.startTime;
   }
-  if (mesg.IsNumLapsValid()) {
-    session.no = mesg.GetNumLaps(); //uint16
-    qDebug() << "Session no=" << session.no;
+  if (mesg.IsTotalElapsedTimeValid()) {
+    session.elapsedTime = mesg.GetTotalElapsedTime(); //uint32, second => float
+  }
+  if (mesg.IsTotalTimerTimeValid()) {
+    session.timerTime = mesg.GetTotalTimerTime(); //uint32, second => float
+  }
+  if (mesg.IsTotalDistanceValid()) {
+    session.distance = mesg.GetTotalDistance(); //uint32, meter => float
+  }
+  if (mesg.IsAvgSpeedValid()) {
+    session.avgSpeed = mesg.GetAvgSpeed(); //uint32, meter/second => float
+  }
+  if (mesg.IsEnhancedAvgSpeedValid()) {
+    session.avgSpeed = mesg.GetEnhancedAvgSpeed(); //uint32, meter/second => float
+  }
+  if (mesg.IsMaxSpeedValid()) {
+    session.maxSpeed = mesg.GetMaxSpeed(); //uint32, meter/second => float
+  }
+  if (mesg.IsEnhancedMaxSpeedValid()) {
+    session.maxSpeed = mesg.GetEnhancedMaxSpeed();//uint32, second => float
+  }
+  if (mesg.IsTotalAscentValid()) {
+    session.ascent = mesg.GetTotalAscent(); //uint16, meter
+  }
+  if (mesg.IsTotalDescentValid()) {
+    session.descent = mesg.GetTotalDescent(); //uint16, meter
+  }
+  if (mesg.IsAvgHeartRateValid()) {
+    session.avgHr = mesg.GetAvgHeartRate(); //uint8, beep/minute
+  }
+  if (mesg.IsMaxHeartRateValid()) {
+    session.maxHr = mesg.GetMaxHeartRate(); //uint8, beep/minute
+  }
+  if (mesg.IsAvgCadenceValid()) {
+    session.avgCad = mesg.GetAvgCadence(); //uint8, revolution/minute
+  }
+  if (mesg.IsMaxCadenceValid()) {
+    session.maxCad = mesg.GetMaxCadence(); //uint8, revolution/minute
+  }
+  if (mesg.IsAvgPowerValid()) {
+    session.avgPower = mesg.GetAvgPower(); //uint16, watt
+  }
+  if (mesg.IsMaxPowerValid()) {
+    session.maxPower = mesg.GetMaxPower(); //uint16, watt
+  }
+  if (mesg.IsNormalizedPowerValid()) {
+    session.normPower = mesg.GetNormalizedPower(); //uint16, watt
+  }
+  if (mesg.IsLeftRightBalanceValid()) {
+    session.leftRightBalance = mesg.GetLeftRightBalance(); // uint16, bitfield FIT_LEFT_RIGHT_BALANCE_100
+  }
+  if (mesg.IsAvgLeftPedalSmoothnessValid()) {
+    session.leftPedalSmooth = mesg.GetAvgLeftPedalSmoothness(); //uint8, percent => float
+  }
+  if (mesg.IsAvgRightPedalSmoothnessValid()) {
+    session.rightPedalSmooth = mesg.GetAvgRightPedalSmoothness(); //uint8, percent => float
+  }
+  if (mesg.IsAvgLeftTorqueEffectivenessValid()) {
+    session.leftTorqueEff = mesg.GetAvgLeftTorqueEffectiveness(); //uint8, percent => float
+  }
+  if (mesg.IsAvgRightTorqueEffectivenessValid()) {
+    session.rightTorqueEff = mesg.GetAvgRightTorqueEffectiveness(); //uint8, percent => float
+  }
+  if (mesg.IsAvgLeftPcoValid()) {
+    session.leftPco = mesg.GetAvgLeftPco(); //uint8, mm, plus to outer the bike, minus to inner the bike
+  }
+  if (mesg.IsAvgRightPcoValid()) {
+    session.rightPco = mesg.GetAvgRightPco(); //uint8, mm, plus to outer the bike, minus to inner the bike
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgLeftPowerPhaseValid(i)) {
+        session.powerPhases.append(mesg.GetAvgLeftPowerPhase(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgLeftPowerPhasePeakValid(i)) {
+        session.powerPhases.append(mesg.GetAvgLeftPowerPhasePeak(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgRightPowerPhaseValid(i)) {
+        session.powerPhases.append(mesg.GetAvgRightPowerPhase(i)); //float
+    }
+  }
+  for (qint32 i = 0; i < 4; ++i) {
+    if (mesg.IsAvgRightPowerPhasePeakValid(i)) {
+        session.powerPhases.append(mesg.GetAvgRightPowerPhasePeak(i)); //float
+    }
   }
   if(mesg.IsThresholdPowerValid())
   {
-    fitData.setFunctionalThresholdPower(mesg.GetThresholdPower());
-    qDebug() << "Session ThresholdPower=" << mesg.GetThresholdPower();
+    session.functionalThresholdPower = mesg.GetThresholdPower(); //uint16 session only
   }
   if(mesg.IsIntensityFactorValid())
   {
-    fitData.setIntensityFactor(mesg.GetIntensityFactor());
-    qDebug() << "Session IntensityFactor=" << mesg.GetIntensityFactor();
+    session.intensityFactor = mesg.GetIntensityFactor(); //float session only
   }
   if(mesg.IsTrainingStressScoreValid())
   {
-    fitData.setTrainingStressScore(mesg.GetTrainingStressScore());
-    qDebug() << "Session TrainingStressScore=" << mesg.GetTrainingStressScore();
+    session.trainingStressScore = mesg.GetTrainingStressScore(); //float session only
+  }
+  if (mesg.IsTotalWorkValid()) {
+    session.work = mesg.GetTotalWork(); // uint32, joule
+  }
+  if (mesg.IsTotalCaloriesValid()) {
+    session.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
   fitData.setLap(fitData.getNoOfLaps(), session); //Set the session always at the end of laps list
+  //********************
   //KKA end
 
   QString comment = "<div><b>Device Statistic</b><br/>";
@@ -351,8 +443,6 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   lap.type = CFitData::eTypeLap;
   if (mesg.IsStartTimeValid()) {
     lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
-    qDebug() << "Lap startTime=" << lap.startTime;
-    qDebug() << "Lap startTime=" << IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
   }
   if (mesg.IsMessageIndexValid()) {
     lap.no = mesg.GetMessageIndex(); //uint16
@@ -405,7 +495,6 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   if (mesg.IsNormalizedPowerValid()) {
     lap.normPower = mesg.GetNormalizedPower(); //uint16, watt
   }
-  //Left and right balance missing, only one value "LeftRightBalance"
   if (mesg.IsLeftRightBalanceValid()) {
     lap.leftRightBalance = mesg.GetLeftRightBalance(); // uint16, bitfield FIT_LEFT_RIGHT_BALANCE_100
   }
