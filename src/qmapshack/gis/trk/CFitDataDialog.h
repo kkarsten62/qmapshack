@@ -158,10 +158,10 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
 */
   void updateData();
   void updateDataMivs();
-  void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
+  void getCellString(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
   CGisItemTrk& trk;
   //QList<qint32> shownTableCols;
-  const qint32 maxMivs = 10;
+  const qint32 maxMivs = 8;
   QList<QLabel *> mivLabels;
   quint32 checkstates; // Bitmask to store checkbox states, 32 columns max
 };

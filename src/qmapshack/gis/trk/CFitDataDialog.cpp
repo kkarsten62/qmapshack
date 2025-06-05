@@ -154,7 +154,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
        item->setText(eColMaxSpeed, QString("%L1%2").arg(val).arg(unit));
        item->setTextAlignment(eColMaxSpeed, columns[eColMaxSpeed].alignment);
 
-       IUnit::self().meter2elevation(lap.ascent, val, unit);
+       IUnit::self().meter2elevation(lap.ascent, val, unit)aa;
        item->setText(eColAscent, QString("%L1%2").arg(val).arg(unit));
        item->setTextAlignment(eColAscent, columns[eColAscent].alignment);
 
@@ -213,13 +213,6 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
        item->setText(eColEnergy, QString("%L1%2").arg(lap.energy).arg("kcal"));
        item->setTextAlignment(eColEnergy, columns[eColEnergy].alignment);
 
-       // Set bold to session row
-       if (lap.type == CFitData::eTypeSession)
-       {
-           QFont font = QFont();
-           font.setBold(true);
-           for (qint32 i = 0; i < item->columnCount();item->setFont(i, font), ++i);
-       }
 
        items << item;
    }
@@ -261,6 +254,11 @@ void CFitDataDialog::updateData()
         item->setToolTip(treeCol, tr("Double click to edit comment"));
       }
       ++treeCol;
+    }
+    if (lap.type == CFitData::eTypeSession) { //Set text to bold for session row
+      QFont font = QFont();
+      font.setBold(true);
+      for (qint32 i = 0; i < item->columnCount();item->setFont(i, font), ++i);
     }
     items << item;
     ++treeRow;
@@ -314,56 +312,116 @@ void CFitDataDialog::updateDataMivs() {
   paintGraphics();
 }
 
-void CFitDataDialog::getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr) {
+void CFitDataDialog::getCellString(const CFitData::lap_t& lap, qint32 column, QString& cellStr) {
   QString val, unit;
-  switch (shownTableCol) {
-    case eColNo: //no
+  cellStr = "";
+  switch (column) {
+    case eColNo:
       cellStr = QString("%1").arg(lap.no + 1);
-      //item->setText(treeCol, QString("%1").arg(lap.no + 1));
       break;
-    case eColType: //type
+    case eColType:
       if (lap.type == CFitData::eTypeLap) {
         cellStr = tr("Lap");
-        //item->setText(treeCol, tr("Lap"));
       } else if (lap.type == CFitData::eTypeSession) {
         cellStr = tr("Session");
-        //item->setText(treeCol, tr("Session"));
       }
       break;
-    case eColComment: //comment
-      //item->setText(treeCol, lap.comment);
+    case eColComment:
       cellStr = lap.comment;
-      //item->setToolTip(treeCol, tr("Double click to edit comment"));
       break;
-    case eColStartTime: //startTime
+    case eColStartTime:
       val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
       cellStr = QString("%L1").arg(val);
-      //item->setText(treeCol, QString("%L1").arg(val));
       break;
-    case eColElapsedTime: //elapsedTime
+    case eColElapsedTime:
       IUnit::self().seconds2time(lap.elapsedTime, val, unit);
-      cellStr = QString("%1%2").arg(val).arg(unit);
-      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
-    case eColTimerTime: //timerTime
+    case eColTimerTime:
       IUnit::self().seconds2time(lap.timerTime, val, unit);
-      cellStr = QString("%1%2").arg(val).arg(unit);
-      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
-    case eColPause: //pause
+    case eColPause:
       IUnit::self().seconds2time(lap.elapsedTime - lap.timerTime, val, unit);
-      cellStr = QString("%1%2").arg(val).arg(unit);
-      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
-    case eColDistance: //distance
+    case eColDistance:
       IUnit::self().meter2distance(lap.distance, val, unit);
-      cellStr = QString("%1%2").arg(val).arg(unit);
-      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
-    case eColAvgSpeed: //avgSpeed
+    case eColAvgSpeed:
       IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
-      cellStr = QString("%1%2").arg(val).arg(unit);
-      //item->setText(treeCol, QString("%1%2").arg(val).arg(unit));
+      cellStr = QString("%L1%2").arg(val).arg(unit);
+      break;
+    case eColMaxSpeed:
+      IUnit::self().meter2speed(lap.maxSpeed / 1000., val, unit);
+      cellStr = QString("%L1%2").arg(val).arg(unit);
+      break;
+    case eColAscent:
+       IUnit::self().meter2elevation(lap.ascent, val, unit);
+      cellStr = QString("%L1%2").arg(val).arg(unit);
+      break;
+    case eColDescent:
+       IUnit::self().meter2elevation(lap.descent, val, unit);
+      cellStr = QString("%L1%2").arg(val).arg(unit);
+      break;
+    case eColAvgHr:
+      cellStr = QString("%L1%2").arg(lap.avgHr).arg(tr("bpm"));
+      break;
+    case eColMaxHr:
+      cellStr = QString("%L1%2").arg(lap.maxHr).arg(tr("bpm"));
+      break;
+    case eColAvgCad:
+      cellStr = QString("%L1%2").arg(lap.avgCad).arg(tr("rpm"));
+      break;
+    case eColMaxCad:
+      cellStr = QString("%L1%2").arg(lap.maxCad).arg(tr("rpm"));
+      break;
+    case eColAvgPower:
+      cellStr = QString("%L1%2").arg(lap.avgPower).arg(tr("Watt"));
+      break;
+    case eColMaxPower:
+      cellStr = QString("%L1%2").arg(lap.maxPower).arg(tr("Watt"));
+      break;
+    case eColNormPower:
+      cellStr = QString("%L1%2").arg(lap.normPower).arg(tr("Watt"));
+      break;
+    case eColLeftBalance:
+      {
+        qreal leftBalance = 0;
+        if (lap.leftRightBalance & 0x8000) { //According to FIT type "left_right_balance_100"
+          qreal rightBalance = (lap.leftRightBalance & 0x3FFF) / 100.;
+          leftBalance = 100. - rightBalance;
+        }
+        cellStr = QString("%L1%").arg(leftBalance, 0, 'f', 1);
+      }
+      break;
+    case eColRightBalance:
+      {
+        qreal rightBalance = 0;
+         if (lap.leftRightBalance & 0x8000) { //According to FIT type "left_right_balance_100"
+          rightBalance = (lap.leftRightBalance & 0x3FFF) / 100.;
+        }
+        cellStr = QString("%L1%").arg(rightBalance, 0, 'f', 1);
+      }
+      break;
+    case eColLeftPedalSmooth:
+        cellStr = QString("%L1%").arg(lap.leftPedalSmooth, 0, 'f', 1);
+      break;
+    case eColRightPedalSmooth:
+        cellStr = QString("%L1%").arg(lap.rightPedalSmooth, 0, 'f', 1);
+      break;
+    case eColLeftTorqueEff:
+        cellStr = QString("%L1%").arg(lap.leftTorqueEff, 0, 'f', 1);
+      break;
+    case eColRightTorqueEff:
+        cellStr = QString("%L1%").arg(lap.rightTorqueEff, 0, 'f', 1);
+      break;
+    case eColWork:
+        cellStr = QString("%L1%2").arg(lap.work / 1000).arg(tr("kJ"));
+      break;
+    case eColEnergy:
+        cellStr = QString("%L1%2").arg(lap.energy).arg(tr("kcal"));
       break;
   }
 }
