@@ -79,6 +79,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void slotToogleView(bool);
   void slotSettingsDialog(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
+  void slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem*);
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
   void paintGraphics();
@@ -156,6 +157,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   };
 */
   void updateData();
+  void updateDataMivs();
   void getCellString(const CFitData::lap_t& lap, qint32 shownTableCol, QString& cellStr);
   CGisItemTrk& trk;
   //QList<qint32> shownTableCols;

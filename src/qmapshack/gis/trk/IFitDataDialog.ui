@@ -6,81 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>874</width>
-    <height>559</height>
+    <width>1072</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Show FIT data</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="7" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="toolTip">
-      <string/>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LayoutDirection::LeftToRight</enum>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::Save</set>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <layout class="QHBoxLayout" name="hLayValuesAndImage">
-     <item>
-      <layout class="QGridLayout" name="gridLayoutMiv"/>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelGraphics">
-       <property name="minimumSize">
-        <size>
-         <width>800</width>
-         <height>200</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>labelGrapics</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0">
-    <widget class="Line" name="lineMiddle">
-     <property name="lineWidth">
-      <number>5</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="Line" name="lineBottom">
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <layout class="QHBoxLayout" name="hLayHeader">
      <item>
       <widget class="QLabel" name="labelIcon">
@@ -147,28 +81,90 @@
      </item>
     </layout>
    </item>
-   <item row="5" column="0">
-    <widget class="QTreeWidget" name="treeTable">
-     <property name="sortingEnabled">
-      <bool>false</bool>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QFrame" name="frameMiv">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Shape::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QGridLayout" name="gridLayoutMiv"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelGraphics">
+       <property name="minimumSize">
+        <size>
+         <width>800</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>labelGrapics</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="frameTreeTable">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
      </property>
-     <property name="wordWrap">
-      <bool>true</bool>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QTreeWidget" name="treeTable">
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="Line" name="lineTop">
-     <property name="lineWidth">
-      <number>5</number>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LayoutDirection::LeftToRight</enum>
      </property>
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::Save</set>
      </property>
     </widget>
    </item>

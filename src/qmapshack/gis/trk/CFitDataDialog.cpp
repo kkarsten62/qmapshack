@@ -64,6 +64,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
   connect(buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &CFitDataDialog::slotCancel);
   connect(treeTable, &QTreeWidget::itemDoubleClicked, this, &CFitDataDialog::slotItemDoubleClicked);
+  connect(treeTable, &QTreeWidget::currentItemChanged, this, &CFitDataDialog::slotCurrentItemChanged);
   connect(pushHelp, &QPushButton::clicked, this, &CFitDataDialog::slotShowHelp);
 
           //Read settings
@@ -234,7 +235,7 @@ CFitDataDialog::~CFitDataDialog()
 
 void CFitDataDialog::updateData()
 {
-  //Add Header labels to treeTable for laps and session values
+          //Add Header labels to treeTable for laps and session values
   QTreeWidgetItem* item = new QTreeWidgetItem();
   qint32 treeCol = 0;
   for (qint32 shownTableCol : shownTableCols) {
@@ -243,7 +244,7 @@ void CFitDataDialog::updateData()
   }
   treeTable->setHeaderItem(item);
 
-  //Add values to treeTable
+          //Add values to treeTable
   QList<QTreeWidgetItem*> items;
   qint32 treeRow = 0;
   for(CFitData::lap_t& lap : trk.getFitData().getLaps()) { //For all laps/session
@@ -266,29 +267,49 @@ void CFitDataDialog::updateData()
   }
   treeTable->clear();
   treeTable->addTopLevelItems(items);
+  QTreeWidgetItem * tl0 = treeTable->topLevelItem(0);
+  if (nullptr != tl0) {
+    treeTable->setCurrentItem(tl0);
+  }
   treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
 
-  //Show mivs
-  qint32 row = 0;
-  CFitData::lap_t& session = trk.getFitData().getSession();
-  for (qint32 miv : shownMivs) { //For all shown miv
-    struct column_t column = columns[miv];
-    QLabel* labelMivName = mivLabels[2 * row];
-    QLabel* labelMivValue = mivLabels[2 * row + 1];
-    labelMivName->setText(column.label + ":");
-    QString mivValueStr;
-    getCellString(session, miv, mivValueStr);
-    labelMivValue->setText(mivValueStr);
-    labelMivName->show();
-    labelMivValue->show();
-    ++row;
-  }
-  //Hide non-shown mivs
-  for (qint32 i = row; i < maxMivs; ++i) {
+  updateDataMivs();
+
+          //Hide non-shown mivs
+  for (qint32 i = shownMivs.count(); i < maxMivs; ++i) {
     QLabel* labelMivName = mivLabels[2 * i];
     QLabel* labelMivValue = mivLabels[2 * i + 1];
     labelMivName->hide();
     labelMivValue->hide();
+  }
+  treeTable->setFocus();
+}
+
+void CFitDataDialog::updateDataMivs() {
+
+  QTreeWidgetItem* curItem = treeTable->currentItem();
+  if (nullptr == curItem) {
+    return;
+  }
+  qint32 treeRow = curItem->data(0, Qt::UserRole +1).toInt();
+
+  CFitData::lap_t& lap = trk.getFitData().getLap(treeRow);
+
+  qint32 mivRow = 0;
+  for (qint32 miv : shownMivs) { //For all shown miv
+    struct column_t column = columns[miv];
+    QLabel* labelMivName = mivLabels[2 * mivRow];
+    QLabel* labelMivValue = mivLabels[2 * mivRow + 1];
+    labelMivName->setText(column.label + ":");
+    QString mivValueStr;
+    getCellString(lap, miv, mivValueStr);
+    labelMivValue->setText(mivValueStr);
+    if (miv == eColComment) {
+        labelMivValue->setToolTip(mivValueStr);
+    }
+    labelMivName->show();
+    labelMivValue->show();
+    ++mivRow;
   }
   paintGraphics();
 }
@@ -619,6 +640,10 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
         trk.getFitData().setLapComment(treeRow, newComment);
         treeTable->header()->resizeSections(QHeaderView::ResizeToContents);
     }
+}
+
+void CFitDataDialog::slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* ) {
+  updateDataMivs();
 }
 
 void CFitDataDialog::slotShowTrkptInfo(bool checked)
