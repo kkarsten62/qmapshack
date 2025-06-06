@@ -46,9 +46,9 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
   QPushButton* buttonAddSessionToDb = buttonBox->addButton(tr("Add Session to DB"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
   QPushButton* buttonToogleView = buttonBox->addButton(tr("Show Sessions DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
-  QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings..."), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
+  QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings..."), QDialogButtonBox::ActionRole); //Show Settings Dialog
 
-  buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the FIT data from the track and close the dialog."));
+  buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the Fit data from the track and close the dialog."));
 
   connect(checkShowTrkptInfo, &QCheckBox::clicked, this, &CFitDataDialog::slotShowTrkptInfo);
   connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
@@ -68,7 +68,6 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   shownMivs = cfg.value("shownMostImportantValues").value<QList<qint32>>();
   cfg.endGroup();
 
-
           //Create the labels for the most important values
   qint32 row = 0;
   for (qint32 i = 0; i < maxMivs; ++i) {
@@ -79,7 +78,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
     gridLayoutMiv->addWidget(labelMivValue, row, 1);
     ++row;
   }
-  gridLayoutMiv->addItem(new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding), row,0);
+  gridLayoutMiv->addItem(new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding), row, 0);
 
   updateData();
 }
@@ -612,7 +611,7 @@ void CFitDataDialog::slotShowTrkptInfo(bool checked) {
 }
 
 void CFitDataDialog::slotShowHelp() {
-  QString msg = tr("<p><b>Show FIT data</b></p>"
+  QString msg = tr("<p><b>FIT Data</b></p>"
       "<p>Links to specific values</p>"
       "<p><a href=\"https://www.trainingpeaks.com/learn/articles/normalized-power-intensity-factor-training-stress/\">"
       "https://www.trainingpeaks.com/learn/articles/normalized-power-intensity-factor-training-stress/</a></p>"
