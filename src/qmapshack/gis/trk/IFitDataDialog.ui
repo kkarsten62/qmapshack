@@ -69,9 +69,44 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="checkShowSessionsDb">
+       <property name="text">
+        <string>Show Sessions DB</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources.qrc">
+         <normaloff>:/icons/32x32/Database.png</normaloff>:/icons/32x32/Database.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushAddSessionToDb">
+       <property name="text">
+        <string>Add Session to DB</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources.qrc">
+         <normaloff>:/icons/32x32/DatabaseSync.png</normaloff>:/icons/32x32/DatabaseSync.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QCheckBox" name="checkShowTrkptInfo">
        <property name="text">
-        <string>Show Trackpoint Info</string>
+        <string>Trackpoint Info</string>
        </property>
        <property name="icon">
         <iconset resource="../../resources.qrc">
@@ -164,7 +199,7 @@
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset|QDialogButtonBox::StandardButton::Save</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::Reset</set>
      </property>
     </widget>
    </item>

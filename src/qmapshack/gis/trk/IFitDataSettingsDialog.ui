@@ -30,18 +30,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxDb">
-       <item>
-        <property name="text">
-         <string>karlkarsten_qms</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>karlkarsten_local_qms</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxDb"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">

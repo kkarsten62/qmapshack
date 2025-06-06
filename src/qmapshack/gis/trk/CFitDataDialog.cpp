@@ -29,7 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
                                                                     QDialog(parent)
-                                                                    , trk(trk) {
+                                                                    , trk(trk)
+                                                                    , laps(trk.getFitData().getLaps()) {
   setupUi(this);
 
           //Show product name in GUI label
@@ -43,17 +44,17 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   checkShowTrkptInfo->setChecked(trk.getFitData().getIsTrkptInfo());
 
   buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Remove"));
-  buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save Data to .csv File"));
-  QPushButton* buttonAddSessionToDb = buttonBox->addButton(tr("Add Session to DB"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
-  QPushButton* buttonToogleView = buttonBox->addButton(tr("Show Sessions DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
+  //QPushButton* buttonDelSession = buttonBox->addButton(tr("Remove Session"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
+  //QPushButton* buttonAddSession = buttonBox->addButton(tr("Add Session"), QDialogButtonBox::ActionRole); //Add a button to add current session to DB
+  //buttonToogleView = buttonBox->addButton(tr("Show DB"), QDialogButtonBox::ActionRole); //Add a button to toggle beetwen lap and sessions view
   QPushButton* buttonSettingsDialog = buttonBox->addButton(tr("Settings..."), QDialogButtonBox::ActionRole); //Show Settings Dialog
 
   buttonBox->button(QDialogButtonBox::Reset)->setToolTip(tr("Remove the Fit data from the track and close the dialog."));
 
+  connect(checkShowSessionsDb, &QCheckBox::clicked, this, &CFitDataDialog::slotShowSessionsDb);
   connect(checkShowTrkptInfo, &QCheckBox::clicked, this, &CFitDataDialog::slotShowTrkptInfo);
   connect(buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CFitDataDialog::slotReset);
-  connect(buttonBox->button(QDialogButtonBox::Save), &QPushButton::clicked, this, &CFitDataDialog::slotSave2Csv);
-  connect(buttonToogleView, &QPushButton::clicked, this, &CFitDataDialog::slotToogleView);
+  //connect(buttonToogleView, &QPushButton::clicked, this, &CFitDataDialog::slotToogleView);
   connect(buttonSettingsDialog, &QPushButton::clicked, this, &CFitDataDialog::slotSettingsDialog);
   connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataDialog::slotOk);
   connect(buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &CFitDataDialog::slotCancel);
@@ -66,8 +67,11 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   cfg.beginGroup("FitData");
   shownTableCols = cfg.value("shownTableCols").value<QList<qint32>>();
   shownMivs = cfg.value("shownMostImportantValues").value<QList<qint32>>();
+  curDbName = cfg.value("curDbName", "").toString();
   cfg.endGroup();
-
+  checkShowSessionsDb->setEnabled(curDbName.size() ? true : false);
+  pushAddSessionToDb->setEnabled(curDbName.size() ? true : false);
+  checkCurSessionExistInDb();
           //Create the labels for the most important values
   qint32 row = 0;
   for (qint32 i = 0; i < maxMivs; ++i) {
@@ -80,13 +84,13 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
   }
   gridLayoutMiv->addItem(new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding), row, 0);
 
-  updateData();
+  updateData(trk.getFitData().getLaps());
 }
 
 CFitDataDialog::~CFitDataDialog() {
 }
 
-void CFitDataDialog::updateData() {
+void CFitDataDialog::updateData(const QList<CFitData::lap_t> &laps) {
   //Add Header labels to treeTable for laps and session values
   QTreeWidgetItem* item = new QTreeWidgetItem();
   qint32 treeCol = 0;
@@ -99,7 +103,7 @@ void CFitDataDialog::updateData() {
           //Add values to treeTable
   QList<QTreeWidgetItem*> items;
   qint32 treeRow = 0;
-  for(CFitData::lap_t& lap : trk.getFitData().getLaps()) { //For all laps/session
+  for(const CFitData::lap_t& lap : laps) { //For all laps/session
     treeCol = 0;
     QTreeWidgetItem *item = new QTreeWidgetItem();
     for (qint32 shownTableCol : shownTableCols) { //For all shown tree columns
@@ -148,9 +152,10 @@ void CFitDataDialog::updateDataMivs() {
   if (nullptr == curItem) {
     return;
   }
-  qint32 treeRow = curItem->data(0, Qt::UserRole +1).toInt();
+  qint32 treeRow = curItem->data(0, Qt::UserRole + 1).toInt();
 
-  CFitData::lap_t& lap = trk.getFitData().getLap(treeRow);
+  //CFitData::lap_t& lap = trk.getFitData().getLap(treeRow);
+  const CFitData::lap_t& lap = laps[treeRow];
 
   qint32 mivRow = 0;
   for (qint32 miv : shownMivs) { //For all shown miv
@@ -172,7 +177,7 @@ void CFitDataDialog::updateDataMivs() {
 }
 
 QString CFitDataDialog::getPowerPhaseStr(const QList<qreal>& powerPhases, qint32 phase) {
-  QString cellStr = "0,0,0,0";
+  QString cellStr = "0°,0°,0°,0°";
   if (powerPhases.count() == 16) {
     QStringList strList;
     for (qint32 i = phase * 4; i < phase * 4 + 4; ++i) {
@@ -309,7 +314,7 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
     case eColFtp:
       cellStr = "-";
       if (lap.type == CFitData::eTypeSession) {
-        cellStr = QString("%L1").arg(lap.functionalThresholdPower).arg(tr("Watt"));
+        cellStr = QString("%L1%2").arg(lap.functionalThresholdPower).arg(tr("Watt"));
       }
       break;
     case eColIf:
@@ -331,6 +336,21 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
       cellStr = QString("%L1%2").arg(lap.energy).arg(tr("kcal"));
       break;
   }
+}
+
+bool CFitDataDialog::checkCurSessionExistInDb() {
+  pushAddSessionToDb->setEnabled(false);
+  pushAddSessionToDb->setToolTip(tr("Current session already exists in DB or there is no access to DB"));
+  QSqlDatabase db = QSqlDatabase::database(curDbName);
+  QSqlQuery query(db);
+  query.prepare("SELECT starttime FROM fitdata WHERE starttime = :starttime");
+  query.bindValue(":starttime", "2025-05-14 14:12:45");
+  QUERY_EXEC(return false);
+  if (!query.next()) {
+    pushAddSessionToDb->setEnabled(true);
+    pushAddSessionToDb->setToolTip("");
+  }
+  return true;
 }
 
 void CFitDataDialog::paintGraphics() {
@@ -471,7 +491,15 @@ void CFitDataDialog::slotSettingsDialog(bool) {
   CFitDataSettingsDialog dialog = CFitDataSettingsDialog(this, columns, shownTableCols, shownMivs, maxMivs);
   qint32 ret = dialog.exec();
   if (ret == QDialog::Accepted) {
-    updateData();
+    updateData(trk.getFitData().getLaps());
+
+    SETTINGS;
+    cfg.beginGroup("FitData");
+    curDbName = cfg.value("curDbName", "").toString();
+    cfg.endGroup();
+    checkShowSessionsDb->setEnabled(curDbName.size() ? true : false);
+    pushAddSessionToDb->setEnabled(curDbName.size() ? true : false);
+    checkCurSessionExistInDb();
   }
 }
 
@@ -487,19 +515,44 @@ void CFitDataDialog::slotToogleView(bool) {
     qDebug() << "connection is NOT valid!";
   }
   //}
+
   QSqlQuery query(db);
-  query.prepare("SELECT * FROM fitDataSessions ");
-  //query.bindValue(":id", id);
+  QByteArray qbaOut;
+  QDataStream out(&qbaOut, QIODeviceBase::WriteOnly);
+  out.setByteOrder(QDataStream::LittleEndian);
+  out.setVersion(QDataStream::Qt_5_2);
+  const CFitData::lap_t& lap = trk.getFitData().getLap(0);
+  out << lap;
+  qbaOut = qCompress(qbaOut, 9);
+
+  query.prepare("INSERT INTO fitdata (starttime, lap) VALUES (:starttime, :lap)");
+  query.bindValue(":starttime", "2025-06-06 19:00:00");
+  query.bindValue(":lap", qbaOut);
   QUERY_EXEC(return);
+
+
+  query.prepare("SELECT * FROM fitdata WHERE id = :id");
+  query.bindValue(":id", 5);
+  QUERY_EXEC(return);
+
+  QByteArray qbaIn;
   while (query.next()) {
     qint32 id = query.value(0).toInt();
-    QDateTime startTime = query.value(1).toDateTime();
-    qreal distance = query.value(2).toReal();
+    QDateTime starttime = query.value(1).toDateTime();
+    qbaIn = query.value(2).toByteArray();
   }
+  qbaIn = qUncompress(qbaIn);
+
+  QDataStream in(&qbaIn, QIODevice::ReadOnly);
+  in.setByteOrder(QDataStream::LittleEndian);
+  in.setVersion(QDataStream::Qt_5_2);
+
+  CFitData::lap_t lap1;
+  in >> lap1;
 }
 
+/*
 void CFitDataDialog::slotSave2Csv(bool) {
-  /*
     SETTINGS;
     cfg.beginGroup("FitData");
     QString path = cfg.value("csvPath", QDir::homePath()).toString();
@@ -563,8 +616,8 @@ void CFitDataDialog::slotSave2Csv(bool) {
  path = QFileInfo(filename).absolutePath();
  cfg.setValue("csvPath", path);
  cfg.endGroup();
-*/
 }
+*/
 
 void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column) {
   qint32 treeCol = item->data(column, Qt::UserRole).toInt();
@@ -599,6 +652,33 @@ void CFitDataDialog::slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column)
 
 void CFitDataDialog::slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* ) {
   updateDataMivs();
+}
+
+void CFitDataDialog::slotShowSessionsDb(bool checked) {
+  if (checked) {
+    QSqlDatabase db = QSqlDatabase::database("karlkarsten_qms_local");
+    QSqlQuery query(db);
+    query.prepare("SELECT lap FROM fitdata");
+    QUERY_EXEC(return);
+
+    QByteArray qbaIn;
+    laps.clear();
+    while (query.next()) {
+      qbaIn = query.value(0).toByteArray();
+      qbaIn = qUncompress(qbaIn);
+      QDataStream in(&qbaIn, QIODevice::ReadOnly);
+      in.setByteOrder(QDataStream::LittleEndian);
+      in.setVersion(QDataStream::Qt_5_2);
+      CFitData::lap_t lap;
+      in >> lap;
+      laps << lap;
+    }
+    updateData(laps);
+  } else {
+    laps.clear();
+    laps = trk.getFitData().getLaps();
+    updateData(laps);
+  }
 }
 
 void CFitDataDialog::slotShowTrkptInfo(bool checked) {

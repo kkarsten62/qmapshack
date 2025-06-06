@@ -81,11 +81,11 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   void slotOk(bool);
   void slotCancel(bool);
   void slotReset(bool);
-  void slotSave2Csv(bool);
   void slotToogleView(bool);
   void slotSettingsDialog(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
   void slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem*);
+  void slotShowSessionsDb(bool checked);
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
   void paintGraphics();
@@ -137,16 +137,19 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
 
-  void updateData();
+  void updateData(const QList<struct CFitData::lap_t>& laps);
   void updateDataMivs();
   QString getPowerPhaseStr(const QList<qreal> &powerPhases, qint32 phase);
   void getCellStr(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
+  bool checkCurSessionExistInDb();
 
   CGisItemTrk& trk;
   QList<qint32> shownTableCols;
   QList<qint32> shownMivs;
   const qint32 maxMivs = 8;
   QList<QLabel*> mivLabels;
+  QString curDbName;
+  QList<struct CFitData::lap_t> laps;
 };
 
 #endif // CFITDATADIALOG_H

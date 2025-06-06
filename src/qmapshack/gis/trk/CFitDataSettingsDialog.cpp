@@ -1,5 +1,8 @@
 #include "CFitDataSettingsDialog.h"
+#include "helpers/CSettings.h"
 #include<QListWidgetItem>
+#include <QSqlQuery>
+#include <QSqlError>
 
 CFitDataSettingsDialog::CFitDataSettingsDialog(
     QWidget *parent
@@ -25,6 +28,42 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(
   labelMiv->setText(QString(tr("Select Most Important Values")
                             + ((maxMivs == -1) ? (":") : QString(tr(" (max. %L1 Values:)")).arg(maxMivs))));
 
+  SETTINGS;
+  cfg.beginGroup("FitData");
+  QString curDbName = cfg.value("curDbName", "").toString();
+  cfg.endGroup();
+
+  qint32 curIndex;
+  cfg.beginGroup("Database");
+  const QStringList& names = cfg.value("names").toStringList();
+  cfg.beginGroup("Entries");
+  for (const QString& name : names) {
+    cfg.beginGroup(name);
+    QString type = cfg.value("type").toString();
+    if (type == "MySQL") {
+      QString user = cfg.value("user", "").toString();
+      if (!QSqlDatabase::contains(user)) {
+        qWarning() << tr("The database '%1' has no connection!").arg(user);
+        continue;
+      }
+      QSqlDatabase db = QSqlDatabase::database(user);
+      if (!db.isValid()) {
+        qWarning() << tr("The database '%1' is not valid!").arg(user);
+        continue;
+      }
+      comboBoxDb->addItem(name);
+      if (name == curDbName) {
+        curIndex = comboBoxDb->count() - 1;
+      }
+    }
+    cfg.endGroup();  //name
+  }
+  cfg.endGroup();  //Entries
+  cfg.endGroup();  //Database
+  if (comboBoxDb->count()) {
+    comboBoxDb->setCurrentIndex(curIndex);
+  }
+
   connect(buttonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &CFitDataSettingsDialog::slotOk);
 }
 
@@ -33,6 +72,11 @@ void CFitDataSettingsDialog::slotOk() {
   shownMivs.clear();
   tableColsWidget->getSelectedCols(shownTableCols);
   mivsWidget->getSelectedCols(shownMivs);
+
+  SETTINGS;
+  cfg.beginGroup("FitData");
+  cfg.setValue("curDbName", comboBoxDb->currentText());
+  cfg.endGroup();
 }
 
 CFitDataSettingsDialog::~CFitDataSettingsDialog() {
