@@ -63,8 +63,8 @@ class CFitData
     qreal rightPedalSmooth = 0;
     qreal leftTorqueEff = 0;
     qreal rightTorqueEff = 0;
-    quint8 leftPco = 0;
-    quint8 rightPco = 0;
+    qint8 leftPco = 0;
+    qint8 rightPco = 0;
     /*
      *  16 values in QList for powerPhases
      *  0-3  leftPowerPhase

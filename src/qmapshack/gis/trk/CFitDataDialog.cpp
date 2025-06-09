@@ -351,10 +351,10 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
       cellStr = QString("%L1%").arg(lap.rightTorqueEff, 0, 'f', 1);
       break;
     case eColLeftPco:
-      cellStr = QString("%L1mm").arg(lap.leftPco);
+      cellStr = QString("%1mm").arg(lap.leftPco);
       break;
     case eColRightPco:
-      cellStr = QString("%L1mm").arg(lap.rightPco);
+      cellStr = QString("%1mm").arg(lap.rightPco);
       break;
     case eColLeftPp:
       cellStr = getPowerPhaseStr(lap.powerPhases, 0);
@@ -404,15 +404,24 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
   USE_ANTI_ALIASING(p, true);
 
   p.save(); //Save to initial state=0
-  p.translate(20, 0); //Move to left border
+  p.translate(10, 10); //Move to left border
   p.save(); //Save to state=1
-  p.translate(0, 90); //Move down to center of pedal
+  p.translate(0, 80); //Move down to center left of left pedal
+  p.save(); //Save to state=2
 
+  qint8 leftPcoVal = lap.leftPco;
+  qint8 rightPcoVal = lap.rightPco;
+  qint8 leftPco; //Maybe cutted
+  qint8 rightPco; //Maybe cutted
+  qint8 pco;
   for (qint32 i = 0; i < 2; ++i) {
+    pco = leftPcoVal < 0 ? qMax(leftPcoVal, -30) : qMin(leftPcoVal, 30);
+    leftPco = pco;
     if (i == 1) { //Print right pedal moved and mirrored
-      p.save(); //Save to state=2
-      p.translate(270, 0); //Move to right edge of right pedal
+      p.translate(260, 0); //Move to right edge of right pedal
       p.scale(-1, 1); //Mirrored by y-axis
+      pco = rightPcoVal < 0 ? qMax(rightPcoVal, -30) : qMin(rightPcoVal, 30);
+      rightPco = pco;
     }
     p.setPen(QPen(QColor(Qt::black), 1, Qt::SolidLine,
                   Qt::FlatCap, Qt::MiterJoin));
@@ -426,36 +435,49 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
     p.setPen(QPen(Qt::DashDotDotLine));
     p.drawLine(30, -40, 30, 40); //Center line of pedal
     p.setPen(QPen(QColor(Qt::red), 1, Qt::SolidLine));
-    p.drawLine(30 + 2 * 10, -40, 30 +2 * 10, 40); //PCO line
+    p.drawLine(30 - pco, -40, 30 - pco, 40); //PCO line, plus values to outer of the bike
   }
-  p.restore(); //Back to state=2
+  p.restore(); //Back to state=2 center left of left pedal
   p.setPen(QPen(QColor(Qt::black)));
-  p.drawText(0, 60, "Balance: 50%");
-  p.drawText(0, 80, "Pedal Smoothness: 50%");
-  p.drawText(0, 100, "Torque Efficiency: 50%");
-  p.save(); //Save to a next state=3
-  p.translate(190, 0); //Move to left edge of right pedal
-  p.drawText(0, 60, "Balance: 50%");
-  p.drawText(0, 80, "Pedal Smoothness: 50%");
-  p.drawText(0, 100, "Torque Efficiency: 50%");
-  p.restore(); //Back to state=2
-  p.drawText(30 + 2 * 10, -45, "PCO: 10mm");
-  p.drawText(240 - 2 * 10, -45, "PCO: 10mm");
+  //qint8 leftPco = lap.leftPco;
+  QString valStr;
+  getCellStr(lap, eColLeftPco, valStr);
+  p.drawText(30 - leftPco, -45, QString("PCO: ") + valStr);
+  getCellStr(lap, eColRightPco, valStr);
+  p.drawText(230 + rightPco, -45, QString("PCO: ") + valStr);
 
+  p.translate(0, 60); //Move down to text
+  getCellStr(lap, eColLeftBalance, valStr);
+  p.drawText(0, 0, QString(tr("Balance: ") + valStr));
+  getCellStr(lap, eColLeftPedalSmooth, valStr);
+  p.drawText(0, 20, QString(tr("Pedal Smoothness: ") + valStr));
+  getCellStr(lap, eColLeftTorqueEff, valStr);
+  p.drawText(0, 40, QString(tr("Torque Efficiency: ") + valStr));
+  p.translate(180, 0); //Move to left edge of right pedal
+  getCellStr(lap, eColRightBalance, valStr);
+  p.drawText(0, 0, QString(tr("Balance: ") + valStr));
+  getCellStr(lap, eColRightPedalSmooth, valStr);
+  p.drawText(0, 20, QString(tr("Pedal Smoothness: ") + valStr));
+  getCellStr(lap, eColRightTorqueEff, valStr);
+  p.drawText(0, 40, QString(tr("Torque Efficiency: ") + valStr));
   p.restore(); //Back to state=1
   QFont font = QFont();
   font.setBold(true);
   font.setUnderline(true);
   p.setFont(font);
-  p.drawText(0, 20, tr("Left Pedal"));
-  p.drawText(190, 20, tr("Right Pedal"));
-  p.restore(); //Back to initial state=0
+  p.drawText(0, 10, tr("Left Pedal"));
+  p.drawText(180, 10, tr("Right Pedal"));
+  font.setBold(false);
+  font.setUnderline(false);
+  p.setFont(font);
+  p.restore(); //Back to state=0
 
           //Power Phases
   if (lap.powerPhases.count()) {
-
-    p.translate(465, 100);
+  //if (false) {
+    p.translate(475, 0); //Center of left PP
     p.save(); //Save to state=1
+    p.translate(0, 110); //Center of left PP
 
     QList<struct marker_t> markers;
     qint32 endAngleInner;
@@ -463,6 +485,7 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
     qint32 endAngleOuter;
     qint32 spanAngleOuter;
     for (qint32 i = 0; i < 2; ++i) { //0=Left pedal, 1=right pedal
+      p.save(); //Save to state=2
       if (i == 0) { //Print left pedal
         markers = {
           {lap.powerPhases[0], 65} //Start angle
@@ -498,34 +521,42 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
       p.setBrush(QColor(Qt::darkGray));
       p.drawEllipse(-50, -50, 100, 100);
 
-      p.rotate(-90); //Angles 12 o'clock
+      p.rotate(-90); //PP angles are on 12 o'clock
 
       p.setPen(QPen(Qt::DashDotLine));
       for (struct marker_t marker: markers) {
-        p.save(); //Save to state=2
-        p.rotate(marker.angle);
-        p.drawLine(0, 0, marker.length, 0);
-        p.translate(marker.length, 0);
-        p.rotate(90 - marker.angle);
+        p.save(); //Save to state=3
+        p.rotate(marker.angle); //Rotate angle ccw to 12 o'clock
+        p.drawLine(0, 0, marker.length, 0); //Draw the dotted line, we have rotate, so x=y!
+        p.translate(marker.length, 0); //Move to the end of the line
+        p.rotate(90 - marker.angle); //Rotate cw to draw the text
 
         QRect rect;
         qint32 alignment;
-        for (struct direction_t direction : directions) {
-          if (marker.angle >= direction.gt && marker.angle <= direction.lt) {
-            rect = direction.rect;
-            alignment = direction.alignment;
+        for (struct position_t position : positions) { //Find the right position at end of line
+          if (marker.angle >= position.gt && marker.angle <= position.lt) {
+            rect = position.rect;
+            alignment = position.alignment;
           }
         }
         QString text = QString("%1°").arg(marker.angle, 0, 'f', 1);
-        QRect textRect = p.boundingRect(rect, alignment, text);
+        QRect textRect = p.boundingRect(rect, alignment, text); //Get the right rect with given position rect and alignment
         p.drawText(textRect, Qt::AlignCenter, text);
 
-        p.restore(); //Back to state=2
+        p.restore(); //Back to state=3
       }
-      p.restore(); //Back to state=1
+      p.restore(); //Back to state=2
     }
+    p.restore(); //Back to state=1
+    QFont font = QFont();
+    font.setBold(true);
+    font.setUnderline(true);
+    p.setFont(font);
+    p.drawText(-50, 20, tr("Left Power Phases"));
+    p.drawText(150, 20, tr("Right Power Phases"));
+    //p.restore(); //Back to state=0
   }
-  labelGraphics->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
+  labelGraphics->setPixmap(QPixmap::fromImage(image)); //Assign the img to the GUI
 }
 
 void CFitDataDialog::slotOk(bool) {

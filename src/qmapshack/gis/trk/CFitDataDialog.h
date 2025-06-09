@@ -138,13 +138,13 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
-   struct direction_t {
+   struct position_t {
      qreal gt;
      qreal lt;
      QRect rect;
      qint32 alignment;
    };
-   QList<struct direction_t> const directions = {
+   QList<struct position_t> const positions = {
       {    0,  20, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignBottom}
       , { 20, 160, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignVCenter}
       , {160, 200, QRect(-0.5, 0, 1, 1), Qt::AlignHCenter | Qt::AlignTop}
