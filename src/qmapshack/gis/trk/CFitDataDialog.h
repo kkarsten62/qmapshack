@@ -38,7 +38,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   };
 
   enum columnTypes_e {
-    eColNo
+    eColProduct
+    , eColNo
     , eColType
     , eColComment
     , eColStartTime
@@ -80,18 +81,18 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
  private slots:
   void slotOk(bool);
   void slotCancel(bool);
-  void slotReset(bool);
-  void slotToogleView(bool);
+  void slotDeleteFitDataFromTrack(bool);
   void slotSettingsDialog(bool);
   void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
   void slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem*);
   void slotShowSessionsDb(bool checked);
+  void slotAddSessionToDb();
+  void slotDeleteSessionFromDb();
   void slotShowTrkptInfo(bool checked);
   void slotShowHelp();
-  void paintGraphics();
 
  private:
-  QMap<quint16, QString> productName = {
+  QMap<quint16, QString> products = {
       {0, "Unknown"}
       , {1836, "GARMIN Edge 1000"}
       , {3011, "GARMIN Edge Explore"}
@@ -99,7 +100,8 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   };
 
   QMap<qint32, struct column_t> columns = {
-      {eColNo, {"#", Qt::AlignRight}}
+      {eColProduct, {"Product", Qt::AlignLeft}}
+      ,{eColNo, {"#", Qt::AlignRight}}
       , {eColType, {tr("Type"), Qt::AlignLeft}}
       , {eColComment, {tr("Comment"), Qt::AlignLeft}}
       , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
@@ -136,20 +138,44 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColWork, {tr("Work"), Qt::AlignRight}}
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
+   struct direction_t {
+     qint32 gt;
+     qint32 lt;
+     QRect rect;
+     qint32 alignment;
+   };
+   QList<struct direction_t> const directions = {
+      {0, 0, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignBottom}
+      , {1, 89, QRect(0, 0, 1, 1), Qt::AlignLeft | Qt::AlignBottom}
+      , {90, 90, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignVCenter}
+      , {91, 179, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignTop}
+      , {180, 180, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignTop}
+      , {181, 269, QRect(-1, 0, 1, 1), Qt::AlignRight | Qt::AlignTop}
+      , {270, 270, QRect(-1, -0.5, 1, 1), Qt::AlignRight | Qt::AlignVCenter}
+      , {271, 359, QRect(-1, -1, 1, 1), Qt::AlignRight | Qt::AlignBottom}
+  };
 
+  struct marker_t {
+    qint32 angle;
+    qint32 length;
+  };
+
+  bool checkDbAccess();
+  void enableButtons();
   void updateData(const QList<struct CFitData::lap_t>& laps);
   void updateDataMivs();
   QString getPowerPhaseStr(const QList<qreal> &powerPhases, qint32 phase);
   void getCellStr(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
-  bool checkCurSessionExistInDb();
+  void paintGraphics(const CFitData::lap_t &lap);
 
   CGisItemTrk& trk;
   QList<qint32> shownTableCols;
   QList<qint32> shownMivs;
   const qint32 maxMivs = 8;
   QList<QLabel*> mivLabels;
-  QString curDbName;
+  QString connectionDbName;
   QList<struct CFitData::lap_t> laps;
+  QPushButton* buttonSettingsDialog;
 };
 
 #endif // CFITDATADIALOG_H

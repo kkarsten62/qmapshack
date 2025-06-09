@@ -100,6 +100,7 @@ class CFit2Project : public fit::FileIdMesgListener,
   //KKA start
   CFitData fitData;
   QDateTime trkptTime;
+  quint16 product;
   //KKA end
 
 };

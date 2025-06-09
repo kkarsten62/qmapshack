@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1026</width>
-    <height>526</height>
+    <width>1126</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,11 +82,20 @@
      <item>
       <widget class="QPushButton" name="pushAddSessionToDb">
        <property name="text">
-        <string>Add Session to DB</string>
+        <string>Add Session</string>
        </property>
        <property name="icon">
-        <iconset resource="../../resources.qrc">
-         <normaloff>:/icons/32x32/DatabaseSync.png</normaloff>:/icons/32x32/DatabaseSync.png</iconset>
+        <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushRemoveSessionFromDb">
+       <property name="text">
+        <string>Delete Session</string>
+       </property>
+       <property name="icon">
+        <iconset theme="QIcon::ThemeIcon::ListRemove"/>
        </property>
       </widget>
      </item>
@@ -122,8 +131,8 @@
       <widget class="QFrame" name="frameMiv">
        <property name="minimumSize">
         <size>
-         <width>200</width>
-         <height>0</height>
+         <width>350</width>
+         <height>200</height>
         </size>
        </property>
        <property name="frameShape">
@@ -171,6 +180,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QTreeWidget" name="treeTable">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>300</height>
+         </size>
+        </property>
         <property name="sortingEnabled">
          <bool>false</bool>
         </property>

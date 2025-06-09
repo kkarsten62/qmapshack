@@ -160,9 +160,12 @@ void CFit2Project::OnMesg(fit::Mesg& mesg) {
 //KKA start
 //void CFit2Project::OnMesg(fit::FileIdMesg& mesg) { /*qDebug() << mesg.GetName();*/ } //Original
 void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
+  if (recordType == eRecordType::Course) {
+    return;
+  }
   qDebug() << "Product:" << mesg.GetProduct();
   if (mesg.IsProductValid()) {
-    fitData.setProduct(mesg.GetProduct());
+    product = mesg.GetProduct();
     fitData.setIsValid(true);
   }
 }
@@ -251,9 +254,12 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   // }
 
   //KKA start
-  //********************
+  if (recordType == eRecordType::Course) {
+    return;
+  }
   CFitData::lap_t session;
 
+  session.product = product; //quint16
   if (mesg.IsNumLapsValid()) {
     session.no = mesg.GetNumLaps(); //uint16
   }
@@ -440,12 +446,16 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   CFitData::lap_t lap;
 
   //KKA start
+  if (recordType == eRecordType::Course) {
+    return;
+  }
+  lap.product = product; //quint16
+  if (mesg.IsMessageIndexValid()) {
+    lap.no = mesg.GetMessageIndex(); //uint16
+  }
   lap.type = CFitData::eTypeLap;
   if (mesg.IsStartTimeValid()) {
     lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32
-  }
-  if (mesg.IsMessageIndexValid()) {
-    lap.no = mesg.GetMessageIndex(); //uint16
   }
   if (mesg.IsTotalElapsedTimeValid()) {
     lap.elapsedTime = mesg.GetTotalElapsedTime(); //uint32, second => float
@@ -602,6 +612,9 @@ void CFit2Project::OnMesg(fit::CourseMesg& mesg) {
   recordType = eRecordType::Course;
   track.name = QString::fromStdWString(mesg.GetName());
   // sport to qms activity?
+  //KKA start
+  fitData.setIsValid(false);
+  //KKA end
 }
 
 constexpr int kNumKnownSymbols = 26;

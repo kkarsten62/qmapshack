@@ -26,7 +26,7 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(
 
   labelTreeTableCols->setText(tr("Select Table Columns:"));
   labelMiv->setText(QString(tr("Select Most Important Values")
-                            + ((maxMivs == -1) ? (":") : QString(tr(" (max. %L1 Values:)")).arg(maxMivs))));
+                            + ((maxMivs == -1) ? (":") : QString(tr(" (max. %L1 Values):")).arg(maxMivs))));
 
   SETTINGS;
   cfg.beginGroup("FitData");
@@ -41,16 +41,6 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(
     cfg.beginGroup(name);
     QString type = cfg.value("type").toString();
     if (type == "MySQL") {
-      QString user = cfg.value("user", "").toString();
-      if (!QSqlDatabase::contains(user)) {
-        qWarning() << tr("The database '%1' has no connection!").arg(user);
-        continue;
-      }
-      QSqlDatabase db = QSqlDatabase::database(user);
-      if (!db.isValid()) {
-        qWarning() << tr("The database '%1' is not valid!").arg(user);
-        continue;
-      }
       comboBoxDb->addItem(name);
       if (name == curDbName) {
         curIndex = comboBoxDb->count() - 1;

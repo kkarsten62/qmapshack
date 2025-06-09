@@ -524,18 +524,18 @@ QDataStream& operator>>(QDataStream& stream, CFitDataV1::lap_t& l) //Read
 //FIT version 2
 QDataStream& operator<<(QDataStream& stream, const CFitData& f) //Write
 {
-  stream << VER_FITDATA << f.isValid << f.product << f.laps << f.isTrkptInfo;
+  stream << VER_FITDATA << f.isValid << f.laps << f.isTrkptInfo;
   return stream;
 }
 QDataStream& operator>>(QDataStream& stream, CFitData& f) //Read
 {
   quint8 version;
-  stream  >> version >> f.isValid >> f.product >> f.laps >> f.isTrkptInfo;
+  stream  >> version >> f.isValid >> f.laps >> f.isTrkptInfo;
   return stream;
 }
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 {
-  stream << l.no << l.type << l.comment << l.startTime << l.elapsedTime
+  stream << l.product << l.no << l.type << l.comment << l.startTime << l.elapsedTime
       << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
       << l.ascent << l.descent << l.avgHr << l.maxHr
       << l.avgCad << l.maxCad
@@ -549,7 +549,7 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 }
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
 {
-  stream >> l.no >> l.type >> l.comment >> l.startTime >> l.elapsedTime
+  stream >> l.product >> l.no >> l.type >> l.comment >> l.startTime >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
       >> l.ascent >> l.descent >> l.avgHr >> l.maxHr
       >> l.avgCad >> l.maxCad
