@@ -233,7 +233,7 @@ QString CFitDataDialog::getPowerPhaseStr(const QList<qreal>& powerPhases, qint32
   if (powerPhases.count() == 16) {
     QStringList strList;
     for (qint32 i = phase * 4; i < phase * 4 + 4; ++i) {
-      strList << QString("%L1°").arg(qFloor(powerPhases[i]));
+      strList << QString("%L1°").arg(powerPhases[i], 0, 'f', 1);
     }
     cellStr = strList.join(',');
   }
@@ -244,6 +244,11 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
   QString val, unit;
   cellStr = "";
   switch (column) {
+    case eColProduct:
+      cellStr = products.contains(lap.product) ?
+                         QString("(%1) %2").arg(lap.product).arg(products[lap.product]) :
+                         QString("(%1) %1").arg(lap.product).arg(tr("Unknown device"));
+      break;
     case eColNo:
       cellStr = QString("%1").arg(lap.no);
       break;
@@ -399,7 +404,7 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
   USE_ANTI_ALIASING(p, true);
 
   p.save(); //Save to initial state=0
-  p.translate(10, 0); //Move to left border
+  p.translate(20, 0); //Move to left border
   p.save(); //Save to state=1
   p.translate(0, 90); //Move down to center of pedal
 
@@ -447,93 +452,79 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
   p.restore(); //Back to initial state=0
 
           //Power Phases
-  p.translate(465, 100);
-  p.rotate(-90);
-  QList<struct marker_t> markers;
-  qint32 startAngleInner;
-  qint32 spanAngleInner;
-  qint32 startAngleOuter;
-  qint32 spanAngleOuter;
-  for (qint32 i = 0; i < 2; ++i) { //0=Left pedal, 1=right pedal
-    if (i == 0) { //Print left pedal
-      markers = {
-        {qFloor(lap.powerPhases[0]), 65}
-        , {qFloor(lap.powerPhases[1]), 65}
-        , {qFloor(lap.powerPhases[4]), 75}
-        , {qFloor(lap.powerPhases[5]), 75}
-        , {qFloor(lap.powerPhases[7]), 75}
-      };
-      startAngleOuter = qFloor(lap.powerPhases[4]);
-      spanAngleOuter = qFloor(lap.powerPhases[5]) - startAngleOuter;
-      startAngleInner = qFloor(lap.powerPhases[0]);
-      spanAngleInner = qFloor(lap.powerPhases[1]) - startAngleInner;
-    } else if (i == 1) { //Print right pedal, moved
-      markers = {
-        {qFloor(lap.powerPhases[8]), 65}
-        , {qFloor(lap.powerPhases[9]), 65}
-        , {qFloor(lap.powerPhases[12]), 75}
-        , {qFloor(lap.powerPhases[13]), 75}
-        , {qFloor(lap.powerPhases[15]), 75}
-      };
-      startAngleOuter = qFloor(lap.powerPhases[12]);
-      spanAngleOuter = qFloor(lap.powerPhases[13]) - startAngleOuter;
-      startAngleInner = qFloor(lap.powerPhases[8]);
-      spanAngleInner = qFloor(lap.powerPhases[9]) - startAngleInner;
-      p.translate(0, 225);
-    }
+  if (lap.powerPhases.count()) {
 
-    p.save(); //Save to state=
-    p.rotate(+90);
-    p.setBrush(QColor(Qt::darkBlue));
-    //p.drawPie(-70, -70, 140, 140, -45 * 16, -90 * 16);
-    p.drawPie(-70, -70, 140, 140, startAngleOuter * 16, -spanAngleOuter * 16);
-    p.setBrush(QColor(Qt::darkGreen));
-    p.drawPie(-60, -60, 120, 120, startAngleInner * 16, -spanAngleInner * 16);
-    //p.drawPie(-60, -60, 120, 120, -350 * 16, -200 * 16);
-    p.setBrush(QColor(Qt::darkGray));
-    p.drawEllipse(-50, -50, 100, 100);
-    p.restore(); //
+    p.translate(465, 100);
+    p.save(); //Save to state=1
 
-
-    p.setPen(QPen(Qt::DashDotLine));
-    for (struct marker_t marker: markers) {
-      p.save(); //Save to state=1
-      p.rotate(marker.angle);
-      p.drawLine(0, 0, marker.length, 0);
-      p.translate(marker.length, 0);
-      p.rotate(90 - marker.angle);
-
-      QRect rect;
-      qint32 alignment;
-      for (struct direction_t direction : directions) {
-        if (marker.angle >= direction.gt && marker.angle <= direction.lt) {
-          rect = direction.rect;
-          alignment = direction.alignment;
-        }
+    QList<struct marker_t> markers;
+    qint32 endAngleInner;
+    qint32 spanAngleInner;
+    qint32 endAngleOuter;
+    qint32 spanAngleOuter;
+    for (qint32 i = 0; i < 2; ++i) { //0=Left pedal, 1=right pedal
+      if (i == 0) { //Print left pedal
+        markers = {
+          {lap.powerPhases[0], 65} //Start angle
+            , {lap.powerPhases[1], 65} //End angle
+            , {lap.powerPhases[4], 75} //Start peak angle
+            , {lap.powerPhases[5], 75} //End peak angle
+            , {lap.powerPhases[7], 75} //Center peak angle
+        };
+        endAngleOuter = lap.powerPhases[5];
+        spanAngleOuter = lap.powerPhases[6];
+        endAngleInner = lap.powerPhases[1];
+        spanAngleInner = lap.powerPhases[2];
+      } else if (i == 1) { //Print right pedal, moved
+        markers = {
+            {lap.powerPhases[8], 65} //Start angle
+            , {lap.powerPhases[9], 65} //End angle
+            , {lap.powerPhases[12], 75} //Start peak angle
+            , {lap.powerPhases[13], 75} //End peak angle
+            , {lap.powerPhases[15], 75} //Center peak angle
+        };
+        endAngleOuter = lap.powerPhases[13];
+        spanAngleOuter = lap.powerPhases[14];
+        endAngleInner = lap.powerPhases[9];
+        spanAngleInner = lap.powerPhases[10];
+        p.translate(200, 0);
       }
-      QString text = QString("%1°").arg(marker.angle);
-      QRect textRect = p.boundingRect(rect, alignment, text);
-      //p.fillRect(textRect, Qt::white); // Fill text box with a white rect
-      p.drawText(textRect, Qt::AlignCenter, text);
 
+      p.setPen(QPen(Qt::SolidLine));
+      p.setBrush(QColor(Qt::darkBlue));
+      p.drawPie(-70, -70, 140, 140, -(endAngleOuter - 90) * 16, spanAngleOuter * 16); //PP peak, pie is on couterclock at 3 o'clock
+      p.setBrush(QColor(Qt::darkGreen));
+      p.drawPie(-60, -60, 120, 120, -(endAngleInner - 90) * 16, spanAngleInner * 16); //PP
+      p.setBrush(QColor(Qt::darkGray));
+      p.drawEllipse(-50, -50, 100, 100);
+
+      p.rotate(-90); //Angles 12 o'clock
+
+      p.setPen(QPen(Qt::DashDotLine));
+      for (struct marker_t marker: markers) {
+        p.save(); //Save to state=2
+        p.rotate(marker.angle);
+        p.drawLine(0, 0, marker.length, 0);
+        p.translate(marker.length, 0);
+        p.rotate(90 - marker.angle);
+
+        QRect rect;
+        qint32 alignment;
+        for (struct direction_t direction : directions) {
+          if (marker.angle >= direction.gt && marker.angle <= direction.lt) {
+            rect = direction.rect;
+            alignment = direction.alignment;
+          }
+        }
+        QString text = QString("%1°").arg(marker.angle, 0, 'f', 1);
+        QRect textRect = p.boundingRect(rect, alignment, text);
+        p.drawText(textRect, Qt::AlignCenter, text);
+
+        p.restore(); //Back to state=2
+      }
       p.restore(); //Back to state=1
     }
-    p.setPen(QPen(Qt::SolidLine));
-    //p.save(); //Save to state=1
-    /*
-    p.rotate(20);
-    p.setPen(QPen(Qt::DashDotDotLine));
-    p.drawLine(0, 0, 65, 0);
-    p.translate(65, 0);
-    p.rotate(70);
-    QRectF textDirection(0, -1, 1, 1);
-    QRectF textRect = p.boundingRect(textDirection, Qt::AlignLeft | Qt::AlignBottom, "20°");
-    p.fillRect(textRect, Qt::white); // Fill text box with a white rect
-    p.drawText(textRect, Qt::AlignCenter, "20°");
-*/
-    //p.restore(); //Back to state=2
-    p.restore(); //Back to state=1
-}
+  }
   labelGraphics->setPixmap(QPixmap::fromImage(image)); // Assign the img to the GUI
 }
 

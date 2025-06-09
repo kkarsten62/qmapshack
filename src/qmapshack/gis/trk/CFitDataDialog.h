@@ -139,24 +139,21 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       , {eColEnergy, {tr("Energy Use"), Qt::AlignRight}}
   };
    struct direction_t {
-     qint32 gt;
-     qint32 lt;
+     qreal gt;
+     qreal lt;
      QRect rect;
      qint32 alignment;
    };
    QList<struct direction_t> const directions = {
-      {0, 0, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignBottom}
-      , {1, 89, QRect(0, 0, 1, 1), Qt::AlignLeft | Qt::AlignBottom}
-      , {90, 90, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignVCenter}
-      , {91, 179, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignTop}
-      , {180, 180, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignTop}
-      , {181, 269, QRect(-1, 0, 1, 1), Qt::AlignRight | Qt::AlignTop}
-      , {270, 270, QRect(-1, -0.5, 1, 1), Qt::AlignRight | Qt::AlignVCenter}
-      , {271, 359, QRect(-1, -1, 1, 1), Qt::AlignRight | Qt::AlignBottom}
+      {    0,  20, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignBottom}
+      , { 20, 160, QRect(0, -0.5, 1, 1), Qt::AlignLeft | Qt::AlignVCenter}
+      , {160, 200, QRect(-0.5, 0, 1, 1), Qt::AlignHCenter | Qt::AlignTop}
+      , {200, 340, QRect(-1, -0.5, 1, 1), Qt::AlignRight | Qt::AlignVCenter}
+      , {340, 360, QRect(-0.5, -1, 1, 1), Qt::AlignHCenter | Qt::AlignBottom}
   };
 
   struct marker_t {
-    qint32 angle;
+    qreal angle;
     qint32 length;
   };
 
