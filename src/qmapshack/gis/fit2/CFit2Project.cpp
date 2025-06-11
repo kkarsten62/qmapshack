@@ -450,9 +450,7 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
     return;
   }
   lap.product = product; //quint16
-  if (mesg.IsMessageIndexValid()) {
-    lap.no = mesg.GetMessageIndex(); //uint16
-  }
+  lap.no = fitData.getNoOfLaps();
   lap.type = CFitData::eTypeLap;
   if (mesg.IsStartTimeValid()) {
     lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32

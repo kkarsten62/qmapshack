@@ -86,7 +86,7 @@ class CFitData
   bool getIsValid() const;
   void setIsValid(bool isValid);
   QList<lap_t>& getLaps();
-  quint32 getNoOfLaps();
+  quint16 getNoOfLaps();
   void setLap(quint32 index, const struct lap_t& lap);
   lap_t& getLap(quint32 index);
   lap_t& getSession();

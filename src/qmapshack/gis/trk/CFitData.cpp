@@ -33,7 +33,7 @@ QList<CFitData::lap_t>& CFitData::getLaps()
   return laps;
 }
 
-quint32 CFitData::getNoOfLaps() {
+quint16 CFitData::getNoOfLaps() {
   return laps.size();
 }
 

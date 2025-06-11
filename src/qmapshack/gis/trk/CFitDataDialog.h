@@ -96,6 +96,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
       {0, "Unknown"}
       , {1836, "GARMIN Edge 1000"}
       , {3011, "GARMIN Edge Explore"}
+      , {3028, "GARMIN GPSMAP 66"}
       , {4440, "GARMIN Edge 1050"}
   };
 
