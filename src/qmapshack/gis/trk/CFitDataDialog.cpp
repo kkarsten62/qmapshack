@@ -200,14 +200,10 @@ void CFitDataDialog::updateDataMivs() {
   qint32 treeRow = curItem->data(0, Qt::UserRole + 1).toInt();
 
   const CFitData::lap_t& lap = laps[treeRow];
-  //Show product name in GUI label
-
-  quint16 product = lap.product;
-  QString prefix(tr("FIT Data from Device:"));
-  QString labelTxt = products.contains(product) ?
-                         QString("%1 (%2) %3").arg(prefix).arg(product).arg(products[product]) :
-                         QString("%1 (%2) %3").arg(prefix).arg(product).arg(tr("Unknown device"));
-  labelProductName->setText(labelTxt);
+  //Show deviceName in GUI label
+  QString deviceStr;
+  getDeviceName(lap, deviceStr);
+  labelDeviceName->setText(QString(tr("Fit Data from Device %1")).arg(deviceStr));
 
   qint32 mivRow = 0;
   for (qint32 miv : shownMivs) { //For all shown miv
@@ -244,10 +240,19 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
   QString val, unit;
   cellStr = "";
   switch (column) {
+    case eColManufacturer:
+      cellStr = QString(tr("Unknown"));
+      if (manufacturers.contains(lap.manufacturer)) {
+        cellStr = manufacturers[lap.manufacturer];
+      }
+      break;
     case eColProduct:
-      cellStr = products.contains(lap.product) ?
-                         QString("(%1) %2").arg(lap.product).arg(products[lap.product]) :
-                         QString("(%1) %1").arg(lap.product).arg(tr("Unknown device"));
+      cellStr = QString(tr("Unknown"));
+      for (struct product_t product : products) {
+        if (product.manufacturer == lap.manufacturer && product.product == lap.product) {
+          cellStr = product.productStr;
+        }
+      }
       break;
     case eColNo:
       cellStr = QString("%1").arg(lap.no);
@@ -557,6 +562,24 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
     //p.restore(); //Back to state=0
   }
   labelGraphics->setPixmap(QPixmap::fromImage(image)); //Assign the img to the GUI
+}
+
+void CFitDataDialog::getDeviceName(const CFitData::lap_t &lap, QString& deviceStr) {
+
+  if (manufacturers.contains(lap.manufacturer)) {
+    QString manufacturerStr = manufacturers[lap.manufacturer];
+
+    QString productStr = QString(tr("unknown"));
+    for (struct product_t product : products) {
+      if (product.manufacturer == lap.manufacturer && product.product == lap.product) {
+        productStr = product.productStr;
+      }
+      deviceStr = QString("%1 %2").arg(manufacturerStr, productStr);
+    }
+  } else {
+      deviceStr = QString(tr("Manfacturer and product unknown"));
+    return;
+  }
 }
 
 void CFitDataDialog::slotOk(bool) {

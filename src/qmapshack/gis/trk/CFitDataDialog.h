@@ -23,22 +23,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CGisItemTrk;
 class CFitData;
 
-class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
-{
+class CFitDataDialog : public QDialog, private Ui::IFitDataDialog {
   Q_OBJECT
 
  public:
   explicit CFitDataDialog(QWidget *parent, CGisItemTrk& trk);
   ~CFitDataDialog();
 
-  struct column_t
-  {
+  struct column_t {
     QString label;
     Qt::AlignmentFlag alignment;
   };
 
+ private slots:
+  void slotOk(bool);
+  void slotCancel(bool);
+  void slotDeleteFitDataFromTrack(bool);
+  void slotSettingsDialog(bool);
+  void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
+  void slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem*);
+  void slotShowSessionsDb(bool checked);
+  void slotAddSessionToDb();
+  void slotDeleteSessionFromDb();
+  void slotShowTrkptInfo(bool checked);
+  void slotShowHelp();
+
+ private:
   enum columnTypes_e {
-    eColProduct
+    eColManufacturer
+    , eColProduct
     , eColNo
     , eColType
     , eColComment
@@ -78,31 +91,29 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
     , eColCount //The number of the enum items
   };
 
- private slots:
-  void slotOk(bool);
-  void slotCancel(bool);
-  void slotDeleteFitDataFromTrack(bool);
-  void slotSettingsDialog(bool);
-  void slotItemDoubleClicked(QTreeWidgetItem* item, qint32 column);
-  void slotCurrentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem*);
-  void slotShowSessionsDb(bool checked);
-  void slotAddSessionToDb();
-  void slotDeleteSessionFromDb();
-  void slotShowTrkptInfo(bool checked);
-  void slotShowHelp();
-
- private:
-  QMap<quint16, QString> products = {
+  QMap<quint16, QString> manufacturers = {
       {0, "Unknown"}
-      , {1836, "GARMIN Edge 1000"}
-      , {3011, "GARMIN Edge Explore"}
-      , {3028, "GARMIN GPSMAP 66"}
-      , {4440, "GARMIN Edge 1050"}
+      , {1, "GARMIN"}
+      , {32, "Wahoo"}
+  };
+  struct product_t {
+    quint16 manufacturer;
+    quint16 product;
+    QString productStr;
+  };
+  QList<struct product_t> products = {
+      {0, 0, "Unknown"}
+      , {1, 1836, "Edge 1000"}
+      , {1, 3011, "Edge Explore"}
+      , {1, 3028, "GPSMAP 66"}
+      , {1, 4440, "Edge 1050"}
+      , {32, 57, "Elemnt ACE"}
   };
 
   QMap<qint32, struct column_t> columns = {
-      {eColProduct, {"Product", Qt::AlignLeft}}
-      ,{eColNo, {"#", Qt::AlignRight}}
+      {eColManufacturer, {"Manufacturer", Qt::AlignLeft}}
+      , {eColProduct, {"Product", Qt::AlignLeft}}
+      , {eColNo, {"#", Qt::AlignRight}}
       , {eColType, {tr("Type"), Qt::AlignLeft}}
       , {eColComment, {tr("Comment"), Qt::AlignLeft}}
       , {eColStartTime, {tr("Start Time"), Qt::AlignLeft}}
@@ -165,6 +176,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog
   QString getPowerPhaseStr(const QList<qreal> &powerPhases, qint32 phase);
   void getCellStr(const CFitData::lap_t& lap, qint32 column, QString& cellStr);
   void paintGraphics(const CFitData::lap_t &lap);
+  void getDeviceName(const CFitData::lap_t &lap, QString& deviceStr);
 
   CGisItemTrk& trk;
   QList<qint32> shownTableCols;

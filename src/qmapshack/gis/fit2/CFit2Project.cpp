@@ -163,10 +163,12 @@ void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
   if (recordType == eRecordType::Course) {
     return;
   }
-  qDebug() << "Product:" << mesg.GetProduct();
+  if (mesg.IsManufacturerValid()) {
+    manufacturer = mesg.GetManufacturer();
+    fitData.setIsValid(true);
+  }
   if (mesg.IsProductValid()) {
     product = mesg.GetProduct();
-    fitData.setIsValid(true);
   }
 }
 //KKA end
@@ -259,6 +261,7 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   }
   CFitData::lap_t session;
 
+  session.manufacturer = manufacturer; //quint16
   session.product = product; //quint16
   if (mesg.IsNumLapsValid()) {
     session.no = mesg.GetNumLaps(); //uint16
@@ -449,6 +452,7 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   if (recordType == eRecordType::Course) {
     return;
   }
+  lap.manufacturer = manufacturer; //quint16
   lap.product = product; //quint16
   lap.no = fitData.getNoOfLaps();
   lap.type = CFitData::eTypeLap;

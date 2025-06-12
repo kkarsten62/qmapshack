@@ -535,7 +535,8 @@ QDataStream& operator>>(QDataStream& stream, CFitData& f) //Read
 }
 QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 {
-  stream << l.product << l.no << l.type << l.comment << l.startTime << l.elapsedTime
+  stream << l.manufacturer << l.product << l.no << l.type << l.comment
+      << l.startTime << l.elapsedTime
       << l.timerTime << l.distance << l.avgSpeed << l.maxSpeed
       << l.ascent << l.descent << l.avgHr << l.maxHr
       << l.avgCad << l.maxCad
@@ -549,7 +550,8 @@ QDataStream& operator<<(QDataStream& stream, const CFitData::lap_t& l) //Write
 }
 QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
 {
-  stream >> l.product >> l.no >> l.type >> l.comment >> l.startTime >> l.elapsedTime
+  stream >> l.manufacturer >> l.product >> l.no >> l.type >> l.comment
+      >> l.startTime >> l.elapsedTime
       >> l.timerTime >> l.distance >> l.avgSpeed >> l.maxSpeed
       >> l.ascent >> l.descent >> l.avgHr >> l.maxHr
       >> l.avgCad >> l.maxCad

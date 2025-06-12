@@ -39,6 +39,7 @@ class CFitData
 
   struct lap_t
   {
+    quint16 manufacturer = 0;
     quint16 product = 0;
     quint16 no = NOIDX;
     qint32 type = lapType_e::eTypeUnknown;
