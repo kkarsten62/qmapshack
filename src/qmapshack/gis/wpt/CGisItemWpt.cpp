@@ -159,9 +159,10 @@ CGisItemWpt::CGisItemWpt(const CTwoNavProject::wpt_t& tnvWpt, IGisProject* proje
   updateDecoration(eMarkNone, eMarkNone);
 }
 
-CGisItemWpt::CGisItemWpt(CFitStream& stream, IGisProject* project)
+
+CGisItemWpt::CGisItemWpt(const wpt_t& data, IGisProject* project)
     : IGisItem(project, eTypeWpt, NOIDX), proximity(NOFLOAT), posScreen(NOPOINTF) {
-  readWptFromFit(stream);
+  wpt = data;
   detBoundingRect();
 
   CGisItemWpt::genKey();

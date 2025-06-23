@@ -20,6 +20,7 @@
 
 #include "CMainWindow.h"
 #include "canvas/CCanvas.h"
+#include "gis/fit2/CFit2Project.h"
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
 #include "device/CDeviceWatcherLinux.h"
 #endif
@@ -44,7 +45,6 @@
 #include "gis/db/CSelectDBFolder.h"
 #include "gis/db/CSetupFolder.h"
 #include "gis/db/macros.h"
-#include "gis/fit/CFitProject.h"
 #include "gis/gpx/CGpxProject.h"
 #include "gis/ovl/CGisItemOvlArea.h"
 #include "gis/prj/IGisProject.h"
@@ -744,6 +744,9 @@ void CGisListWks::slotSaveWorkspace() {
     stream.setByteOrder(QDataStream::LittleEndian);
 
     project->IGisProject::operator>>(stream);
+    if (project->getName() == "") {
+      continue;
+    }
 
     query.prepare(
         "INSERT INTO workspace (type, keyqms, name, changed, visible, data) VALUES (:type, :keyqms, :name, :changed, "
@@ -775,9 +778,21 @@ void CGisListWks::slotLoadWorkspace() {
 
   QUERY_RUN("SELECT type, keyqms, name, changed, visible, data FROM workspace", return)
 
-  {  // open context for progress dialog
-    const int total = query.size();
+  { // open context for progress dialog
+    //Refer to https://stackoverflow.com/questions/26495049/qsqlquery-size-always-returns-1
+    qreal total = 0;
+    if (db.driver()->hasFeature(QSqlDriver::QuerySize)) {
+      total = query.size();
+    } else {
+      if(query.last())
+      {
+        total =  query.at() + 1;
+        query.first();
+        query.previous();
+      }
+    }
     PROGRESS_SETUP(tr("Loading workspace. Please wait."), 0, total, this);
+    progress.show();
     quint32 progCnt = 0;
 
     while (query.next()) {
@@ -845,7 +860,7 @@ void CGisListWks::slotLoadWorkspace() {
         }
 
         case IGisProject::eTypeFit: {
-          project = new CFitProject(name, this);
+          project = new CFit2Project(name, this);
           project->setCheckState(CGisListDB::eColumnCheckbox, visible);
           *project << stream;
           break;

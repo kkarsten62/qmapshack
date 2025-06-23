@@ -22,7 +22,7 @@ def find_copyright(filename):
             if res:
                 names.add(res.group(1).strip())
             else:
-                if "COPYRIGHT" in line.upper():
+                if "COPYRIGHT" in line.upper() and "qdbusxml2cpp" not in line:
                     print(f"Bad matching copyright: {line}\nin file: {filename}")
                     raise Exception
 

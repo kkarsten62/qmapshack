@@ -72,29 +72,7 @@ set( SRCS
     gis/db/IDBFolderSql.cpp
     gis/db/IDBMysql.cpp
     gis/db/IDBSqlite.cpp
-    gis/fit/CFitProject.cpp
-    gis/fit/CFitStream.cpp
-    gis/fit/decoder/CFitByteDataTransformer.cpp
-    gis/fit/decoder/CFitCrcState.cpp
-    gis/fit/decoder/CFitDecoder.cpp
-    gis/fit/decoder/CFitDefinitionMessage.cpp
-    gis/fit/decoder/CFitDevFieldDefinition.cpp
-    gis/fit/decoder/CFitDevFieldDefinitionState.cpp
-    gis/fit/decoder/CFitField.cpp
-    gis/fit/decoder/CFitFieldBuilder.cpp
-    gis/fit/decoder/CFitFieldDataState.cpp
-    gis/fit/decoder/CFitFieldDefinition.cpp
-    gis/fit/decoder/CFitFieldDefinitionState.cpp
-    gis/fit/decoder/CFitHeaderState.cpp
-    gis/fit/decoder/CFitMessage.cpp
-    gis/fit/decoder/CFitRecordContentState.cpp
-    gis/fit/decoder/CFitRecordHeaderState.cpp
-    gis/fit/decoder/IFitDecoderState.cpp
-    gis/fit/defs/CFitBaseType.cpp
-    gis/fit/defs/CFitFieldProfile.cpp
-    gis/fit/defs/CFitProfile.cpp
-    gis/fit/defs/CFitProfileLookup.cpp
-    gis/fit/serialization.cpp
+    gis/fit2/CFit2Project.cpp
     gis/gpx/CGpxProject.cpp
     gis/gpx/serialization.cpp
     gis/ovl/CDetailsOvlArea.cpp
@@ -110,7 +88,6 @@ set( SRCS
     gis/rte/CGisItemRte.cpp
     gis/rte/CScrOptRte.cpp
     gis/rte/router/CRouterBRouter.cpp
-    gis/rte/router/CRouterMapQuest.cpp
     gis/rte/router/CRouterOptimization.cpp
     gis/rte/router/CRouterRoutino.cpp
     gis/rte/router/CRouterSetup.cpp
@@ -375,6 +352,7 @@ set( SRCS
     device/CDeviceAccessKMtp.cpp
     device/CDeviceAccessGvfsMtp.cpp
     device/CDeviceGarminMtp.cpp
+    device/CDeviceGarminArchiveMtp.cpp
     device/dbus/org.kde.kmtp.Daemon.cpp
     device/dbus/org.kde.kmtp.Device.cpp
     device/dbus/org.kde.kmtp.Storage.cpp
@@ -458,31 +436,7 @@ set( HDRS
     gis/db/IDBMysql.h
     gis/db/IDBSqlite.h
     gis/db/macros.h
-    gis/fit/CFitProject.h
-    gis/fit/CFitStream.h
-    gis/fit/decoder/CFitByteDataTransformer.h
-    gis/fit/decoder/CFitCrcState.h
-    gis/fit/decoder/CFitDecoder.h
-    gis/fit/decoder/CFitDefinitionMessage.h
-    gis/fit/decoder/CFitDevFieldDefinition.h
-    gis/fit/decoder/CFitDevFieldDefinitionState.h
-    gis/fit/decoder/CFitField.h
-    gis/fit/decoder/CFitFieldBuilder.h
-    gis/fit/decoder/CFitFieldDataState.h
-    gis/fit/decoder/CFitFieldDefinition.h
-    gis/fit/decoder/CFitFieldDefinitionState.h
-    gis/fit/decoder/CFitHeaderState.h
-    gis/fit/decoder/CFitMessage.h
-    gis/fit/decoder/CFitRecordContentState.h
-    gis/fit/decoder/CFitRecordHeaderState.h
-    gis/fit/decoder/IFitDecoderState.h
-    gis/fit/defs/CFitBaseType.h
-    gis/fit/defs/CFitFieldProfile.h
-    gis/fit/defs/CFitProfile.h
-    gis/fit/defs/CFitProfileLookup.h
-    gis/fit/defs/fit_const.h
-    gis/fit/defs/fit_enums.h
-    gis/fit/defs/fit_fields.h
+    gis/fit2/CFit2Project.h
     gis/gpx/CGpxProject.h
     gis/ovl/CDetailsOvlArea.h
     gis/ovl/CGisItemOvlArea.h
@@ -496,7 +450,6 @@ set( HDRS
     gis/rte/CGisItemRte.h
     gis/rte/CScrOptRte.h
     gis/rte/router/CRouterBRouter.h
-    gis/rte/router/CRouterMapQuest.h
     gis/rte/router/CRouterOptimization.h
     gis/rte/router/CRouterRoutino.h
     gis/rte/router/CRouterSetup.h
@@ -767,6 +720,7 @@ set( HDRS
     device/CDeviceAccessKMtp.h
     device/CDeviceAccessGvfsMtp.h
     device/CDeviceGarminMtp.h
+    device/CDeviceGarminArchiveMtp.h
     device/IDeviceAccess.h
     device/dbus/org.kde.kmtp.Daemon.h
     device/dbus/org.kde.kmtp.Device.h
@@ -820,7 +774,6 @@ set( UIS
     gis/rte/IDetailsRte.ui
     gis/rte/IScrOptRte.ui
     gis/rte/router/IRouterBRouter.ui
-    gis/rte/router/IRouterMapQuest.ui
     gis/rte/router/IRouterRoutino.ui
     gis/rte/router/IRouterSetup.ui
     gis/rte/router/brouter/IRouterBRouterInfo.ui
@@ -927,18 +880,6 @@ set( RCS
     resources.qrc
 )
 
-set( TRANSLATIONS
-    locale/${APPLICATION_NAME}.ts
-    locale/${APPLICATION_NAME}_ca.ts
-    locale/${APPLICATION_NAME}_cs.ts
-    locale/${APPLICATION_NAME}_de.ts
-    locale/${APPLICATION_NAME}_es.ts
-    locale/${APPLICATION_NAME}_fr.ts
-    locale/${APPLICATION_NAME}_it.ts
-    locale/${APPLICATION_NAME}_nl.ts
-    locale/${APPLICATION_NAME}_ru.ts
-)
-
 ###############################################################################################
 # Some Qt magic
 ###############################################################################################
@@ -946,14 +887,6 @@ set( TRANSLATIONS
 qt6_wrap_ui(UI_HDRS ${UIS})
 qt6_add_resources(RC_SRCS ${RCS})
 
-###############################################################################################
-# Translation related stuff
-###############################################################################################
-
-qt_add_translations(${APPLICATION_NAME}
-    TS_FILES ${TRANSLATIONS}
-    QM_FILES_OUTPUT_VARIABLE ${APPLICATION_NAME}_QM_FILES
-)
 
 ###############################################################################################
 # Build source file and include paths lists
@@ -968,6 +901,7 @@ set(MAININP
 )
 
 include_directories(
+    .
     ../common
     SYSTEM # this prevents warnings from non-QMS headers
     ${CMAKE_BINARY_DIR}
@@ -975,6 +909,7 @@ include_directories(
     ${PROJ_INCLUDE_DIRS}
     ${ROUTINO_INCLUDE_DIRS}
     ${ALGLIB_INCLUDE_DIRS}
+    ../../3rdparty/GarminFitSdk/cpp
 )
 
 if(APPLE)
@@ -986,11 +921,38 @@ endif(APPLE)
 ###############################################################################################
 # Build the executable and define necessary libraries.
 ###############################################################################################
-# if(APPLE)
-    # add_executable(${APPLICATION_NAME} MACOSX_BUNDLE ${MAININP})
-# else(APPLE)
-    add_executable(${APPLICATION_NAME} WIN32 ${MAININP})
-# endif(APPLE)
+add_executable(${APPLICATION_NAME} WIN32 ${MAININP})
+
+###############################################################################################
+# Translation related stuff
+###############################################################################################
+if(${UPDATE_TRANSLATIONS_PURGE_OBSOLETE})
+    set(UPDATE_OPTIONS -noobsolete)
+else()
+    set(UPDATE_OPTIONS )
+endif()
+if(${UPDATE_TRANSLATIONS})
+    set( TRANSLATIONS
+        locale/${APPLICATION_NAME}.ts
+        locale/${APPLICATION_NAME}_ca.ts
+        locale/${APPLICATION_NAME}_cs.ts
+        locale/${APPLICATION_NAME}_de.ts
+        locale/${APPLICATION_NAME}_es.ts
+        locale/${APPLICATION_NAME}_fr.ts
+        locale/${APPLICATION_NAME}_it.ts
+        locale/${APPLICATION_NAME}_nl.ts
+        locale/${APPLICATION_NAME}_ru.ts
+    )
+
+    qt_add_translations(${APPLICATION_NAME}
+        TS_FILES ${TRANSLATIONS}
+        QM_FILES_OUTPUT_VARIABLE ${APPLICATION_NAME}_QM_FILES
+        LUPDATE_TARGET ${APPLICATION_NAME}_lupdate
+        SOURCE_TARGETS ${APPLICATION_NAME}    
+        LUPDATE_OPTIONS ${UPDATE_OPTIONS}
+    )
+    add_dependencies(${APPLICATION_NAME} ${APPLICATION_NAME}_lupdate)
+endif()
 
 target_compile_definitions(${APPLICATION_NAME} PUBLIC
     -DVER_MAJOR=${PROJECT_VERSION_MAJOR}
@@ -1028,6 +990,7 @@ target_link_libraries(${APPLICATION_NAME}
     ${ROUTINO_LIBRARIES}
     ${ALGLIB_LIBRARIES}
     QuaZip::QuaZip
+    GarminFit
 )
 
 if(APPLE)
@@ -1047,3 +1010,11 @@ if (UNIX AND NOT WIN32 AND NOT APPLE)
     install(FILES   ${${APPLICATION_NAME}_QM_FILES}         DESTINATION     ${DATA_INSTALL_PREFIX}/${APPLICATION_NAME}/translations)
     install(FILES   ${${APPLICATION_NAME}_DESKTOP_FILES}    DESTINATION     ${XDG_APPS_DIR})
 endif (UNIX AND NOT WIN32 AND NOT APPLE)
+if(WIN32)
+    qt_generate_deploy_app_script(
+        TARGET ${APPLICATION_NAME}
+        OUTPUT_SCRIPT deploy_script_${APPLICATION_NAME}
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+    install(SCRIPT ${deploy_script_${APPLICATION_NAME}})
+endif()
