@@ -255,7 +255,7 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
       }
       break;
     case eColNo:
-      cellStr = QString("%1").arg(lap.no);
+      cellStr = QString("%1").arg((lap.type == CFitData::eTypeLap) ? lap.no + 1 : lap.no);
       break;
     case eColType:
       if (lap.type == CFitData::eTypeLap) {

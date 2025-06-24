@@ -99,9 +99,9 @@ void CFitData::assignTimeToIdx(CGisItemTrk& trk)
         ptClosedBy = pt;
       }
     }
-    qDebug() << "ptClosedBy.idxTotal:" << ptClosedBy.idxTotal << "lap.startTime:" << lap.startTime.toString() << "ptClosedBy.time:" << ptClosedBy.time.toString();
+    //qDebug() << "ptClosedBy.idxTotal:" << ptClosedBy.idxTotal << "lap.startTime:" << lap.startTime.toString() << "ptClosedBy.time:" << ptClosedBy.time.toString();
     idxDescs.insert(ptClosedBy.idxTotal,
-                    QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no).arg(ptClosedBy.idxTotal));
+                    QString(tr("FIT LAP")) + QString("-%1 (%2)").arg(lap.no + 1).arg(ptClosedBy.idxTotal));
   }
 }
 
