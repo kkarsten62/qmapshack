@@ -33,7 +33,7 @@ CFitDataSettingsDialog::CFitDataSettingsDialog(
   QString curDbName = cfg.value("curDbName", "").toString();
   cfg.endGroup();
 
-  qint32 curIndex;
+  qint32 curIndex = 0;
   cfg.beginGroup("Database");
   const QStringList& names = cfg.value("names").toStringList();
   cfg.beginGroup("Entries");

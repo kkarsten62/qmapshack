@@ -416,8 +416,8 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
 
   qint8 leftPcoVal = lap.leftPco;
   qint8 rightPcoVal = lap.rightPco;
-  qint8 leftPco; //Maybe cutted
-  qint8 rightPco; //Maybe cutted
+  qint8 leftPco = 0;
+  qint8 rightPco = 0;
   qint8 pco;
   for (qint32 i = 0; i < 2; ++i) {
     pco = leftPcoVal < 0 ? qMax(leftPcoVal, -30) : qMin(leftPcoVal, 30);
@@ -537,7 +537,7 @@ void CFitDataDialog::paintGraphics(const CFitData::lap_t& lap) {
         p.rotate(90 - marker.angle); //Rotate cw to draw the text
 
         QRect rect;
-        qint32 alignment;
+        qint32 alignment = Qt::AlignBottom;
         for (struct position_t position : positions) { //Find the right position at end of line
           if (marker.angle >= position.gt && marker.angle <= position.lt) {
             rect = position.rect;
