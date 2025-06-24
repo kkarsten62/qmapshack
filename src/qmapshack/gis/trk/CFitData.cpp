@@ -64,7 +64,16 @@ void CFitData::clear(CGisItemTrk& trk)
 
 void CFitData::setLapComment(qint32 index, const QString& comment)
 {
-  laps[index].comment = comment;
+  if (getNoOfLaps()) {
+    laps[index].comment = comment;
+  }
+}
+
+void CFitData::setSessionComment(const QString& comment) {
+  if (getNoOfLaps()) {
+    CFitData::lap_t& lap = getSession();
+    lap.comment = comment;
+  }
 }
 
 qint32 CFitData::getLapNo(qint32 index) const

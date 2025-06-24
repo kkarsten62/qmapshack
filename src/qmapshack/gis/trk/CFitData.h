@@ -93,6 +93,7 @@ class CFitData
   lap_t& getSession();
   void clear(CGisItemTrk &trk);
   void setLapComment(qint32 index, const QString& comment);
+  void setSessionComment(const QString& comment);
   qint32 getLapNo(qint32 index) const;
   void assignTimeToIdx(CGisItemTrk &trk);
   void setTrkPtDesc(CGisItemTrk &trk);

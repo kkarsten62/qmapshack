@@ -139,6 +139,7 @@ void CFit2Project::decodeFile(const QString& filename) {
 
   //KKA start
   //new CGisItemTrk(track, this);
+  fitData.setSessionComment(track.name);
   new CGisItemTrk(track, fitData, this);
   //KKA end
 
