@@ -268,7 +268,7 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
       cellStr = lap.comment;
       break;
     case eColStartTime:
-      val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortWithSecs);
+      val = IUnit::self().datetime2string(lap.startTime, IUnit::eTimeFormatShortPlusSecs);
       cellStr = QString("%L1").arg(val);
       break;
     case eColElapsedTime:

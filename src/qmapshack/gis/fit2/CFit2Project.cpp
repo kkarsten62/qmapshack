@@ -116,10 +116,6 @@ void CFit2Project::decodeFile(const QString& filename) {
     throw std::runtime_error((QStringLiteral("Exception decoding file: ") + e.what()).toStdString());
   }
 
-  createTrack("", "");
-}
-
-void CFit2Project::createTrack(const QString& name, const QString& comment) {
   if (!segment.isEmpty()) {
     track.segs.append(segment);
     segment.pts.clear();
@@ -131,8 +127,6 @@ void CFit2Project::createTrack(const QString& name, const QString& comment) {
 
   if (track.name.isEmpty()) {
     track.name = IUnit::datetime2string(track.segs.first().pts.first().time, IUnit::eTimeFormatShort);
-  } else {
-    track.name = name;
   }
 
   //Only for debugging
@@ -167,12 +161,8 @@ void CFit2Project::OnMesg(fit::Mesg& mesg) {
   //}
 }
 
-//KKA start
-//void CFit2Project::OnMesg(fit::FileIdMesg& mesg) { /*qDebug() << mesg.GetName();*/ } //Original
 void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
-  if (recordType == eRecordType::Course) {
-    return;
-  }
+//KKA start
   if (mesg.IsManufacturerValid()) {
     manufacturer = mesg.GetManufacturer();
     fitData.setIsValid(true);
@@ -180,26 +170,17 @@ void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
   if (mesg.IsProductValid()) {
     product = mesg.GetProduct();
   }
-}
 //KKA end
+}
 
 void CFit2Project::OnMesg(fit::DeviceInfoMesg& mesg) {
-  // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp());
+  //Currently not supported
 }
 
 void CFit2Project::OnMesg(fit::RecordMesg& mesg) {
-  // qDebug() << mesg.GetName();
-  // for (int i = 0; i < mesg.GetNumFields(); i++) {
-  //   fit::Field* filed = mesg.GetFieldByIndex(i);
-  //   qDebug() << "  " << filed->GetName();
-  // }
-
   CTrackData::trkpt_t trkpt;
   if (mesg.IsTimestampValid()) {
     trkpt.time = dateTimeFromFitToQt(mesg.GetTimestamp());
-    //KKA start
-    trkptTime = trkpt.time; //To be saved to get the last time for a lap
-    //KKA end
   }
   if (mesg.IsPositionLatValid() && mesg.IsPositionLongValid()) {
     trkpt.lon = semicircleToDegree(mesg.GetPositionLong());
@@ -251,12 +232,6 @@ void CFit2Project::OnMesg(fit::ActivityMesg& mesg) {
 }
 
 void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
-  // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp()) << mesg.GetEventType();
-  // for (int i = 0; i < mesg.GetNumFields(); i++) {
-  //   fit::Field* filed = mesg.GetFieldByIndex(i);
-  //   qDebug() << "  " << filed->GetName();
-  // }
-
   //KKA start
   if (recordType == eRecordType::Course) {
     return;
@@ -380,9 +355,8 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
     session.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
   fitData.setLap(fitData.getNoOfLaps(), session); //Set the session always at the end of laps list
-  //********************
   //KKA end
-
+  /*
   QString comment = "<div><b>Device Statistic</b><br/>";
   QString val, unit;
   if (mesg.IsTotalElapsedTimeValid()) {
@@ -436,27 +410,18 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   comment += "</div>";
 
   track.cmt = comment;
+  */
 }
 
 void CFit2Project::OnMesg(fit::LapMesg& mesg) {
-  // qDebug() << mesg.GetName() << dateTimeFromFitToQt(mesg.GetTimestamp());
-  // for (int i = 0; i < mesg.GetNumFields(); i++) {
-  //   fit::Field* filed = mesg.GetFieldByIndex(i);
-  //   qDebug() << "  " << filed->GetName();
-  // }
-  if (!segment.isEmpty()) {
-    track.segs.append(segment);
-    segment.pts.clear();
-  }
-  CFitData::lap_t lap;
-
   //KKA start
   if (recordType == eRecordType::Course) {
     return;
   }
+  CFitData::lap_t lap;
+
   lap.manufacturer = manufacturer; //quint16
   lap.product = product; //quint16
-  //lap.no = fitData.getNoOfLaps();
   lap.no = lapNo++;
   lap.type = CFitData::eTypeLap;
   if (mesg.IsStartTimeValid()) {
@@ -558,36 +523,6 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
     lap.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
   fitData.setLap(lap.no, lap);
-
-  //Original, all commented
-  /*
-  if (recordType == eRecordType::Course) {
-    QString val, unit;
-    QString comment = "<div>";
-    if (mesg.IsTotalTimerTimeValid()) {
-      IUnit::self().seconds2time(mesg.GetTotalTimerTime(), val, unit);
-      comment += tr("total timer time: %1%2<br/>").arg(val, unit);
-    }
-    if (mesg.IsTotalDistanceValid()) {
-      IUnit::self().meter2distance(mesg.GetTotalDistance(), val, unit);
-      comment += tr("total distance: %1%2<br/>").arg(val, unit);
-    }
-    if (mesg.IsEnhancedAvgSpeedValid()) {
-      IUnit::self().meter2speed(mesg.GetEnhancedAvgSpeed(), val, unit);
-      comment += tr("enhanced average speed: %1%2<br/>").arg(val, unit);
-    }
-    if (mesg.GetTotalAscent()) {
-      IUnit::self().meter2elevation(mesg.GetTotalAscent(), val, unit);
-      comment += tr("total ascent: %1%2<br/>").arg(val, unit);
-    }
-    if (mesg.GetTotalDescent()) {
-      IUnit::self().meter2elevation(mesg.GetTotalDescent(), val, unit);
-      comment += tr("total descent: %1%2<br/>").arg(val, unit);
-    }
-
-    comment += "<div>";
-    track.cmt = comment;
-  }
 }
 
 void CFit2Project::OnMesg(fit::EventMesg& mesg) {

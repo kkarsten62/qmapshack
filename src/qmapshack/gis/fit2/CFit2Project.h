@@ -97,7 +97,6 @@ class CFit2Project : public fit::FileIdMesgListener,
   CTrackData::trkseg_t segment;
   //KKA start
   CFitData fitData;
-  QDateTime trkptTime;
   quint16 manufacturer;
   quint16 product;
   qint32 lapNo = 0;
