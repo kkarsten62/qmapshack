@@ -454,7 +454,8 @@ void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   }
   lap.manufacturer = manufacturer; //quint16
   lap.product = product; //quint16
-  lap.no = fitData.getNoOfLaps();
+  //lap.no = fitData.getNoOfLaps();
+  lap.no = lapNo++;
   lap.type = CFitData::eTypeLap;
   if (mesg.IsStartTimeValid()) {
     lap.startTime = dateTimeFromFitToQt(mesg.GetStartTime()); //uint32

@@ -102,6 +102,7 @@ class CFit2Project : public fit::FileIdMesgListener,
   QDateTime trkptTime;
   quint16 manufacturer;
   quint16 product;
+  qint32 lapNo = 0;
   //KKA end
 
 };
