@@ -288,11 +288,11 @@ void CFitDataDialog::getCellStr(const CFitData::lap_t& lap, qint32 column, QStri
       cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
     case eColAvgSpeed:
-      IUnit::self().meter2speed(lap.avgSpeed / 1000., val, unit);
+      IUnit::self().meter2speed(lap.avgSpeed, val, unit);
       cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
     case eColMaxSpeed:
-      IUnit::self().meter2speed(lap.maxSpeed / 1000., val, unit);
+      IUnit::self().meter2speed(lap.maxSpeed, val, unit);
       cellStr = QString("%L1%2").arg(val).arg(unit);
       break;
     case eColAscent:
