@@ -32,15 +32,18 @@ CDeviceAccessKMtp::CDeviceAccessKMtp(const QDBusObjectPath& objectPathStorage, Q
   for (const KMTPFile& file : topLevelFiles) {
     if (file.isFolder() && (file.filename().toUpper() == "GARMIN")) {
       dir.setPath("/" + file.filename());
-      break;
+      return;
     }
   }
+
+  // No GARMIN directory is found, so we assume it is a Generic one, set the data directory to the top level
+  dir.setPath("/");
 }
 
-QPixmap CDeviceAccessKMtp::getIcon() {
+QPixmap CDeviceAccessKMtp::getIcon(const QString& iconPath) {
   QPixmap pixmap;
   QTemporaryFile icon;
-  if (readFileFromStorage(dir.filePath("Garmintriangletm.ico"), icon)) {
+  if (readFileFromStorage(dir.filePath(iconPath), icon)) {
     icon.open();
     pixmap.loadFromData(icon.readAll());
   }

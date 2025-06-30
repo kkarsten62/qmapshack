@@ -35,14 +35,18 @@ CDeviceAccessGvfsMtp::CDeviceAccessGvfsMtp(const GVFSMount& mount, const QString
     if (directory.toUpper() == "GARMIN") {
       dir.setPath(d.filePath(directory));
       pathOnDevice.setPath("/" + QDir(storagePath).filePath(directory));
+      return;
     }
   }
+  // No GARMIN directory is found, so we assume it is a Generic one, set the data directory to the top level
+  dir = d;
+  pathOnDevice.setPath("/" + storagePath);
 }
 
-QPixmap CDeviceAccessGvfsMtp::getIcon() {
+QPixmap CDeviceAccessGvfsMtp::getIcon(const QString& iconPath) {
   QPixmap pixmap;
-  if (dir.exists("Garmintriangletm.ico")) {
-    pixmap.load(dir.filePath("Garmintriangletm.ico"));
+  if (dir.exists(iconPath)) {
+    pixmap.load(dir.filePath(iconPath));
   }
   return pixmap;
 }
@@ -82,7 +86,7 @@ bool CDeviceAccessGvfsMtp::sendFileToStorage(const QString& path, QFile& file) {
   file.flush();
   file.close();
   QByteArray source = file.fileName().toLocal8Bit();
-  QByteArray target = pathOnDevice.filePath(path).toLocal8Bit();
+  QByteArray target = QDir::cleanPath(pathOnDevice.filePath(path)).toLocal8Bit();
   source.append('\0');
   target.append('\0');
   auto res = storage->Push(target, source, false, 0, QDBusObjectPath("/"), false);
