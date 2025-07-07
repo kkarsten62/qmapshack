@@ -1,4 +1,4 @@
-V1.XX.X
+V1.18.0
 [QMS-558] Support for MTP devices
 [QMS-648] Porting to Qt6
 [QMS-656] TMS/WMTS: Fix loosing layer selection when reloading maps
