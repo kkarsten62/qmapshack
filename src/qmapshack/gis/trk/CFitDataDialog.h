@@ -184,7 +184,7 @@ class CFitDataDialog : public QDialog, private Ui::IFitDataDialog {
   const qint32 maxMivs = 8;
   QList<QLabel*> mivLabels;
   QString connectionDbName;
-  QList<struct CFitData::lap_t> laps;
+  QList<CFitData::lap_t> laps;
   QPushButton* buttonSettingsDialog;
 };
 
