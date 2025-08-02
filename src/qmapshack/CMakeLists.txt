@@ -184,6 +184,7 @@ set( SRCS
     helpers/CInputDialog.cpp
     helpers/CLimit.cpp
     helpers/CLinksDialog.cpp
+    helpers/CMapIconSizesSetup.cpp
     helpers/CPhotoViewer.cpp
     helpers/CPositionDialog.cpp
     helpers/CProgressDialog.cpp
@@ -548,6 +549,7 @@ set( HDRS
     helpers/CInputDialog.h
     helpers/CLimit.h
     helpers/CLinksDialog.h
+    helpers/CMapIconSizesSetup.h
     helpers/CPhotoViewer.h
     helpers/CPositionDialog.h
     helpers/CProgressDialog.h
@@ -833,6 +835,7 @@ set( UIS
     helpers/IElevationDialog.ui
     helpers/IInputDialog.ui
     helpers/ILinksDialog.ui
+    helpers/IMapIconSizesSetup.ui
     helpers/IPositionDialog.ui
     helpers/IProgressDialog.ui
     helpers/ISelectCopyAction.ui
@@ -901,7 +904,6 @@ set(MAININP
     ${HDRS}
     ${UI_HDRS}
     ${RC_SRCS}
-    ${${APPLICATION_NAME}_QM_FILES}
     ${${APPLICATION_NAME}_DESKTOP_FILES}
 )
 
@@ -936,18 +938,20 @@ if(${UPDATE_TRANSLATIONS_PURGE_OBSOLETE})
 else()
     set(UPDATE_OPTIONS )
 endif()
+
+set( TRANSLATIONS
+    locale/${APPLICATION_NAME}.ts
+    locale/${APPLICATION_NAME}_ca.ts
+    locale/${APPLICATION_NAME}_cs.ts
+    locale/${APPLICATION_NAME}_de.ts
+    locale/${APPLICATION_NAME}_es.ts
+    locale/${APPLICATION_NAME}_fr.ts
+    locale/${APPLICATION_NAME}_it.ts
+    locale/${APPLICATION_NAME}_nl.ts
+    locale/${APPLICATION_NAME}_ru.ts
+)
+
 if(${UPDATE_TRANSLATIONS})
-    set( TRANSLATIONS
-        locale/${APPLICATION_NAME}.ts
-        locale/${APPLICATION_NAME}_ca.ts
-        locale/${APPLICATION_NAME}_cs.ts
-        locale/${APPLICATION_NAME}_de.ts
-        locale/${APPLICATION_NAME}_es.ts
-        locale/${APPLICATION_NAME}_fr.ts
-        locale/${APPLICATION_NAME}_it.ts
-        locale/${APPLICATION_NAME}_nl.ts
-        locale/${APPLICATION_NAME}_ru.ts
-    )
 
     qt_add_translations(${APPLICATION_NAME}
         TS_FILES ${TRANSLATIONS}
@@ -957,8 +961,22 @@ if(${UPDATE_TRANSLATIONS})
         LUPDATE_OPTIONS ${UPDATE_OPTIONS}
     )
     add_dependencies(${APPLICATION_NAME} ${APPLICATION_NAME}_lupdate)
-endif()
+else(${UPDATE_TRANSLATIONS})
+    qt_add_lrelease(
+        TS_FILES  ${TRANSLATIONS}
+        QM_FILES_OUTPUT_VARIABLE ${APPLICATION_NAME}_QM_FILES
+    )
+    qt_add_resources(${APPLICATION_NAME} "translations"
+        PREFIX "/locale"
+        BASE "${CMAKE_CURRENT_BINARY_DIR}"
+        FILES "${${APPLICATION_NAME}_QM_FILES}"
+    )
+endif(${UPDATE_TRANSLATIONS})
 
+
+###############################################################################################
+# Compile definitions
+###############################################################################################
 target_compile_definitions(${APPLICATION_NAME} PUBLIC
     -DVER_MAJOR=${PROJECT_VERSION_MAJOR}
     -DVER_MINOR=${PROJECT_VERSION_MINOR}
@@ -972,6 +990,9 @@ if(${DEVELOPMENT_VERSION})
     )
 endif(${DEVELOPMENT_VERSION})
 
+###############################################################################################
+# Libraries
+###############################################################################################
 if(Qt6DBus_FOUND)
     set(DBUS_LIB Qt6::DBus)
 else(Qt6DBus_FOUND)
