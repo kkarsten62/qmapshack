@@ -130,6 +130,7 @@ class CGisListWks : public QTreeWidget {
   void slotNewDevice();
   void slotSyncPrjToDevices();
   void slotToRoute();
+  void slotToArea();
 
  private:
   void configDB();
@@ -225,7 +226,9 @@ class CGisListWks : public QTreeWidget {
   QAction* actionNogoArea;
   QAction* actionRteFromWpt;
   QAction* actionEditPrxWpt;
+  QAction* actionChangeIconWpt;
   QAction* actionToRoute;
+  QAction* actionToArea;
 
   QAction* actionEleWptTrk;
 

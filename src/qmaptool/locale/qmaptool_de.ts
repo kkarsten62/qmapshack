@@ -256,7 +256,7 @@
 <context>
     <name>CItemMapLayer</name>
     <message>
-        <location filename="../items/CItemMapLayer.cpp" line="32"/>
+        <location filename="../items/CItemMapLayer.cpp" line="33"/>
         <source>Layer</source>
         <translation>Ebene</translation>
     </message>
@@ -280,34 +280,47 @@
     </message>
 </context>
 <context>
+    <name>CMainWindow</name>
+    <message>
+        <location filename="../misc.h" line="29"/>
+        <source>File access failed...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../misc.h" line="30"/>
+        <source>Failed to open %1 with error %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>COverlayCutMap</name>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="197"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="198"/>
         <source>Delete mask...</source>
         <translation>Maske löschen...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="197"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="198"/>
         <source>Are you sure to delete complete mask?</source>
         <translation>Wollen Sie wirklich die gesamte Maske löschen?</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="213"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="214"/>
         <source>Save mask...</source>
         <translation>Maske speichern...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="256"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="257"/>
         <source>Load mask...</source>
         <translation>Maske laden...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="268"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="269"/>
         <source>Failed...</source>
         <translation>Fehlgeschlagen...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="268"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="269"/>
         <source>Not a shape file.</source>
         <translation>Keine Shape-Datei.</translation>
     </message>
@@ -329,7 +342,7 @@ Im nächsten Schritte benutzen Sie das Referenzwerkzeug, um die Positionen von a
 <context>
     <name>COverlayRefMap</name>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="41"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="43"/>
         <source>If you used the Grid Tool you have to fine tune the reference points by placing them as much as possible on the grid crossing. Be aware that if you over scale you get jumping points by rounding effects. Be precise but do not make religion out of the task.
 If your mouse focus is on the map you can use the N and B keys to jump forward an backward in the reference point list. 
 The is also the option to fine tune the reference points in auto-mode. In this mode the next reference point is selected automatically right after you placed the current one. This is very convenient for a large number of reference points.</source>
@@ -339,32 +352,32 @@ Wenn ihr Mausfokus auf der Karte ist, können Sie die N und B Tasten benützen, 
 Es gibt außerdem die Option, die Referenzpunkte im Automode zu justieren. In diesem Modus wird der nächste Referenzpunkt automatisch ausgewählt, nachdem Sie den aktuellen Punkt platziert haben. Diese Funktion ist sehr praktisch, wenn Sie eine große Anzahl an Punkten bearbeiten wollen.</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="517"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="519"/>
         <source>Save reference points...</source>
         <translation>Referenzpunkte speichern...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="552"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="554"/>
         <source>Load reference points...</source>
         <translation>Referenzpunkte laden...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="587"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="589"/>
         <source>Delete all reference points...</source>
         <translation>Alle Referenzpunkte löschen...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="588"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="590"/>
         <source>Are you sure to delete all reference points in the list?</source>
         <translation>Sind Sie sicher, dass Sie alle Referenzpunkte aus der Liste löschen wollen?</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="614"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="616"/>
         <source>Delete...</source>
         <translation>Löschen...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="614"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="616"/>
         <source>Delete all selected reference points?</source>
         <translation>Alle ausgewählten Referenzpunkte löschen?</translation>
     </message>
@@ -549,22 +562,22 @@ Durch den Benutzer abgebrochen.</translation>
 <context>
     <name>CToolPalettize</name>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="29"/>
+        <location filename="../tool/CToolPalettize.cpp" line="30"/>
         <source>Add Color Palette</source>
         <translation>Farbtabelle erzeugen</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="36"/>
+        <location filename="../tool/CToolPalettize.cpp" line="37"/>
         <source>Usually you use RGBA color while referencing a map because the large color space allows you to scale and rotate the map without any loss of quality. But it results into rather large files. The file size can be optimized by using a color palette instead of the RGBA color space. The impact on quality is low as long as you do not want to scale or rotate the map. If you want to combine files with a color palette all files need to have the same palette.</source>
         <translation>Üblicherweise benützt man RGBA Farben während man eine Karte referenziert, weil der große Farbraum einem erlaubt, die Karte ohne Qualitätseinbuße zu drehen und zu skalieren. Leider wird deswegen auch die Datei sehr groß. Die Größe kann optimiert werden, wenn man eine Farbpalette anstelle von RGBA verwendet. Die Qualitätseinbußen sind gering, solange man die Karte nicht drehen oder skalieren möchte. Wenn Sie mehrere Karten zusammenfügen wolle, müssen alle dieselbe Palette benützen.</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="48"/>
+        <location filename="../tool/CToolPalettize.cpp" line="49"/>
         <source>Note: This tool will use all files in the list as a combined input to derive an optimal palette. This will only work if all files have the same projection and scale.</source>
         <translation>Anmerkung: Dieses Werkzeug benützt alle Dateien in der Liste als gemeinsame Eingabe, um eine optimale Palette zu berechnen. Das kann nur funktionieren, wenn alle Dateien die gleiche Projektion und Skalierung haben.</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="113"/>
+        <location filename="../tool/CToolPalettize.cpp" line="114"/>
         <source>Select filename...</source>
         <translation>Dateinamen auswählen...</translation>
     </message>

@@ -52,6 +52,7 @@ class CScrOptTrk : public IScrOpt, private Ui::IScrOptTrk {
   void slotAddInfo();
   void slotTags();
   void slotToRoute();
+  void slotToArea();
 
  private:
   IGisItem::key_t key;

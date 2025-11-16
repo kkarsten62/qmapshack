@@ -22,6 +22,7 @@
 #include <QPixmap>
 
 #include "CMainWindow.h"
+#include "misc.h"
 
 CDeviceAccessGvfsMtp::CDeviceAccessGvfsMtp(const GVFSMount& mount, const QString& storagePath, QObject* parent)
     : IDeviceAccess(parent), _description(storagePath) {
@@ -67,7 +68,7 @@ bool CDeviceAccessGvfsMtp::readFileFromStorage(const QString& path, QFile& file)
     if (file.isOpen()) {
       file.seek(0);
     } else {
-      file.open(QIODevice::WriteOnly);
+      openFileCheckSuccess(QIODevice::WriteOnly, file);
     }
 
     file.write(f.readAll());

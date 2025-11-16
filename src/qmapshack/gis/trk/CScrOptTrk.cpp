@@ -75,6 +75,7 @@ CScrOptTrk::CScrOptTrk(CGisItemTrk* trk, const QPoint& point, IMouse* parent) : 
   connect(toolAddElevation, &QToolButton::clicked, this, &CScrOptTrk::slotAddElevation);
   connect(toolAddInfo, &QToolButton::clicked, this, &CScrOptTrk::slotAddInfo);
   connect(toolToRoute, &QToolButton::clicked, this, &CScrOptTrk::slotToRoute);
+  connect(toolToArea, &QToolButton::clicked, this, &CScrOptTrk::slotToArea);
 
   connect(label, &QLabel::linkActivated, this, &CScrOptTrk::slotLinkActivated);
 
@@ -87,54 +88,63 @@ CScrOptTrk::~CScrOptTrk() {}
 
 void CScrOptTrk::slotDelete() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().delItemByKey(key);
   close();
 }
 
 void CScrOptTrk::slotCopy() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().copyItemByKey(key);
   close();
 }
 
 void CScrOptTrk::slotEditDetails() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().editItemByKey(key);
   close();
 }
 
 void CScrOptTrk::slotProfile(bool on) {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().focusTrkByKey(on, key);
   close();
 }
 
 void CScrOptTrk::slotCut() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().cutTrkByKey(key);
   close();
 }
 
 void CScrOptTrk::slotEdit() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().editTrkByKey(key);
   close();
 }
 
 void CScrOptTrk::slotReverse() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().reverseTrkByKey(key);
   close();
 }
 
 void CScrOptTrk::slotCombine() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().combineTrkByKey(key);
   close();
 }
 
 void CScrOptTrk::slotRange() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   mouse = nullptr;
   CGisWorkspace::self().rangeTrkByKey(key);
   close();
@@ -142,50 +152,63 @@ void CScrOptTrk::slotRange() {
 
 void CScrOptTrk::slotActivity() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CActivityTrk::getMenu(key, this, true);
   close();
 }
 
 void CScrOptTrk::slotColor() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().colorTrkByKey({key});
   close();
 }
 
 void CScrOptTrk::slotCopyWithWpt() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().copyTrkWithWptByKey(key);
   close();
 }
 
 void CScrOptTrk::slotNogo() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().toggleNogoItem(key);
   close();
 }
 
 void CScrOptTrk::slotAddElevation() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().addEleToWptTrkByKey({key});
   close();
 }
 
 void CScrOptTrk::slotAddInfo() {
-  close();
-
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().addTrkInfoByKey(key);
+  close();
 }
 
 void CScrOptTrk::slotToRoute() {
-  close();
-
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().convertTrackToRoute(key);
+  close();
+}
+
+void CScrOptTrk::slotToArea() {
+  CScrOptSemaphoreLocker lock(*this);
+  hide();
+  CGisWorkspace::self().convertTrackToArea(key);
+  close();
 }
 
 void CScrOptTrk::slotTags() {
   CScrOptSemaphoreLocker lock(*this);
+  hide();
   CGisWorkspace::self().tagItemsByKey({key});
   close();
 }

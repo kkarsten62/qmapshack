@@ -20,13 +20,12 @@
 #define ISCROPT_H
 
 #include <QMouseEvent>
-#include <QPixmap>
 #include <QPointer>
-#include <QRect>
 #include <QSemaphore>
 #include <QWidget>
 
 class IMouse;
+class QMouseEvent;
 
 #define SCR_OPT_OFFSET 15
 

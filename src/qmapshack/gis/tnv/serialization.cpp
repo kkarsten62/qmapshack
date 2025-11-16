@@ -21,6 +21,7 @@
 #include "CMainWindow.h"
 #include "gis/trk/CGisItemTrk.h"
 #include "gis/wpt/CGisItemWpt.h"
+#include "misc.h"
 
 struct twonav_icon_t {
   const char* twonav;
@@ -43,16 +44,16 @@ static const twonav_icon_t TwoNavIcons[] = {{"City (Capitol)", "City (Capitol)"}
                                             {"Red Cube", "Block, Red"},
                                             {"Blue Cube", "Block, Blue"},
                                             {"Green Cube", "Block, Green"},
-                                            {"Blue Diamond", "Blue Diamond"},
-                                            {"Green Diamond", "Green Diamond"},
-                                            {"Red Diamond", "Red Diamond"},
+                                            {"Blue Diamond", "Diamond, Blue"},
+                                            {"Green Diamond", "Diamond, Green"},
+                                            {"Red Diamond", "Diamond, Red"},
                                             {"Traditional Cache", "Traditional Cache"},
-                                            {"Multi-cache", "Multi-cache"},
+                                            {"Multi-cache", "Multi-Cache"},
                                             {"Unknown Cache", "Unknown Cache"},
                                             {"Wherigo", "Wherigo Cache"},
                                             {"Event Cache", "Event Cache"},
                                             {"Earthcache", "Earthcache"},
-                                            {"Letterbox", "Letterbox Hybrid"},
+                                            {"Letterbox", "Letterbox Cache"},
                                             {"Virtual Cache", "Virtual Cache"},
                                             {"Webcam Cache", "Webcam Cache"},
                                             {0, 0}};
@@ -63,11 +64,9 @@ static QStringList writeCompeTime(const QDateTime& t, bool isTrack) {
 
   if (!t.isValid()) {
     if (isTrack) {
-      result << "01-Jan-1970"
-             << "00:00:00.000";
+      result << "01-Jan-1970" << "00:00:00.000";
     } else {
-      result << "01-Jan-1970"
-             << "00:00:00";
+      result << "01-Jan-1970" << "00:00:00";
     }
     return result;
   }
@@ -268,7 +267,7 @@ bool CGisItemTrk::saveTwoNav(const QString& filename) {
           if (!IGisItem::removeHtml(comment).isEmpty()) {
             QString filenameCmt = QString("QMS_CMT%1.html").arg(wpt->getKey().item);
             QFile fileCmt(dir.absoluteFilePath(filenameCmt));
-            fileCmt.open(QIODevice::WriteOnly);
+            openFileCheckSuccess(QIODevice::WriteOnly, fileCmt);
 
             QTextStream stream(&fileCmt);
             stream << Qt::bom << comment;
@@ -462,7 +461,7 @@ void CGisItemWpt::saveTwoNav(QTextStream& out, const QDir& dir) {
   if (!IGisItem::removeHtml(comment).isEmpty()) {
     QString filenameCmt = QString("QMS_CMT%1.html").arg(getKey().item);
     QFile fileCmt(dir.absoluteFilePath(filenameCmt));
-    fileCmt.open(QIODevice::WriteOnly);
+    openFileCheckSuccess(QIODevice::WriteOnly, fileCmt);
 
     QTextStream stream(&fileCmt);
     stream << Qt::bom << comment;

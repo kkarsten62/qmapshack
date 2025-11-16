@@ -256,7 +256,7 @@
 <context>
     <name>CItemMapLayer</name>
     <message>
-        <location filename="../items/CItemMapLayer.cpp" line="32"/>
+        <location filename="../items/CItemMapLayer.cpp" line="33"/>
         <source>Layer</source>
         <translation>Слой</translation>
     </message>
@@ -280,34 +280,47 @@
     </message>
 </context>
 <context>
+    <name>CMainWindow</name>
+    <message>
+        <location filename="../misc.h" line="29"/>
+        <source>File access failed...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../misc.h" line="30"/>
+        <source>Failed to open %1 with error %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>COverlayCutMap</name>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="197"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="198"/>
         <source>Delete mask...</source>
         <translation>Удалить маску ...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="197"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="198"/>
         <source>Are you sure to delete complete mask?</source>
         <translation>Вы действительно хотите удалить всю маску?</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="213"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="214"/>
         <source>Save mask...</source>
         <translation>Сохранить маску ...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="256"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="257"/>
         <source>Load mask...</source>
         <translation>Загрузить маску ...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="268"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="269"/>
         <source>Failed...</source>
         <translation>Не удалось...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayCutMap.cpp" line="268"/>
+        <location filename="../overlay/COverlayCutMap.cpp" line="269"/>
         <source>Not a shape file.</source>
         <translation>Не файл фигуры.</translation>
     </message>
@@ -329,7 +342,7 @@ The next step will be to use the Reference Tool to adjust the position of all re
 <context>
     <name>COverlayRefMap</name>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="41"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="43"/>
         <source>If you used the Grid Tool you have to fine tune the reference points by placing them as much as possible on the grid crossing. Be aware that if you over scale you get jumping points by rounding effects. Be precise but do not make religion out of the task.
 If your mouse focus is on the map you can use the N and B keys to jump forward an backward in the reference point list. 
 The is also the option to fine tune the reference points in auto-mode. In this mode the next reference point is selected automatically right after you placed the current one. This is very convenient for a large number of reference points.</source>
@@ -339,32 +352,32 @@ The is also the option to fine tune the reference points in auto-mode. In this m
 Существует также возможность настройки опорных точек в автоматическом режиме. В этом режиме следующая опорная точка автоматически выбирается после размещения текущей точки. Эта функция очень полезна, когда вы хотите редактировать большое количество точек.</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="517"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="519"/>
         <source>Save reference points...</source>
         <translation>Сохранить опорные точки ...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="552"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="554"/>
         <source>Load reference points...</source>
         <translation>Загрузить опорные точки...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="587"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="589"/>
         <source>Delete all reference points...</source>
         <translation>Удалить все опорные точки...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="588"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="590"/>
         <source>Are you sure to delete all reference points in the list?</source>
         <translation>Вы уверены, что хотите удалить все опорные точки из списка?</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="614"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="616"/>
         <source>Delete...</source>
         <translation>Удалить...</translation>
     </message>
     <message>
-        <location filename="../overlay/COverlayRefMap.cpp" line="614"/>
+        <location filename="../overlay/COverlayRefMap.cpp" line="616"/>
         <source>Delete all selected reference points?</source>
         <translation>Удалить все выделенные опорные точки?</translation>
     </message>
@@ -556,22 +569,22 @@ Canceled by user&apos;s request.
 <context>
     <name>CToolPalettize</name>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="29"/>
+        <location filename="../tool/CToolPalettize.cpp" line="30"/>
         <source>Add Color Palette</source>
         <translation>Добавить цветовую палитру</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="36"/>
+        <location filename="../tool/CToolPalettize.cpp" line="37"/>
         <source>Usually you use RGBA color while referencing a map because the large color space allows you to scale and rotate the map without any loss of quality. But it results into rather large files. The file size can be optimized by using a color palette instead of the RGBA color space. The impact on quality is low as long as you do not want to scale or rotate the map. If you want to combine files with a color palette all files need to have the same palette.</source>
         <translation>Обычно вы используете цветы RGBA при обращении к карте, поскольку большое цветовое пространство позволяет масштабировать и поворачивать карту без потери качества. Но это приводит к довольно большим файлам. Размер файла можно оптимизировать, используя цветовую палитру вместо цветового пространства RGBA. Влияние на качество будет низким, если вы не хотите масштабировать или поворачивать карту. Если вы хотите объединить файлы с цветовой палитрой, все файлы должны иметь одинаковую палитру.</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="48"/>
+        <location filename="../tool/CToolPalettize.cpp" line="49"/>
         <source>Note: This tool will use all files in the list as a combined input to derive an optimal palette. This will only work if all files have the same projection and scale.</source>
         <translation>Примечание: Этот инструмент будет использовать все файлы в списке в качестве комбинированного ввода для получения оптимальной палитры. Это будет работать только, если все файлы имеют одинаковую проекцию и масштаб.</translation>
     </message>
     <message>
-        <location filename="../tool/CToolPalettize.cpp" line="113"/>
+        <location filename="../tool/CToolPalettize.cpp" line="114"/>
         <source>Select filename...</source>
         <translation>Выберите имя файла...</translation>
     </message>

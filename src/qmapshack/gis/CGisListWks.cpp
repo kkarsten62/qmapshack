@@ -163,6 +163,7 @@ CGisListWks::CGisListWks(QWidget* parent) : QTreeWidget(parent) {
   actionCopyTrkWithWpt = addAction(QIcon("://icons/32x32/CopyTrkWithWpt.png"), tr("Copy Track with Waypoints"), this,
                                    &CGisListWks::slotCopyTrkWithWpt);
   actionToRoute = addAction(QIcon("://icons/32x32/Route.png"), tr("Convert to Route"), this, &CGisListWks::slotToRoute);
+  actionToArea = addAction(QIcon("://icons/32x32/Area.png"), tr("Convert to Area"), this, &CGisListWks::slotToArea);
   actionNogoTrk = addAction(QIcon("://icons/32x32/NoGo.png"), tr("Toggle Nogo-Line"), this, &CGisListWks::slotNogoItem);
   actionNogoTrk->setCheckable(true);
 
@@ -206,6 +207,8 @@ CGisListWks::CGisListWks(QWidget* parent) : QTreeWidget(parent) {
       addAction(QIcon("://icons/32x32/Route.png"), tr("Create Route..."), this, &CGisListWks::slotRteFromWpt);
   actionEditPrxWpt =
       addAction(QIcon("://icons/32x32/WptEditProx.png"), tr("Change Proximity..."), this, &CGisListWks::slotEditPrxWpt);
+  actionChangeIconWpt =
+      addAction(QIcon("://icons/waypoints/32x32/PinBlue.png"), tr("Change Icon..."), this, &CGisListWks::slotSymWpt);
 
   connect(qApp, &QApplication::aboutToQuit, this, &CGisListWks::slotSaveWorkspace);
   connect(this, &CGisListWks::customContextMenuRequested, this, &CGisListWks::slotContextMenu);
@@ -778,15 +781,14 @@ void CGisListWks::slotLoadWorkspace() {
 
   QUERY_RUN("SELECT type, keyqms, name, changed, visible, data FROM workspace", return)
 
-  { // open context for progress dialog
-    //Refer to https://stackoverflow.com/questions/26495049/qsqlquery-size-always-returns-1
+  {  // open context for progress dialog
+    // Refer to https://stackoverflow.com/questions/26495049/qsqlquery-size-always-returns-1
     qreal total = 0;
     if (db.driver()->hasFeature(QSqlDriver::QuerySize)) {
       total = query.size();
     } else {
-      if(query.last())
-      {
-        total =  query.at() + 1;
+      if (query.last()) {
+        total = query.at() + 1;
         query.first();
         query.previous();
       }
@@ -986,6 +988,7 @@ void CGisListWks::showMenuItemTrk(const QPoint& p, const IGisItem::key_t& key) {
   menu.addAction(actionEleWptTrk);
   menu.addAction(actionCopyTrkWithWpt);
   menu.addAction(actionToRoute);
+  menu.addAction(actionToArea);
   menu.addAction(actionNogoTrk);
   menu.addSeparator();
   menu.addAction(actionDelete);
@@ -1062,8 +1065,7 @@ void CGisListWks::showMenuItem(const QPoint& p, const QList<IGisItem::key_t>& ke
   menu.addSection(tr("Waypoints"));
   menu.addAction(actionRteFromWpt);
   menu.addAction(actionEditPrxWpt);
-  action = menu.addMenu(CWptIconManager::self().getWptIconMenu(tr("Change Icon"), this, SLOT(slotSymWpt()), &menu));
-  action->setEnabled(!keysWpts.isEmpty());
+  menu.addAction(actionChangeIconWpt);
   menu.addSection(tr("Wayp. & Tracks"));
   menu.addAction(actionEleWptTrk);
   menu.addSection(tr("Tracks"));
@@ -1152,6 +1154,7 @@ void CGisListWks::slotContextMenu(const QPoint& point) {
 
       actionRteFromWpt->setEnabled(keysWpt.count() > 1);
       actionEditPrxWpt->setEnabled(hasWpts);
+      actionChangeIconWpt->setEnabled(hasWpts);
       actionCombineTrk->setEnabled(keysTrk.count() > 1);
       actionEleWptTrk->setEnabled(hasWpts | hasTrks);
       showMenuItem(p, keysTrk, keysWpt);
@@ -2149,12 +2152,10 @@ void CGisListWks::slotCopyProject() {
 void CGisListWks::slotSymWpt() {
   CGisListWksEditLock lock(false, IGisItem::mutexItems);
 
-  QObject* obj = sender();
-  QString iconName = obj->property("iconName").toString();
-  if (iconName.isEmpty()) {
-    return;
+  const QString& iconName = CWptIconManager::self().selectWptIcon(this);
+  if (!iconName.isEmpty()) {
+    CGisWorkspace::self().changeWptSymByKey(selectedItems2Keys<CGisItemWpt>(), iconName);
   }
-  CGisWorkspace::self().changeWptSymByKey(selectedItems2Keys<CGisItemWpt>(), iconName);
 }
 
 void CGisListWks::slotEleWptTrk() { CGisWorkspace::self().addEleToWptTrkByKey(selectedItems2Keys<IGisItem>()); }
@@ -2165,5 +2166,14 @@ void CGisListWks::slotToRoute() {
   CGisItemTrk* gisItem = dynamic_cast<CGisItemTrk*>(currentItem());
   if (gisItem != nullptr) {
     CGisWorkspace::self().convertTrackToRoute(gisItem->getKey());
+  }
+}
+
+void CGisListWks::slotToArea() {
+  CGisListWksEditLock lock(false, IGisItem::mutexItems);
+
+  CGisItemTrk* gisItem = dynamic_cast<CGisItemTrk*>(currentItem());
+  if (gisItem != nullptr) {
+    CGisWorkspace::self().convertTrackToArea(gisItem->getKey());
   }
 }

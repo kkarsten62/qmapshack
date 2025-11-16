@@ -162,8 +162,6 @@ void IPlot::newLine(const QPolygonF& line, const QString& label) {
   data->badData = false;
   data->lines << l;
   setSizes();
-  data->x().setScale(rectGraphArea.width());
-  data->y().setScale(rectGraphArea.height());
 
   needsRedraw = true;
   update();
@@ -181,8 +179,6 @@ void IPlot::addLine(const QPolygonF& line, const QString& label) {
 
   data->lines << l;
   setSizes();
-  data->x().setScale(rectGraphArea.width());
-  data->y().setScale(rectGraphArea.height());
 
   needsRedraw = true;
   update();
@@ -201,6 +197,7 @@ void IPlot::resetZoom() {
 
 void IPlot::paintEvent(QPaintEvent* /*e*/) {
   QPainter p(this);
+  USE_ANTI_ALIASING(p, true);
   draw(p);
 }
 
@@ -269,7 +266,7 @@ bool IPlot::graphAreaContainsMousePos(QPoint& pos) {
 }
 
 void IPlot::mouseMoveEvent(QMouseEvent* e) {
-  if (data->lines.isEmpty() || data->badData || !data->x().isValid() || !data->y().isValid()) {
+  if (noOrBadData()) {
     return;
   }
 
@@ -314,7 +311,7 @@ void IPlot::mouseMoveEvent(QMouseEvent* e) {
 }
 
 bool IPlot::setMouseFocus(qreal pos, enum CGisItemTrk::focusmode_e fm) {
-  if (nullptr == trk) {
+  if (nullptr == trk || noOrBadData()) {
     return false;
   }
 
@@ -338,6 +335,10 @@ bool IPlot::setMouseFocus(qreal pos, enum CGisItemTrk::focusmode_e fm) {
 }
 
 void IPlot::mousePressEvent(QMouseEvent* e) {
+  if (noOrBadData()) {
+    return;
+  }
+
   if ((e->button() == Qt::LeftButton) && (mode == eModeIcon)) {
     trk->edit();
   }
@@ -347,6 +348,10 @@ void IPlot::mousePressEvent(QMouseEvent* e) {
 }
 
 void IPlot::mouseReleaseEvent(QMouseEvent* e) {
+  if (noOrBadData()) {
+    return;
+  }
+
   bool wasProcessed = false;
 
   if (e->button() == Qt::LeftButton) {
@@ -375,6 +380,10 @@ void IPlot::mouseReleaseEvent(QMouseEvent* e) {
 }
 
 bool IPlot::mouseReleaseEventSimple(QMouseEvent* e) {
+  if (noOrBadData()) {
+    return false;
+  }
+
   QPoint pos = e->pos();
   posMouse1 = graphAreaContainsMousePos(pos) ? pos : NOPOINT;
 
@@ -390,6 +399,10 @@ bool IPlot::mouseReleaseEventSimple(QMouseEvent* e) {
 }
 
 bool IPlot::mouseReleaseEventNormal(QMouseEvent* e) {
+  if (noOrBadData()) {
+    return false;
+  }
+
   bool wasProcessed = true;
 
   QPoint pos = e->pos();
@@ -623,8 +636,14 @@ void IPlot::setSizeDrawArea() {
   rectGraphArea.setHeight(bottom - top);
   rectGraphArea.moveTopLeft(QPoint(left, top));
 
-  data->x().setScale(rectGraphArea.width());
-  data->y().setScale(rectGraphArea.height());
+  if (rectGraphArea.isValid()) {
+    data->x().setScale(rectGraphArea.width());
+    data->y().setScale(rectGraphArea.height());
+  }
+}
+
+bool IPlot::noOrBadData() {
+  return data->lines.isEmpty() || data->badData || !data->x().isValid() || !data->y().isValid();
 }
 
 void IPlot::draw() {
@@ -649,7 +668,7 @@ void IPlot::draw() {
     PAINT_ROUNDED_RECT(p, r);
   }
 
-  if (data->lines.isEmpty() || data->badData || !data->x().isValid() || !data->y().isValid()) {
+  if (noOrBadData()) {
     p.drawText(rect(), Qt::AlignCenter, tr("No or bad data."));
     return;
   }
@@ -1098,7 +1117,7 @@ void IPlot::drawTags(QPainter& p) {
       continue;
     }
 
-    QPixmap icon = tag.icon.scaled(iconBarHeight, iconBarHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPixmap icon = tag.icon.scaled(iconBarHeight, iconBarHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     p.drawPixmap(ptx - icon.width() / 2, 2, icon);
 
     if (pty > bottom) {
@@ -1377,6 +1396,10 @@ void IPlot::slotCutTrk() {
 }
 
 void IPlot::setMouseRangeFocus(const CTrackData::trkpt_t* ptRange1, const CTrackData::trkpt_t* ptRange2) {
+  if (noOrBadData()) {
+    return;
+  }
+
   if (nullptr == ptRange1 || nullptr == ptRange2) {
     idxSel1 = NOIDX;
     idxSel2 = NOIDX;
