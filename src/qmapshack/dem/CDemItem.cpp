@@ -24,37 +24,133 @@
 #include "dem/CDemVRT.h"
 #include "dem/CDemWCS.h"
 #include "dem/IDemProp.h"
+#include "misc.h"
 
 QRecursiveMutex CDemItem::mutexActiveDems;
 
-CDemItem::CDemItem(QTreeWidget* parent, CDemDraw* dem) : QTreeWidgetItem(parent), dem(dem) {
-  setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+CDemItem::CDemItem(CDemDraw* dem) : dem(dem) {
+  setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+
+  itemWidget();
 }
 
 CDemItem::~CDemItem() {}
 
-void CDemItem::saveConfig(QSettings& cfg) {
-  if (demfile.isNull()) {
-    return;
+QWidget* CDemItem::itemWidget() {
+  if (widget.isNull()) {
+    widget = new CMapItemWidget();
+    QFileInfo fi(filename);
+    setName(fi.completeBaseName().replace("_", " "));
+
+    if (QFile::exists(filename)) {
+      if (noShadowConfig()) {
+        setStatus(CMapItemWidget::eStatus::Unused);
+      } else {
+        setStatus(demfile.isNull() ? CMapItemWidget::eStatus::Inactive : CMapItemWidget::eStatus::Active);
+      }
+    } else {
+      setStatus(CMapItemWidget::eStatus::Missing);
+    }
+
+    connect(widget, &CMapItemWidget::sigActivate, this, &CDemItem::slotActivate);
+    connect(widget, &CMapItemWidget::destroyed, this, [this] { emit sigUpdateWidget(this); });
+  }
+  return widget;
+}
+
+void CDemItem::slotActivate(bool yes) {
+  if (yes) {
+    activate();
+  } else {
+    deactivate();
   }
 
+  emit sigChanged();
+}
+
+void CDemItem::setName(const QString& name) { widget->setName(name); }
+
+void CDemItem::setStatus(CMapItemWidget::eStatus status) { widget->setStatus(status); }
+
+void CDemItem::setFilename(const QString& name, const QString& fallbackKey) {
+  filename = name;
+
+  QFile f(filename);
+  if (f.exists() && f.open(QIODevice::ReadOnly)) {
+    QCryptographicHash md5(QCryptographicHash::Md5);
+    md5.addData(f.read(qMin(1024, f.size())));
+    key = md5.result().toHex();
+    f.close();
+  } else {
+    key = fallbackKey;
+  }
+}
+
+void CDemItem::configToShadowConfig(const QSettings& cfg) {
+  shadowConfig.clear();
+  const QStringList& keys = cfg.childKeys();
+  for (const QString& key : keys) {
+    shadowConfig[key] = cfg.value(key);
+  }
+}
+
+void CDemItem::shadowConfigToConfig(QSettings& cfg) const {
+  const QStringList& keys = shadowConfig.keys();
+  for (const QString& key : keys) {
+    cfg.setValue(key, shadowConfig[key]);
+  }
+}
+
+void CDemItem::saveConfig(QSettings& cfg) const {
   cfg.beginGroup(key);
-  demfile->saveConfig(cfg);
+  if (demfile.isNull()) {
+    shadowConfigToConfig(cfg);
+  } else {
+    demfile->saveConfig(cfg);
+    cfg.setValue("isActive", true);
+  }
+  cfg.setValue("filename", filename);
   cfg.endGroup();
 }
 
-void CDemItem::loadConfig(QSettings& cfg) {
-  if (demfile.isNull()) {
+void CDemItem::loadConfig(QSettings& cfg, bool triggerActivation) {
+  if (!demfile.isNull()) {
+    // dem is already active, read the config
+    cfg.beginGroup(key);
+    configToShadowConfig(cfg);
+    demfile->loadConfig(cfg);
+    cfg.endGroup();
     return;
   }
 
+  // let's see what we can do...
   cfg.beginGroup(key);
-  demfile->loadConfig(cfg);
+  bool active = cfg.value("isActive", false).toBool();
+  configToShadowConfig(cfg);
   cfg.endGroup();
+
+  if (!QFile::exists(filename)) {
+    setStatus(CMapItemWidget::eStatus::Missing);
+    return;
+  } else if (noShadowConfig()) {
+    setStatus(CMapItemWidget::eStatus::Unused);
+  } else {
+    setStatus(CMapItemWidget::eStatus::Inactive);
+    if (triggerActivation) {
+      // Evil hack: If you activate the DEM directly Qt will crash internally.
+      QPointer<CDemItem> self(this);
+      QTimer::singleShot(100, this, [self, active]() {
+        if (!self.isNull()) self->slotActivate(active);
+      });
+    }
+  }
 }
 
 void CDemItem::showChildren(bool yes) {
-  if (yes && !demfile.isNull()) {
+  if (demfile.isNull()) {
+    return;
+  }
+  if (yes) {
     QTreeWidget* tw = treeWidget();
 
     QTreeWidgetItem* item = new QTreeWidgetItem(this);
@@ -88,18 +184,19 @@ bool CDemItem::isActivated() {
   return !demfile.isNull();
 }
 
-bool CDemItem::toggleActivate() {
-  QMutexLocker lock(&mutexActiveDems);
-  if (demfile.isNull()) {
-    return activate();
-  } else {
-    deactivate();
-    return false;
-  }
-}
-
 void CDemItem::deactivate() {
   QMutexLocker lock(&mutexActiveDems);
+
+  if (demfile.isNull()) {
+    return;
+  }
+  // save current configuration into
+  // the shadow configuration
+  QTemporaryFile file;
+  QSettings cfg(file.fileName(), QSettings::IniFormat);
+  demfile->saveConfig(cfg);
+  configToShadowConfig(cfg);
+
   // remove demfile setup dialog as child of this item
   showChildren(false);
 
@@ -108,20 +205,18 @@ void CDemItem::deactivate() {
 
   // maybe used to reflect changes in the icon
   updateIcon();
-  // move to bottom of the active dem list
-  moveToBottom();
 
-  // deny drag-n-drop again
-  setFlags(flags() & ~Qt::ItemIsDragEnabled);
+  // dem->reportStatusToCanvas(text(0), "");
+
+  setStatus(CMapItemWidget::eStatus::Inactive);
 }
 
 bool CDemItem::activate() {
   QMutexLocker lock(&mutexActiveDems);
 
-  // remove demfile object
   delete demfile;
 
-  // load map by suffix
+  // load DEM by suffix
   QFileInfo fi(filename);
   if (fi.suffix().toLower() == "vrt") {
     demfile = new CDemVRT(filename, dem);
@@ -131,58 +226,38 @@ bool CDemItem::activate() {
 
   updateIcon();
 
-  // no mapfiles loaded? Bad.
+  // no demfile loaded? Bad.
   if (demfile.isNull()) {
+    setStatus(CMapItemWidget::eStatus::Inactive);
     return false;
   }
 
-  // if map is activated successfully add to the list of map files
-  // else delete all previous loaded maps and abort
+  // if DEM is activated successfully add to the list of DEM files
+  // else delete all previous loaded DEMs and abort
   if (!demfile->activated()) {
     delete demfile;
+    setStatus(CMapItemWidget::eStatus::Inactive);
     return false;
   }
 
-  moveToBottom();
+  // setToolTip(0, demfile->getCopyright());
 
-  setFlags(flags() | Qt::ItemIsDragEnabled);
-  /*
-     As the map file setup is stored in the context of the CMapDraw object
-     the configuration has to be loaded via the CMapDraw object to select
-     the correct group context in the QSetting object.
-     This call will result into a call of loadConfig() of this CMapItem
-     object.
-   */
-  dem->loadConfigForDemItem(this);
+  // setup DEM with settings stored in
+  // the shadow config
+  QTemporaryFile file;
+  QSettings cfg(file.fileName(), QSettings::IniFormat);
+
+  shadowConfigToConfig(cfg);
+  demfile->loadConfig(cfg);
+  // On first activation the shadow config is empty. (state *new*)
+  // Therfore always read back the config and store it as new
+  // shadow config
+  demfile->saveConfig(cfg);
+  configToShadowConfig(cfg);
 
   // Add the demfile setup dialog as child of this item
   showChildren(true);
+
+  setStatus(CMapItemWidget::eStatus::Active);
   return true;
-}
-
-void CDemItem::moveToTop() {
-  QTreeWidget* w = treeWidget();
-  QMutexLocker lock(&mutexActiveDems);
-
-  w->takeTopLevelItem(w->indexOfTopLevelItem(this));
-  w->insertTopLevelItem(0, this);
-
-  dem->emitSigCanvasUpdate();
-}
-
-void CDemItem::moveToBottom() {
-  int row;
-  QTreeWidget* w = treeWidget();
-  QMutexLocker lock(&mutexActiveDems);
-
-  w->takeTopLevelItem(w->indexOfTopLevelItem(this));
-  for (row = 0; row < w->topLevelItemCount(); row++) {
-    CDemItem* item = dynamic_cast<CDemItem*>(w->topLevelItem(row));
-    if (item && item->demfile.isNull()) {
-      break;
-    }
-  }
-  w->insertTopLevelItem(row, this);
-
-  dem->emitSigCanvasUpdate();
 }

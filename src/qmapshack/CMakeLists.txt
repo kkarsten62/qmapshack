@@ -331,6 +331,7 @@ set( SRCS
     widgets/CHistoryListWidget.cpp
     widgets/CIconGrid.cpp
     widgets/CLineEdit.cpp
+    widgets/CMapItemWidget.cpp
     widgets/CPhotoAlbum.cpp
     widgets/CSelectDoubleListWidget.cpp
     widgets/CScaleLabel.cpp
@@ -706,6 +707,7 @@ set( HDRS
     widgets/CHistoryListWidget.h
     widgets/CIconGrid.h
     widgets/CLineEdit.h
+    widgets/CMapItemWidget.h
     widgets/CPhotoAlbum.h
     widgets/CSelectDoubleListWidget.h
     widgets/CScaleLabel.h
