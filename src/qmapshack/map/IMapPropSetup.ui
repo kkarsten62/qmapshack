@@ -50,7 +50,7 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change opacity of map&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -85,6 +85,7 @@ zoom-in to display the map.</string>
       </widget>
      </item>
      <item>
+<<<<<<< HEAD
       <widget class="CScaleLabel" name="labelScale">
        <property name="minimumSize">
         <size>
@@ -106,6 +107,9 @@ zoom-in or zoom-out.
         <bool>true</bool>
        </property>
       </widget>
+=======
+      <widget class="CScaleWidget" name="widgetScale" native="true"/>
+>>>>>>> upstream/dev
      </item>
      <item>
       <widget class="QToolButton" name="toolSetMaxScale">
@@ -137,10 +141,10 @@ zoom-out to display the map.</string>
    <item>
     <widget class="QFrame" name="frameVectorItems">
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <property name="spacing">
@@ -216,10 +220,10 @@ zoom-out to display the map.</string>
    <item>
     <widget class="QFrame" name="frameTileCache">
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -240,7 +244,7 @@ zoom-out to display the map.</string>
       <item>
        <layout class="QFormLayout" name="formLayout">
         <property name="fieldGrowthPolicy">
-         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
         </property>
         <property name="horizontalSpacing">
          <number>3</number>
@@ -310,10 +314,10 @@ zoom-out to display the map.</string>
    <item>
     <widget class="QFrame" name="frameLayers">
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="spacing">
@@ -340,7 +344,7 @@ zoom-out to display the map.</string>
          </sizepolicy>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Shape::StyledPanel</enum>
         </property>
        </widget>
       </item>
@@ -350,10 +354,10 @@ zoom-out to display the map.</string>
    <item>
     <widget class="QFrame" name="frameTypFile">
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Shape::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="spacing">
@@ -426,9 +430,10 @@ zoom-out to display the map.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CScaleLabel</class>
-   <extends>QLabel</extends>
-   <header location="global">widgets/CScaleLabel.h</header>
+   <class>CScaleWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/CScaleWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

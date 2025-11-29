@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2025 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,31 +16,31 @@
 
 **********************************************************************************************/
 
-#ifndef CMAPPROPSETUP_H
-#define CMAPPROPSETUP_H
+#ifndef CFADINGLABEL_H
+#define CFADINGLABEL_H
 
-#include "IMapProp.h"
-#include "ui_IMapPropSetup.h"
+#include <QLabel>
 
-class CMapPropSetup : public IMapProp, private Ui::IMapPropSetup {
+class QPropertyAnimation;
+class QGraphicsOpacityEffect;
+
+class CFadingLabel : public QLabel {
   Q_OBJECT
  public:
-  CMapPropSetup(IMap* mapfile, CMapDraw* map);
-  virtual ~CMapPropSetup();
+  explicit CFadingLabel(QWidget* parent = nullptr);
 
- protected slots:
-  void slotPropertiesChanged() override;
-
- private slots:
-  void slotScaleChanged(const QPointF& s);
-  void slotSetMinScale(bool checked);
-  void slotSetMaxScale(bool checked);
-  void slotLoadTypeFile();
-  void slotClearTypeFile();
+  void fadeOut(int duration = 300);
+  void fadeIn(int duration = 300);
 
  private:
-  void updateCanvasAndStatus();
-  static QPointF scale;
+  enum class eState {
+    Unknown,
+    In,
+    Out,
+  };
+  eState state = eState::Unknown;
+  QPropertyAnimation* fadeAnim;
+  QGraphicsOpacityEffect* effect;
 };
 
-#endif  // CMAPPROPSETUP_H
+#endif  // CFADINGLABEL_H

@@ -114,6 +114,8 @@ class IDrawContext : public QThread {
 
   const QPointF& getZoomFactor() const { return zoomFactor; }
 
+  QPointF getScale() const;
+
   /**
      @brief Set the projection of the draw context
 
@@ -129,6 +131,8 @@ class IDrawContext : public QThread {
   virtual bool setProjection(const QString& projStr);
 
   virtual void setScales(const CCanvas::scales_type_e type);
+
+  CCanvas* getCanvas() { return canvas; }
 
  signals:
   void sigCanvasUpdate(CCanvas::redraw_e flags);

@@ -19,11 +19,16 @@
 #ifndef CMAPITEMWIDGET_H
 #define CMAPITEMWIDGET_H
 
-#include <QHBoxLayout>
 #include <QLabel>
-#include <QToolButton>
-#include <QVBoxLayout>
+#include <QPointer>
 #include <QWidget>
+
+class QToolButton;
+class QHBoxLayout;
+class QVBoxLayout;
+class IDrawObject;
+class CLedIndicator;
+class CFadingLabel;
 
 class CMapItemWidget : public QWidget {
   Q_OBJECT
@@ -35,7 +40,7 @@ class CMapItemWidget : public QWidget {
     Unused,
   };
 
-  CMapItemWidget();
+  CMapItemWidget(const QString& type);
   ~CMapItemWidget() override;
 
   void setName(const QString& name) {
@@ -46,20 +51,33 @@ class CMapItemWidget : public QWidget {
   void setStatus(eStatus status);
   eStatus getStatus() const { return status; }
 
+  void setDrawObject(IDrawObject* object, const QPointF& scale);
+
+  void setAccess(const QString& ele);
+
  signals:
   void sigActivate(bool);
+
+ public slots:
+  void slotScaleChanged(const QPointF& scale);
 
  private slots:
   void slotSetChecked(bool yes);
 
  private:
+  const QString typeIMap;
   eStatus status = eStatus::Unused;
   QString mapName;
   QVBoxLayout* layout1;
   QHBoxLayout* layout2;
   QLabel* labelName;
   QLabel* labelStatus;
+  CFadingLabel* labelAccess;
+  CLedIndicator* indicatorVisibility;
   QToolButton* buttonActivate;
+  QTimer* timerAccess;
+
+  QPointer<IDrawObject> map;
 };
 
 #endif  // CMAPITEMWIDGET_H

@@ -328,13 +328,15 @@ set( SRCS
     widgets/CDateTimeEditor.cpp
     widgets/CDoubleSpinBox.cpp
     widgets/CFadingIcon.cpp
+    widgets/CFadingLabel.cpp
     widgets/CHistoryListWidget.cpp
     widgets/CIconGrid.cpp
+    widgets/CLedIndicator.cpp
     widgets/CLineEdit.cpp
     widgets/CMapItemWidget.cpp
     widgets/CPhotoAlbum.cpp
     widgets/CSelectDoubleListWidget.cpp
-    widgets/CScaleLabel.cpp
+    widgets/CScaleWidget.cpp
     widgets/CTemplateWidget.cpp
     widgets/CTextEdit.cpp
     widgets/CTextEditWidget.cpp
@@ -704,13 +706,15 @@ set( HDRS
     widgets/CDateTimeEditor.h
     widgets/CDoubleSpinBox.h
     widgets/CFadingIcon.h
+    widgets/CFadingLabel.h
     widgets/CHistoryListWidget.h
     widgets/CIconGrid.h
+    widgets/CLedIndicator.h
     widgets/CLineEdit.h
     widgets/CMapItemWidget.h
     widgets/CPhotoAlbum.h
     widgets/CSelectDoubleListWidget.h
-    widgets/CScaleLabel.h
+    widgets/CScaleWidget.h
     widgets/CTemplateWidget.h
     widgets/CTextEdit.h
     widgets/CTextEditWidget.h

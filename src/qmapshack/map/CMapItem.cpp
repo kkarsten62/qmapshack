@@ -44,7 +44,7 @@ CMapItem::~CMapItem() {}
 
 QWidget* CMapItem::itemWidget() {
   if (widget.isNull()) {
-    widget = new CMapItemWidget();
+    widget = new CMapItemWidget(tr("map"));
     QFileInfo fi(filename);
     setName(fi.completeBaseName().replace("_", " "));
 
@@ -58,8 +58,10 @@ QWidget* CMapItem::itemWidget() {
       setStatus(CMapItemWidget::eStatus::Missing);
     }
 
+    widget->setDrawObject(mapfile, map->getScale());
     connect(widget, &CMapItemWidget::sigActivate, this, &CMapItem::slotActivate);
     connect(widget, &CMapItemWidget::destroyed, this, [this] { emit sigUpdateWidget(this); });
+    connect(map, &CMapDraw::sigScaleChanged, widget, &CMapItemWidget::slotScaleChanged);
   }
   return widget;
 }
@@ -113,10 +115,10 @@ void CMapItem::saveConfig(QSettings& cfg) const {
     shadowConfigToConfig(cfg);
   } else {
     mapfile->saveConfig(cfg);
-    cfg.setValue("isActive", true);      
+    cfg.setValue("isActive", true);
   }
   cfg.setValue("filename", filename);
-  cfg.endGroup(); // key
+  cfg.endGroup();  // key
 }
 
 void CMapItem::loadConfig(QSettings& cfg, bool triggerActivation) {
@@ -277,6 +279,7 @@ bool CMapItem::activate() {
   // Add the mapfile setup dialog as child of this item
   showChildren(true);
 
+  widget->setDrawObject(mapfile, map->getScale());
   setStatus(CMapItemWidget::eStatus::Active);
   return true;
 }

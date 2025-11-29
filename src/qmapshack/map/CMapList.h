@@ -30,11 +30,14 @@ class CMapTreeWidget : public QTreeWidget {
  public:
   CMapTreeWidget(QWidget* parent);
 
+  void restoreItemWidgetDelayed(CMapItem* map);
+
  signals:
   void sigChanged();
 
  protected:
   void dragEnterEvent(QDragEnterEvent* e) override;
+  void dragLeaveEvent(QDragLeaveEvent* e) override;
   void dropEvent(QDropEvent* e) override;
 };
 

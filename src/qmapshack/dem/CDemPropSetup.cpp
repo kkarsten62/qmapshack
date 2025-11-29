@@ -36,6 +36,7 @@ CDemPropSetup::CDemPropSetup(IDem* demfile, CDemDraw* dem) : IDemProp(demfile, d
   slopeSpins[3] = spinSlope3;
   slopeSpins[4] = spinSlope4;
 
+  scale = dem->getScale();
   CDemPropSetup::slotPropertiesChanged();
 
   connect(sliderOpacity, &QSlider::valueChanged, demfile, &IDem::slotSetOpacity);
@@ -110,7 +111,7 @@ void CDemPropSetup::slotPropertiesChanged() {
   toolSetMinScale->setChecked(demfile->getMinScale() != NOFLOAT);
   toolSetMaxScale->setChecked(demfile->getMaxScale() != NOFLOAT);
 
-  labelScale->setValue(demfile->getMinScale(), scale.x(), demfile->getMaxScale());
+  widgetScale->setValue(demfile->getMinScale(), scale.x(), demfile->getMaxScale());
 
   checkHillshading->setChecked(demfile->doHillshading());
   sliderHillshading->setValue(demfile->getFactorHillshading());
@@ -159,11 +160,13 @@ void CDemPropSetup::slotScaleChanged(const QPointF& s) {
 void CDemPropSetup::slotSetMinScale(bool checked) {
   demfile->setMinScale(checked ? scale.x() : NOFLOAT);
   slotPropertiesChanged();
+  updateCanvasAndStatus();
 }
 
 void CDemPropSetup::slotSetMaxScale(bool checked) {
   demfile->setMaxScale(checked ? scale.x() : NOFLOAT);
   slotPropertiesChanged();
+  updateCanvasAndStatus();
 }
 
 void CDemPropSetup::slotSlopeChanged(int val) {
@@ -218,4 +221,14 @@ void CDemPropSetup::slotElevationShadeLowValueChanged() {
 void CDemPropSetup::slotElevationShadeHiValueChanged() {
   demfile->setElevationShadeHi(spinBoxElevationShadeLimitHi->value());
   dem->emitSigCanvasUpdate();
+}
+
+void CDemPropSetup::updateCanvasAndStatus() {
+  QPointer<CDemDraw> pDem(dem);
+  QTimer::singleShot(100, this, [pDem]() {
+    if (!pDem.isNull()) {
+      emit pDem->sigScaleChanged(pDem->getScale());
+      pDem->getCanvas()->triggerCompleteUpdate(CCanvas::eRedrawDem);
+    }
+  });
 }

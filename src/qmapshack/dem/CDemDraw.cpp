@@ -278,6 +278,10 @@ qreal CDemDraw::getElevationAt(const QPointF& pos, bool checkScale) {
 
         ele = item->getDemFile()->getElevationAt(pos, checkScale);
         if (ele != NOFLOAT) {
+          QString val;
+          QString unit;
+          IUnit::self().meter2elevation(ele, val, unit);
+          item->setAccess(val + unit);
           break;
         }
       }
@@ -311,7 +315,7 @@ qreal CDemDraw::getSlopeAt(const QPointF& pos, bool checkScale) {
 
 void CDemDraw::getElevationAt(const QPolygonF& pos, QPolygonF& ele) {
   for (int i = 0; i < pos.size(); i++) {
-    qreal tmp = getElevationAt(pos[i]);
+    qreal tmp = getElevationAt(pos[i], false);
     ele[i].ry() = (tmp == NOFLOAT) ? NOFLOAT : tmp;
   }
 }

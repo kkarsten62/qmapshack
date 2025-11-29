@@ -18,7 +18,20 @@
 
 #include "widgets/CMapItemWidget.h"
 
-CMapItemWidget::CMapItemWidget() {
+#include <QGraphicsOpacityEffect>
+#include <QHBoxLayout>
+#include <QPainter>
+#include <QToolButton>
+#include <QVBoxLayout>
+
+#include "canvas/IDrawObject.h"
+#include "widgets/CFadingLabel.h"
+#include "widgets/CLedIndicator.h"
+
+constexpr Qt::GlobalColor kColorOut = Qt::lightGray;
+constexpr Qt::GlobalColor kColorIn = Qt::darkGreen;
+
+CMapItemWidget::CMapItemWidget(const QString& typeIMap) : typeIMap(typeIMap) {
   labelName = new QLabel(this);
   labelName->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   labelStatus = new QLabel(tr("unknown"), this);
@@ -27,28 +40,55 @@ CMapItemWidget::CMapItemWidget() {
   labelStatus->setFont(f);
   labelStatus->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
+  labelAccess = new CFadingLabel(this);
+  labelAccess->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+  labelAccess->setFont(f);
+
+  indicatorVisibility = new CLedIndicator(this);
+  indicatorVisibility->setFixedSize(6, 20);
+
   buttonActivate = new QToolButton(this);
   buttonActivate->setCheckable(true);
   buttonActivate->setIcon(QIcon(":/icons/32x32/ShowNone.png"));
 
   layout2 = new QHBoxLayout(this);
+  layout2->setContentsMargins(2, 2, 2, 2);
+  layout2->setSpacing(3);
 
   layout1 = new QVBoxLayout();
   layout1->setContentsMargins(0, 0, 0, 0);
   layout1->setSpacing(0);
+
   layout1->addWidget(labelName);
   layout1->addWidget(labelStatus);
 
   layout2->addLayout(layout1);
-  layout2->setContentsMargins(2, 2, 2, 2);
-  layout2->setSpacing(0);
+  layout2->addWidget(labelAccess);
+  layout2->addWidget(indicatorVisibility);
   layout2->addWidget(buttonActivate);
+
+  timerAccess = new QTimer(this);
+  timerAccess->setSingleShot(true);
+  timerAccess->setInterval(1000);
 
   connect(buttonActivate, &QToolButton::clicked, this, &CMapItemWidget::sigActivate);
   connect(buttonActivate, &QToolButton::toggled, this, &CMapItemWidget::slotSetChecked);
+  connect(timerAccess, &QTimer::timeout, this, [this]() { labelAccess->fadeOut(1000); });
 }
 
 CMapItemWidget::~CMapItemWidget() { /*qDebug() << "~CMapItemWidget()" << labelName->text();*/ }
+
+void CMapItemWidget::setDrawObject(IDrawObject* object, const QPointF& scale) {
+  map = object;
+  indicatorVisibility->setHidden(map.isNull());
+  slotScaleChanged(scale);
+}
+
+void CMapItemWidget::setAccess(const QString& ele) {
+  labelAccess->setText(ele);
+  labelAccess->fadeIn(1);
+  timerAccess->start();
+}
 
 void CMapItemWidget::setStatus(eStatus status) {
   this->status = status;
@@ -58,6 +98,8 @@ void CMapItemWidget::setStatus(eStatus status) {
       labelName->setText(mapName);
       labelName->setEnabled(false);
       buttonActivate->setChecked(false);
+      buttonActivate->setToolTip(tr("Activate %1").arg(typeIMap));
+      indicatorVisibility->animateHide();
       break;
 
     case eStatus::Active:
@@ -65,6 +107,8 @@ void CMapItemWidget::setStatus(eStatus status) {
       labelName->setText("<b>" + mapName + "</b>");
       labelName->setEnabled(true);
       buttonActivate->setChecked(true);
+      buttonActivate->setToolTip(tr("Deactivate %1").arg(typeIMap));
+      indicatorVisibility->animateShow();
       break;
 
     case eStatus::Missing:
@@ -72,6 +116,8 @@ void CMapItemWidget::setStatus(eStatus status) {
       labelName->setText(mapName);
       labelName->setEnabled(false);
       buttonActivate->setChecked(false);
+      buttonActivate->setToolTip(tr("Activate %1").arg(typeIMap));
+      indicatorVisibility->animateHide();
       break;
 
     case eStatus::Unused:
@@ -79,6 +125,8 @@ void CMapItemWidget::setStatus(eStatus status) {
       labelName->setText(mapName);
       labelStatus->setText("-");
       buttonActivate->setChecked(false);
+      buttonActivate->setToolTip(tr("Activate %1").arg(typeIMap));
+      indicatorVisibility->animateHide();
       break;
   }
 
@@ -90,5 +138,18 @@ void CMapItemWidget::slotSetChecked(bool yes) {
     buttonActivate->setIcon(QIcon(":/icons/32x32/ShowAll.png"));
   } else {
     buttonActivate->setIcon(QIcon(":/icons/32x32/ShowNone.png"));
+  }
+}
+
+void CMapItemWidget::slotScaleChanged(const QPointF& scale) {
+  if (map.isNull()) {
+    return;
+  }
+  if (map->isOutOfScale(scale)) {
+    indicatorVisibility->setColor(kColorOut);
+    indicatorVisibility->setToolTip(tr("%1 is not visible at current scale").arg(typeIMap));
+  } else {
+    indicatorVisibility->setColor(kColorIn);
+    indicatorVisibility->setToolTip(tr("%1 is visible at current scale").arg(typeIMap));
   }
 }

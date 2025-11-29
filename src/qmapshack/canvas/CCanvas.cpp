@@ -594,8 +594,9 @@ void CCanvas::mousePressEvent(QMouseEvent* e) {
 void CCanvas::mouseMoveEvent(QMouseEvent* e) {
   QPointF pos = e->pos();
   map->convertPx2Rad(pos);
-  qreal ele = dem->getElevationAt(pos, true);
-  qreal slope = dem->getSlopeAt(pos, true);
+  qreal ele = dem->getElevationAt(pos, false);
+  qreal slope = dem->getSlopeAt(pos, false);
+
   emit sigMousePosition(pos * RAD_TO_DEG, ele, slope);
 
   mouse->mouseMoveEvent(e);
@@ -1029,7 +1030,9 @@ void CCanvas::setScales(const scales_type_e type) {
 
 CCanvas::scales_type_e CCanvas::getScalesType() { return map->getScalesType(); }
 
-qreal CCanvas::getElevationAt(const QPointF& pos) const { return dem->getElevationAt(pos); }
+qreal CCanvas::getElevationAt(const QPointF& pos, bool checkScale) const {
+  return dem->getElevationAt(pos, checkScale);
+}
 
 void CCanvas::getElevationAt(const QPolygonF& pos, QPolygonF& ele) const { return dem->getElevationAt(pos, ele); }
 

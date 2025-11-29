@@ -30,6 +30,7 @@ QPointF CMapPropSetup::scale;
 CMapPropSetup::CMapPropSetup(IMap* mapfile, CMapDraw* map) : IMapProp(mapfile, map) {
   setupUi(this);
 
+  scale = map->getScale();
   CMapPropSetup::slotPropertiesChanged();
 
   connect(sliderOpacity, &QSlider::valueChanged, mapfile, &IMap::slotSetOpacity);
@@ -84,7 +85,7 @@ void CMapPropSetup::slotPropertiesChanged() /* override */
   qreal maxScale = mapfile->getMaxScale();
   toolSetMaxScale->setChecked(maxScale != NOFLOAT);
 
-  labelScale->setValue(mapfile->getMinScale(), scale.x(), mapfile->getMaxScale());
+  widgetScale->setValue(mapfile->getMinScale(), scale.x(), mapfile->getMaxScale());
 
   // vector maps properties
   checkPolygons->setChecked(mapfile->getShowPolygons());
@@ -120,11 +121,13 @@ void CMapPropSetup::slotScaleChanged(const QPointF& s) {
 void CMapPropSetup::slotSetMinScale(bool checked) {
   mapfile->setMinScale(checked ? scale.x() : NOFLOAT);
   slotPropertiesChanged();
+  updateCanvasAndStatus();
 }
 
 void CMapPropSetup::slotSetMaxScale(bool checked) {
   mapfile->setMaxScale(checked ? scale.x() : NOFLOAT);
   slotPropertiesChanged();
+  updateCanvasAndStatus();
 }
 
 void CMapPropSetup::slotLoadTypeFile() {
@@ -145,4 +148,14 @@ void CMapPropSetup::slotLoadTypeFile() {
 void CMapPropSetup::slotClearTypeFile() {
   mapfile->slotSetTypeFile("");
   slotPropertiesChanged();
+}
+
+void CMapPropSetup::updateCanvasAndStatus() {
+  QPointer<CMapDraw> pMap(map);
+  QTimer::singleShot(100, this, [pMap]() {
+    if (!pMap.isNull()) {
+      emit pMap->sigScaleChanged(pMap->getScale());
+      pMap->getCanvas()->triggerCompleteUpdate(CCanvas::eRedrawMap);
+    }
+  });
 }
