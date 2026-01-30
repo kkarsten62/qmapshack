@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2026 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2025 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,5 +16,20 @@
 
 **********************************************************************************************/
 
-#include "CLASSNAME.h"
+#ifndef CPOITREEWIDGETCATEGORIES_H
+#define CPOITREEWIDGETCATEGORIES_H
 
+#include <QScrollBar>
+#include <QTreeWidget>
+
+class CPoiTreeWidgetCategories : public QTreeWidget {
+  Q_OBJECT
+ public:
+  CPoiTreeWidgetCategories(QWidget *parent);
+  virtual ~CPoiTreeWidgetCategories() = default;
+
+ protected:
+  void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
+};
+
+#endif  // CPOITREEWIDGETCATEGORIES_H

@@ -24,6 +24,7 @@
 #include "map/CMapDraw.h"
 #include "map/CMapGEMF.h"
 #include "map/CMapIMG.h"
+#include "map/CMapItemDelegate.h"
 #include "map/CMapJNX.h"
 #include "map/CMapMAP.h"
 #include "map/CMapRMAP.h"
@@ -31,42 +32,18 @@
 #include "map/CMapVRT.h"
 #include "map/CMapWMTS.h"
 #include "map/IMapProp.h"
+#include "misc.h"
 
 QRecursiveMutex CMapItem::mutexActiveMaps;
 
 CMapItem::CMapItem(CMapDraw* map) : map(map) {
   setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-
-  itemWidget();
+  connect(map, &CMapDraw::sigScaleChanged, this, &CMapItem::slotScaleChanged);
 }
 
 CMapItem::~CMapItem() {}
 
-QWidget* CMapItem::itemWidget() {
-  if (widget.isNull()) {
-    widget = new CMapItemWidget(tr("map"));
-    QFileInfo fi(filename);
-    setName(fi.completeBaseName().replace("_", " "));
-
-    if (QFile::exists(filename)) {
-      if (noShadowConfig()) {
-        setStatus(CMapItemWidget::eStatus::Unused);
-      } else {
-        setStatus(mapfile.isNull() ? CMapItemWidget::eStatus::Inactive : CMapItemWidget::eStatus::Active);
-      }
-    } else {
-      setStatus(CMapItemWidget::eStatus::Missing);
-    }
-
-    widget->setDrawObject(mapfile, map->getScale());
-    connect(widget, &CMapItemWidget::sigActivate, this, &CMapItem::slotActivate);
-    connect(widget, &CMapItemWidget::destroyed, this, [this] { emit sigUpdateWidget(this); });
-    connect(map, &CMapDraw::sigScaleChanged, widget, &CMapItemWidget::slotScaleChanged);
-  }
-  return widget;
-}
-
-void CMapItem::slotActivate(bool yes) {
+void CMapItem::activate(bool yes) {
   if (yes) {
     activate();
   } else {
@@ -75,13 +52,6 @@ void CMapItem::slotActivate(bool yes) {
 
   emit sigChanged();
 }
-
-void CMapItem::setName(const QString& name) {
-  widget->setName(name);
-  setText(0, name);
-}
-
-void CMapItem::setStatus(CMapItemWidget::eStatus status) { widget->setStatus(status); }
 
 void CMapItem::setFilename(const QString& name, const QString& fallbackKey) {
   filename = name;
@@ -141,17 +111,17 @@ void CMapItem::loadConfig(QSettings& cfg, bool triggerActivation) {
   cfg.endGroup();
 
   if (!QFile::exists(filename)) {
-    setStatus(CMapItemWidget::eStatus::Missing);
+    setStatus(IMapItem::eStatus::Missing);
     return;
   } else if (noShadowConfig()) {
-    setStatus(CMapItemWidget::eStatus::Unused);
+    setStatus(IMapItem::eStatus::Unused);
   } else {
-    setStatus(CMapItemWidget::eStatus::Inactive);
+    setStatus(IMapItem::eStatus::Inactive);
     if (triggerActivation) {
       // Evil hack: If you activate the map directly Qt will crash internally.
       QPointer<CMapItem> self(this);
       QTimer::singleShot(100, this, [self, active]() {
-        if (!self.isNull()) self->slotActivate(active);
+        if (!self.isNull()) self->activate(active);
       });
     }
   }
@@ -163,7 +133,6 @@ void CMapItem::showChildren(bool yes) {
   }
   if (yes) {
     QTreeWidget* tw = treeWidget();
-
     QTreeWidgetItem* item = new QTreeWidgetItem(this);
     item->setFlags(Qt::ItemIsEnabled);
     tw->setItemWidget(item, 0, mapfile->getSetup());
@@ -180,13 +149,13 @@ void CMapItem::updateIcon() {
   }
 
   static QHash<QString, QString> icons{
-      {"rmap", "://icons/32x32/MimeRMAP.png"}, {"jnx", "://icons/32x32/MimeJNX.png"},
-      {"vrt", "://icons/32x32/MimeVRT.png"},   {"img", "://icons/32x32/MimeIMG.png"},
-      {"map", "://icons/32x32/MimeMAP.png"},   {"wmts", "://icons/32x32/MimeWMTS.png"},
-      {"tms", "://icons/32x32/MimeTMS.png"},   {"gemf", "://icons/32x32/MimeGEMF.png"}};
+      {"rmap", "://icons/48x48/MimeRMAP.png"}, {"jnx", "://icons/48x48/MimeJNX.png"},
+      {"vrt", "://icons/48x48/MimeVRT.png"},   {"img", "://icons/48x48/MimeIMG.png"},
+      {"map", "://icons/48x48/MimeMAP.png"},   {"wmts", "://icons/48x48/MimeWMTS.png"},
+      {"tms", "://icons/48x48/MimeTMS.png"},   {"gemf", "://icons/48x48/MimeGEMF.png"}};
 
   const QString& suffix = QFileInfo(filename).suffix().toLower();
-  QPixmap img(icons.contains(suffix) ? icons[suffix] : "://icons/32x32/Map.png");
+  QPixmap img(icons.contains(suffix) ? icons[suffix] : "://icons/48x48/Map.png");
 
   setIcon(/* col */ 0, QIcon(img));
 }
@@ -205,6 +174,7 @@ void CMapItem::deactivate() {
   // save current configuration into
   // the shadow configuration
   QTemporaryFile file;
+  openFileCheckSuccess(QIODevice::ReadWrite, file);
   QSettings cfg(file.fileName(), QSettings::IniFormat);
   mapfile->saveConfig(cfg);
   configToShadowConfig(cfg);
@@ -218,7 +188,7 @@ void CMapItem::deactivate() {
   // maybe used to reflect changes in the icon
   updateIcon();
 
-  setStatus(CMapItemWidget::eStatus::Inactive);
+  setStatus(IMapItem::eStatus::Inactive);
 }
 
 bool CMapItem::activate() {
@@ -250,7 +220,7 @@ bool CMapItem::activate() {
 
   // no mapfiles loaded? Bad.
   if (mapfile.isNull()) {
-    setStatus(CMapItemWidget::eStatus::Inactive);
+    setStatus(IMapItem::eStatus::Inactive);
     return false;
   }
 
@@ -258,7 +228,7 @@ bool CMapItem::activate() {
   // else delete all previous loaded maps and abort
   if (!mapfile->activated()) {
     delete mapfile;
-    setStatus(CMapItemWidget::eStatus::Inactive);
+    setStatus(IMapItem::eStatus::Inactive);
     return false;
   }
 
@@ -267,6 +237,7 @@ bool CMapItem::activate() {
   // setup map with settings stored in
   // the shadow config
   QTemporaryFile file;
+  openFileCheckSuccess(QIODevice::ReadWrite, file);
   QSettings cfg(file.fileName(), QSettings::IniFormat);
 
   shadowConfigToConfig(cfg);
@@ -280,13 +251,37 @@ bool CMapItem::activate() {
   // Add the mapfile setup dialog as child of this item
   showChildren(true);
 
-  widget->setDrawObject(mapfile, map->getScale());
-  setStatus(CMapItemWidget::eStatus::Active);
+  // make sure the delegate is updated
+  setStatus(IMapItem::eStatus::Active);
+  slotScaleChanged(map->getScale());
   return true;
 }
 
 void CMapItem::setProcessing(bool on) {
-  if (!widget.isNull()) {
-    widget->setProcessing(on);
+  const QModelIndex& index = treeWidget()->indexFromItem(this);
+  CMapItemDelegate* delegate = dynamic_cast<CMapItemDelegate*>(treeWidget()->itemDelegate());
+  if (delegate == nullptr) {
+    return;
+  }
+
+  delegate->setProcessing(index, on);
+}
+
+void CMapItem::slotScaleChanged(const QPointF& scale) {
+  if (mapfile.isNull()) {
+    return;
+  }
+
+  const QModelIndex& index = treeWidget()->indexFromItem(this);
+  CMapItemDelegate* delegate = dynamic_cast<CMapItemDelegate*>(treeWidget()->itemDelegate());
+  if (delegate == nullptr) {
+    return;
+  }
+
+  outOfScale = mapfile->isOutOfScale(scale);
+  if (outOfScale) {
+    delegate->setColor(index, kColorOut);
+  } else {
+    delegate->setColor(index, kColorIn);
   }
 }

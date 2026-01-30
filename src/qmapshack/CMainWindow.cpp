@@ -491,6 +491,10 @@ void CMainWindow::prepareMenuForMac() {
 }
 
 CMainWindow::~CMainWindow() {
+
+  // Invalidate stylesheet to avoid crash after destruction (macOS!)
+  qApp->setStyleSheet("");
+
   CActivityTrk::release();
 
   SETTINGS;
@@ -871,6 +875,7 @@ void CMainWindow::slotCloneCanvas() {
   }
 
   QTemporaryFile temp;
+  openFileCheckSuccess(QIODevice::ReadWrite, temp);
   QSettings view(temp.fileName(), QSettings::IniFormat);
   view.clear();
 
