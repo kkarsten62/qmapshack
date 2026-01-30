@@ -24,6 +24,7 @@
 #include "helpers/CSettings.h"
 #include "plot/CPlotTrack.h"
 #include "print/CTrkPrintDialog.h"
+#include "misc.h"
 
 #include <QPrintDialog>
 
@@ -142,8 +143,9 @@ void CTrkPrintDialog::setCanvas()
     CCanvas* mainCanvas = comboCanvasList->currentData().value<CCanvas*>();
 
     QTemporaryFile temp;
-    temp.open();
-    temp.close();
+    openFileCheckSuccess(QIODevice::ReadWrite, temp);
+    //temp.open();
+    //temp.close();
 
     QSettings view(temp.fileName(), QSettings::IniFormat);
     view.clear();
