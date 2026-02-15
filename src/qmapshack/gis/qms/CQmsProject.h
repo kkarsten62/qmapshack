@@ -31,7 +31,7 @@ class CQmsProject : public IGisProject {
 
   const QString getFileExtension() const override { return "qms"; }
 
-  bool canSave() const override { return true; }
+  const bool canSave() const override { return true; }
 
   static bool saveAs(const QString& fn, IGisProject& project);
 };

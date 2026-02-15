@@ -299,7 +299,10 @@ void CGisItemOvlArea::drawHighlight(QPainter& p) {
   p.drawPolygon(polygonArea);
 }
 
-void CGisItemOvlArea::gainUserFocus(bool yes) { keyUserFocus = yes ? key : key_t(); }
+void CGisItemOvlArea::gainUserFocus(bool yes) {
+  keyUserFocus = yes ? key : key_t();
+  IWksItem::updateItem();
+}
 
 const searchValue_t CGisItemOvlArea::getValueByKeyword(searchProperty_e keyword) {
   if (keywordLambdaMap.contains(keyword)) {
@@ -411,7 +414,7 @@ void CGisItemOvlArea::setDataFromPolyline(const SGisLine& l) {
 }
 
 void CGisItemOvlArea::setName(const QString& str) {
-  setText(CGisListWks::eColumnName, str);
+  name = str;
   area.name = str;
   changed(tr("Changed name."), "://icons/48x48/EditText.png");
 }
@@ -516,7 +519,7 @@ QMap<searchProperty_e, CGisItemOvlArea::fSearch> CGisItemOvlArea::initKeywordLam
   });
   map.insert(eSearchPropertyGeneralKeywords, [](CGisItemOvlArea* item) {
     searchValue_t searchValue;
-    searchValue.str1 = QStringList(item->getKeywords().values()).join(", ");
+    searchValue.str1 = QStringList(item->getTags().values()).join(", ");
     return searchValue;
   });
   map.insert(eSearchPropertyGeneralType, [](CGisItemOvlArea* /*item*/) {

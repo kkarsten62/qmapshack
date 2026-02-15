@@ -48,7 +48,7 @@ const QList<extension_t> CSmlProject::extensions = {
 };
 
 CSmlProject::CSmlProject(const QString& filename, CGisListWks* parent) : ISuuntoProject(eTypeSml, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/SmlProject.png"));
+  icon = QPixmap("://icons/32x32/SmlProject.png");
   blockUpdateItems(true);
   loadSml(filename);
   blockUpdateItems(false);
@@ -72,7 +72,6 @@ void CSmlProject::loadSml(const QString& filename, CSmlProject* project) {
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "sml") {
     project->filename.clear();
     project->setupName(filename);
-    project->setToolTip(CGisListWks::eColumnName, project->getInfo());
     project->valid = true;
     return;
   }
@@ -233,7 +232,6 @@ void CSmlProject::loadSml(const QString& filename, CSmlProject* project) {
 
         project->sortItems();
         project->setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-        project->setToolTip(CGisListWks::eColumnName, project->getInfo());
         project->valid = true;
       }
     }

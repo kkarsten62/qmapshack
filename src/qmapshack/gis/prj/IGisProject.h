@@ -23,9 +23,9 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QPointer>
-#include <QTreeWidgetItem>
 
 #include "gis/IGisItem.h"
+#include "gis/IWksItem.h"
 #include "gis/search/CProjectFilterItem.h"
 #include "gis/search/CSearch.h"
 #include "helpers/CSelectCopyAction.h"
@@ -37,25 +37,9 @@ class QDataStream;
 class CDetailsPrj;
 class IDevice;
 
-class IGisProject : public QTreeWidgetItem {
+class IGisProject : public IWksItem {
   Q_DECLARE_TR_FUNCTIONS(IGisProject)
  public:
-  enum type_e {
-    eTypeGeoSearch,
-    eTypeQms,
-    eTypeGpx,
-    eTypeDb,
-    eTypeLostFound,
-    eTypeTwoNav,
-    eTypeSlf  // the Sigma Log Format
-    ,
-    eTypeFit,
-    eTypeTcx,
-    eTypeSml,
-    eTypeLog,
-    eTypeQlb
-  };
-
   /// flags used to serialize trivial flags in qms file
   enum flags_e { eFlagNoCorrelation = 0x1, eFlagAutoSave = 0x2, eFlagInvalidDataOk = 0x4, eFlagAutoSyncToDev = 0x8 };
 
@@ -134,11 +118,6 @@ class IGisProject : public QTreeWidgetItem {
   void edit();
 
   /**
-     @brief Returns true if a project of given format can be saved, false if it cannot be saved (just as .slf atm)
-   */
-  virtual bool canSave() const { return false; }
-
-  /**
      @brief Return true if saving should be skipped.
    */
   virtual bool skipSave() const { return false; }
@@ -192,13 +171,11 @@ class IGisProject : public QTreeWidgetItem {
    */
   QString getDeviceKey() const;
 
-  QPixmap getIcon() const;
-
   /**
      @brief Get the project's name
      @return The name from metadata.name
    */
-  QString getName() const;
+  const QString& getName() const override;
   /**
      @brief Get the project's name extended with the parent's name.
      @return The name from metadata.nam appended with either the device name or the database parent folder's name.
@@ -251,7 +228,8 @@ class IGisProject : public QTreeWidgetItem {
      @brief Get a short metadata summary
      @return Informational string.
    */
-  virtual QString getInfo() const;
+  QString getInfo(quint32) const override;
+
   /**
      @brief Get a temporary pointer to the item with matching key
      @param key
@@ -286,7 +264,7 @@ class IGisProject : public QTreeWidgetItem {
 
   void switchOnCorrelation();
 
-  void setAutoSave(bool on);
+  void setAutoSave(bool on) override;
 
   void setInvalidDataOk(bool ok) {
     invalidDataOk = ok;
@@ -341,24 +319,10 @@ class IGisProject : public QTreeWidgetItem {
   bool isValid() const { return valid; }
 
   /**
-     @brief Test if visibility check mark is set
-     @return True if project is visible
-   */
-  bool isVisible() const;
-
-  bool isAutoSave() const { return autoSave; }
-
-  /**
      @brief Test if this project is handled by a device
      @return The device type (IDevice::type_e). IDevice::eTypeNone if the project is not stored on a device.
    */
-  qint32 isOnDevice() const;
-
-  /**
-     @brief Test if project has been changed
-     @return True if changed.
-   */
-  bool isChanged() const;
+  const qint32 isOnDevice() const override;
 
   void drawItem(QPainter& p, const QPolygonF& viewport, QList<QRectF>& blockedAreas, CGisDraw* gis);
   void drawLabel(QPainter& p, const QPolygonF& viewport, QList<QRectF>& blockedAreas, const QFontMetricsF& fm,
@@ -440,20 +404,17 @@ class IGisProject : public QTreeWidgetItem {
 
   bool findPolylineCloseBy(const QPointF& pt1, const QPointF& pt2, qint32& threshold, QPolygonF& polyline);
 
-  void gainUserFocus(bool yes);
+  void gainUserFocus(bool yes) override;
 
-  bool hasUserFocus() const { return keyUserFocus == key; }
+  bool hasUserFocus() const override { return keyUserFocus == key; }
 
   static const QString& getUserFocus() { return keyUserFocus; }
 
-  void setAutoSyncToDevice(bool yes);
-
-  bool doAutoSyncToDevice() const { return autoSyncToDev; }
-
-  CProjectFilterItem* filterProject(bool filter);
+  void filterProject(bool filter);
   CProjectFilterItem* getProjectFilterItem() { return projectFilter; }
 
  protected:
+  using IWksItem::updateDecoration;
   void genKey() const;
   virtual void setupName(const QString& defaultName);
   void markAsSaved();
@@ -461,7 +422,7 @@ class IGisProject : public QTreeWidgetItem {
   void updateItems();
   void updateItemCounters();
   void updateDecoration();
-  void updateDecoration(bool saved);
+  // void updateDecoration(bool saved);
   void sortItems();
   void sortItems(QList<IGisItem*>& items) const;
 
@@ -499,10 +460,9 @@ class IGisProject : public QTreeWidgetItem {
   bool noUpdate = false;
   bool noCorrelation = false;
   bool changedRoadbookMode = false;
-  bool autoSave = false;              ///< flag to show if auto save is on or off
+
   bool autoSavePending = false;       ///< flag to show if auto save event has been sent. will be reset by save()
   bool invalidDataOk = false;         ///< if set invalid data in GIS items will not raise any dialog
-  bool autoSyncToDev = false;         ///< if set true sync the project with every device connected
   bool autoSyncToDevPending = false;  ///< flag to show that a sync to device is already pending
 
   metadata_t metadata;
@@ -527,7 +487,7 @@ class IGisProject : public QTreeWidgetItem {
   CSearch projectSearch = CSearch("");
   CSearch workspaceSearch = CSearch("");
 
-  CProjectFilterItem* projectFilter = nullptr;
+  QPointer<CProjectFilterItem> projectFilter;
 };
 Q_DECLARE_METATYPE(IGisProject*)
 

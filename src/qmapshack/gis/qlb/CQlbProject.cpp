@@ -33,7 +33,7 @@
 #include "qlgt/IQlgtOverlay.h"
 
 CQlbProject::CQlbProject(const QString& filename, CGisListWks* parent) : IGisProject(eTypeQlb, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/QlbProject.png"));
+  icon = QPixmap("://icons/32x32/QlbProject.png");
 
   // create file instance
   QFile file(filename);
@@ -42,7 +42,6 @@ CQlbProject::CQlbProject(const QString& filename, CGisListWks* parent) : IGisPro
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "qlb") {
     IGisProject::filename.clear();
     setupName(filename);
-    setToolTip(CGisListWks::eColumnName, getInfo());
     valid = true;
     return;
   }
@@ -57,7 +56,6 @@ CQlbProject::CQlbProject(const QString& filename, CGisListWks* parent) : IGisPro
 
   markAsSaved();
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  setToolTip(CGisListWks::eColumnName, getInfo());
   updateItems();
   valid = true;
 }

@@ -70,6 +70,8 @@
         <file>../icons/32x32/ArrowUser.png</file>
         <file>../icons/32x32/Attention.png</file>
         <file>../icons/32x32/AutoSave.png</file>
+        <file>../icons/32x32/AutoSaveA.png</file>
+        <file>../icons/32x32/AutoSaveNoA.png</file>
         <file>../icons/32x32/Bubble.png</file>
         <file>../icons/32x32/CSrcATemp.png</file>
         <file>../icons/32x32/CSrcAccel.png</file>
@@ -116,6 +118,8 @@
         <file>../icons/32x32/DeleteMultiple.png</file>
         <file>../icons/32x32/DeleteOne.png</file>
         <file>../icons/32x32/Device.png</file>
+        <file>../icons/32x32/DeviceSync.png</file>
+        <file>../icons/32x32/DeviceNoSync.png</file>
         <file>../icons/32x32/Disconnected.png</file>
         <file>../icons/32x32/Down.png</file>
         <file>../icons/32x32/EditDetails.png</file>
@@ -179,6 +183,7 @@
         <file>../icons/32x32/MySQL.png</file>
         <file>../icons/32x32/MySQLNoConn.png</file>
         <file>../icons/32x32/NightDay.png</file>
+        <file>../icons/32x32/NoAutoSave.png</file>
         <file>../icons/32x32/NoGo.png</file>
         <file>../icons/32x32/NotPossible.png</file>
         <file>../icons/32x32/O.png</file>
@@ -301,6 +306,9 @@
         <file>../icons/32x32/ToolBar.png</file>
         <file>../icons/32x32/ToolBarSetup.png</file>
         <file>../icons/32x32/ToolTip.png</file>
+        <file>../icons/32x32/ToWksUnchecked.png</file>
+        <file>../icons/32x32/ToWksChecked.png</file>
+        <file>../icons/32x32/ToWksPartially.png</file>
         <file>../icons/32x32/Track.png</file>
         <file>../icons/32x32/TrackHighlight.png</file>
         <file>../icons/32x32/TrackInfo.png</file>
@@ -315,6 +323,12 @@
         <file>../icons/32x32/Up.png</file>
         <file>../icons/32x32/V.png</file>
         <file>../icons/32x32/VrtBuilder.png</file>
+        <file>../icons/32x32/waypoint_final.png</file>
+        <file>../icons/32x32/waypoint_parking.png</file>
+        <file>../icons/32x32/waypoint_physical.png</file>
+        <file>../icons/32x32/waypoint_reference.png</file>
+        <file>../icons/32x32/waypoint_trailhead.png</file>
+        <file>../icons/32x32/waypoint_virtual.png</file>
         <file>../icons/32x32/WaypointOn.png</file>
         <file>../icons/32x32/WptAvoid.png</file>
         <file>../icons/32x32/WptDelProx.png</file>
@@ -357,6 +371,8 @@
         <file>../icons/48x48/ArrowUser.png</file>
         <file>../icons/48x48/Attention.png</file>
         <file>../icons/48x48/AutoSave.png</file>
+        <file>../icons/48x48/AutoSaveA.png</file>
+        <file>../icons/48x48/AutoSaveNoA.png</file>
         <file>../icons/48x48/Bubble.png</file>
         <file>../icons/48x48/CSrcATemp.png</file>
         <file>../icons/48x48/CSrcAccel.png</file>
@@ -402,6 +418,8 @@
         <file>../icons/48x48/DeleteMultiple.png</file>
         <file>../icons/48x48/DeleteOne.png</file>
         <file>../icons/48x48/Device.png</file>
+        <file>../icons/48x48/DeviceSync.png</file>
+        <file>../icons/48x48/DeviceNoSync.png</file>
         <file>../icons/48x48/Disconnected.png</file>
         <file>../icons/48x48/Down.png</file>
         <file>../icons/48x48/EditDetails.png</file>
@@ -466,6 +484,7 @@
         <file>../icons/48x48/MySQL.png</file>
         <file>../icons/48x48/MySQLNoConn.png</file>
         <file>../icons/48x48/NightDay.png</file>
+        <file>../icons/48x48/NoAutoSave.png</file>
         <file>../icons/48x48/NoGo.png</file>
         <file>../icons/48x48/NotPossible.png</file>
         <file>../icons/48x48/O.png</file>
@@ -588,6 +607,9 @@
         <file>../icons/48x48/ToolBar.png</file>
         <file>../icons/48x48/ToolBarSetup.png</file>
         <file>../icons/48x48/ToolTip.png</file>
+        <file>../icons/48x48/ToWksUnchecked.png</file>
+        <file>../icons/48x48/ToWksChecked.png</file>
+        <file>../icons/48x48/ToWksPartially.png</file>
         <file>../icons/48x48/Track.png</file>
         <file>../icons/48x48/TrackHighlight.png</file>
         <file>../icons/48x48/TrackInfo.png</file>
@@ -604,6 +626,12 @@
         <file>../icons/48x48/VrtBuilder.png</file>
         <file>../icons/48x48/WptAvoid.png</file>
         <file>../icons/48x48/Waypoint.png</file>
+        <file>../icons/48x48/waypoint_final.png</file>
+        <file>../icons/48x48/waypoint_parking.png</file>
+        <file>../icons/48x48/waypoint_physical.png</file>
+        <file>../icons/48x48/waypoint_reference.png</file>
+        <file>../icons/48x48/waypoint_trailhead.png</file>
+        <file>../icons/48x48/waypoint_virtual.png</file>
         <file>../icons/48x48/WaypointOn.png</file>
         <file>../icons/48x48/WptEditProx.png</file>
         <file>../icons/48x48/WptMove.png</file>

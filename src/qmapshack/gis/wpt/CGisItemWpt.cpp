@@ -189,6 +189,14 @@ void CGisItemWpt::genKey() const {
   IGisItem::genKey();
 }
 
+const QString& CGisItemWpt::getIconName() const {
+  if (geocache.hasData) {
+    return geocache.type;
+  } else {
+    return wpt.sym;
+  }
+}
+
 QString CGisItemWpt::getLastName(const QString& name) {
   SETTINGS;
   QString lastName = name;
@@ -420,9 +428,7 @@ void CGisItemWpt::setIcon() {
 void CGisItemWpt::setName(const QString& str) {
   SETTINGS;
   cfg.setValue("Waypoint/lastName", str);
-
-  setText(CGisListWks::eColumnName, str);
-
+  name = str;
   wpt.name = str;
   changed(tr("Changed name"), "://icons/48x48/EditText.png");
 }
@@ -430,9 +436,7 @@ void CGisItemWpt::setName(const QString& str) {
 void CGisItemWpt::setPosition(const QPointF& pos) {
   wpt.lon = pos.x();
   wpt.lat = pos.y();
-
   detBoundingRect();
-
   changed(tr("Changed position"), "://icons/48x48/WptMove.png");
 }
 
@@ -522,7 +526,10 @@ bool CGisItemWpt::isWithin(const QRectF& area, selflags_t flags) {
   return (flags & eSelectionWpt) ? area.contains(QPointF(wpt.lon, wpt.lat)) : false;
 }
 
-void CGisItemWpt::gainUserFocus(bool yes) { keyUserFocus = yes ? key : key_t(); }
+void CGisItemWpt::gainUserFocus(bool yes) {
+  keyUserFocus = yes ? key : key_t();
+  IWksItem::updateItem();
+}
 
 void CGisItemWpt::edit() {
   if (geocache.hasData) {
@@ -1106,7 +1113,7 @@ QMap<searchProperty_e, CGisItemWpt::fSearch> CGisItemWpt::initKeywordLambdaMap()
   });
   map.insert(eSearchPropertyGeneralKeywords, [](CGisItemWpt* item) {
     searchValue_t searchValue;
-    searchValue.str1 = QStringList(item->getKeywords().values()).join(", ");
+    searchValue.str1 = QStringList(item->getTags().values()).join(", ");
     return searchValue;
   });
   map.insert(eSearchPropertyGeneralType, [](CGisItemWpt* /*item*/) {

@@ -20,7 +20,6 @@
 
 #include <gdal.h>
 
-#include "CCommandProcessor.h"
 #if defined(Q_OS_MAC)
 #include "setup/CAppSetupMac.h"
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(__FreeBSD_kernel__) || defined(__GNU__)
@@ -28,7 +27,7 @@
 #elif defined(Q_OS_WIN32)
 #include "setup/CAppSetupWin.h"
 #endif
-
+#include "setup/CCommandProcessor.h"
 #include "setup/CLogHandler.h"
 
 IAppSetup* IAppSetup::instance = nullptr;
@@ -48,15 +47,20 @@ IAppSetup* IAppSetup::getPlatformInstance() {
   return instance;
 }
 
-void IAppSetup::prepareGdal(QString gdalDir, QString projDir) {
-  if (!gdalDir.isEmpty()) {
-    qputenv("GDAL_DATA", gdalDir.toUtf8());
-    qDebug() << "GDAL_DATA directory set to " + gdalDir;
+void IAppSetup::prepareGdal(QString gdalDataDir, QString gdalPluginsDir, QString projDataDir) {
+  if (!gdalDataDir.isEmpty()) {
+    qputenv("GDAL_DATA", gdalDataDir.toUtf8());
+    qDebug() << "GDAL_DATA directory set to " + gdalDataDir;
   }
 
-  if (!projDir.isEmpty()) {
-    qputenv("PROJ_LIB", projDir.toUtf8());
-    qDebug() << "PROJ_LIB directory set to " + projDir;
+  if (!gdalPluginsDir.isEmpty()) {
+    qputenv("GDAL_DRIVER_PATH", gdalPluginsDir.toUtf8());
+    qDebug() << "GDAL_DRIVER_PATH directory set to " + gdalPluginsDir;
+  }
+
+  if (!projDataDir.isEmpty()) {
+    qputenv("PROJ_DATA", projDataDir.toUtf8());
+    qDebug() << "PROJ_DATA directory set to " + projDataDir;
   }
 
   GDALAllRegister();
@@ -78,21 +82,25 @@ QString IAppSetup::path(QString path, QString subdir, bool mkdir, QString debugN
 }
 
 void IAppSetup::prepareTranslator(QString translationPath, QString translationPrefix) {
-  QString locale = QLocale::system().name();
+  QString locale = qlOpts->locale != nullptr ? qlOpts->locale : QLocale::system().name();
   QDir dir(translationPath);
-  if (!QFile::exists(dir.absoluteFilePath(translationPrefix + locale))) {
+  if (!QFile::exists(dir.absoluteFilePath(translationPrefix + locale + ".qm"))) {
     locale = locale.left(2);
   }
-  qDebug() << "locale" << locale;
+  if (QFile::exists(dir.absoluteFilePath(translationPrefix + locale + ".qm"))) {
+    qDebug() << "locale" << locale;
+  } else {
+    qDebug() << "locale" << locale << "not found (using default).";
+  }
 
   QApplication* app = (QApplication*)QCoreApplication::instance();
   QTranslator* qtTranslator = new QTranslator(app);
   if (qtTranslator->load(translationPrefix + locale, translationPath)) {
     app->installTranslator(qtTranslator);
-    qDebug() << "using file '" + translationPath + "/" + translationPrefix + locale + ".qm' for translations.";
+    qDebug() << "using file '" + qtTranslator->filePath() + "' for translations.";
   } else {
-    qWarning() << "no file found for translations '" + translationPath + "/" + translationPrefix + locale +
-                      "' (using default).";
+    qWarning() << "no translations found for file '" + translationPath + "/" + translationPrefix + locale +
+                      ".qm' (using default).";
   }
 }
 

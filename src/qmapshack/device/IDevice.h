@@ -21,18 +21,16 @@
 #define IDEVICE_H
 
 #include <QDir>
-#include <QTreeWidgetItem>
 
 #include "gis/IGisItem.h"
+#include "gis/IWksItem.h"
 class CGisDraw;
 class CGisItemWpt;
 class CDeviceGarmin;
 
-class IDevice : public QTreeWidgetItem {
+class IDevice : public IWksItem {
   Q_DECLARE_TR_FUNCTIONS(IDevice)
  public:
-  enum type_e { eTypeNone = 0, eTypeGarmin = 1, eTypeTwoNav = 2, eTypeGarminMtp = 3, eTypeVirtual = 4, eTypeGenericMtp = 5 };
-
   IDevice(const QString& path, type_e type, const QString& key, QTreeWidget* parent);
   IDevice(const QString& path, const QString& key, IDevice* parent);
   virtual ~IDevice();
@@ -45,8 +43,6 @@ class IDevice : public QTreeWidgetItem {
   void umount() { umount(key); }
 
   const QString& getKey() const { return key; }
-
-  QString getName() const;
 
   void getItemsByPos(const QPointF& pos, QList<IGisItem*>& items);
   void getItemsByArea(const QRectF& area, IGisItem::selflags_t flags, QList<IGisItem*>& items);
@@ -69,6 +65,11 @@ class IDevice : public QTreeWidgetItem {
   virtual void aboutToRemoveProject(IGisProject* project) {}
 
   IGisProject* getProjectByKey(const QString& key);
+
+  void gainUserFocus(bool yes) override {};
+  bool hasUserFocus() const override { return false; };
+
+  void setVisibility(bool visible) override;
 
  protected:
   virtual void insertCopyOfProject(IGisProject* project) = 0;

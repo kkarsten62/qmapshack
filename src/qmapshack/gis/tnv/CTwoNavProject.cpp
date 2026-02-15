@@ -30,20 +30,20 @@
 #include "helpers/CSettings.h"
 
 CTwoNavProject::CTwoNavProject(const QString& filename, IDevice* parent) : IGisProject(eTypeTwoNav, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/2NavProject.png"));
+  icon = QPixmap("://icons/32x32/2NavProject.png");
 
   load(filename);
 
   sortItems();
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  setToolTip(CGisListWks::eColumnName, getInfo());
   updateItems();
   valid = true;
 }
 
 CTwoNavProject::CTwoNavProject(const QString& filename, const IGisProject* project, IDevice* parent)
     : IGisProject(eTypeTwoNav, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/2NavProject.png"));
+  icon = QPixmap("://icons/32x32/2NavProject.png");
+
   *(IGisProject*)this = *project;
 
   CSelectCopyAction::result_e res = CSelectCopyAction::eResultNone;
@@ -57,7 +57,6 @@ CTwoNavProject::CTwoNavProject(const QString& filename, const IGisProject* proje
 
   sortItems();
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  setToolTip(CGisListWks::eColumnName, getInfo());
   updateItems();
   valid = true;
 }

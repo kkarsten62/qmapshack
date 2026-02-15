@@ -41,13 +41,7 @@ class CGisListWks : public QTreeWidget {
   CGisListWks(QWidget* parent);
   virtual ~CGisListWks();
 
-  enum column_e {
-    eColumnIcon = 0,
-    eColumnCheckBox = eColumnIcon,
-    eColumnDecoration = eColumnIcon,
-    eColumnRating = 1,
-    eColumnName = 2
-  };
+  // enum column_e { eColumnName = 2 };
 
   void setExternalMenu(QMenu* project);
   bool hasProject(IGisProject* project);
@@ -61,6 +55,10 @@ class CGisListWks : public QTreeWidget {
 
   void removeDevice(const QString& key);
 
+  void setUserFocus(const QString& key, bool yes);
+
+  bool hasDeviceSupport() const { return deviceWatcher != nullptr; }
+
  public slots:
   void slotLoadWorkspace();
 
@@ -71,7 +69,7 @@ class CGisListWks : public QTreeWidget {
  protected:
   void dragMoveEvent(QDragMoveEvent* e) override;
   void dropEvent(QDropEvent* e) override;
-  void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
+  void scrollTo(const QModelIndex& index, ScrollHint hint = EnsureVisible) override;
 
  private slots:
   void slotSaveWorkspace();
@@ -140,6 +138,7 @@ class CGisListWks : public QTreeWidget {
   void migrateDB1to2();
   void migrateDB2to3();
   void migrateDB3to4();
+  void migrateDB4to5();
   void setVisibilityOnMap(bool visible);
   QAction* addSortAction(QObject* parent, QActionGroup* actionGroup, const QString& icon, const QString& text,
                          IGisProject::sorting_folder_e mode);

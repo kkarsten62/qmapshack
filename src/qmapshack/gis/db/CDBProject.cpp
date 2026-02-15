@@ -31,18 +31,18 @@
 #include "gis/prj/CDetailsPrj.h"
 #include "helpers/CProgressDialog.h"
 CDBProject::CDBProject(CGisListWks* parent) : IGisProject(eTypeDb, "", parent), id(0) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/DBProject.png"));
+  icon = QPixmap("://icons/32x32/DBProject.png");
 }
 
 CDBProject::CDBProject(const QString& dbName, quint64 id, CGisListWks* parent)
     : IGisProject(eTypeDb, dbName, parent), id(id) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/DBProject.png"));
+  icon = QPixmap("://icons/32x32/DBProject.png");
   db = QSqlDatabase::database(dbName);
 
   QSqlQuery query(db);
   query.prepare("SELECT date, name, data FROM folders WHERE id=:id");
   query.bindValue(":id", id);
-  QUERY_EXEC(return );
+  QUERY_EXEC(return);
   query.next();
 
   QString date = query.value(0).toString();
@@ -69,7 +69,7 @@ CDBProject::CDBProject(const QString& dbName, quint64 id, CGisListWks* parent)
     query.prepare("UPDATE folders SET keyqms=:keyqms WHERE id=:id");
     query.bindValue(":keyqms", getKey());
     query.bindValue(":id", id);
-    QUERY_EXEC(return );
+    QUERY_EXEC(return);
   } else {
     QDataStream in(&data, QIODevice::ReadOnly);
     in.setByteOrder(QDataStream::LittleEndian);
@@ -79,7 +79,6 @@ CDBProject::CDBProject(const QString& dbName, quint64 id, CGisListWks* parent)
   }
 
   CDBProject::setupName(name);
-  setToolTip(CGisListWks::eColumnName, getInfo());
   updateItems();
 
   valid = true;
@@ -100,7 +99,7 @@ CDBProject::CDBProject(const QString& filename, IDBFolder* parentFolder, CGisLis
   QSqlQuery query(db);
   query.prepare("SELECT id FROM folders WHERE keyqms=:keyqms");
   query.bindValue(":keyqms", prjIn->getKey());
-  QUERY_EXEC(return );
+  QUERY_EXEC(return);
   if (query.next()) {
     QMessageBox::information(
         CMainWindow::self().getBestWidgetForParent(), tr("Project already in database..."),
@@ -114,7 +113,7 @@ CDBProject::CDBProject(const QString& filename, IDBFolder* parentFolder, CGisLis
   query.prepare("UPDATE folders SET keyqms=:keyqms WHERE id=:id");
   query.bindValue(":keyqms", prjIn->getKey());
   query.bindValue(":id", id);
-  QUERY_EXEC(return );
+  QUERY_EXEC(return);
 
   // copy data
   key = prjIn->getKey();
@@ -127,7 +126,7 @@ CDBProject::CDBProject(const QString& filename, IDBFolder* parentFolder, CGisLis
   for (QTreeWidgetItem* item : std::as_const(items)) {
     IGisItem* gisItem = dynamic_cast<IGisItem*>(item);
     if (gisItem) {
-      gisItem->updateDecoration(IGisItem::eMarkChanged, IGisItem::eMarkNone);
+      gisItem->updateDecoration(IWksItem::eMarkChanged, IWksItem::eMarkNone);
     }
   }
 
@@ -158,7 +157,7 @@ void CDBProject::restoreDBLink() {
   QSqlQuery query(db);
   query.prepare("SELECT id FROM folders WHERE keyqms=:keyqms");
   query.bindValue(":keyqms", getKey());
-  QUERY_EXEC(return );
+  QUERY_EXEC(return);
   if (query.next()) {
     id = query.value(0).toULongLong();
     setupName("----");
@@ -181,7 +180,7 @@ void CDBProject::setupName(const QString& defaultName) {
   if (query.next()) {
     nameSuffix = query.value(0).toString();
   }
-  setText(CGisListWks::eColumnName, getNameEx());
+  name = getNameEx();
 }
 
 void CDBProject::postStatus(bool updateLostFound) {
@@ -222,7 +221,7 @@ void CDBProject::postStatus(bool updateLostFound) {
   // update item counters and track/waypoint correlation
   // updateItems(); <--- don't! this is causing a crash
   if (!changedItems) {
-    setText(CGisListWks::eColumnDecoration, autoSave ? "A" : "");
+    updateDecoration(eMarkNone, eMarkChanged);
   }
 
   CGisDatabase::self().postEventForDb(info);
@@ -546,8 +545,8 @@ bool CDBProject::save(CSelectSaveAction::result_e action1ForAll, action_e action
         query.bindValue(":child", idItem);
         QUERY_EXEC(throw eReasonQueryFail);
       }
-      item->updateDecoration(IGisItem::eMarkNone,
-                             IGisItem::eMarkChanged | IGisItem::eMarkNotPart | IGisItem::eMarkNotInDB);
+      item->updateDecoration(IWksItem::eMarkNone,
+                             IWksItem::eMarkChanged | IWksItem::eMarkNotPart | IWksItem::eMarkNotInDB);
     } catch (reasons_e reason) {
       CProgressDialog::setAllVisible(false);
       switch (reason) {
@@ -581,7 +580,7 @@ bool CDBProject::save(CSelectSaveAction::result_e action1ForAll, action_e action
   // update folder entry in database
   query.prepare("UPDATE folders SET name=:name, comment=:comment, data=:data, sortmode=:sortmode WHERE id=:id");
   query.bindValue(":name", getName());
-  query.bindValue(":comment", getInfo());
+  query.bindValue(":comment", getInfo(IWksItem::eFeatureShowFullText));
   query.bindValue(":data", data);
   query.bindValue(":sortmode", getSortingFolder());
   query.bindValue(":id", getId());
@@ -622,14 +621,13 @@ void CDBProject::showItems(CEvtD2WShowItems* evt, action_e action2ForAll) {
       }
 
       if (success) {
-        gisItem->updateDecoration(IGisItem::eMarkNone, IGisItem::eMarkChanged);
+        gisItem->updateDecoration(IWksItem::eMarkNone, IWksItem::eMarkChanged);
       }
     }
   }
 
   sortItems();
   postStatus(false);
-  setToolTip(CGisListWks::eColumnName, getInfo());
 
   if (restoreDlgDetails) {
     edit();
@@ -648,7 +646,6 @@ void CDBProject::hideItems(CEvtD2WHideItems* evt) {
   }
 
   postStatus(false);
-  setToolTip(CGisListWks::eColumnName, getInfo());
 }
 
 void CDBProject::update() {
@@ -675,7 +672,7 @@ void CDBProject::update() {
   QSqlQuery query(db);
   query.prepare("SELECT date, name, data FROM folders WHERE id=:id");
   query.bindValue(":id", getId());
-  QUERY_EXEC(return );
+  QUERY_EXEC(return);
   query.next();
 
   QString name = query.value(1).toString();
@@ -690,7 +687,6 @@ void CDBProject::update() {
   }
 
   setupName(name);
-  setToolTip(CGisListWks::eColumnName, getInfo());
 
   /*
       The further proceeding depends on the check state of the project. If the project
@@ -702,7 +698,7 @@ void CDBProject::update() {
     // get keys of all children attached to the project in the database
     query.prepare("SELECT id, type FROM items WHERE id IN (SELECT child FROM folder2item WHERE parent=:parent)");
     query.bindValue(":parent", getId());
-    QUERY_EXEC(return );
+    QUERY_EXEC(return);
 
     CEvtD2WShowItems* evt = new CEvtD2WShowItems(getId(), getDBName());
     evt->addItemsExclusively = true;
@@ -725,7 +721,7 @@ void CDBProject::update() {
       // update item from database
       query.prepare("SELECT id FROM items WHERE keyqms=:keyqms");
       query.bindValue(":keyqms", key.item);
-      QUERY_EXEC(return );
+      QUERY_EXEC(return);
 
       if (query.next()) {
         // item is in the database
@@ -740,15 +736,15 @@ void CDBProject::update() {
         if (query2.next()) {
           // item is connected to this project
           item->updateFromDB(idItem, db);
-          item->updateDecoration(IGisItem::eMarkNone, IGisItem::eMarkChanged);
+          item->updateDecoration(IWksItem::eMarkNone, IWksItem::eMarkChanged);
         } else {
           // item is not connected to this project
           item->updateFromDB(idItem, db);
-          item->updateDecoration(IGisItem::eMarkNotPart | IGisItem::eMarkChanged, IGisItem::eMarkNone);
+          item->updateDecoration(IWksItem::eMarkNotPart | IWksItem::eMarkChanged, IWksItem::eMarkNone);
         }
       } else {
         // item is not in the database at all.
-        item->updateDecoration(IGisItem::eMarkNotInDB | IGisItem::eMarkChanged, IGisItem::eMarkNone);
+        item->updateDecoration(IWksItem::eMarkNotInDB | IWksItem::eMarkChanged, IWksItem::eMarkNone);
       }
     }
 

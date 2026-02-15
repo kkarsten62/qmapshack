@@ -28,7 +28,7 @@
 
 CDeviceGarminArchive::CDeviceGarminArchive(const QString& path, CDeviceGarmin* parent)
     : IDevice(path, parent->getKey(), parent) {
-  setText(CGisListWks::eColumnName, tr("Archive - expand to load"));
+  name = tr("Archive - expand to load");
   setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
   connect(treeWidget(), &QTreeWidget::itemExpanded, this, &CDeviceGarminArchive::slotExpanded);
   connect(treeWidget(), &QTreeWidget::itemCollapsed, this, &CDeviceGarminArchive::slotCollapsed);
@@ -39,7 +39,7 @@ void CDeviceGarminArchive::slotExpanded(QTreeWidgetItem* item) {
     return;
   }
 
-  setText(CGisListWks::eColumnName, tr("Archive - loaded"));
+  name = tr("Archive - loaded");
 
   QMutexLocker lock(&IGisItem::mutexItems);
   CDeviceMountLock mountLock(*this);
@@ -49,8 +49,12 @@ void CDeviceGarminArchive::slotExpanded(QTreeWidgetItem* item) {
   for (const QString& entry : entries) {
     const QString& filename = dir.absoluteFilePath(entry);
     IGisProject* project = new CGpxProject(filename, this);
-    if (!project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 }
@@ -66,6 +70,6 @@ void CDeviceGarminArchive::slotCollapsed(QTreeWidgetItem* item) {
 
   qDeleteAll(takeChildren());
 
-  setText(CGisListWks::eColumnName, tr("Archive - expand to load"));
+  name = tr("Archive - expand to load");
   emit CGisWorkspace::self().sigChanged();
 }

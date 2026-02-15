@@ -17,10 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **********************************************************************************************/
-
 #include "CMainWindow.h"
-#include "canvas/CCanvas.h"
-#include "gis/fit2/CFit2Project.h"
+
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
 #include "device/CDeviceWatcherLinux.h"
 #endif
@@ -34,17 +32,20 @@
 #include <QtSql>
 #include <QtWidgets>
 
+#include "canvas/CCanvas.h"
 #include "device/IDevice.h"
 #include "gis/CGisDatabase.h"
 #include "gis/CGisListWks.h"
 #include "gis/CGisWorkspace.h"
 #include "gis/CSelDevices.h"
+#include "gis/CWksItemDelegate.h"
 #include "gis/IGisItem.h"
 #include "gis/db/CDBProject.h"
 #include "gis/db/CLostFoundProject.h"
 #include "gis/db/CSelectDBFolder.h"
 #include "gis/db/CSetupFolder.h"
 #include "gis/db/macros.h"
+#include "gis/fit2/CFit2Project.h"
 #include "gis/gpx/CGpxProject.h"
 #include "gis/ovl/CGisItemOvlArea.h"
 #include "gis/prj/IGisProject.h"
@@ -66,7 +67,7 @@
 #include "setup/IAppSetup.h"
 
 #undef DB_VERSION
-#define DB_VERSION 4
+#define DB_VERSION 5
 
 class CGisListWksEditLock {
  public:
@@ -95,6 +96,13 @@ class CGisListWksEditLock {
 };
 
 CGisListWks::CGisListWks(QWidget* parent) : QTreeWidget(parent) {
+  CWksItemDelegate* delegate = new CWksItemDelegate(this);
+  connect(delegate, &CWksItemDelegate::sigUpdateCanvas, this, &CGisListWks::sigChanged);
+  setItemDelegate(delegate);
+
+  setEditTriggers(DoubleClicked | AnyKeyPressed | CurrentChanged | SelectedClicked);
+  header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
   db = QSqlDatabase::addDatabase("QSQLITE", "Workspace1");
   QString config = QDir(IAppSetup::getPlatformInstance()->userDataPath()).filePath("workspace.db");
   db.setDatabaseName(config);
@@ -120,12 +128,12 @@ CGisListWks::CGisListWks(QWidget* parent) : QTreeWidget(parent) {
       addAction(QIcon("://icons/32x32/Filter.png"), tr("Filter Project"), this, &CGisListWks::slotAddProjectFilter);
   actionFilterProject->setCheckable(true);
   actionAutoSave =
-      addAction(QIcon("://icons/32x32/AutoSave.png"), tr("Autom. Save"), this, &CGisListWks::slotAutoSaveProject);
+      addAction(QIcon("://icons/32x32/AutoSaveNoA.png"), tr("Autom. Save"), this, &CGisListWks::slotAutoSaveProject);
   actionAutoSave->setCheckable(true);
   actionUserFocusPrj =
       addAction(QIcon("://icons/32x32/Focus.png"), tr("Active Project"), this, &CGisListWks::slotUserFocusPrj);
   actionUserFocusPrj->setCheckable(true);
-  actionAutoSyncToDev = addAction(QIcon("://icons/32x32/Device.png"), tr("Autom. Sync. w. Device"), this,
+  actionAutoSyncToDev = addAction(QIcon("://icons/32x32/DeviceNoSync.png"), tr("Autom. Sync. w. Device"), this,
                                   &CGisListWks::slotAutoSyncProject);
   actionAutoSyncToDev->setCheckable(true);
 
@@ -322,6 +330,9 @@ void CGisListWks::migrateDB(int version) {
   if (version < 4) {
     migrateDB3to4();
   }
+  if (version < 5) {
+    migrateDB4to5();
+  }
 
   // save the new version to the database
   QSqlQuery query(db);
@@ -366,6 +377,39 @@ void CGisListWks::migrateDB3to4() {
   if (query.exec("CREATE TABLE userfocus ( focus TEXT )")) {
     query.prepare("INSERT INTO userfocus (focus) VALUES(:focus)");
     query.bindValue(":focus", "");
+    QUERY_EXEC();
+  }
+}
+
+void CGisListWks::migrateDB4to5() {
+  // old enum types
+  // enum type_e {
+  //   eTypeGeoSearch,   --> 0
+  //   eTypeQms,
+  //   eTypeGpx,
+  //   eTypeDb,
+  //   eTypeLostFound,
+  //   eTypeTwoNav,
+  //   eTypeSlf,
+  //   eTypeFit,
+  //   eTypeTcx,
+  //   eTypeSml,
+  //   eTypeLog,
+  //   eTypeQlb         --> 11
+  // };
+
+  IWksItem::type_e newTypes[12] = {
+      IWksItem::eTypeGeoSearch, IWksItem::eTypeQms,    IWksItem::eTypeGpx, IWksItem::eTypeDb,
+      IWksItem::eTypeLostFound, IWksItem::eTypeTwoNav, IWksItem::eTypeSlf, IWksItem::eTypeFit,
+      IWksItem::eTypeTcx,       IWksItem::eTypeSml,    IWksItem::eTypeLog, IWksItem::eTypeQlb,
+  };
+
+  QSqlQuery query(db);
+  // do it backward as the lower type numbers are in both enumerations
+  for (int typeOld = 11; typeOld >= 0; typeOld--) {
+    query.prepare("UPDATE workspace SET type=:type_new WHERE type=:type_old;");
+    query.bindValue(":type_old", typeOld);
+    query.bindValue(":type_new", newTypes[typeOld]);
     QUERY_EXEC();
   }
 }
@@ -648,7 +692,7 @@ void CGisListWks::dropEvent(QDropEvent* e) {
   emit sigChanged();
 }
 
-void CGisListWks::scrollTo(const QModelIndex &index, ScrollHint hint) {
+void CGisListWks::scrollTo(const QModelIndex& index, ScrollHint hint) {
   QTreeView::scrollTo(index, hint);
   horizontalScrollBar()->setValue(0);
 }
@@ -769,9 +813,7 @@ void CGisListWks::slotSaveWorkspace() {
     query.bindValue(":keyqms", project->getKey());
     query.bindValue(":name", project->getName());
     query.bindValue(":changed", project->isChanged());
-
-    bool visible = (project->checkState(CGisListDB::eColumnCheckbox) == Qt::Checked);
-    query.bindValue(":visible", visible);
+    query.bindValue(":visible", project->isVisible());
     query.bindValue(":data", data);
     QUERY_EXEC(continue);
   }
@@ -813,7 +855,7 @@ void CGisListWks::slotLoadWorkspace() {
       int type = query.value(0).toInt();
       QString name = query.value(2).toString();
       bool changed = query.value(3).toBool();
-      Qt::CheckState visible = query.value(4).toBool() ? Qt::Checked : Qt::Unchecked;
+      bool visible = query.value(4).toBool();
       QByteArray data = query.value(5).toByteArray();
 
       QDataStream stream(&data, QIODevice::ReadOnly);
@@ -824,21 +866,21 @@ void CGisListWks::slotLoadWorkspace() {
       switch (type) {
         case IGisProject::eTypeQms: {
           project = new CQmsProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);  // (1a)
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
 
         case IGisProject::eTypeQlb: {
           project = new CQlbProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);  // (1a)
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
 
         case IGisProject::eTypeGpx: {
           project = new CGpxProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);  // (1b)
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
@@ -846,7 +888,7 @@ void CGisListWks::slotLoadWorkspace() {
         case IGisProject::eTypeDb: {
           CDBProject* dbProject;
           project = dbProject = new CDBProject(this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);  // (1c)
+          project->setVisibility(visible);
 
           project->IGisProject::operator<<(stream);
           dbProject->restoreDBLink();
@@ -862,7 +904,7 @@ void CGisListWks::slotLoadWorkspace() {
 
         case IGisProject::eTypeSlf: {
           project = new CSlfProject(name, false);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);  // (1d)
+          project->setVisibility(visible);
           *project << stream;
 
           // the CSlfProject does not - as the other C*Project - register itself in the list
@@ -873,28 +915,28 @@ void CGisListWks::slotLoadWorkspace() {
 
         case IGisProject::eTypeFit: {
           project = new CFit2Project(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
 
         case IGisProject::eTypeTcx: {
           project = new CTcxProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
 
         case IGisProject::eTypeSml: {
           project = new CSmlProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
 
         case IGisProject::eTypeLog: {
           project = new CSmlProject(name, this);
-          project->setCheckState(CGisListDB::eColumnCheckbox, visible);
+          project->setVisibility(visible);
           *project << stream;
           break;
         }
@@ -905,8 +947,6 @@ void CGisListWks::slotLoadWorkspace() {
         // but this results in a visible `the checkbox is being unchecked`, especially in case the project
         // is large and takes some time to load.
         // When done directly after construction there is no `blinking` of the check mark
-
-        project->setToolTip(eColumnName, project->getInfo());
         if (changed) {
           project->setChanged();
         }
@@ -1106,7 +1146,7 @@ void CGisListWks::slotContextMenu(const QPoint& point) {
     IGisProject* project = dynamic_cast<IGisProject*>(item);
     if (nullptr != project) {
       // as soon as we find an unchecked element, not all elements are checked (and vice versa)
-      if (project->checkState(CGisListDB::eColumnCheckbox) == Qt::Unchecked) {
+      if (project->isVisible() == false) {
         allChecked = false;
       } else {
         allUnchecked = false;
@@ -1131,6 +1171,7 @@ void CGisListWks::slotContextMenu(const QPoint& point) {
       } else {
         actionGroupSort->setEnabled(false);
         actionFilterProject->setEnabled(false);
+        actionAutoSyncToDev->setEnabled(hasDeviceSupport());
         actionSyncWksDev->setEnabled(IDevice::count());
         actionAutoSyncToDev->setVisible(false);
         actionSyncDB->setEnabled(project->getType() == IGisProject::eTypeDb);
@@ -1184,9 +1225,11 @@ void CGisListWks::slotContextMenu(const QPoint& point) {
         } else {
           actionGroupSort->setEnabled(true);
 
-          bool autoSyncToDev = project->doAutoSyncToDevice();
-          actionAutoSyncToDev->setVisible(true);
+          bool autoSyncToDev = project->isAutoSyncToDev();
+          actionAutoSyncToDev->setEnabled(hasDeviceSupport());
           actionAutoSyncToDev->setChecked(autoSyncToDev);
+          actionAutoSyncToDev->setIcon(autoSyncToDev ? QIcon("://icons/32x32/DeviceSync.png")
+                                                     : QIcon("://icons/32x32/DeviceNoSync.png"));
 
           actionSyncWksDev->setEnabled(IDevice::count() && !autoSyncToDev);
           actionSyncDB->setEnabled(project->getType() == IGisProject::eTypeDb);
@@ -1211,15 +1254,18 @@ void CGisListWks::slotContextMenu(const QPoint& point) {
           actionFilterProject->setEnabled(true);
           actionFilterProject->setChecked(project->getProjectFilterItem() != nullptr);
 
-          bool hasUserFocus = project->hasUserFocus();
-
+          bool isAutoSave = project->isAutoSave();
           actionAutoSave->setVisible(true);
           actionAutoSave->setEnabled(project->canSave());
           actionAutoSave->setChecked(project->isAutoSave());
+          actionAutoSave->setIcon(isAutoSave ? QIcon("://icons/32x32/AutoSaveA.png")
+                                             : QIcon("://icons/32x32/AutoSaveNoA.png"));
+
+          bool hasUserFocus = project->hasUserFocus();
           actionUserFocusPrj->setVisible(true);
           actionUserFocusPrj->setChecked(hasUserFocus);
-          const QIcon& icon = hasUserFocus ? QIcon("://icons/32x32/Focus.png") : QIcon("://icons/32x32/UnFocus.png");
-          actionUserFocusPrj->setIcon(icon);
+          actionUserFocusPrj->setIcon(hasUserFocus ? QIcon("://icons/32x32/Focus.png")
+                                                   : QIcon("://icons/32x32/UnFocus.png"));
           actionCloseProj->setEnabled(!autoSyncToDev);
           showMenuProjectWks(p);
         }
@@ -1312,7 +1358,7 @@ void CGisListWks::setVisibilityOnMap(bool visible) {
   for (QTreeWidgetItem* item : items) {
     IGisProject* project = dynamic_cast<IGisProject*>(item);
     if (nullptr != project) {
-      project->setCheckState(CGisListDB::eColumnCheckbox, visible ? Qt::Checked : Qt::Unchecked);
+      project->setVisibility(visible);
     }
   }
   emit sigChanged();
@@ -1326,7 +1372,7 @@ static void closeProjects(const QList<QTreeWidgetItem*>& items) {
   for (QTreeWidgetItem* item : items) {
     IGisProject* project = dynamic_cast<IGisProject*>(item);
     if (nullptr != project) {
-      if (project->doAutoSyncToDevice()) {
+      if (project->isAutoSyncToDev()) {
         continue;
       }
 
@@ -1443,17 +1489,30 @@ void CGisListWks::slotAutoSaveProject(bool on) {
 void CGisListWks::slotUserFocusPrj(bool yes) {
   CGisListWksEditLock lock(false, IGisItem::mutexItems);
 
+  QString key;
+  IGisProject* project = dynamic_cast<IGisProject*>(currentItem());
+  if (project != nullptr) {
+    key = project->getKey();
+  }
+
+  setUserFocus(key, yes);
+}
+
+void CGisListWks::setUserFocus(const QString& key, bool yes) {
+  CGisListWksEditLock lock(false, IGisItem::mutexItems);
   const int N = topLevelItemCount();
+  IGisProject* projectNewFocus = nullptr;
   for (int n = 0; n < N; n++) {
     IGisProject* project = dynamic_cast<IGisProject*>(topLevelItem(n));
     if (project != nullptr) {
       project->gainUserFocus(false);
+      if (project->getKey() == key) {
+        projectNewFocus = project;
+      }
     }
   }
-
-  IGisProject* project = dynamic_cast<IGisProject*>(currentItem());
-  if (project != nullptr) {
-    project->gainUserFocus(yes);
+  if (projectNewFocus != nullptr && yes) {
+    projectNewFocus->gainUserFocus(yes);
   }
 }
 
@@ -1462,7 +1521,7 @@ void CGisListWks::slotAutoSyncProject(bool yes) {
 
   IGisProject* project = dynamic_cast<IGisProject*>(currentItem());
   if (project != nullptr) {
-    project->setAutoSyncToDevice(yes);
+    project->setAutoSyncToDev(yes);
     if (yes) {
       syncPrjToDevices(project, getAllDeviceKeys());
     }
@@ -1496,10 +1555,13 @@ void CGisListWks::slotItemDoubleClicked(QTreeWidgetItem* item, int) {
 void CGisListWks::slotItemChanged(QTreeWidgetItem* /*item*/, int column) {
   CGisListWksEditLock lock(true, IGisItem::mutexItems);
 
-  if (column == eColumnCheckBox) {
-    CGisWorkspace::self().slotWksItemSelectionReset();
-    emit sigChanged();
-  }
+  /// @todo CWksItemDelegate: this clears the top left selection information whenever
+  /// a project is checked or unchecked.
+
+  // if (column == eColumnCheckBox) {
+  //   CGisWorkspace::self().slotWksItemSelectionReset();
+  //   emit sigChanged();
+  // }
 }
 
 void CGisListWks::slotEditItem() {
@@ -1856,9 +1918,8 @@ void CGisListWks::slotSyncDevWks() {
   if (project) {
     CCanvas* canvas = CMainWindow::self().getVisibleCanvas();
     if (canvas) {
-      canvas->reportStatus(
-          "device",
-          tr("<b>Update devices</b><p>Update %1<br/>Please wait...</p>").arg(device->text(CGisListWks::eColumnName)));
+      canvas->reportStatus("device",
+                           tr("<b>Update devices</b><p>Update %1<br/>Please wait...</p>").arg(device->getName()));
       canvas->update();
       qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
@@ -1891,7 +1952,7 @@ void CGisListWks::slotSyncPrjToDevices() {
   const int N = topLevelItemCount();
   for (int n = 0; n < N; n++) {
     IGisProject* project = dynamic_cast<IGisProject*>(topLevelItem(n));
-    if (project && project->doAutoSyncToDevice()) {
+    if (project && project->isAutoSyncToDev()) {
       syncPrjToDevices(project, keys);
     }
   }
@@ -1918,14 +1979,17 @@ void CGisListWks::syncPrjToDevices(IGisProject* project, const QSet<QString>& ke
       continue;
     }
     if (canvas) {
-      canvas->reportStatus(
-          "device",
-          tr("<b>Update devices</b><p>Update %1<br/>Please wait...</p>").arg(device->text(CGisListWks::eColumnName)));
+      canvas->reportStatus("device",
+                           tr("<b>Update devices</b><p>Update %1<br/>Please wait...</p>").arg(device->getName()));
       canvas->update();
       qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
+    const bool hasFocus = project->hasUserFocus();
     device->updateProject(project);
+    if (hasFocus) {
+      project->gainUserFocus(true);
+    }
   }
   if (canvas) {
     canvas->reportStatus("device", "");

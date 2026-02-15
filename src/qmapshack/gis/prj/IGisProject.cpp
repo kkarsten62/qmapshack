@@ -68,9 +68,8 @@ const QString IGisProject::filedialogLoadFilters =
 QString IGisProject::keyUserFocus;
 
 IGisProject::IGisProject(type_e type, const QString& filename, CGisListWks* parent)
-    : QTreeWidgetItem(parent), type(type), filename(filename) {
+    : IWksItem(parent, type), type(type), filename(filename) {
   memset(cntItemsByType, 0, sizeof(cntItemsByType));
-  setCheckState(CGisListWks::eColumnCheckBox, Qt::Checked);
 
   if (parent) {
     // move project up the list until there a re only projects, no devices
@@ -93,15 +92,14 @@ IGisProject::IGisProject(type_e type, const QString& filename, CGisListWks* pare
 }
 
 IGisProject::IGisProject(type_e type, const QString& filename, IDevice* parent)
-    : QTreeWidgetItem(parent), type(type), filename(filename) {
+    : IWksItem(parent, type), type(type), filename(filename) {
   memset(cntItemsByType, 0, sizeof(cntItemsByType));
-  setCheckState(CGisListWks::eColumnCheckBox, Qt::Checked);
   nameSuffix = parent->getName();
 }
 
 IGisProject::~IGisProject() {
   delete dlgDetails;
-  if (key == keyUserFocus) {
+  if (key == keyUserFocus && isOnDevice() == IDevice::eTypeNone) {
     keyUserFocus.clear();
   }
 }
@@ -142,9 +140,10 @@ IGisProject* IGisProject::create(const QString filename, CGisListWks* parent) {
 }
 
 QString IGisProject::html2Dev(const QString& str) {
-  return (isOnDevice() == IDevice::eTypeGarmin)
-                 || (isOnDevice() == IDevice::eTypeGarminMtp)
-                 || (isOnDevice() == IDevice::eTypeGenericMtp) ? IGisItem::removeHtml(str) : str;
+  return (isOnDevice() == IDevice::eTypeGarmin) || (isOnDevice() == IDevice::eTypeGarminMtp) ||
+                 (isOnDevice() == IDevice::eTypeGenericMtp)
+             ? IGisItem::removeHtml(str)
+             : str;
 }
 
 bool IGisProject::askBeforClose() {
@@ -170,8 +169,6 @@ bool IGisProject::askBeforClose() {
   return res == QMessageBox::Abort;
 }
 
-bool IGisProject::isVisible() const { return checkState(CGisListWks::eColumnCheckBox) == Qt::Checked; }
-
 void IGisProject::genKey() const {
   if (key.isEmpty()) {
     QByteArray buffer;
@@ -196,14 +193,10 @@ QString IGisProject::getDeviceKey() const {
   return "";
 }
 
-QPixmap IGisProject::getIcon() const { return icon(CGisListWks::eColumnIcon).pixmap(22, 22); }
-
-qint32 IGisProject::isOnDevice() const {
+const qint32 IGisProject::isOnDevice() const {
   IDevice* device = dynamic_cast<IDevice*>(parent());
   return device != nullptr ? device->type() : IDevice::eTypeNone;
 }
-
-bool IGisProject::isChanged() const { return text(CGisListWks::eColumnDecoration).contains("*"); }
 
 void IGisProject::edit() {
   if (dlgDetails.isNull()) {
@@ -216,7 +209,7 @@ void IGisProject::edit() {
 
 void IGisProject::setName(const QString& str) {
   metadata.name = str;
-  setText(CGisListWks::eColumnName, getNameEx());
+  name = getNameEx();
   setChanged();
 }
 
@@ -257,36 +250,31 @@ void IGisProject::setSortingFolder(sorting_folder_e s) {
 }
 
 void IGisProject::setChanged() {
-  if (autoSave) {
+  if (isAutoSave()) {
     if (!autoSavePending) {
       autoSavePending = true;
       CGisWorkspace::self().postEventForWks(new CEvtA2WSave(getKey()));
     }
   }
 
-  if (autoSyncToDev) {
+  if (isAutoSyncToDev()) {
     if (!autoSyncToDevPending) {
       autoSyncToDevPending = true;
       CGisWorkspace::self().postEventForWks(new CEvtA2WSync(getKey()));
     }
   }
-  updateDecoration(false);
+  updateDecoration(eMarkChanged, eMarkNone);
   updateItems();
 }
 
 void IGisProject::setAutoSave(bool on) {
   // make sure project is saved one more time to remove autoSave flag in storage
-  if (!on && autoSave) {
+  if (!on && IWksItem::isAutoSave()) {
     CGisWorkspace::self().postEventForWks(new CEvtA2WSave(getKey()));
   }
 
-  autoSave = on;
+  IWksItem::setAutoSave(on);
   setChanged();
-}
-
-void IGisProject::setAutoSyncToDevice(bool yes) {
-  autoSyncToDev = yes;
-  updateDecoration();
 }
 
 void IGisProject::switchOnCorrelation() {
@@ -315,25 +303,10 @@ void IGisProject::updateItems() {
   }
   changedRoadbookMode = false;
 
-  quint32 total = cntTrkPts * cntWpts;
-  quint32 current = 0;
-
-  PROGRESS_SETUP(tr("%1: Correlate tracks and waypoints.").arg(getName()), 0, total,
-                 CMainWindow::getBestWidgetForParent());
-
   for (int i = 0; i < childCount(); i++) {
     CGisItemTrk* trk = dynamic_cast<CGisItemTrk*>(child(i));
     if (trk) {
-      trk->findWaypointsCloseBy(progress, current);
-      if (progress.wasCanceled()) {
-        QString msg = tr("<h3>%1</h3>Did that take too long for you? Do you want to skip correlation of tracks and "
-                         "waypoints for this project in the future?")
-                          .arg(getNameEx());
-        int res = QMessageBox::question(&progress, tr("Canceled correlation..."), msg,
-                                        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-        noCorrelation = res == QMessageBox::Yes;
-        break;
-      }
+      trk->findWaypointsCloseBy();
     }
   }
 
@@ -392,6 +365,7 @@ bool IGisProject::saveAs(QString fn, QString filter) {
     return false;
   }
 
+  qDebug() << res << filter << getFileDialogFilter();
   if (res && filter == getFileDialogFilter()) {
     markAsSaved();
   }
@@ -434,21 +408,21 @@ void IGisProject::setupName(const QString& defaultName) {
   if (metadata.name.isEmpty()) {
     metadata.name = defaultName;
   }
-  setText(CGisListWks::eColumnName, getName());
+  name = getName();
 }
 
 void IGisProject::markAsSaved() {
-  updateDecoration(true);
+  updateDecoration(eMarkNone, eMarkChanged);
   for (int i = 0; i < childCount(); i++) {
     IGisItem* item = dynamic_cast<IGisItem*>(child(i));
     if (nullptr == item) {
       continue;
     }
-    item->updateDecoration(IGisItem::eMarkNone, IGisItem::eMarkChanged);
+    item->updateDecoration(IWksItem::eMarkNone, IWksItem::eMarkChanged);
   }
 }
 
-QString IGisProject::getName() const { return metadata.name; }
+const QString& IGisProject::getName() const { return metadata.name; }
 
 QString IGisProject::getNameEx() const {
   if (nameSuffix.isEmpty()) {
@@ -458,8 +432,8 @@ QString IGisProject::getNameEx() const {
   }
 }
 
-QString IGisProject::getInfo() const {
-  QString str = metadata.name.isEmpty() ? text(CGisListWks::eColumnName) : metadata.name;
+QString IGisProject::getInfo(quint32) const {
+  QString str = metadata.name.isEmpty() ? name : metadata.name;
   str = "<div style='font-weight: bold;'>" + str + "</div>";
 
   if (metadata.time.isValid()) {
@@ -480,6 +454,10 @@ QString IGisProject::getInfo() const {
 
   if (!filename.isEmpty()) {
     str += tr("<br/>\nFilename: %1").arg(filename);
+  }
+
+  if (!metadata.keywords.isEmpty()) {
+    str += "<br/>\n" + tr("Keywords: ") + metadata.keywords;
   }
 
   if (cntItemsByType[IGisItem::eTypeWpt]) {
@@ -596,8 +574,7 @@ bool IGisProject::delItemByKey(const IGisItem::key_t& key, QMessageBox::Standard
 
     if (item->getKey() == key) {
       if (last != QMessageBox::YesToAll) {
-        QString msg = tr("Are you sure you want to delete '%1' from project '%2'?")
-                          .arg(item->getName(), text(CGisListWks::eColumnName));
+        QString msg = tr("Are you sure you want to delete '%1' from project '%2'?").arg(item->getName(), name);
         last = QMessageBox::question(CMainWindow::getBestWidgetForParent(), tr("Delete..."), msg,
                                      QMessageBox::YesToAll | QMessageBox::Cancel | QMessageBox::Ok | QMessageBox::No,
                                      QMessageBox::Ok);
@@ -890,15 +867,11 @@ void IGisProject::updateDecoration() {
       break;
     }
   }
-  updateDecoration(saved);
-}
-
-void IGisProject::updateDecoration(bool saved) {
-  QString str = autoSave ? "A" : saved ? "" : "*";
-  if (autoSyncToDev) {
-    str += "S";
+  if (saved) {
+    updateDecoration(eMarkNone, eMarkChanged);
+  } else {
+    updateDecoration(eMarkChanged, eMarkNone);
   }
-  setText(CGisListWks::eColumnDecoration, str);
 }
 
 void IGisProject::sortItems() {
@@ -1032,15 +1005,14 @@ bool IGisProject::findPolylineCloseBy(const QPointF& pt1, const QPointF& pt2, qi
 
 void IGisProject::gainUserFocus(bool yes) {
   if (yes) {
-    setIcon(CGisListWks::eColumnName, QIcon("://icons/32x32/Focus.png"));
     keyUserFocus = key;
   } else {
-    setIcon(CGisListWks::eColumnName, QIcon());
     keyUserFocus.clear();
   }
+  IWksItem::updateItem();
 }
 
-CProjectFilterItem* IGisProject::filterProject(bool filter) {
+void IGisProject::filterProject(bool filter) {
   if (filter) {
     if (projectFilter == nullptr) {
       projectFilter = new CProjectFilterItem(this);
@@ -1052,9 +1024,7 @@ CProjectFilterItem* IGisProject::filterProject(bool filter) {
   } else {
     removeChild(projectFilter);
     delete projectFilter;
-    projectFilter = nullptr;
     projectSearch = CSearch("");
   }
   sortItems();
-  return projectFilter;
 }

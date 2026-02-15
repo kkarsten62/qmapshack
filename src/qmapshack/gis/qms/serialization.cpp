@@ -703,8 +703,7 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream) {
     deriveSecondaryData();
   }
   setColor(str2color(trk.color));
-  setText(CGisListWks::eColumnName, getName());
-  setToolTip(CGisListWks::eColumnName, getInfo(IGisItem::eFeatureShowName));
+  name = getName();
 
   checkForInvalidPoints();
   return stream;
@@ -835,8 +834,7 @@ QDataStream& CGisItemRte::operator<<(QDataStream& stream) {
 
   setSymbol();
   deriveSecondaryData();
-  setText(CGisListWks::eColumnName, getName());
-  setToolTip(CGisListWks::eColumnName, getInfo(IGisItem::eFeatureShowName));
+  name = getName();
 
   return stream;
 }
@@ -918,8 +916,7 @@ QDataStream& CGisItemOvlArea::operator<<(QDataStream& stream) {
   deriveSecondaryData();
 
   setColor(str2color(area.color));
-  setText(CGisListWks::eColumnName, getName());
-  setToolTip(CGisListWks::eColumnName, getInfo(IGisItem::eFeatureShowName));
+  name = getName();
 
   return stream;
 }
@@ -996,9 +993,9 @@ QDataStream& IGisProject::operator<<(QDataStream& stream) {
     qint8 tmp;
     stream >> tmp;
     noCorrelation = (tmp & eFlagNoCorrelation) != 0;
-    autoSave = (tmp & eFlagAutoSave) != 0;
+    setAutoSave((tmp & eFlagAutoSave) != 0);
     invalidDataOk = (tmp & eFlagInvalidDataOk) != 0;
-    autoSyncToDev = (tmp & eFlagAutoSyncToDev) != 0;
+    setAutoSyncToDev((tmp & eFlagAutoSyncToDev) != 0);
     updateDecoration();
   }
 
@@ -1048,9 +1045,9 @@ QDataStream& IGisProject::operator<<(QDataStream& stream) {
             // Update decoration always, to set possible rating and tag markers
     if (item) {
       if (changed) {
-        item->updateDecoration(IGisItem::eMarkChanged, IGisItem::eMarkNone);
+        item->updateDecoration(IWksItem::eMarkChanged, IWksItem::eMarkNone);
       } else {
-        item->updateDecoration(IGisItem::eMarkNone, IGisItem::eMarkNone);
+        item->updateDecoration(IWksItem::eMarkNone, IWksItem::eMarkNone);
       }
     }
   }
@@ -1076,9 +1073,9 @@ QDataStream& IGisProject::operator>>(QDataStream& stream) const {
   stream << metadata.bounds;
   stream << key;
   stream << qint32(sortingRoadbook);
-  stream << qint8((noCorrelation ? eFlagNoCorrelation : 0) | (autoSave ? eFlagAutoSave : 0) |
+  stream << qint8((noCorrelation ? eFlagNoCorrelation : 0) | (isAutoSave() ? eFlagAutoSave : 0) |
                   (invalidDataOk ? eFlagInvalidDataOk : 0) |
-                  (autoSyncToDev ? eFlagAutoSyncToDev : 0));  // collect trivial flags in one field.
+                  (isAutoSyncToDev() ? eFlagAutoSyncToDev : 0));  // collect trivial flags in one field.
   stream << qint32(sortingFolder);
 
   for (int i = 0; i < childCount(); i++) {
@@ -1089,7 +1086,7 @@ QDataStream& IGisProject::operator>>(QDataStream& stream) const {
     stream << VER_ITEM;
     stream << quint8(item->type());
     stream << item->getHistory();
-    stream << quint8(item->data(1, Qt::UserRole).toUInt() & IGisItem::eMarkChanged);
+    stream << quint8(item->isChanged());
     stream << item->getLastDatabaseHash();
   }
   for (int i = 0; i < childCount(); i++) {
@@ -1100,7 +1097,7 @@ QDataStream& IGisProject::operator>>(QDataStream& stream) const {
     stream << VER_ITEM;
     stream << quint8(item->type());
     stream << item->getHistory();
-    stream << quint8(item->data(1, Qt::UserRole).toUInt() & IGisItem::eMarkChanged);
+    stream << quint8(item->isChanged());
     stream << item->getLastDatabaseHash();
   }
   for (int i = 0; i < childCount(); i++) {
@@ -1111,7 +1108,7 @@ QDataStream& IGisProject::operator>>(QDataStream& stream) const {
     stream << VER_ITEM;
     stream << quint8(item->type());
     stream << item->getHistory();
-    stream << quint8(item->data(1, Qt::UserRole).toUInt() & IGisItem::eMarkChanged);
+    stream << quint8(item->isChanged());
     stream << item->getLastDatabaseHash();
   }
   for (int i = 0; i < childCount(); i++) {
@@ -1122,7 +1119,7 @@ QDataStream& IGisProject::operator>>(QDataStream& stream) const {
     stream << VER_ITEM;
     stream << quint8(item->type());
     stream << item->getHistory();
-    stream << quint8(item->data(1, Qt::UserRole).toUInt() & IGisItem::eMarkChanged);
+    stream << quint8(item->isChanged());
     stream << item->getLastDatabaseHash();
   }
 
@@ -1164,9 +1161,9 @@ QDataStream& CDBProject::operator<<(QDataStream& stream) {
     qint8 tmp;
     stream >> tmp;
     noCorrelation = (tmp & eFlagNoCorrelation) != 0;
-    autoSave = (tmp & eFlagAutoSave) != 0;
+    setAutoSave((tmp & eFlagAutoSave) != 0);
     invalidDataOk = (tmp & eFlagInvalidDataOk) != 0;
-    autoSyncToDev = (tmp & eFlagAutoSyncToDev) != 0;
+    setAutoSyncToDev((tmp & eFlagAutoSyncToDev) != 0);
     updateDecoration();
   }
 
@@ -1194,9 +1191,9 @@ QDataStream& CDBProject::operator>>(QDataStream& stream) const {
   stream << metadata.bounds;
   stream << key;
   stream << qint32(sortingRoadbook);
-  stream << qint8((noCorrelation ? eFlagNoCorrelation : 0) | (autoSave ? eFlagAutoSave : 0) |
+  stream << qint8((noCorrelation ? eFlagNoCorrelation : 0) | (isAutoSave() ? eFlagAutoSave : 0) |
                   (invalidDataOk ? eFlagInvalidDataOk : 0) |
-                  (autoSyncToDev ? eFlagAutoSyncToDev : 0));  // collect trivial flags in one field.
+                  (isAutoSyncToDev() ? eFlagAutoSyncToDev : 0));  // collect trivial flags in one field.
   stream << qint32(sortingFolder);
 
   return stream;

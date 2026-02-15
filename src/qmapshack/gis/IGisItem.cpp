@@ -48,7 +48,7 @@ const QString IGisItem::noName = IGisItem::tr("[no name]");
 
 QVector<IGisItem::color_t> IGisItem::colorMap;
 
-IGisItem::IGisItem(IGisProject* parent, type_e typ, int idx) : QTreeWidgetItem(parent, typ) {
+IGisItem::IGisItem(IGisProject* parent, type_e typ, int idx) : IWksItem(parent, typ) {
   int n = -1;
   setFlags(QTreeWidgetItem::flags() & ~Qt::ItemIsDropEnabled);
 
@@ -292,8 +292,6 @@ QString IGisItem::getNameEx() const {
 
 void IGisItem::updateDecoration(quint32 enable, quint32 disable) {
   // update text and icon
-  setToolTip(CGisListWks::eColumnName, getInfo(IGisItem::eFeatureShowName));
-  setText(CGisListWks::eColumnName, getName());
   setSymbol();
 
   // update project if necessary
@@ -304,50 +302,11 @@ void IGisItem::updateDecoration(quint32 enable, quint32 disable) {
 
   // test for lost & found folder
   if (project && project->getType() == IGisProject::eTypeLostFound) {
-    setText(CGisListWks::eColumnDecoration, QString());
-    setToolTip(CGisListWks::eColumnDecoration, QString());
     return;
   }
 
   // set marks in column 1
-  quint32 mask = data(1, Qt::UserRole).toUInt();
-  mask |= enable;
-  mask &= ~disable;
-  setData(1, Qt::UserRole, mask);
-
-  QString tt;
-  QString str;
-  if (mask & eMarkNotPart) {
-    tt += tt.isEmpty() ? "" : "\n";
-    tt += tr("The item is not part of the project in the database.");
-    tt += tr("\nIt is either a new item or it has been deleted in the database by someone else.");
-    str += "?";
-  }
-  if (mask & eMarkNotInDB) {
-    tt += tt.isEmpty() ? "" : "\n";
-    tt += tr("The item is not in the database.");
-    str += "X";
-  }
-  if (mask & eMarkChanged) {
-    tt += tt.isEmpty() ? "" : "\n";
-    tt += tr("The item might need to be saved");
-    str += "*";
-  }
-  setText(CGisListWks::eColumnDecoration, str);
-  setToolTip(CGisListWks::eColumnDecoration, tt);
-
-  // Set Rating column
-  if (!keywords.isEmpty()) {
-    QTreeWidgetItem::setIcon(CGisListWks::eColumnRating, QPixmap("://icons/32x32/Tag.png"));
-    setToolTip(CGisListWks::eColumnRating, QStringList(getKeywordsSorted()).join(", "));
-  } else {
-    QTreeWidgetItem::setIcon(CGisListWks::eColumnRating, QIcon());
-  }
-  if (rating > 0) {
-    QTreeWidgetItem::setText(CGisListWks::eColumnRating, QString::number(rating));
-  } else {
-    QTreeWidgetItem::setText(CGisListWks::eColumnRating, "");
-  }
+  IWksItem::updateDecoration(enable, disable);
 }
 
 void IGisItem::changed(const QString& what, const QString& icon) {
@@ -510,7 +469,7 @@ bool IGisItem::isReadOnly() const { return !(flags & eFlagWriteAllowed) || isOnD
 
 bool IGisItem::isTainted() const { return flags & eFlagTainted; }
 
-qint32 IGisItem::isOnDevice() const {
+const qint32 IGisItem::isOnDevice() const {
   IGisProject* project = getParentProject();
   if (nullptr == project) {
     return false;
@@ -603,15 +562,15 @@ void IGisItem::showIcon() {
   displayIcon = QPixmap(size, size);
   displayIcon.fill(Qt::transparent);
   QPainter painter(&displayIcon);
-  int dw = (size-width) / 2;
-  int dh = (size-height) / 2;
+  int dw = (size - width) / 2;
+  int dh = (size - height) / 2;
   painter.drawPixmap(dw, dh, icon);
   if (isNogo()) {
     painter.drawPixmap(width * 0.4 + dw, height * 0.4 + dh,
                        QPixmap("://icons/48x48/NoGo.png")
                            .scaled(width * 0.6, height * 0.6, Qt::KeepAspectRatio, Qt::SmoothTransformation));
   }
-  QTreeWidgetItem::setIcon(CGisListWks::eColumnIcon, displayIcon);
+  icon = displayIcon;
 }
 
 QColor IGisItem::str2color(const QString& name) {
@@ -683,10 +642,10 @@ QString IGisItem::html2Dev(const QString& str, bool strictGpx11) {
     return "";
   }
 
-  return (isOnDevice() == IDevice::eTypeGarmin)
-                 || (isOnDevice() == IDevice::eTypeGarminMtp)
-                 || (isOnDevice() == IDevice::eTypeGenericMtp)
-                 || strictGpx11 ? removeHtml(str) : str;
+  return (isOnDevice() == IDevice::eTypeGarmin) || (isOnDevice() == IDevice::eTypeGarminMtp) ||
+                 (isOnDevice() == IDevice::eTypeGenericMtp) || strictGpx11
+             ? removeHtml(str)
+             : str;
 }
 
 QString IGisItem::toLink(bool isReadOnly, const QString& href, const QString& str, const QString& key) {
@@ -763,6 +722,14 @@ QString IGisItem::createText(bool isReadOnly, const QString& desc, const QList<l
   return str;
 }
 
+const bool IGisItem::isVisible() const {
+  IGisProject* project = getParentProject();
+  if (project == nullptr) {
+    return false;
+  }
+  return project->isVisible();
+}
+
 bool IGisItem::isVisible(const QRectF& rect, const QPolygonF& viewport, CGisDraw* gis) {
   QPolygonF tmp1;
   tmp1 << rect.topLeft();
@@ -787,8 +754,6 @@ bool IGisItem::isVisible(const QPointF& point, const QPolygonF& viewport, CGisDr
 
   return tmp2.boundingRect().contains(pt);
 }
-
-bool IGisItem::isChanged() const { return text(CGisListWks::eColumnDecoration).contains('*'); }
 
 bool IGisItem::isWithin(const QRectF& area, selflags_t flags, const QPolygonF& points) {
   if (points.isEmpty()) {
@@ -894,14 +859,10 @@ IGisItem* IGisItem::newGisItem(quint32 type, quint64 id, QSqlDatabase& db, IGisP
   return item;
 }
 
-qreal IGisItem::getRating() const { return rating; }
-
 void IGisItem::setRating(qreal rating) {
   this->rating = rating;
   updateHistory();
 }
-
-const QSet<QString>& IGisItem::getKeywords() const { return keywords; }
 
 QList<QString> IGisItem::getKeywordsSorted() const {
   QList<QString> sortedKeywords = keywords.values();

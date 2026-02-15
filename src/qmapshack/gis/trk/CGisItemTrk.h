@@ -2,20 +2,20 @@
     Copyright (C) 2014 Oliver Eichler <oliver.eichler@gmx.de>
     Copyright (C) 2019 Henri Hornburg <hrnbg@t-online.de>
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- **********************************************************************************************/
+**********************************************************************************************/
 
 #ifndef CGISITEMTRK_H
 #define CGISITEMTRK_H
@@ -129,7 +129,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Overide IGisItem::updateHistory() method
 
-     same as changed();
+      same as changed();
 
    */
   void updateHistory(quint32 visuals);
@@ -184,7 +184,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   QDataStream& operator>>(QDataStream& stream) const override;
 
-          /// get name of track
+  /// get name of track
   const QString& getName() const override { return trk.name.isEmpty() ? noName : trk.name; }
 
   CEnergyCycling& getEnergyCycling() { return energyCycling; }
@@ -194,17 +194,17 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   CFitData& getFitData() { return fitData; }
   //KKA end
 
-          /// returns "true" when trk has no time-related invalid points
+  /// returns "true" when trk has no time-related invalid points
   bool isTrkTimeValid() const { return (allValidFlags & CTrackData::trkpt_t::eInvalidTime) == 0; }
   bool isTrkElevationInvalid() const { return allValidFlags & CTrackData::trkpt_t::eInvalidEle; }
   bool isTrkSlopeInvalid() const { return allValidFlags & CTrackData::trkpt_t::eInvalidSlope; }
 
   QDateTime getTimestamp() const override { return getTimeStart(); }
 
-          /// get the track color as index into the Garmin color table
+  /// get the track color as index into the Garmin color table
   int getColorIdx() const { return colorIdx; }
 
-          /// get the track color a Qt color object
+  /// get the track color a Qt color object
   const QColor& getColor() const { return color; }
 
   /**
@@ -246,7 +246,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   const CTrackData::trkpt_t* getMouseMoveFocusPoint() const { return mouseMoveFocus; }
   quint32 getAllValidFlags() const { return allValidFlags; }
 
-          /// get the track as a simple coordinate polyline
+  /// get the track as a simple coordinate polyline
   void getPolylineFromData(QPolygonF& l) const;
   /// get the track as polyline with elevation, pixel and GIS coordinates.
   void getPolylineFromData(SGisLine& l) const override;
@@ -278,23 +278,24 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   /** @defgroup ColorSource Stuff related to coloring tracks using data from different sources
 
-     @{
-  */
+      @{
+   */
  public:
+  //KKA start
   void doUpdateExtremaAndExtensions(); //KKA: new
-
+  //KKA end
   static const struct ColorizeSource unknownColorizeSource;
 
   /** @brief Set the colorize source to the source specified.
 
-     @param src  The new source to use.
-  */
+      @param src  The new source to use.
+   */
   void setColorizeSource(QString src);
 
   /** @brief Get the current colorize source.
 
-     @return  The new source to use.
-  */
+      @return  The new source to use.
+   */
   QString getColorizeSource() const { return colorSourceLimit.getSource(); }
 
   QStringList getExistingDataSources() const;
@@ -325,8 +326,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   bool setMode(mode_e m, const QString& owner);
   const mode_e getMode() const { return mode; }
 
-          // Note: Maybe we have a race condition here.
-          // Usually the QPointer to "dlgDetails" should be cleared if the object is destroyed.
+  // Note: Maybe we have a race condition here.
+  // Usually the QPointer to "dlgDetails" should be cleared if the object is destroyed.
   void clearDlgDetails() { dlgDetails.clear(); }
 
   void setComment(const QString& str) override;
@@ -345,10 +346,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief display the track screen options
 
-    @param origin    the point on screen to anchor the options
-    @param mouse     the mouse object causing the request
-    @return          a pointer to the screen option widget
-  */
+     @param origin    the point on screen to anchor the options
+     @param mouse     the mouse object causing the request
+     @return          a pointer to the screen option widget
+   */
   IScrOpt* getScreenOptions(const QPoint& origin, IMouse* mouse) override;
   /**
      @brief Get a screen pixel of the track close to the given position on the screen
@@ -375,15 +376,15 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Switch user focus on and off.
 
-    If the focus is switched on any other track having the focus will loose it.
+     If the focus is switched on any other track having the focus will loose it.
 
-    @param yes   set true to gain focus.
-  */
+     @param yes   set true to gain focus.
+   */
   void gainUserFocus(bool yes) override;
   /**
      @brief Make sure the track has lost focus.
 
-    If the track has the focus, keyUserFocus will be reset. In all other cases nothing will be done.
+     If the track has the focus, keyUserFocus will be reset. In all other cases nothing will be done.
 
    */
   void looseUserFocus();
@@ -413,7 +414,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   bool setTrkPtDesc(int idxTotal, const QString& desc);
 
-    //KKA start
+  //KKA start
   /**
     @brief Set a maplist of desc fields for track points referenced by it's total indeces
     @param idxDescs  QMap of key/value pairs of index and string to set
@@ -432,25 +433,25 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Reverse the complete track
 
-    @note All timestamps will be removed
-  */
+     @note All timestamps will be removed
+   */
   void reverse();
 
   /**
      @brief Combine this track with several others.
 
-    @param keysPreSel list of pre-selected track item keys
+     @param keysPreSel list of pre-selected track item keys
 
-    Handle the complete process of selecting tracks, choosing the order and
-    the final name with dialogs.
-  */
+     Handle the complete process of selecting tracks, choosing the order and
+     the final name with dialogs.
+   */
   void combine(const QList<key_t>& keys);
 
   /**
      @brief Set the CTrackData::trkpt_t::eFlagHidden flag
 
-    The flag is set for all track points between mouseClickFocus and mouseMoveFocus,
-    regardless of their previous state.
+     The flag is set for all track points between mouseClickFocus and mouseMoveFocus,
+     regardless of their previous state.
 
    */
   void hideSelectedPoints();
@@ -458,8 +459,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Reset the CTrackData::trkpt_t::eFlagHidden flag
 
-    The flag is reset for all track points between mouseClickFocus and mouseMoveFocus,
-    regardless of their previous state.
+     The flag is reset for all track points between mouseClickFocus and mouseMoveFocus,
+     regardless of their previous state.
 
    */
   void showSelectedPoints();
@@ -478,16 +479,16 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Sets the activity flag for a selected range of track points
 
-    The range has to be selected already. The activity will be selected by a dialog displayed
-    in this method.
-  */
+     The range has to be selected already. The activity will be selected by a dialog displayed
+     in this method.
+   */
   void setActivityRange(trkact_t act);
 
   /**
      @brief Copy a section into a new track object
 
-    The section is defined by mouseClickFocus and mouseMoveFocus, All points are copied,
-    including the hidden (CTrackData::trkpt_t::eFlagHidden) ones.
+     The section is defined by mouseClickFocus and mouseMoveFocus, All points are copied,
+     including the hidden (CTrackData::trkpt_t::eFlagHidden) ones.
 
    */
   void copySelectedPoints() const;
@@ -495,54 +496,54 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Check for user focus
 
-    @return True if the track has user focus
-  */
+     @return True if the track has user focus
+   */
   bool hasUserFocus() const override { return key == keyUserFocus; }
 
   /**
      @brief Get the key of the current track with user focus
 
-    @return If no track has the focus an empty string is returned
-  */
+     @return If no track has the focus an empty string is returned
+   */
   static const key_t& getKeyUserFocus() { return keyUserFocus; }
 
   /**
      @brief Each plot widget that operates on the track must register during it's construction
 
-    see registeredPlots for a detailed discussion
+     see registeredPlots for a detailed discussion
 
-    @param plot
-  */
+     @param plot
+   */
   void registerVisual(INotifyTrk* visual);
 
   /**
      @brief Each plot widget that operates on the track must unregister during it's destruction
 
-    see registeredPlots for a detailed discussion
+     see registeredPlots for a detailed discussion
 
-    @param plot
-  */
+     @param plot
+   */
   void unregisterVisual(INotifyTrk* visual);
 
   /**
      @brief Use point with the distance from start matching best the given distance.
 
-    @param dist      the distance in [m]
-  */
+     @param dist      the distance in [m]
+   */
   bool setMouseFocusByDistance(qreal dist, focusmode_e fmode, const QString& owner);
 
   /**
      @brief Use point with time from start matching best the given time delta
 
-    @param time      a time delta in [s] relative to the start time
-  */
+     @param time      a time delta in [s] relative to the start time
+   */
   bool setMouseFocusByTime(quint32 time, focusmode_e fmode, const QString& owner);
 
   /**
      @brief Use the point that is closest to the given point on the screen.
 
-    @param pt        a point on the screen in pixel.
-  */
+     @param pt        a point on the screen in pixel.
+   */
   QPointF setMouseFocusByPoint(const QPoint& pt, focusmode_e fmode, const QString& owner);
 
   /**
@@ -576,15 +577,15 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   /** @defgroup Filter All filters implemented by CGisItemTrks.
 
-     @note All filter implementations are found in src/gis/trk/filter/filter.cpp
+      @note All filter implementations are found in src/gis/trk/filter/filter.cpp
 
-     @{
-  */
+      @{
+   */
   /**
      @brief Reduce the amount of visible track points with the help of the Douglas Peuker algorithm
 
-    @param dist the Douglas Peuker distance in meters
-  */
+     @param dist the Douglas Peuker distance in meters
+   */
   void filterReducePoints(qreal dist);
 
   /** @brief Remove track points without valid location at the beginning of the track */
@@ -626,13 +627,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Correlate waypoints with the track points
 
-    If a waypoint correlates with a trackpoint it's key is written to
-    CTrackData::trkpt_t::keyWpt.
-
-    @param progress  a progress dialog as this operation can take quite some time
-    @param current   the current progress if the operation is done for several tracks
-  */
-  void findWaypointsCloseBy(CProgressDialog& progress, quint32& current);
+     If a waypoint correlates with a trackpoint it's key is written to
+     CTrackData::trkpt_t::keyWpt.
+   */
+  void findWaypointsCloseBy();
 
   bool findPolylineCloseBy(const QPointF& pt1, const QPointF& pt2, qint32& threshold, QPolygonF& polyline);
 
@@ -662,8 +660,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Derive secondary data from the track data
 
-    This has to be called each time the track data is changed.
-  */
+     This has to be called each time the track data is changed.
+   */
   void deriveSecondaryData();
 
   /**
@@ -675,8 +673,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   /** @defgroup ExtremaExtensions Stuff related to calculation of extrema/extensions
 
-     @{
-  */
+      @{
+   */
  public:
   struct limits_t {
     void setMin(qreal val, const QPointF& pos) {
@@ -713,10 +711,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Tell the point of focus to all plots and the detail dialog
 
-    @param pt        A pointer to the point itself
-    @param fmode     The reason for the focus
-    @param owner     A string to identify owner of the operation
-  */
+     @param pt        A pointer to the point itself
+     @param fmode     The reason for the focus
+     @param owner     A string to identify owner of the operation
+   */
   bool publishMouseFocus(const CTrackData::trkpt_t* pt, focusmode_e fmode, const QString& owner);
   void publishMouseFocusNormalMode(const CTrackData::trkpt_t* pt, focusmode_e fmode);
   void publishMouseFocusRangeMode(const CTrackData::trkpt_t* pt, focusmode_e fmode);
@@ -724,26 +722,26 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
      @brief Replace all trackpoints by the coordinates stored in the polyline
 
-    The DEM layer will be queried for elevation data. All other data is lost.
+     The DEM layer will be queried for elevation data. All other data is lost.
 
-    @param l     A polyline with coordinates [rad]
-  */
+     @param l     A polyline with coordinates [rad]
+   */
   void readTrackDataFromGisLine(const SGisLine& l);
   /**
      @brief Override IGisItem::changed() method
 
-    As the CDetailsTrk is no modal dialog that blocks the GUI from any other input the track
-    can be changed while the widget is visible. Therefore it needs some feedback to update the
-    CDetailsTrk widget. Usually this would be a signal. However CGisItemTrk is a QTreeWidgetItem
-    and therefor no QObject. Fortunately there the dlgDetails pointer. So CDetailsTrk::setupGui()
-    can be called from changed()
+     As the CDetailsTrk is no modal dialog that blocks the GUI from any other input the track
+     can be changed while the widget is visible. Therefore it needs some feedback to update the
+     CDetailsTrk widget. Usually this would be a signal. However CGisItemTrk is a QTreeWidgetItem
+     and therefor no QObject. Fortunately there the dlgDetails pointer. So CDetailsTrk::setupGui()
+     can be called from changed()
 
-    @param what  The reason string
-    @param icon  An icon string
-  */
+     @param what  The reason string
+     @param icon  An icon string
+   */
   void changed(const QString& what, const QString& icon) override;
 
-          /// setup colorIdx, color, bullet and icon
+  /// setup colorIdx, color, bullet and icon
   void setColor(const QColor& c);
   /// setup track icon by color
   void setIcon(const QString& iconColor);
@@ -761,8 +759,9 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @return
    */
   const CTrackData& getTrackData() const { return trk; }
+  //KKA start  
   CTrackData& getTrackData() { return trk; } //KKA: new for EnergyCycling, add power and torque to extensions
-
+  //KKA end
   void updateFromDB(quint64 id, QSqlDatabase& db) override;
 
  private:
@@ -794,7 +793,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /// this is the GPX structure oriented data of the track
   CTrackData trk;
 
-          /// the key of the track having the user focus.
+  /// the key of the track having the user focus.
   static key_t keyUserFocus;
   /// drawing and mouse interaction is dependent on the mode
   mode_e mode = eModeNormal;
@@ -843,7 +842,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   qint32 widthInfoBox = MIN_WIDTH_INFO_BOX;
 
-          /// the pen with the actual track color
+  /// the pen with the actual track color
   QPen penForeground{Qt::blue, qreal(penWidthFg), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
   /// background (border) color of all tracks
   QPen penBackground{Qt::white, qreal(penWidthBg), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
@@ -869,26 +868,26 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
       A list of INotifyTrk objects that need to get informed on any change in data.
 
-     @note This is necessary because QTreeWidgetItem is not derived from QObject.
-           Thus no signals and slots can be handled. Probably this is because the
-           signal/slot system would be a huge overhead on treewidgets with a large
-           amount of items.
+      @note This is necessary because QTreeWidgetItem is not derived from QObject.
+            Thus no signals and slots can be handled. Probably this is because the
+            signal/slot system would be a huge overhead on treewidgets with a large
+            amount of items.
 
-           Anyway we need some kind of signaling between the track object and the
-           INotifyTrk objects displaying the data. And we have to keep in mind that
-           the track can be delete by the user at any time. That is why no other
-           object is allowed to save a pointer to the track. It must store the
-           key. But accessing the track via key is expensive.
+            Anyway we need some kind of signaling between the track object and the
+            INotifyTrk objects displaying the data. And we have to keep in mind that
+            the track can be delete by the user at any time. That is why no other
+            object is allowed to save a pointer to the track. It must store the
+            key. But accessing the track via key is expensive.
 
-           That is why we make an exception here. As the track will delete all
-           registered INotifyTrk objects upon destruction, it should be ok to store
-           the track object in the INotifyTrk object, too. By that INotifyTrk and track can
-           easily communicate with each other.
+            That is why we make an exception here. As the track will delete all
+            registered INotifyTrk objects upon destruction, it should be ok to store
+            the track object in the INotifyTrk object, too. By that INotifyTrk and track can
+            easily communicate with each other.
 
-     @note CDetailsTrk is an INotifyTrk, too. But it is a bit special as it has to be destroyed
-           right after all other INotifyTrk have been destroyed. That is why it is not part of
-           that set.
-  */
+      @note CDetailsTrk is an INotifyTrk, too. But it is a bit special as it has to be destroyed
+            right after all other INotifyTrk have been destroyed. That is why it is not part of
+            that set.
+   */
   QSet<INotifyTrk*> registeredVisuals;
 
   /**
@@ -901,9 +900,9 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   /**
       @brief Identify source of current range selection
 
-     Each range selection operation has to provide an owner string.
-     If mouseFocusOwner is not empty and different to the passed
-     owner string the operation must be rejected.
+      Each range selection operation has to provide an owner string.
+      If mouseFocusOwner is not empty and different to the passed
+      owner string the operation must be rejected.
 
    */
   QString mouseFocusOwner;
@@ -917,10 +916,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   QPointer<CDetailsTrk> dlgDetails;  //< the track's details dialog if any
   QPointer<CScrOptTrk> scrOpt;       //< the track's screen option if visible
 
-          /// all function concerning track activities have been moved to CActivityTrk
+  /// all function concerning track activities have been moved to CActivityTrk
   CActivityTrk activities = {this};
 
-          /// all functions and data concerning graphs
+  /// all functions and data concerning graphs
   CPropertyTrk* propHandler = nullptr;
 
   /**
@@ -928,9 +927,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   /**@{*/
  public:
+  //KKA start
   //enum quality_e { eQualityFine = 8, eQualityMedium = 4, eQualityCoarse = 2 }; //KKA: changed
   enum quality_e { eQualityFine = 7, eQualityMedium = 6, eQualityCoarse = 5 }; //KKA: new
-
+  //KKA end
   void setupInterpolation(bool on, qint32 q);
   bool isInterpolationEnabled() const { return interp.valid; }
 

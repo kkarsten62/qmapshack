@@ -31,20 +31,33 @@
 int IDevice::cnt = 0;
 
 IDevice::IDevice(const QString& path, type_e type, const QString& key, QTreeWidget* parent)
-    : QTreeWidgetItem(parent, type), dir(path), key(key) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/Device.png"));
+    : IWksItem(parent, type), dir(path), key(key) {
+  icon = QPixmap("://icons/32x32/Device.png");
   cnt++;
+  setVisibility(false);
 }
 
 IDevice::IDevice(const QString& path, const QString& key, IDevice* parent)
-    : QTreeWidgetItem(parent, eTypeVirtual), dir(path), key(key) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/PathGreen.png"));
+    : IWksItem(parent, eTypeVirtual), dir(path), key(key) {
+  icon = QPixmap("://icons/32x32/PathGreen.png");
+  setVisibility(false);
 }
 
 IDevice::~IDevice() {
   if (type() != eTypeVirtual) {
     cnt--;
   }
+}
+
+void IDevice::setVisibility(bool visible) {
+  const int N = childCount();
+  for (int n = 0; n < N; n++) {
+    IGisProject* project = dynamic_cast<IGisProject*>(child(n));
+    if (project != nullptr) {
+      project->setVisibility(visible);
+    }
+  }
+  IWksItem::setVisibility(visible);
 }
 
 void IDevice::mount(const QString& path) {
@@ -72,8 +85,6 @@ void IDevice::umount(const QString& path) {
   QDBusConnection::systemBus().call(message);
 #endif
 }
-
-QString IDevice::getName() const { return text(CGisListWks::eColumnName); }
 
 void IDevice::getItemsByPos(const QPointF& pos, QList<IGisItem*>& items) {
   const int N = childCount();
@@ -273,7 +284,7 @@ bool IDevice::testForExternalProject(const QString& filename) {
     const int N = childCount();
     for (int n = 0; n < N; n++) {
       QTreeWidgetItem* item = child(n);
-      if (item->text(CGisListWks::eColumnName) == fi.baseName()) {
+      if (getName() == fi.baseName()) {
         delete item;
         break;
       }

@@ -29,10 +29,10 @@
 #include <QPainter>
 #include <QString>
 #include <QStringList>
-#include <QTreeWidgetItem>
 #include <QUrl>
 #include <QVariant>
 
+#include "gis/IWksItem.h"
 #include "units/IUnit.h"
 
 class CGisDraw;
@@ -43,7 +43,7 @@ class IGisProject;
 struct searchValue_t;
 enum searchProperty_e : unsigned int;
 
-class IGisItem : public QTreeWidgetItem {
+class IGisItem : public IWksItem {
   Q_DECLARE_TR_FUNCTIONS(IGisItem)
  public:
   struct history_event_t {
@@ -116,10 +116,8 @@ class IGisItem : public QTreeWidgetItem {
     QMap<QString, QVariant> extensions;
   };
 
-  /// never ever change these numbers. it will break binary data files
-  enum type_e { eTypeWpt = 1, eTypeTrk = 2, eTypeRte = 3, eTypeOvl = 4, eTypeMax = 5 };
-
-  enum mark_e { eMarkNone = 0, eMarkChanged = 0x00000001, eMarkNotPart = 0x00000002, eMarkNotInDB = 0x00000004 };
+  // /// never ever change these numbers. it will break binary data files
+  // enum type_e { eTypeWpt = 1, eTypeTrk = 2, eTypeRte = 3, eTypeOvl = 4, eTypeMax = 5 };
 
   enum selection_e {
     eSelectionNone = 0,
@@ -187,7 +185,7 @@ class IGisItem : public QTreeWidgetItem {
      @param enable
      @param disable
    */
-  virtual void updateDecoration(quint32 enable, quint32 disable);
+  void updateDecoration(quint32 enable, quint32 disable) override;
 
   /**
      @brief Save the item's data into a GPX structure
@@ -231,39 +229,13 @@ class IGisItem : public QTreeWidgetItem {
    */
   void setIcon(const QPixmap& icon);
 
-  const QPixmap& getIcon() const { return icon; }
-
   const QPixmap& getDisplayIcon() const { return displayIcon; }
-  /**
-     @brief Get name of this item.
-     @return A reference to the internal string object
-   */
-  virtual const QString& getName() const = 0;
 
   /**
      @brief Get name of this item extended by the project name
      @return A string object.
    */
   virtual QString getNameEx() const;
-
-  enum features_e {
-    eFeatureNone = 0,
-    eFeatureShowName = 0x00000001,
-    eFeatureShowFullText = 0x00000002,
-    eFeatureShowActivity = 0x00000004,
-    eFeatureShowDateTime = 0x00000008,
-    eFeatureShowLinks = 0x00000010
-  };
-
-  /**
-     @brief Get a short string with the items properties to be displayed in tool tips or similar
-
-     @param showName          set true if the first line should be the item's name
-     @param features          a combination of features_e types
-
-     @return A string object.
-   */
-  virtual QString getInfo(quint32 features) const = 0;
 
   virtual const QString& getComment() const = 0;
   virtual const QString& getDescription() const = 0;
@@ -307,6 +279,11 @@ class IGisItem : public QTreeWidgetItem {
   virtual QPointF getPointCloseBy(const QPoint& point) { return NOPOINTF; }
 
   /**
+    @brief General visibility on the map
+   */
+  const bool isVisible() const override;
+
+  /**
      @brief Test if the item is close to a given pixel coordinate of the screen
 
      @param pos       the coordinate on the screen in pixel
@@ -341,13 +318,7 @@ class IGisItem : public QTreeWidgetItem {
      @brief Check if item is on a GPS device
      @return The device type (IDevice::type_e). IDevice::eTypeNone if the item is not stored on a device.
    */
-  qint32 isOnDevice() const;
-
-  /**
-     @brief Check if there are any pending unsaved changes
-     @return True if the are changes to be saved
-   */
-  bool isChanged() const;
+  const qint32 isOnDevice() const override;
 
   /**
      @brief Set the read only mode.
@@ -367,14 +338,12 @@ class IGisItem : public QTreeWidgetItem {
                          CGisDraw* gis) = 0;
   virtual void drawHighlight(QPainter& p) = 0;
 
-  virtual void gainUserFocus(bool yes) = 0;
-
   /**
      @brief Check for user focus
 
      @return True if the item has user focus. The default implementation is always false.
    */
-  virtual bool hasUserFocus() const { return false; }
+  virtual bool hasUserFocus() const override { return false; }
 
   /**
      @brief Serialize object out of a QDataStream
@@ -517,9 +486,7 @@ class IGisItem : public QTreeWidgetItem {
 
   virtual const searchValue_t getValueByKeyword(searchProperty_e keyword) = 0;
 
-  qreal getRating() const;
   void setRating(qreal rating);
-  const QSet<QString>& getKeywords() const;
   QList<QString> getKeywordsSorted() const;
   void addKeywords(const QSet<QString>& otherKeywords);
   void removeKeywords(const QSet<QString>& otherKeywords);
@@ -567,8 +534,7 @@ class IGisItem : public QTreeWidgetItem {
   quint32 flags = 0;
   /// the item's unique key
   mutable key_t key;
-  /// each item has an icon for the tree widget
-  QPixmap icon;
+
   QPixmap displayIcon;
   /// the dimensions of the item
   QRectF boundingRect;
@@ -586,10 +552,6 @@ class IGisItem : public QTreeWidgetItem {
   };
 
   static QVector<color_t> colorMap;
-
-  /// labeling the GisItems
-  qreal rating = 0;
-  QSet<QString> keywords;
 
  private:
   void showIcon();

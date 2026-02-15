@@ -40,7 +40,7 @@ CTcxProject::CTcxProject(const QString& filename, IDevice* parent) : IGisProject
 
 CTcxProject::CTcxProject(const QString& filename, const IGisProject* project, IDevice* parent)
     : IGisProject(eTypeGpx, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/TcxProject.png"));
+  icon = QPixmap("://icons/32x32/TcxProject.png");
   *(IGisProject*)this = *project;
   blockUpdateItems(project->blockUpdateItems());
 
@@ -55,12 +55,11 @@ CTcxProject::CTcxProject(const QString& filename, const IGisProject* project, ID
 
   blockUpdateItems(false);
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  setToolTip(CGisListWks::eColumnName, getInfo());
   valid = true;
 }
 
 void CTcxProject::setup() {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/TcxProject.png"));
+  icon = QPixmap("://icons/32x32/TcxProject.png");
   blockUpdateItems(true);
   loadTcx(filename);
   blockUpdateItems(false);
@@ -84,7 +83,6 @@ void CTcxProject::loadTcx(const QString& filename, CTcxProject* project) {
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "tcx") {
     project->filename.clear();
     project->setupName(filename);
-    project->setToolTip(CGisListWks::eColumnName, project->getInfo());
     project->valid = true;
     return;
   }
@@ -133,7 +131,6 @@ void CTcxProject::loadTcx(const QString& filename, CTcxProject* project) {
 
   project->sortItems();
   project->setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  project->setToolTip(CGisListWks::eColumnName, project->getInfo());
   project->valid = true;
 }
 

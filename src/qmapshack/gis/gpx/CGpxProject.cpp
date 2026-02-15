@@ -32,14 +32,14 @@
 #include "misc.h"
 
 CGpxProject::CGpxProject(const QString& filename, CGisListWks* parent) : IGisProject(eTypeGpx, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/GpxProject.png"));
+  icon = QPixmap("://icons/32x32/GpxProject.png");
   blockUpdateItems(true);
   loadGpx(filename);
   blockUpdateItems(false);
 }
 
 CGpxProject::CGpxProject(const QString& filename, IDevice* parent) : IGisProject(eTypeGpx, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/GpxProject.png"));
+  icon = QPixmap("://icons/32x32/GpxProject.png");
   blockUpdateItems(true);
   loadGpx(filename);
   blockUpdateItems(false);
@@ -47,7 +47,7 @@ CGpxProject::CGpxProject(const QString& filename, IDevice* parent) : IGisProject
 
 CGpxProject::CGpxProject(QFile& file, const QString& filename, IDevice* parent)
     : IGisProject(eTypeGpx, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/GpxProject.png"));
+  icon = QPixmap("://icons/32x32/GpxProject.png");
   blockUpdateItems(true);
   loadGpx(file, filename, this);
   setName(QFileInfo(filename).completeBaseName().replace("_", " "));
@@ -58,7 +58,7 @@ CGpxProject::CGpxProject(QFile& file, const QString& filename, IDevice* parent)
 
 CGpxProject::CGpxProject(const QString& filename, const IGisProject* project, IDevice* parent)
     : IGisProject(eTypeGpx, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/GpxProject.png"));
+  icon = QPixmap("://icons/32x32/GpxProject.png");
   *(IGisProject*)this = *project;
   blockUpdateItems(project->blockUpdateItems());
 
@@ -73,7 +73,6 @@ CGpxProject::CGpxProject(const QString& filename, const IGisProject* project, ID
 
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
   blockUpdateItems(false);
-  setToolTip(CGisListWks::eColumnName, getInfo());
   valid = true;
 }
 
@@ -97,7 +96,6 @@ void CGpxProject::loadGpx(const QString& filename, CGpxProject* project) {
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "gpx") {
     project->filename.clear();
     project->setupName(filename);
-    project->setToolTip(CGisListWks::eColumnName, project->getInfo());
     project->valid = true;
     return;
   }
@@ -216,7 +214,6 @@ void CGpxProject::loadGpx(QFile& file, const QString& filename, CGpxProject* pro
 
   project->sortItems();
   project->setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  project->setToolTip(CGisListWks::eColumnName, project->getInfo());
   project->valid = true;
 }
 

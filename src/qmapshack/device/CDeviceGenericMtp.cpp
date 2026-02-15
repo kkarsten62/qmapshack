@@ -40,6 +40,8 @@ CDeviceGenericMtp::CDeviceGenericMtp(const QDBusObjectPath& objectPathStorage, c
   setup();
 }
 
+QString CDeviceGenericMtp::getInfo(quint32) const { return ""; }
+
 void CDeviceGenericMtp::setup() {
   if (!device->foundValidStoragePath()) {
     return;
@@ -68,7 +70,7 @@ void CDeviceGenericMtp::setup() {
     const QString& iconPath = QDir::cleanPath(rootPath.filePath(icon));
     const QPixmap& pixmap = device->getIcon(iconPath);
     if (!pixmap.isNull()) {
-      setIcon(CGisListWks::eColumnIcon, pixmap);
+      IWksItem::icon = pixmap;
     }
 
     for (const QString& path : exportPathsRelativ) {
@@ -81,7 +83,7 @@ void CDeviceGenericMtp::setup() {
       createProjectsFromFiles(QDir::cleanPath(rootPath.filePath(path)));
     }
   }
-  setText(CGisListWks::eColumnName, QString("%1 (%2)").arg(description, device->decription()));
+  name = QString("%1 (%2)").arg(description, device->decription());
 }
 
 bool CDeviceGenericMtp::removeFromDevice(const QString& filename) {
@@ -101,7 +103,7 @@ void CDeviceGenericMtp::insertCopyOfProject(IGisProject* project) {
     }
 
     QTemporaryFile file;
-    openFileCheckSuccess(QIODevice::ReadWrite, file); // saveAs will close the file
+    openFileCheckSuccess(QIODevice::ReadWrite, file);  // saveAs will close the file
     if (!CGpxProject::saveAs(file, filename, *gpx, false)) {
       delete gpx;
       return;
@@ -136,8 +138,12 @@ void CDeviceGenericMtp::createProjectsFromFiles(const QString& subdirectory) {
       } else if (suffix == "fit") {
         project = new CFit2Project(tempFile, d.filePath(file), this);
       }
-      if (project && !project->isValid()) {
-        delete project;
+      if (project) {
+        if (!project->isValid()) {
+          delete project;
+        } else {
+          project->setVisibility(isVisible());
+        }
       }
     }
   }
@@ -149,7 +155,8 @@ QString CDeviceGenericMtp::createFileName(IGisProject* project, const QString& p
 
 QString CDeviceGenericMtp::simplifiedName(IGisProject* project) const {
   static const QRegularExpression re("[^A-Za-z0-9_]");
-  return project->getName().remove(re);
+  QString tempName = project->getName();
+  return tempName.remove(re);
 }
 
 void CDeviceGenericMtp::reorderProjects(IGisProject* project) {

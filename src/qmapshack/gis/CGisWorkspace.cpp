@@ -61,17 +61,6 @@ CGisWorkspace::CGisWorkspace(QMenu* menuProject, QWidget* parent) : QWidget(pare
   treeWks->setExternalMenu(menuProject);
 
   SETTINGS;
-  treeWks->header()->restoreState(cfg.value("Workspace/treeWks/state", treeWks->header()->saveState()).toByteArray());
-
-  tags_hidden_e tagsHidden = (tags_hidden_e)cfg.value("Workspace/treeWks/tagsHidden", eTagsHiddenUnknown).toInt();
-  // Limit the column width to half the table width to avoid the name column to be pushed out the window.
-  if (tagsHidden == eTagsHiddenUnknown || treeWks->columnWidth(CGisListWks::eColumnRating) > 0.4 * this->width()) {
-    treeWks->setColumnWidth(CGisListWks::eColumnRating, 0.2 * this->width());
-  }
-
-  // Only show tags if they are explcitely not hidden
-  setTagsHidden(tagsHidden != eTagsHiddenFalse);
-
   CSearch::setSearchMode(
       CSearch::search_mode_e(cfg.value("Workspace/projects/filterMode", CSearch::getSearchMode()).toInt()));
   CSearch::setCaseSensitivity(
@@ -87,12 +76,6 @@ CGisWorkspace::CGisWorkspace(QMenu* menuProject, QWidget* parent) : QWidget(pare
 
 CGisWorkspace::~CGisWorkspace() {
   SETTINGS;
-  // To ensure backwards compatibility first it is saved wether the tags are hidden,
-  // then the column is made visible and then the header is saved. This way the name column is in no case hidden.
-  cfg.setValue("Workspace/treeWks/tagsHidden", areTagsHidden() ? eTagsHiddenTrue : eTagsHiddenFalse);
-  setTagsHidden(false);
-  cfg.setValue("Workspace/treeWks/state", treeWks->header()->saveState());
-
   cfg.setValue("Workspace/projects/filterMode", CSearch::getSearchMode());
   cfg.setValue("Workspace/projects/CaseSensitivity", CSearch::getCaseSensitivity());
   /*
@@ -1196,10 +1179,6 @@ bool CGisWorkspace::findPolylineCloseBy(const QPointF& pt1, const QPointF& pt2, 
   return !polyline.isEmpty();
 }
 
-bool CGisWorkspace::areTagsHidden() const { return treeWks->isColumnHidden(CGisListWks::eColumnRating); }
-
-void CGisWorkspace::setTagsHidden(bool hidden) { treeWks->setColumnHidden(CGisListWks::eColumnRating, hidden); }
-
 void CGisWorkspace::tagItemsByKey(const QList<IGisItem::key_t>& keys) {
   QSet<QString> commonKeywords;
 
@@ -1210,11 +1189,11 @@ void CGisWorkspace::tagItemsByKey(const QList<IGisItem::key_t>& keys) {
     IGisItem* gisItem = getItemByKey(key);
     if (gisItem != nullptr) {
       if (firstItem) {
-        commonKeywords = gisItem->getKeywords();
+        commonKeywords = gisItem->getTags();
         rating = gisItem->getRating();
         firstItem = false;
       } else {
-        commonKeywords = commonKeywords.intersect(gisItem->getKeywords());
+        commonKeywords = commonKeywords.intersect(gisItem->getTags());
       }
 
       items << gisItem;

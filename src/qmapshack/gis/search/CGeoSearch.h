@@ -37,19 +37,27 @@ class CGeoSearch : public QObject, public IGisProject {
   virtual ~CGeoSearch();
 
   bool skipSave() const override { return true; }
+  bool isInputEnabled() const { return inputEnabled; }
+  const bool isChanged() const override { return false; }
+
+  QPixmap getWptIcon() const;
+  const QString& getLastAddress() const { return lastAddress; }
+
+  void selectService(const QRect& rect);
+  void changeSymbol();
+  void startSearch(const QString& address);
+  QString getServiceName() const;
 
  private slots:
-  void slotChangeSymbol();
-  void slotSelectService();
   void slotServiceSelected(CGeoSearchConfig::service_e service, bool checked);
   void slotSetupGeoSearch();
-  void slotStartSearch();
   void slotRequestFinished(QNetworkReply* reply);
   void slotConfigChanged();
   void slotAccuResults(bool yes);
   void slotResetResults();
 
  private:
+  static inline QString trRichText(const char* msg) { return "<div>" + tr(msg) + "</div>"; }
   QAction* addService(CGeoSearchConfig::service_e service, const QString& name, QMenu* menu);
   void requestNominatim(QString& addr) const;
   void requestGeonamesSearch(QString& addr) const;
@@ -65,11 +73,12 @@ class CGeoSearch : public QObject, public IGisProject {
 
   void setIcon();
 
-  QLineEdit* edit;
-  QAction* actSymbol;
   QNetworkAccessManager* networkAccessManager;
   CGeoSearchConfig* searchConfig;
   QTreeWidgetItem* itemStatus = nullptr;
+  bool inputEnabled = true;
+  QString lastAddress;
+  CGeoSearchConfig::service_e lastService = CGeoSearchConfig::service_e::eServiceNone;
 };
 
 #endif  // CSEARCHGOOGLE_H

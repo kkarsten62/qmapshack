@@ -31,8 +31,8 @@
 
 CDeviceGarmin::CDeviceGarmin(const QString& path, const QString& key, const QString& model,
                              const QString& garminDeviceXml, QTreeWidget* parent)
-    : IDevice(path, eTypeGarmin, key, parent), cntImages(0) {
-  setText(CGisListWks::eColumnName, "Garmin");
+    : IDevice(path, eTypeGarmin, key, parent), model(model), cntImages(0) {
+  name = "Garmin";
 
   QFile file(QDir(path).absoluteFilePath(garminDeviceXml));
   if (!file.open(QIODevice::ReadOnly)) {
@@ -58,8 +58,7 @@ CDeviceGarmin::CDeviceGarmin(const QString& path, const QString& key, const QStr
   description = xmlModel.namedItem("Description").toElement().text().trimmed();
   partno = xmlModel.namedItem("PartNumber").toElement().text().trimmed();
 
-  setText(CGisListWks::eColumnName, QString("%1 (%2)").arg(description, model));
-  setToolTip(CGisListWks::eColumnName, QString("%1 (%2, %3)").arg(description, partno, model));
+  name = QString("%1 (%2)").arg(description, model);
 
   const QDomNode& xmlMassStorageMode = xmlDevice.namedItem("MassStorageMode");
   const QDomNodeList& xmlDataTypes = xmlMassStorageMode.toElement().elementsByTagName("DataType");
@@ -135,6 +134,8 @@ CDeviceGarmin::CDeviceGarmin(const QString& path, const QString& key, const QStr
   }
 }
 
+QString CDeviceGarmin::getInfo(quint32) const { return QString("%1 (%2, %3)").arg(description, partno, model); }
+
 void CDeviceGarmin::createProjectsFromFiles(QString subdirecoty, QString fileEnding) {
   QDir dirLoop(dir.absoluteFilePath(subdirecoty));
   qDebug() << "reading files from device: " << dirLoop.path();
@@ -150,8 +151,12 @@ void CDeviceGarmin::createProjectsFromFiles(QString subdirecoty, QString fileEnd
       project = new CTcxProject(filename, this);
     }
 
-    if (project && !project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 }
@@ -187,7 +192,8 @@ void CDeviceGarmin::reorderProjects(IGisProject* project) {
 
 QString CDeviceGarmin::simplifiedName(IGisProject* project) {
   static const QRegularExpression re("[^A-Za-z0-9_]");
-  return project->getName().remove(re);
+  QString simpleName = project->getName();
+  return simpleName.remove(re);
 }
 
 QString CDeviceGarmin::createFileName(IGisProject* project, const QString& path, const QString& suffix) {

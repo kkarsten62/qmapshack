@@ -48,7 +48,7 @@ const QList<extension_t> CLogProject::extensions = {
 };
 
 CLogProject::CLogProject(const QString& filename, CGisListWks* parent) : ISuuntoProject(eTypeLog, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/LogProject.png"));
+  icon = QPixmap("://icons/32x32/LogProject.png");
   blockUpdateItems(true);
   loadLog(filename);
   blockUpdateItems(false);
@@ -72,7 +72,6 @@ void CLogProject::loadLog(const QString& filename, CLogProject* project) {
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "log") {
     project->filename.clear();
     project->setupName(filename);
-    project->setToolTip(CGisListWks::eColumnName, project->getInfo());
     project->valid = true;
     return;
   }
@@ -229,7 +228,6 @@ void CLogProject::loadLog(const QString& filename, CLogProject* project) {
 
         project->sortItems();
         project->setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-        project->setToolTip(CGisListWks::eColumnName, project->getInfo());
         project->valid = true;
       }
     }

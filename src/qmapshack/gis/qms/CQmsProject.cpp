@@ -24,7 +24,7 @@
 #include "gis/CGisListWks.h"
 
 CQmsProject::CQmsProject(const QString& filename, CGisListWks* parent) : IGisProject(eTypeQms, filename, parent) {
-  setIcon(CGisListWks::eColumnIcon, QIcon("://icons/32x32/QmsProject.png"));
+  icon = QPixmap("://icons/32x32/QmsProject.png");
 
   // create file instance
   QFile file(filename);
@@ -33,7 +33,6 @@ CQmsProject::CQmsProject(const QString& filename, CGisListWks* parent) : IGisPro
   if (!file.exists() || QFileInfo(filename).suffix().toLower() != "qms") {
     IGisProject::filename.clear();
     setupName(filename);
-    setToolTip(CGisListWks::eColumnName, getInfo());
     valid = true;
     return;
   }
@@ -53,7 +52,6 @@ CQmsProject::CQmsProject(const QString& filename, CGisListWks* parent) : IGisPro
   markAsSaved();
 
   setupName(QFileInfo(filename).completeBaseName().replace("_", " "));
-  setToolTip(CGisListWks::eColumnName, getInfo());
   updateItems();
   valid = true;
 }

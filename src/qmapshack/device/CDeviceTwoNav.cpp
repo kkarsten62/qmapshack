@@ -26,9 +26,8 @@
 #include "misc.h"
 
 CDeviceTwoNav::CDeviceTwoNav(const QString& path, const QString& key, const QString& model, QTreeWidget* parent)
-    : IDevice(path, eTypeTwoNav, key, parent) {
-  setText(CGisListWks::eColumnName, QString("TwoNav (%1)").arg(model));
-  setToolTip(CGisListWks::eColumnName, QString("TwoNav (%1)").arg(model));
+    : IDevice(path, eTypeCompe, key, parent), model(model) {
+  name = QString("TwoNav (%1)").arg(model);
 
   if (QFile::exists(dir.absoluteFilePath("RegInfo.ini"))) {
     readReginfo(dir.absoluteFilePath("RegInfo.ini"));
@@ -46,24 +45,36 @@ CDeviceTwoNav::CDeviceTwoNav(const QString& path, const QString& key, const QStr
 
   {
     IGisProject* project = new CTwoNavProject(dirData.absolutePath(), this);
-    if (!project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 
   const QStringList& entriesGpx = dirData.entryList(QStringList("*.gpx"));
   for (const QString& entry : entriesGpx) {
     IGisProject* project = new CGpxProject(dirData.absoluteFilePath(entry), this);
-    if (!project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 
   const QStringList& entriesDir = dirData.entryList(QDir::NoDotAndDotDot | QDir::Dirs);
   for (const QString& entry : entriesDir) {
     IGisProject* project = new CTwoNavProject(dirData.absoluteFilePath(entry), this);
-    if (!project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 
@@ -72,13 +83,19 @@ CDeviceTwoNav::CDeviceTwoNav(const QString& path, const QString& key, const QStr
   const QStringList& entriesLog = dirData.entryList(QStringList("*.gpx"));
   for (const QString& entry : entriesLog) {
     IGisProject* project = new CGpxProject(dirData.absoluteFilePath(entry), this);
-    if (!project->isValid()) {
-      delete project;
+    if (project) {
+      if (!project->isValid()) {
+        delete project;
+      } else {
+        project->setVisibility(isVisible());
+      }
     }
   }
 }
 
 CDeviceTwoNav::~CDeviceTwoNav() {}
+
+QString CDeviceTwoNav::getInfo(quint32) const { return QString("TwoNav (%1)").arg(model); }
 
 void CDeviceTwoNav::readReginfo(const QString& filename) {
   QString product, unittype;
@@ -103,7 +120,7 @@ void CDeviceTwoNav::readReginfo(const QString& filename) {
   }
 
   if (!product.isEmpty() && !unittype.isEmpty()) {
-    setText(CGisListWks::eColumnName, QString("%1 (%2)").arg(product, unittype));
+    name = QString("%1 (%2)").arg(product, unittype);
   }
 }
 
