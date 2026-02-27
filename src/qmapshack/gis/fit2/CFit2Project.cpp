@@ -232,9 +232,10 @@ void CFit2Project::OnMesg(fit::ActivityMesg& mesg) {
 
 void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
   //KKA start
-  if (recordType == eRecordType::Course) {
-    return;
-  }
+  //2026-02-27 To check if this is needed
+  //if (recordType == eRecordType::Course) {
+  //  return;
+  //}
   CFitData::lap_t session;
 
   session.manufacturer = manufacturer; //quint16
@@ -413,9 +414,10 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
 
 void CFit2Project::OnMesg(fit::LapMesg& mesg) {
   //KKA start
-  if (recordType == eRecordType::Course) {
-    return;
-  }
+  //2026-02-27 To check if this is needed
+  //if (recordType == eRecordType::Course) {
+  //  return;
+  //}
   CFitData::lap_t lap;
 
   lap.manufacturer = manufacturer; //quint16

@@ -95,6 +95,8 @@ class CFit2Project : public fit::FileIdMesgListener,
   CTrackData track;
   CTrackData::trkseg_t segment;
   //KKA start
+  //2026-02-27 To check if this is needed
+  //eRecordType recordType{eRecordType::Activity};
   CFitData fitData;
   quint16 manufacturer;
   quint16 product;
