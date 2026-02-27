@@ -22,8 +22,9 @@ endif()
 # Define project name and version tags
 ###############################################################################################
 # this is not only the QMS version it will be the package version, too.
-project(QMapShack VERSION 1.20.0 LANGUAGES CXX C)
-set(CMAKE_CXX_STANDARD 11)
+project(QMapShack VERSION 1.20.1 LANGUAGES CXX C)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_C_STANDARD 99)
 
 # FOR A RELEASE:
 # remove "development" for a release
@@ -77,7 +78,7 @@ option(UPDATE_TRANSLATIONS_PURGE_OBSOLETE "Remove obsolete translations" OFF)
 # All OS and compiler specific tweaks
 ###############################################################################################
 if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -Wall -std=c++11 -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -framework Foundation -framework DiskArbitration")
     SET(LINK_FLAGS "${LINK_FLAGS} -framework Foundation -framework DiskArbitration")
@@ -144,8 +145,7 @@ if(MSVC)
 endif(MSVC)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -lm")
-    add_definitions(-Wall -Wpedantic -Wno-switch -Wno-strict-aliasing)
+    add_compile_options(-Wall -Wpedantic -Wno-switch -Wno-strict-aliasing -fms-extensions)
 
     # Use ASAN for development versions
     if(${DEVELOPMENT_VERSION})

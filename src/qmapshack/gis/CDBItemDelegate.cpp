@@ -24,6 +24,7 @@
 
 #include "gis/IDBItem.h"
 #include "helpers/CDraw.h"
+#include "misc.h"
 
 constexpr int kMargin = 1;
 constexpr int kFontSizeDiffItem = 3;
@@ -61,7 +62,7 @@ QSize CDBItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelInd
   font2.setPointSize(font2.pointSize() - kFontSizeDiffItem);
   QFontMetrics fm2(font2);
 
-  return QSize(opt.rect.width(), std::max(22, 5 * kMargin + fm1.height() + fm2.height()));
+  return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fm1.height() + fm2.height()));
 }
 
 static std::tuple<QFont, QFont, QRect, QRect, QRect, QRect> getRectangles(const QStyleOptionViewItem& opt,
@@ -217,13 +218,13 @@ bool CDBItemDelegate::helpEvent(QHelpEvent* event, QAbstractItemView* view, cons
   if (rectButton.contains(pos)) {
     if (item->getCheckState() == Qt::Unchecked) {
       QToolTip::showText(posGlobal,
-                         item->type() == IDBItem::eTypeItem ? trRichText("Load item into workspace.")
-                                                            : trRichText("Load project into workspace"),
+                         item->type() == IDBItem::eTypeItem ? toRichText(tr("Load item into workspace."))
+                                                            : toRichText(tr("Load project into workspace")),
                          view, {}, 3000);
     } else {
       QToolTip::showText(posGlobal,
-                         item->type() == IDBItem::eTypeItem ? trRichText("Remove item from workspace.")
-                                                            : trRichText("Remove project from workspace"),
+                         item->type() == IDBItem::eTypeItem ? toRichText(tr("Remove item from workspace."))
+                                                            : toRichText(tr("Remove project from workspace")),
                          view, {}, 3000);
     }
   } else {
