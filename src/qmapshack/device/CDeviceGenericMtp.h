@@ -19,22 +19,23 @@
 #ifndef CDEVICEGENERICMTP_H
 #define CDEVICEGENERICMTP_H
 
-#include <functional>
+#include <QPointer>
 
 #include "device/IDevice.h"
 
 class QDBusObjectPath;
 class IDeviceAccess;
 class GVFSMount;
+class CThread;
 
-class CDeviceGenericMtp : public IDevice, private QObject {
-  Q_DECLARE_TR_FUNCTIONS(CDeviceGenericMtp)
+class CDeviceGenericMtp : public QObject, public IDevice {
+  Q_OBJECT
  public:
   CDeviceGenericMtp(const QDBusObjectPath& objectPathStorage, const QString& key, QTreeWidget* parent);
 
   CDeviceGenericMtp(const GVFSMount& mount, const QString& storagePath, const QString& key, QTreeWidget* parent);
 
-  virtual ~CDeviceGenericMtp() = default;
+  virtual ~CDeviceGenericMtp();
 
   bool removeFromDevice(const QString& filename);
 
@@ -52,13 +53,15 @@ class CDeviceGenericMtp : public IDevice, private QObject {
   };
 
   void setup();
-  void createProjectsFromFiles(const QString& subdirectory);
+  void createProjectsFromFiles(const QString& subdirectory, quint32& count, const quint32 total);
   QString createFileName(IGisProject* project, const QString& path, const QString& suffix) const;
   QString simplifiedName(IGisProject* project) const;
   void reorderProjects(IGisProject* project);
 
   IDeviceAccess* device;
   QStringList exportPaths;
+
+  QPointer<CThread> threadLoadData;
 };
 
 #endif  // CDEVICEGENERICMTP_H

@@ -195,6 +195,7 @@ set( SRCS
     helpers/CProgressDialog.cpp
     helpers/CSelectCopyAction.cpp
     helpers/CSelectProjectDialog.cpp
+    helpers/CThread.cpp
     helpers/CTimeDialog.cpp
     helpers/CToolBarConfig.cpp
     helpers/CToolBarSetupDialog.cpp
@@ -572,6 +573,7 @@ set( HDRS
     helpers/CSelectCopyAction.h
     helpers/CSelectProjectDialog.h
     helpers/CSettings.h
+    helpers/CThread.h
     helpers/CTryMutexLocker.h
     helpers/CTimeDialog.h
     helpers/CToolBarConfig.h

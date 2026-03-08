@@ -1,5 +1,5 @@
 /**********************************************************************************************
-    Copyright (C) 2014-2015 Oliver Eichler <oliver.eichler@gmx.de>
+    Copyright (C) 2026 Oliver Eichler <oliver.eichler@gmx.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,38 +16,24 @@
 
 **********************************************************************************************/
 
-#ifndef CPLOT_H
-#define CPLOT_H
+#ifndef CTHREAD_H
+#define CTHREAD_H
 
-#include "gis/trk/CGisItemTrk.h"
-#include "gis/trk/CPropertyTrk.h"
-#include "plot/IPlot.h"
+#include <QThread>
 
-class CLimit;
-
-class CPlot : public IPlot {
-  Q_OBJECT
+class CThread : public QThread {
  public:
-  CPlot(CGisItemTrk* trk, CLimit& limit, CPlotData::axistype_e type, const QString& xLabel, const QString& yLabel,
-        qreal factor, fTrkPtGetVal getX, fTrkPtGetVal getY, QWidget* parent);
-  CPlot(CGisItemTrk* trk, CLimit& limit, mode_e mode, QWidget* parent);
-  virtual ~CPlot() = default;
+  using fCallback = std::function<void(void)>;
 
-  void setup(const CPropertyTrk::property_t& p);
+  CThread(fCallback worker);
+  virtual ~CThread() = default;
 
-  void updateData() override;
+  void run() override;
 
-  void setMouseFocus(const CTrackData::trkpt_t* ptMouseMove) override;
-
- public slots:
-  void setLimits();
+  void cancel();
 
  private:
-  CLimit& limit;
-
-  qreal factor = 1.0;
-  fTrkPtGetVal getX = nullptr;
-  fTrkPtGetVal getY = nullptr;
+  fCallback worker;
 };
 
-#endif  // CPLOT_H
+#endif  // CTHREAD_H
