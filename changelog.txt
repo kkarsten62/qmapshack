@@ -9,6 +9,10 @@ V1.XX.X
 [QMS-1009] Fix: Workspace icon size does not follow font size
 [QMS-1012] Fix: Delegate entries possibly hardly readable
 [QMS-1013] Fix: Icons do not fit into on screen multiple selection circles
+[QMS-1018] Fix: Warnings in CMapItemDelegate
+[QMS-1021] Dev: Add unique key to views for better identification
+[QMS-1024] Fix: Accessibility issue : font is too small (macOS)
+[QMS-1027] Fix: Maps: Copyright notice is missing in tool tips
 
 V1.20.1
 [QMS-945] Redesign icons for focus, autosave, sync, and DB buttons
