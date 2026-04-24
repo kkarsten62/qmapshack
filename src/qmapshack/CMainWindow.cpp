@@ -984,6 +984,25 @@ void CMainWindow::testForNoView() {
 void CMainWindow::slotTabCloseRequest(int i) {
   QMutexLocker lock(&CMapItem::mutexActiveMaps);
 
+  int current = tabWidget->currentIndex();
+  // current tab is closing
+  if (i == current) {
+    if ((current + 1) == tabWidget->count()) {
+      current--;
+    } else {
+      current++;
+    }
+    // would next current tab be any canvas?
+    CCanvas* canvas = dynamic_cast<CCanvas*>(tabWidget->widget(current));
+    if (canvas != nullptr) {
+      // yes -> force "visible" canvas as current
+      canvas = getVisibleCanvas();
+      if (canvas != nullptr) {
+        tabWidget->setCurrentIndex(tabWidget->indexOf(canvas));
+      }
+    }
+  }
+
   delete tabWidget->widget(i);
 
   testForNoView();
@@ -1203,7 +1222,7 @@ void CMainWindow::slotSetupUnits() {
 }
 
 void CMainWindow::slotSetupWorkspace() {
-  CSetupWorkspace* dlg = new CSetupWorkspace(widgetGisWorkspace, this);
+  CSetupWorkspace* dlg = new CSetupWorkspace(widgetGisWorkspace, widgetGisDatabase, this);
   dlg->resize(0, 0);
   dlg->show();
 }
