@@ -33,25 +33,19 @@ CLineOpAddPoint::CLineOpAddPoint(SGisLine& points, CGisDraw* gis, CCanvas* canva
 CLineOpAddPoint::~CLineOpAddPoint() {}
 
 void CLineOpAddPoint::append() {
-  // this is called on construction when creating a complete new line
-  // A new point is appended to what ever line already exists,
-  // and add point mode is entered immediately.
   idxFocus = points.size();
   points.insert(idxFocus, IGisLine::point_t(points.last()));
-  addPoint = true;
-  isPoint = true;
-  // make sure that when starting the line-edit on-the-fly-routing will
-  // not trigger before the mouse has been moved a bit away from last point of line
+  isDragging = true;
+  focusIsEndpoint = true;
   startMouseMove(points.last().pixel);
 }
 
 bool CLineOpAddPoint::abortStep() {
-  if (addPoint) {
-    // cancel action and restore last state of line
+  if (isDragging) {
     cancelDelayedRouting();
     parentHandler->restoreFromHistory(points);
 
-    addPoint = false;
+    isDragging = false;
     idxFocus = NOIDX;
 
     canvas->slotTriggerCompleteUpdate(CCanvas::eRedrawMouse);
@@ -62,99 +56,71 @@ bool CLineOpAddPoint::abortStep() {
 }
 
 void CLineOpAddPoint::leftClick(const QPoint& pos) {
-  if (idxFocus == NOIDX) {
+  if (idxFocus == NOIDX || isRouting) {
     return;
   }
 
-  if (addPoint) {
-    // drop the new point at current position
-    // update subpoints of previous and this point
-    slotTimeoutRouting();
+  if (isDragging) {
+    QPointF coord = pos;
+    gis->convertPx2Rad(coord);
 
-    // slotTimeoutRouting runs an event loop; the user may have aborted (right-click or undo)
-    // during it, which sets idxFocus = NOIDX. Bail out if that happened.
-    if (idxFocus == NOIDX) {
+    if (!runRoutingAndPin(coord)) {
       return;
     }
 
-    // if isPoint is true the line has been appended/prepended
-    // in this case go on with adding another point
-    if (isPoint) {
+    if (focusIsEndpoint) {
       if (idxFocus == (points.size() - 1)) {
         idxFocus++;
       }
-
-      // store current state of line to undo/redo history
       parentHandler->storeToHistory(points);
-
-      QPointF coord = pos;
-      gis->convertPx2Rad(coord);
       points.insert(idxFocus, IGisLine::point_t(coord));
     } else {
-      // store current state of line to undo/redo history
       parentHandler->storeToHistory(points);
-      // terminate operation if the new point was inbetween a line segment.
-      addPoint = false;
+      isDragging = false;
       idxFocus = NOIDX;
     }
-  } else if (isPoint) {
-    // as isPoint is set, add a new point either at the start or end of the line
+  } else if (focusIsEndpoint) {
+    /** idxFocus points at the last existing point; advance past it so the new point is appended. */
     if (idxFocus == (points.size() - 1)) {
       idxFocus++;
     }
-
     QPointF coord = pos;
     gis->convertPx2Rad(coord);
     points.insert(idxFocus, IGisLine::point_t(coord));
-
-    addPoint = true;
+    isDragging = true;
   } else if (idxFocus != NOIDX) {
-    // clear current line segment
     points[idxFocus].subpts.clear();
-
-    // add a new point to line segment
     QPointF coord = pos;
     gis->convertPx2Rad(coord);
-
+    /** idxFocus is the segment start; advance to insert the new point after it, not before. */
     idxFocus++;
     points.insert(idxFocus, IGisLine::point_t(coord));
-
-    addPoint = true;
+    isDragging = true;
   }
   canvas->slotTriggerCompleteUpdate(CCanvas::eRedrawMouse);
 }
 
 void CLineOpAddPoint::mouseMove(const QPoint& pos) {
   ILineOp::mouseMove(pos);
-  if (addPoint) {
+  if (isDragging) {
     QPointF coord = pos;
     gis->convertPx2Rad(coord);
 
     IGisLine::point_t& pt = points[idxFocus];
-    // update position of point
     pt.coord = coord;
-
-    // clear subpoints, as they have to be recalculated
-    // by the routing, if any
     pt.subpts.clear();
     if (idxFocus > 0) {
       points[idxFocus - 1].subpts.clear();
     }
 
-    // retrigger delayed routing
     startDelayedRouting();
   } else {
-    isPoint = false;
-    // find line segment close to cursor
+    focusIsEndpoint = false;
     idxFocus = isCloseToLine(pos);
-    // if none is found try to find point
     if (idxFocus == NOIDX) {
-      // if no line segment is found but a point
-      // it is either first or the last point in the line
       idxFocus = isCloseTo(pos);
-
       if ((idxFocus == 0) || (idxFocus == (points.size() - 1))) {
-        isPoint = true;
+        focusIsEndpoint = true;
       }
     }
   }
@@ -172,10 +138,10 @@ void CLineOpAddPoint::drawFg(QPainter& p) {
     return;
   }
 
-  if (addPoint) {
+  if (isDragging) {
     const IGisLine::point_t& pt = points[idxFocus];
     drawSinglePointSmall(pt.pixel, p);
-  } else if (isPoint) {
+  } else if (focusIsEndpoint) {
     const IGisLine::point_t& pt = points[idxFocus];
     drawSinglePointLarge(pt.pixel, p);
   } else if (idxFocus < (points.size() - 1)) {
