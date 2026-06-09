@@ -299,6 +299,24 @@
     </message>
 </context>
 <context>
+    <name>CHelpBrowser</name>
+    <message>
+        <location filename="../../common/help/CHelpBrowser.cpp" line="55"/>
+        <source>Go back one page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../common/help/CHelpBrowser.cpp" line="59"/>
+        <source>Go forward one page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../common/help/CHelpBrowser.cpp" line="63"/>
+        <source>Go to initial page</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CHelpIndex</name>
     <message>
         <location filename="../../common/help/CHelpIndex.cpp" line="26"/>
