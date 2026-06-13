@@ -25,10 +25,10 @@
 
 #include "gis/IDBItem.h"
 #include "helpers/CDraw.h"
+#include "helpers/CRowBuilder.h"
 #include "helpers/CSettings.h"
 #include "misc.h"
 
-constexpr int kMargin = 1;
 constexpr int kFontSizeDiffItem = 3;
 constexpr int kFontSizeInvalid = -1;
 
@@ -65,19 +65,19 @@ IDBItem* CDBItemDelegate::indexToItem(const QModelIndex& index) const {
   return item;
 }
 
-void CDBItemDelegate::drawToolButton(QPainter* p, const QStyleOptionViewItem& opt, const QRect& rect, const QIcon& icon,
-                                     bool enabled, bool pressed) {
-  QStyleOptionToolButton btnOpt;
-  btnOpt.initFrom(opt.widget);
-  btnOpt.rect = rect;
-  btnOpt.icon = icon;
-  btnOpt.iconSize = rect.adjusted(2 * kMargin, 2 * kMargin, -2 * kMargin, -2 * kMargin).size();
-  btnOpt.toolButtonStyle = Qt::ToolButtonIconOnly;
-  btnOpt.subControls = QStyle::SC_ToolButton;
-  btnOpt.activeSubControls = QStyle::SC_ToolButton;
-  btnOpt.state =
-      (enabled ? QStyle::State_Enabled : QStyle::State_None) | (pressed ? QStyle::State_Sunken : QStyle::State_Raised);
-  opt.widget->style()->drawComplexControl(QStyle::CC_ToolButton, &btnOpt, p, opt.widget);
+void CDBItemDelegate::drawCheckStateButton(QPainter* p, const QStyleOptionViewItem& opt, const QRect& rect,
+                                           Qt::CheckState state) {
+  switch (state) {
+    case Qt::Unchecked:
+      CDraw::drawToolButton(p, opt, rect, QIcon(":/icons/32x32/ToWksUnchecked.png"), true, false);
+      break;
+    case Qt::PartiallyChecked:
+      CDraw::drawToolButton(p, opt, rect, QIcon(":/icons/32x32/ToWksPartially.png"), true, true);
+      break;
+    case Qt::Checked:
+      CDraw::drawToolButton(p, opt, rect, QIcon(":/icons/32x32/ToWksChecked.png"), true, true);
+      break;
+  }
 }
 
 void CDBItemDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const {}
@@ -88,43 +88,37 @@ QSize CDBItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelInd
     return QSize(opt.rect.width(), 22);
   }
 
-  QFont fontName = opt.font;
-  fontName.setBold(true);
-  QFontMetrics fmName(fontName);
+  const QFontMetrics fmName(opt.font);
 
   QFont fontStatusFolder = opt.font;
-  fontStatusFolder.setPointSize(fontName.pointSize() - itemStatusControl.statusSizeFolder);
-  QFontMetrics fmStatusFolder(fontStatusFolder);
+  fontStatusFolder.setPointSize(opt.font.pointSize() - itemStatusControl.statusSizeFolder);
+  const QFontMetrics fmStatusFolder(fontStatusFolder);
 
   QFont fontStatusItem = opt.font;
-  fontStatusItem.setPointSize(fontName.pointSize() - itemStatusControl.statusSizeItem);
-  QFontMetrics fmStatusItem(fontStatusItem);
+  fontStatusItem.setPointSize(opt.font.pointSize() - itemStatusControl.statusSizeItem);
+  const QFontMetrics fmStatusItem(fontStatusItem);
 
   switch (item->type()) {
     case IDBItem::eTypeLostFound:
     case IDBItem::eTypeDatabase:
     case IDBItem::eTypeGroup:
     case IDBItem::eTypeProject:
-    case IDBItem::eTypeOther:
-      if (itemStatusControl.statusSizeFolder != kFontSizeInvalid) {
-        return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fmName.height() + fmStatusFolder.height()));
-      } else {
-        return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fmName.height()));
-      }
+    case IDBItem::eTypeOther: {
+      const int statusH = (itemStatusControl.statusSizeFolder != kFontSizeInvalid) ? fmStatusFolder.height() : 0;
+      return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fmName.height(), statusH)));
+    }
 
-    case IDBItem::eTypeItem:
-      if (itemStatusControl.statusSizeItem != kFontSizeInvalid) {
-        return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fmName.height() + fmStatusItem.height()));
-      } else {
-        return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fmName.height()));
-      }
+    case IDBItem::eTypeItem: {
+      const int statusH = (itemStatusControl.statusSizeItem != kFontSizeInvalid) ? fmStatusItem.height() : 0;
+      return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fmName.height(), statusH)));
+    }
   }
 
-  return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fmName.height()));
+  return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fmName.height())));
 }
 
-std::tuple<QFont, QFont, QRect, QRect, QRect, QRect> CDBItemDelegate::getRectanglesFolder(
-    const QStyleOptionViewItem& opt, const IDBItem& item) const {
+CDBItemDelegate::ItemLayout CDBItemDelegate::getRectanglesFolder(const QStyleOptionViewItem& opt,
+                                                                 const IDBItem& item) const {
   const QFont fontName = opt.font;
   const QFontMetrics fmName(fontName);
 
@@ -132,28 +126,27 @@ std::tuple<QFont, QFont, QRect, QRect, QRect, QRect> CDBItemDelegate::getRectang
   fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizeFolder);
   const QFontMetrics fmStatus(fontStatus);
 
-  const quint32 heightButton = fmName.height() + 3 * kMargin;
+  CRowBuilder row(opt.rect, kCellPad, kInnerGap);
+  const QRect rectIcon = row.takeLeft(row.height());
+  row.markStatusColumn();
 
-  const QRect& r = opt.rect.adjusted(kMargin, kMargin, -kMargin, -kMargin);
-  const QRect rectIcon(r.left(), r.top(), r.height(), r.height());
   QRect rectButton;
   if (item.type() > IDBItem::eTypeGroup || item.type() == IDBItem::eTypeLostFound) {
-    rectButton.setRect(r.right() - heightButton, r.top(), heightButton, heightButton);
+    rectButton = row.takeButton(fmName.height());
   }
-  const QRect rectName(rectIcon.right() + 4 * kMargin, r.top() + kMargin,
-                       r.width() - rectIcon.width() - rectButton.width() - 6 * kMargin, fmName.height());
+
+  const QRect rectName = row.nameSlice(fmName.height());
 
   QRect rectStatus;
   if (itemStatusControl.statusSizeFolder != kFontSizeInvalid) {
-    rectStatus.setRect(rectIcon.right() + 4 * kMargin, r.bottom() - fmStatus.height() - kMargin,
-                       r.width() - rectIcon.width() - rectButton.width() - 6 * kMargin, fmName.height());
+    rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
   return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton};
 }
 
-std::tuple<QFont, QFont, QRect, QRect, QRect, QRect> CDBItemDelegate::getRectanglesItem(const QStyleOptionViewItem& opt,
-                                                                                        const IDBItem& item) const {
+CDBItemDelegate::ItemLayout CDBItemDelegate::getRectanglesItem(const QStyleOptionViewItem& opt,
+                                                               const IDBItem& item) const {
   const QFont fontName = opt.font;
   const QFontMetrics fmName(fontName);
 
@@ -161,24 +154,21 @@ std::tuple<QFont, QFont, QRect, QRect, QRect, QRect> CDBItemDelegate::getRectang
   fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizeItem);
   const QFontMetrics fmStatus(fontStatus);
 
-  const quint32 heightButton = fmName.height() + 3 * kMargin;
+  CRowBuilder row(opt.rect, kCellPad, kInnerGap);
+  const QRect rectIcon = row.takeLeft(row.height());
+  row.markStatusColumn();
 
-  const QRect& r = opt.rect.adjusted(kMargin, kMargin, -kMargin, -kMargin);
-  const QRect rectIcon(r.left(), r.top(), r.height(), r.height());
   QRect rectButton;
-  // If the item is part of the lost-and-found folder -> no button
-  // Yeah. The logic is a bit weird.
+  // Items inside the lost-and-found folder have no load/unload button.
   if (!(item.parent() && item.parent()->type() == IDBItem::eTypeLostFound)) {
-    rectButton.setRect(r.right() - heightButton, r.top(), heightButton, heightButton);
+    rectButton = row.takeButton(fmName.height());
   }
 
-  const QRect rectName(rectIcon.right() + 4 * kMargin, r.top() + kMargin,
-                       r.width() - rectIcon.width() - rectButton.width() - 6 * kMargin, fmName.height());
+  const QRect rectName = row.nameSlice(fmName.height());
 
   QRect rectStatus;
   if (itemStatusControl.statusSizeItem != kFontSizeInvalid) {
-    rectStatus.setRect(rectIcon.right() + 4 * kMargin, r.bottom() - fmStatus.height() - kMargin,
-                       r.width() - rectIcon.width() - rectButton.width() - 6 * kMargin, fmName.height());
+    rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
   return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton};
@@ -213,23 +203,13 @@ void CDBItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const 
 
 void CDBItemDelegate::paintFolder(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index,
                                   const IDBItem& item) const {
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesFolder(opt, item);
+  auto layout = getRectanglesFolder(opt, item);
 
-  const QPixmap& icon = item.getIcon().scaled(rectIcon.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-  QIcon(icon).paint(p, rectIcon, Qt::AlignCenter);
+  const QPixmap& icon = item.getIcon().scaled(layout.rectIcon.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  QIcon(icon).paint(p, layout.rectIcon, Qt::AlignCenter);
 
-  if (rectButton.isValid()) {
-    switch (item.getCheckState()) {
-      case Qt::Unchecked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksUnchecked.png"), true, false);
-        break;
-      case Qt::PartiallyChecked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksPartially.png"), true, true);
-        break;
-      case Qt::Checked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksChecked.png"), true, true);
-        break;
-    }
+  if (layout.rectButton.isValid()) {
+    drawCheckStateButton(p, opt, layout.rectButton, item.getCheckState());
   }
 
   const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
@@ -239,17 +219,17 @@ void CDBItemDelegate::paintFolder(QPainter* p, const QStyleOptionViewItem& opt, 
   QPalette::ColorGroup colorGroup = hasFocus ? QPalette::Active : QPalette::Inactive;
 
   if (item.type() > IDBItem::eTypeGroup) {
-    fontName.setBold(item.getCheckState() != Qt::Unchecked);
+    layout.fontName.setBold(item.getCheckState() != Qt::Unchecked);
     colorGroup = item.getCheckState() != Qt::PartiallyChecked ? colorGroup : QPalette::Disabled;
   }
   const QColor& color = opt.palette.color(colorGroup, colorRole);
 
   p->setPen(color);
-  p->setFont(fontName);
-  p->drawText(rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, item.getName());
+  p->setFont(layout.fontName);
+  p->drawText(layout.rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, item.getName());
 
-  if (rectStatus.isValid()) {
-    p->setFont(fontStatus);
+  if (layout.rectStatus.isValid()) {
+    p->setFont(layout.fontStatus);
     QString status;
     if (itemStatusControl.folder.countFolders) {
       auto [cntGroup, cntProject, cntOther] = item.getFolderCount();
@@ -280,29 +260,19 @@ void CDBItemDelegate::paintFolder(QPainter* p, const QStyleOptionViewItem& opt, 
       }
     }
 
-    p->drawText(rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, status);
+    p->drawText(layout.rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, status);
   }
 }
 
 void CDBItemDelegate::paintItem(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index,
                                 const IDBItem& item) const {
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesItem(opt, item);
+  const auto& layout = getRectanglesItem(opt, item);
 
-  const QPixmap& icon = item.getIcon().scaled(rectIcon.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-  QIcon(icon).paint(p, rectIcon, Qt::AlignCenter);
+  const QPixmap& icon = item.getIcon().scaled(layout.rectIcon.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  QIcon(icon).paint(p, layout.rectIcon, Qt::AlignCenter);
 
-  if (rectButton.isValid()) {
-    switch (item.getCheckState()) {
-      case Qt::Unchecked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksUnchecked.png"), true, false);
-        break;
-      case Qt::PartiallyChecked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksPartially.png"), true, true);
-        break;
-      case Qt::Checked:
-        drawToolButton(p, opt, rectButton, QIcon(":/icons/32x32/ToWksChecked.png"), true, true);
-        break;
-    }
+  if (layout.rectButton.isValid()) {
+    drawCheckStateButton(p, opt, layout.rectButton, item.getCheckState());
   }
 
   const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
@@ -321,10 +291,10 @@ void CDBItemDelegate::paintItem(QPainter* p, const QStyleOptionViewItem& opt, co
   const QColor& color = opt.palette.color(colorGroup, colorRole);
 
   p->setPen(color);
-  p->setFont(fontName);
-  p->drawText(rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, item.getName());
+  p->setFont(layout.fontName);
+  p->drawText(layout.rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, item.getName());
 
-  p->setFont(fontStatus);
+  p->setFont(layout.fontStatus);
   if (parent && parent->type() == IDBItem::eTypeLostFound) {
     QString status;
     quint64 diff = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() - item.getAge().toSecsSinceEpoch();
@@ -335,13 +305,13 @@ void CDBItemDelegate::paintItem(QPainter* p, const QStyleOptionViewItem& opt, co
     } else {
       status = tr("since: ") + tr("%1 days").arg(diff / (60 * 60 * 24));
     }
-    p->drawText(rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, status);
+    p->drawText(layout.rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, status);
   } else if (itemStatusControl.item.infoText) {
     QTextDocument doc;
     doc.setHtml(item.getToolTip());
     const QStringList lines = doc.toPlainText().split("\n");
     if (lines.count() > 1) {
-      p->drawText(rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, lines[1]);
+      p->drawText(layout.rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignTop, lines[1]);
     }
   }
 }
@@ -384,11 +354,11 @@ bool CDBItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, cons
 
 bool CDBItemDelegate::editorEventFolder(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& opt,
                                         const QModelIndex& index, IDBItem& item) {
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesFolder(opt, item);
+  const auto& layout = getRectanglesFolder(opt, item);
 
   if (event->type() == QEvent::MouseButtonPress) {
     auto* me = static_cast<QMouseEvent*>(event);
-    if (rectButton.contains(me->pos())) {
+    if (layout.rectButton.contains(me->pos())) {
       toggleCheckState(item);
       return true;
     }
@@ -399,14 +369,14 @@ bool CDBItemDelegate::editorEventFolder(QEvent* event, QAbstractItemModel* model
 
 bool CDBItemDelegate::editorEventItem(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& opt,
                                       const QModelIndex& index, IDBItem& item) {
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesItem(opt, item);
+  const auto& layout = getRectanglesItem(opt, item);
 
   if (event->type() == QEvent::MouseButtonDblClick) {
     toggleCheckState(item);
     return true;
   } else if (event->type() == QEvent::MouseButtonPress) {
     auto* me = static_cast<QMouseEvent*>(event);
-    if (rectButton.contains(me->pos())) {
+    if (layout.rectButton.contains(me->pos())) {
       toggleCheckState(item);
       return true;
     }
@@ -445,8 +415,8 @@ bool CDBItemDelegate::helpEventFolder(QHelpEvent* event, QAbstractItemView* view
                                       const QModelIndex& index, const IDBItem& item) {
   const QPoint& pos = event->pos();
   const QPoint& posGlobal = event->globalPos();
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesFolder(opt, item);
-  if (rectButton.contains(pos)) {
+  const auto& layout = getRectanglesFolder(opt, item);
+  if (layout.rectButton.contains(pos)) {
     if (item.getCheckState() == Qt::Unchecked) {
       QToolTip::showText(posGlobal, toRichText(tr("Load project into workspace")), view, {}, 3000);
     } else {
@@ -467,8 +437,8 @@ bool CDBItemDelegate::helpEventItem(QHelpEvent* event, QAbstractItemView* view, 
                                     const QModelIndex& index, const IDBItem& item) {
   const QPoint& pos = event->pos();
   const QPoint& posGlobal = event->globalPos();
-  auto [fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton] = getRectanglesItem(opt, item);
-  if (rectButton.contains(pos)) {
+  const auto& layout = getRectanglesItem(opt, item);
+  if (layout.rectButton.contains(pos)) {
     if (item.getCheckState() == Qt::Unchecked) {
       QToolTip::showText(posGlobal, toRichText(tr("Load item into workspace.")), view, {}, 3000);
     } else {

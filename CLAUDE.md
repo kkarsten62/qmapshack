@@ -4,6 +4,39 @@ QMapShack is a Qt/C++ desktop application for planning and analysing GPS tracks,
 
 ---
 
+## Stack
+
+- **Language:** C++20
+- **GUI / framework:** Qt 6.8+
+- **Key libs:** GDAL, PROJ 8+, Routino, QuaZip-Qt6
+- **Build:** CMake 3.20+, Ninja; Debug build in `build/`; binaries in `build/bin/`
+- **Bundled 3rdparty:** alglib, Garmin FIT SDK
+
+---
+
+## Source layout
+
+```
+src/
+  qmapshack/        main app (21 subsystems)
+    canvas/         map rendering
+    gis/            tracks, routes, waypoints, DB, GPX, routing (gis/rte/router/)
+    mouse/          mouse interaction; line editing in mouse/line/
+    map/, dem/, poi/, grid/, plot/, realtime/, device/, tool/, helpers/, widgets/
+  qmaptool/         map creation tool
+  qmt_map2jnx/      utility
+  qmt_rgb2pct/      utility
+  common/           shared code
+```
+
+---
+
+## Working on recent changes
+
+When asked "what were we working on" or "what did we do last", always check `git status && git diff` first. Memory is stale; the live diff is the ground truth for in-progress work. Memory can supplement but never replace the actual diff.
+
+---
+
 ## Code style
 
 **All C++ is formatted with clang-format.** After editing any `.cpp` or `.h` file run:
@@ -110,3 +143,62 @@ When vector or track routing is active, `updateLeadLines()` finds the underlying
 `CRouterSetup` is a singleton (`CRouterSetup::self()`) that owns the active router and exposes `calcRoute()` to the rest of the application. It emits `sigHasFastRouting(bool)` when the router capability changes (e.g. local BRouter starts or stops); `IMouseEditLine` listens to this to enable/disable the auto-routing button.
 
 Only local BRouter supports fast (on-the-fly) routing. Online BRouter and Routino do not — they require the full route to be calculated at once via `calcRoute(const IGisItem::key_t&)`.
+
+---
+
+## Architecture: tree item delegates
+
+The three `QStyledItemDelegate` subclasses used by the tree views:
+
+- `src/qmapshack/gis/CWksItemDelegate.{h,cpp}` (workspace tree)
+- `src/qmapshack/gis/CDBItemDelegate.{h,cpp}` (database tree)
+- `src/qmapshack/map/CMapItemDelegate.{h,cpp}` (map-item tree)
+
+### Row layout: CRowBuilder
+
+All `getRectangles*()` methods use `CRowBuilder` (`helpers/CRowBuilder.{h,cpp}`) to compute their rects. It carves a row into icon, button, and text zones without any magic-number arithmetic in the delegates.
+
+**Tuning parameters** (defined in `helpers/CDraw.h`):
+- `kCellPad` — outer inset on all four sides of `opt.rect`
+- `kInnerGap` — gap between icon, text column, and each tool button
+
+**Typical call sequence:**
+```cpp
+CRowBuilder row(opt.rect, kCellPad, kInnerGap);
+const QRect rectIcon   = row.takeLeft(row.height());   // square icon
+row.markStatusColumn();                                 // snapshot width for status line
+const QRect rectButton = row.takeButton(fmName.height()); // name-height square button
+const QRect rectName   = row.nameSlice(fmName.height());
+const QRect rectStatus = row.fullStatusSlice(fmStatus.height());
+```
+
+**Key methods:**
+- `takeLeft(w)` / `takeRight(w)` — carve a full-height rect, advance by `kInnerGap`
+- `takeButton(iconSize)` — carve a square button sized so `CDraw::drawToolButton` renders its icon at exactly `iconSize × iconSize` (compensates for the button's internal icon inset)
+- `markStatusColumn()` — snapshot the remaining rect before buttons are carved
+- `nameSlice(h)` — top strip of the remaining (button-narrowed) centre area
+- `statusSlice(h)` — bottom strip of the remaining (button-narrowed) centre area; use when buttons are full-height (CMap)
+- `fullStatusSlice(h)` — bottom strip of the snapshotted pre-button column; use when buttons are shorter than the row (CWks, CDB) so the status line extends under them
+- `rowHeight(cellPad, nameH, statusH)` — matching `sizeHint` height from the same parameters
+
+**Button height convention:**
+- `CWksItemDelegate`, `CDBItemDelegate`: buttons are `takeButton(fmName.height())` — sized to the name row only; status line uses `fullStatusSlice` and spans the full width underneath
+- `CMapItemDelegate`: button is `takeRight(row.height())` — spans the full row height; status line uses `statusSlice` and is narrowed by the button
+
+---
+
+## Memory
+
+Store all project-specific learnings, feedback, and notes in this file rather than
+the auto-memory system (`~/.claude/projects/.../memory/`). Append new entries under
+the relevant existing section, or create a new `###` subsection here when nothing fits.
+
+Do not run `cmake --build` or any build command — Oliver builds externally.
+
+Do not add `Co-Authored-By` lines to commit messages.
+
+### CMapItemDelegate — forward declaration pitfall
+
+`animations_t` is defined after `getAnimations()` in the private section. The forward
+declaration `struct animations_t;` before `getAnimations()` is required — do not remove it.
+

@@ -25,9 +25,9 @@
 #include <QVariantAnimation>
 
 #include "helpers/CDraw.h"
+#include "helpers/CRowBuilder.h"
 #include "map/IMapItem.h"
 
-constexpr int kMargin = 1;
 constexpr int kFontSizeDiffItem = 2;
 
 CMapItemDelegate::CMapItemDelegate(QTreeWidget* parent) : QStyledItemDelegate(parent), treeWidget(parent) {
@@ -194,31 +194,22 @@ void CMapItemDelegate::initStyleOption(QStyleOptionViewItem* option, const QMode
   option->decorationSize = QSize(0, 0);
 }
 
-std::tuple<QFont, QFont, QRect, QRect, QRect, QRect, QRect> CMapItemDelegate::getRectangles(
-    const QStyleOptionViewItem& opt, bool isActive) const {
-  // derive fonts from opt.font
-  QFont fontName = opt.font;
-  fontName.setBold(isActive);
+CMapItemDelegate::MapItemLayout CMapItemDelegate::getRectangles(const QStyleOptionViewItem& opt) const {
+  const QFont fontName = opt.font;
   QFontMetrics fmName(fontName);
 
   QFont fontStatus = opt.font;
   fontStatus.setPointSize(fontStatus.pointSize() - kFontSizeDiffItem);
   QFontMetrics fmStatus(fontStatus);
 
-  const QRect& r = opt.rect.adjusted(2 * kMargin, 2 * kMargin, -2 * kMargin, -2 * kMargin);
-  const QRect rectIcon(r.left(), r.top(), r.height(), r.height());
-  const QRect rectButton(r.right() - r.height() + 2 * kMargin, r.top() + kMargin, r.height() - 2 * kMargin,
-                         r.height() - 2 * kMargin);
-  const QRect rectIndicator(rectButton.left() - 2 * kMargin - 6, rectButton.top() + kMargin, 6,
-                            rectButton.height() - 2 * kMargin);
-
-  const QRect rectName(rectIcon.right() + 2 * kMargin, r.top(),
-                       r.width() - rectIcon.width() - rectButton.width() - rectIndicator.width() - 5 * kMargin,
-                       fmName.height());
-
-  const QRect rectStatus(rectIcon.right() + 2 * kMargin, r.bottom() - fmStatus.height(),
-                         r.width() - rectIcon.width() - rectButton.width() - rectIndicator.width() - 5 * kMargin,
-                         fmStatus.height());
+  CRowBuilder row(opt.rect, kCellPad, kInnerGap);
+  const QRect rectIcon = row.takeLeft(row.height());
+  const QRect rectButton = row.takeRight(row.height());
+  // Thin vertical indicator bar to the left of the button.
+  const QRect rawIndicatorSlot = row.takeRight(6);
+  const QRect rectIndicator = rawIndicatorSlot.adjusted(0, kMargin, 0, -kMargin);
+  const QRect rectName = row.nameSlice(fmName.height());
+  const QRect rectStatus = row.statusSlice(fmStatus.height());
 
   return {fontName, fontStatus, rectIcon, rectButton, rectIndicator, rectName, rectStatus};
 }
@@ -235,13 +226,9 @@ void CMapItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const
   QStyledItemDelegate::paint(p, opt, index);
 
   const bool isActive = item->getStatus() == IMapItem::eStatus::Active;
-  const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
-  const bool hasFocus = (opt.state & QStyle::State_HasFocus) != 0;
 
   // derive strings colors
-  const QPalette::ColorRole colorRole = (isSelected && hasFocus) ? QPalette::HighlightedText : QPalette::WindowText;
-  const QPalette::ColorGroup colorGroup = isActive ? (hasFocus ? QPalette::Active : QPalette::Inactive) : QPalette::Disabled;
-  const QColor& colorName = opt.palette.color(colorGroup, colorRole);
+  const QColor colorName = CDraw::itemNameColor(opt, isActive);
 
   QColor colorStatus = colorName;
   QString status;
@@ -262,36 +249,29 @@ void CMapItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const
   }
 
   // derive all rectangles to place visual elements
-  auto [fontName, fontStatus, rectIcon, rectButton, rectIndicator, rectName, rectStatus] = getRectangles(opt, isActive);
+  auto layout = getRectangles(opt);
+  layout.fontName.setBold(isActive);
 
   // draw name
   p->setPen(colorName);
-  p->setFont(fontName);
-  p->drawText(rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignVCenter, item->getName());
+  p->setFont(layout.fontName);
+  p->drawText(layout.rectName.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignVCenter, item->getName());
   p->setClipping(false);
 
   // draw status
   p->setPen(colorStatus);
-  p->setFont(fontStatus);
-  p->drawText(rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignVCenter, status);
+  p->setFont(layout.fontStatus);
+  p->drawText(layout.rectStatus.adjusted(0, -1, 0, 1), Qt::AlignLeft | Qt::AlignVCenter, status);
 
   // draw icon
   const QPixmap& icon =
-      data[keyFromIndex(index)].icon.scaled(rectIcon.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-  QIcon(icon).paint(p, rectIcon);
+      data[keyFromIndex(index)].icon.scaled(layout.rectIcon.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+  QIcon(icon).paint(p, layout.rectIcon);
 
   // draw tool button to activate
-  QStyleOptionToolButton btnOpt;
-  btnOpt.initFrom(opt.widget);
-  btnOpt.rect = rectButton;
-  btnOpt.icon = isActive ? QIcon(":/icons/32x32/ShowAll.png") : QIcon(":/icons/32x32/ShowNone.png");
-  btnOpt.iconSize = rectButton.adjusted(2 * kMargin, 2 * kMargin, 2 * -kMargin, 2 * -kMargin).size();
-  btnOpt.toolButtonStyle = Qt::ToolButtonIconOnly;
-  btnOpt.subControls = QStyle::SC_ToolButton;
-  btnOpt.activeSubControls = QStyle::SC_ToolButton;
-  btnOpt.state = (item->getStatus() != IMapItem::eStatus::Missing ? QStyle::State_Enabled : QStyle::State_None) |
-                 (isActive ? QStyle::State_Sunken : QStyle::State_Raised);
-  opt.widget->style()->drawComplexControl(QStyle::CC_ToolButton, &btnOpt, p, opt.widget);
+  CDraw::drawToolButton(p, opt, layout.rectButton,
+                        isActive ? QIcon(":/icons/32x32/ShowAll.png") : QIcon(":/icons/32x32/ShowNone.png"),
+                        item->getStatus() != IMapItem::eStatus::Missing, isActive);
 
   // draw all elements that tinker with opacity
   // draw indicator
@@ -299,13 +279,13 @@ void CMapItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const
   p->setOpacity(anim.opacityIndicator);
   p->setPen(Qt::NoPen);
   p->setBrush(anim.colorIndicator);
-  p->drawRoundedRect(rectIndicator, 4, 4);
+  p->drawRoundedRect(layout.rectIndicator, 4, 4);
 
   // draw access info
   p->setPen(colorName);
   p->setOpacity(anim.opacityAccessInfo);
-  p->setFont(fontStatus);
-  p->drawText(rectStatus, Qt::AlignRight | Qt::AlignVCenter, anim.accessInfo);
+  p->setFont(layout.fontStatus);
+  p->drawText(layout.rectStatus, Qt::AlignRight | Qt::AlignVCenter, anim.accessInfo);
 
   p->restore();
 }
@@ -315,9 +295,9 @@ bool CMapItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, con
   if (event->type() == QEvent::MouseButtonPress) {
     auto* me = static_cast<QMouseEvent*>(event);
 
-    auto [fontName, fontStatus, rectIcon, rectButton, rectIndicator, rectName, rectStatus] = getRectangles(opt, false);
+    const auto& layout = getRectangles(opt);
 
-    if (rectButton.contains(me->pos())) {
+    if (layout.rectButton.contains(me->pos())) {
       IMapItem* item = indexToItem(index);
       if (item == nullptr) {
         return false;
@@ -349,21 +329,21 @@ bool CMapItemDelegate::helpEvent(QHelpEvent* event, QAbstractItemView* view, con
   }
 
   const bool isActive = item->getStatus() == IMapItem::eStatus::Active;
-  auto [fontName, fontStatus, rectIcon, rectButton, rectIndicator, rectName, rectStatus] = getRectangles(opt, isActive);
+  const auto& layout = getRectangles(opt);
 
-  if (rectButton.contains(event->pos())) {
+  if (layout.rectButton.contains(event->pos())) {
     const QString& tip = isActive ? tr("Deactivate %1").arg(item->getName()) : tr("Activate %1").arg(item->getName());
     QToolTip::showText(event->globalPos(), tip, view, {}, 3000);
-  } else if (isActive && rectIndicator.contains(event->pos())) {
+  } else if (isActive && layout.rectIndicator.contains(event->pos())) {
     const bool outOfScale = item->isOutOfScale();
     const QString& tip = outOfScale ? tr("%1 is not visible at current scale").arg(item->getName())
                                     : tr("%1 is visible at current scale").arg(item->getName());
     QToolTip::showText(event->globalPos(), tip, view, {}, 3000);
-  } else if (rectName.contains(event->pos())) {
-    const QFontMetrics fm(fontName);
+  } else if (layout.rectName.contains(event->pos())) {
+    const QFontMetrics fm(layout.fontName);
     const QRect& boundingRectName = fm.boundingRect(item->getName());
     QString toolTip;
-    if (boundingRectName.width() > rectName.width()) {
+    if (boundingRectName.width() > layout.rectName.width()) {
       toolTip = QString("<p>%1</p>").arg(item->getName());
     }
     if (!item->getToolTip().isEmpty()) {
@@ -378,13 +358,11 @@ bool CMapItemDelegate::helpEvent(QHelpEvent* event, QAbstractItemView* view, con
 }
 
 QSize CMapItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& idx) const {
-  QFont font1 = opt.font;
-  font1.setBold(true);
-  QFontMetrics fm1(font1);
+  const QFontMetrics fm1(opt.font);
 
   QFont font2 = opt.font;
   font2.setPointSize(font2.pointSize() - kFontSizeDiffItem);
-  QFontMetrics fm2(font2);
+  const QFontMetrics fm2(font2);
 
-  return QSize(opt.rect.width(), std::max(22, 7 * kMargin + fm1.height() + fm2.height()));
+  return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fm1.height(), fm2.height())));
 }

@@ -193,6 +193,7 @@ set( SRCS
     helpers/CPhotoViewer.cpp
     helpers/CPositionDialog.cpp
     helpers/CProgressDialog.cpp
+    helpers/CRowBuilder.cpp
     helpers/CSelectCopyAction.cpp
     helpers/CSelectProjectDialog.cpp
     helpers/CThread.cpp
@@ -570,6 +571,7 @@ set( HDRS
     helpers/CPhotoViewer.h
     helpers/CPositionDialog.h
     helpers/CProgressDialog.h
+    helpers/CRowBuilder.h
     helpers/CSelectCopyAction.h
     helpers/CSelectProjectDialog.h
     helpers/CSettings.h

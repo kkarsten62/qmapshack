@@ -20,9 +20,12 @@
 #ifndef CPAINTER_H
 #define CPAINTER_H
 
+#include <QIcon>
 #include <QPainter>
+#include <QPalette>
 #include <QPolygonF>
 #include <QRectF>
+#include <QStyleOptionViewItem>
 
 #include "CMainWindow.h"
 inline void USE_ANTI_ALIASING(QPainter& p, bool useAntiAliasing) {
@@ -32,6 +35,13 @@ inline void USE_ANTI_ALIASING(QPainter& p, bool useAntiAliasing) {
 
 #define RECT_RADIUS 3
 #define PAINT_ROUNDED_RECT(p, r) p.drawRoundedRect(r, RECT_RADIUS, RECT_RADIUS)
+
+/// Margin used throughout the tree-item delegates for spacing icons, tool buttons and text.
+constexpr int kMargin = 1;
+/// Outer inset applied to all four sides of the item rect before layout.
+constexpr int kCellPad = 2 * kMargin;
+/// Gap inserted between the icon, text column, and each tool button.
+constexpr int kInnerGap = 2 * kMargin;
 
 class CDraw {
  public:
@@ -68,6 +78,29 @@ class CDraw {
   static void text(const QString& str, QPainter& p, const QPoint& center, const QColor& color,
                    const QFont& font = CMainWindow::self().getMapFont());
   static void text(const QString& str, QPainter& p, const QRect& r, const QColor& color);
+
+  /**
+     @brief Derive the color to use for an item's name and status text in a tree view
+
+     @param opt        Style option of the item, used for its selection/focus state and palette
+     @param isVisible  Whether the represented item is currently visible/active
+
+     @return The color to draw the item's name and status text with
+   */
+  static QColor itemNameColor(const QStyleOptionViewItem& opt, bool isVisible);
+
+  /**
+     @brief Draw a right-aligned tool button as used by the tree-item delegates
+
+     @param p        An active QPainter
+     @param opt      Style option of the item, used for its widget/palette
+     @param rect     The button's rectangle
+     @param icon     The icon to draw on the button
+     @param enabled  Whether the button is enabled
+     @param pressed  Whether the button is drawn in its pressed/sunken state
+   */
+  static void drawToolButton(QPainter* p, const QStyleOptionViewItem& opt, const QRect& rect, const QIcon& icon,
+                             bool enabled, bool pressed);
 
   /**
      @brief Draw a cartoon bubble
