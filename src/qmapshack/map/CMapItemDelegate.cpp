@@ -36,8 +36,7 @@ CMapItemDelegate::CMapItemDelegate(QTreeWidget* parent) : QStyledItemDelegate(pa
 }
 
 IMapItem* CMapItemDelegate::indexToItem(const QModelIndex& index) const {
-  IMapItem* item = dynamic_cast<IMapItem*>(treeWidget->itemFromIndex(index));
-  return item;
+  return dynamic_cast<IMapItem*>(treeWidget->itemFromIndex(index));
 }
 
 QString CMapItemDelegate::keyFromIndex(const QModelIndex& index) const {
@@ -48,53 +47,37 @@ QString CMapItemDelegate::keyFromIndex(const QModelIndex& index) const {
   return "";
 }
 
+void CMapItemDelegate::initAnimation(QPointer<QVariantAnimation>& anim, int duration,
+                                     std::function<void(QVariant)> onValueChanged) {
+  if (!anim.isNull()) {
+    return;
+  }
+  anim = new QVariantAnimation(this);
+  anim->setDuration(duration);
+  anim->setEasingCurve(QEasingCurve::InOutQuad);
+  connect(anim, &QVariantAnimation::valueChanged, this, std::move(onValueChanged));
+}
+
 CMapItemDelegate::animations_t& CMapItemDelegate::getAnimations(const QModelIndex& index) {
   const QString& key = keyFromIndex(index);
   animations_t& anim = data[key].animations;
 
-  if (anim.animColorIndicator.isNull()) {
-    anim.animColorIndicator = new QVariantAnimation(this);
-    anim.animColorIndicator->setDuration(250);
-    anim.animColorIndicator->setEasingCurve(QEasingCurve::InOutQuad);
-
-    connect(anim.animColorIndicator, &QVariantAnimation::valueChanged, this, [this, key](QVariant v) {
-      data[key].animations.colorIndicator = v.value<QColor>();
-      emit sigUpdateItem(key);
-    });
-  }
-
-  if (anim.animOpacityIndicator.isNull()) {
-    anim.animOpacityIndicator = new QVariantAnimation(this);
-    anim.animOpacityIndicator->setDuration(250);
-    anim.animOpacityIndicator->setEasingCurve(QEasingCurve::InOutQuad);
-
-    connect(anim.animOpacityIndicator, &QVariantAnimation::valueChanged, this, [this, key](QVariant v) {
-      data[key].animations.opacityIndicator = v.toFloat();
-      emit sigUpdateItem(key);
-    });
-  }
-
-  if (anim.animFlashingIndicator.isNull()) {
-    anim.animFlashingIndicator = new QVariantAnimation(this);
-    anim.animFlashingIndicator->setDuration(500);
-    anim.animFlashingIndicator->setEasingCurve(QEasingCurve::InOutQuad);
-
-    connect(anim.animFlashingIndicator, &QVariantAnimation::valueChanged, this, [this, key](QVariant v) {
-      data[key].animations.opacityIndicator = v.toFloat();
-      emit sigUpdateItem(key);
-    });
-  }
-
-  if (anim.animAccessInfo.isNull()) {
-    anim.animAccessInfo = new QVariantAnimation(this);
-    anim.animAccessInfo->setDuration(2000);
-    anim.animAccessInfo->setEasingCurve(QEasingCurve::InOutQuad);
-
-    connect(anim.animAccessInfo, &QVariantAnimation::valueChanged, this, [this, key](QVariant v) {
-      data[key].animations.opacityAccessInfo = v.toFloat();
-      emit sigUpdateItem(key);
-    });
-  }
+  initAnimation(anim.animColorIndicator, 250, [this, key](QVariant v) {
+    data[key].animations.colorIndicator = v.value<QColor>();
+    emit sigUpdateItem(key);
+  });
+  initAnimation(anim.animOpacityIndicator, 250, [this, key](QVariant v) {
+    data[key].animations.opacityIndicator = v.toFloat();
+    emit sigUpdateItem(key);
+  });
+  initAnimation(anim.animFlashingIndicator, 500, [this, key](QVariant v) {
+    data[key].animations.opacityIndicator = v.toFloat();
+    emit sigUpdateItem(key);
+  });
+  initAnimation(anim.animAccessInfo, 2000, [this, key](QVariant v) {
+    data[key].animations.opacityAccessInfo = v.toFloat();
+    emit sigUpdateItem(key);
+  });
 
   return anim;
 }
@@ -195,23 +178,24 @@ void CMapItemDelegate::initStyleOption(QStyleOptionViewItem* option, const QMode
 }
 
 CMapItemDelegate::MapItemLayout CMapItemDelegate::getRectangles(const QStyleOptionViewItem& opt) const {
-  const QFont fontName = opt.font;
-  QFontMetrics fmName(fontName);
+  MapItemLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - kFontSizeDiffItem);
-  QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - kFontSizeDiffItem);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
-  const QRect rectButton = row.takeRight(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
+  layout.rectButton = row.takeRight(row.height());
   // Thin vertical indicator bar to the left of the button.
   const QRect rawIndicatorSlot = row.takeRight(6);
-  const QRect rectIndicator = rawIndicatorSlot.adjusted(0, kMargin, 0, -kMargin);
-  const QRect rectName = row.nameSlice(fmName.height());
-  const QRect rectStatus = row.statusSlice(fmStatus.height());
+  layout.rectIndicator = rawIndicatorSlot.adjusted(0, kMargin, 0, -kMargin);
+  layout.rectName = row.nameSlice(fmName.height());
+  layout.rectStatus = row.statusSlice(fmStatus.height());
 
-  return {fontName, fontStatus, rectIcon, rectButton, rectIndicator, rectName, rectStatus};
+  return layout;
 }
 
 void CMapItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const {
@@ -357,12 +341,12 @@ bool CMapItemDelegate::helpEvent(QHelpEvent* event, QAbstractItemView* view, con
   return true;
 }
 
-QSize CMapItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& idx) const {
-  const QFontMetrics fm1(opt.font);
+QSize CMapItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const {
+  const QFontMetrics fmName(opt.font);
 
-  QFont font2 = opt.font;
-  font2.setPointSize(font2.pointSize() - kFontSizeDiffItem);
-  const QFontMetrics fm2(font2);
+  QFont fontStatus = opt.font;
+  fontStatus.setPointSize(fontStatus.pointSize() - kFontSizeDiffItem);
+  const QFontMetrics fmStatus(fontStatus);
 
-  return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fm1.height(), fm2.height())));
+  return QSize(opt.rect.width(), std::max(22, CRowBuilder::rowHeight(kCellPad, fmName.height(), fmStatus.height())));
 }

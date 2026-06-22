@@ -21,6 +21,13 @@
 
 #include <QRect>
 
+/// Margin used throughout the tree-item delegates for spacing icons, tool buttons and text.
+constexpr int kMargin = 1;
+/// Outer inset applied to all four sides of the item rect before layout.
+constexpr int kCellPad = 2 * kMargin;
+/// Gap inserted between the icon, text column, and each tool button.
+constexpr int kInnerGap = 2 * kMargin;
+
 /**
    @brief Lays out a standard tree-row into icon, button, and text zones.
 
@@ -44,8 +51,13 @@ class CRowBuilder {
   /** Height of the inner working area (use for square icon / button sizing). */
   int height() const;
 
-  /** Carve @p width pixels from the left edge and advance the working area by innerGap. */
+  /** Carve @p width pixels from the left edge and advance the working area by innerGap.
+      The returned rect spans the full working height. */
   QRect takeLeft(int width);
+
+  /** Same as takeLeft(width) but the returned rect is @p height pixels tall (top-aligned).
+      Use when a left-anchored element should not fill the full row height. */
+  QRect takeLeft(int width, int height);
 
   /** Carve @p width pixels from the right edge and retreat the working area by innerGap.
       The returned rect spans the full working height. */
@@ -59,6 +71,14 @@ class CRowBuilder {
   /** Carve a square tool button sized so that CDraw::drawToolButton renders its icon at
       exactly @p iconSize × @p iconSize pixels (compensates for drawToolButton's icon inset). */
   QRect takeButton(int iconSize);
+
+  /** Same as takeButton(iconSize) but carved from the left edge instead of the right. */
+  QRect takeLeftButton(int iconSize);
+
+  /** Side length of the square button takeButton()/takeLeftButton() would carve for @p iconSize.
+      Exposed so a caller can size a same-height sibling rect (e.g. a row's inline line-edit)
+      without duplicating the formula. */
+  static int buttonSize(int iconSize);
 
   /** Top strip of the remaining centre area, @p fontHeight pixels tall. */
   QRect nameSlice(int fontHeight) const;

@@ -38,7 +38,7 @@ constexpr int kFontSizeDiffProject = 2;
 constexpr int kFontSizeDiffItem = 3;
 constexpr int kFontSizeInvalid = -1;  // statusSize* sentinel: hide the status line entirely
 constexpr int kProgressBarHeight = 5;
-constexpr int kProgressBarHeightHalf = 1;
+constexpr int kProgressBarBottomInset = 1;
 
 CWksItemDelegate::CWksItemDelegate(CGisListWks* parent) : QStyledItemDelegate(parent), treeWidget(parent) {
   SETTINGS;
@@ -75,8 +75,7 @@ void CWksItemDelegate::setStatusItemsControl(const item_status_ctrl_t& settings)
 }
 
 IWksItem* CWksItemDelegate::indexToItem(const QModelIndex& index) const {
-  IWksItem* item = dynamic_cast<IWksItem*>(treeWidget->itemFromIndex(index));
-  return item;
+  return dynamic_cast<IWksItem*>(treeWidget->itemFromIndex(index));
 }
 
 QSize CWksItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const {
@@ -125,154 +124,141 @@ QSize CWksItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIn
 
 CWksItemDelegate::ProjectLayout CWksItemDelegate::getRectanglesProject(const QStyleOptionViewItem& opt,
                                                                        IWksItem& item) const {
-  const QFont fontName = opt.font;
-  const QFontMetrics fmName(fontName);
+  ProjectLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizePrj);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - itemStatusControl.statusSizePrj);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   const bool isOnDevice = item.isOnDevice() != IWksItem::eTypeNone;
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
   row.markStatusColumn();
-  const QRect rectVisible = row.takeButton(fmName.height());
+  layout.rectVisible = row.takeButton(fmName.height());
 
-  // All optional button rects are default-constructed (invalid). Buttons with an
-  // invalid rect are simply skipped by the paint and hit-test code.
-  QRect rectActiveProject;
-  QRect rectSave;
-  QRect rectAutoSyncDev;
-
-  if (isOnDevice == false && item.type() != IWksItem::eTypeLostFound) {
+  // All optional button rects stay default-constructed (invalid) unless set below.
+  // Buttons with an invalid rect are simply skipped by the paint and hit-test code.
+  if (!isOnDevice && item.type() != IWksItem::eTypeLostFound) {
     if (item.holdUiFocus(opt)) {
-      rectActiveProject = row.takeButton(fmName.height());
-      rectSave = row.takeButton(fmName.height());
+      layout.rectActiveProject = row.takeButton(fmName.height());
+      layout.rectSave = row.takeButton(fmName.height());
       if (treeWidget->hasDeviceSupport()) {
-        rectAutoSyncDev = row.takeButton(fmName.height());
+        layout.rectAutoSyncDev = row.takeButton(fmName.height());
       }
     } else {
       if (item.hasUserFocus()) {
-        rectActiveProject = row.takeButton(fmName.height());
+        layout.rectActiveProject = row.takeButton(fmName.height());
       }
       if (item.isChanged() && !item.isAutoSave()) {
-        rectSave = row.takeButton(fmName.height());
+        layout.rectSave = row.takeButton(fmName.height());
       }
     }
-  } else if (isOnDevice == true) {
+  } else if (isOnDevice) {
     if (item.holdUiFocus(opt)) {
-      rectSave = row.takeButton(fmName.height());
+      layout.rectSave = row.takeButton(fmName.height());
     }
   }
 
-  const QRect rectName = row.nameSlice(fmName.height());
+  layout.rectName = row.nameSlice(fmName.height());
 
-  QRect rectStatus;
   if (itemStatusControl.statusSizePrj != kFontSizeInvalid) {
-    rectStatus = row.fullStatusSlice(fmStatus.height());
+    layout.rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
-  const QRect rectProgress = row.fullStatusSlice(kProgressBarHeight).adjusted(kInnerGap, 0, -kInnerGap, 0);
+  layout.rectProgress = row.fullStatusSlice(kProgressBarHeight).adjusted(kInnerGap, 0, -kInnerGap, 0);
 
-  return {fontName,     fontStatus,  rectIcon, rectName,          rectStatus,
-          rectProgress, rectVisible, rectSave, rectActiveProject, rectAutoSyncDev};
+  return layout;
 }
 
 CWksItemDelegate::ItemLayout CWksItemDelegate::getRectanglesItem(const QStyleOptionViewItem& opt,
                                                                  const IWksItem& item) const {
-  const QFont fontName = opt.font;
-  const QFontMetrics fmName(fontName);
+  ItemLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizeItem);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - itemStatusControl.statusSizeItem);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
   row.markStatusColumn();
 
-  QRect rectChanged;
   const CGeoSearch* search = dynamic_cast<const CGeoSearch*>(item.parent());
   const bool isOnGeoSearch = search != nullptr;
   if (item.isChanged() && !item.isOnDevice() && !isOnGeoSearch) {
-    rectChanged = row.takeButton(fmName.height());
+    layout.rectChanged = row.takeButton(fmName.height());
   }
 
-  const QRect rectName = row.nameSlice(fmName.height());
+  layout.rectName = row.nameSlice(fmName.height());
 
-  QRect rectStatus;
   if (itemStatusControl.statusSizeItem != kFontSizeInvalid) {
-    rectStatus = row.fullStatusSlice(fmStatus.height());
+    layout.rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
-  return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectChanged};
+  return layout;
 }
 
 CWksItemDelegate::DeviceLayout CWksItemDelegate::getRectanglesDevice(const QStyleOptionViewItem& opt,
                                                                      const IWksItem& item) const {
-  const QFont fontName = opt.font;
-  const QFontMetrics fmName(fontName);
+  DeviceLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - kFontSizeDiffProject);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - kFontSizeDiffProject);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
   row.markStatusColumn();
-  const QRect rectVisible = row.takeButton(fmName.height());
-  const QRect rectName = row.nameSlice(fmName.height());
-  const QRect rectStatus = row.fullStatusSlice(fmStatus.height());
-  const QRect rectProgress = row.fullStatusSlice(kProgressBarHeight);
+  layout.rectVisible = row.takeButton(fmName.height());
+  layout.rectName = row.nameSlice(fmName.height());
+  layout.rectStatus = row.fullStatusSlice(fmStatus.height());
+  layout.rectProgress = row.fullStatusSlice(kProgressBarHeight);
 
-  return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectProgress, rectVisible};
+  return layout;
 }
 
 CWksItemDelegate::GeoSearchLayout CWksItemDelegate::getRectanglesGeoSearch(const QStyleOptionViewItem& opt) const {
-  const QFont fontSearch = opt.font;
-  const QFontMetrics fmSearch(fontSearch);
+  GeoSearchLayout layout;
+  layout.fontSearch = opt.font;
+  const QFontMetrics fmSearch(layout.fontSearch);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - kFontSizeDiffProject);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - kFontSizeDiffProject);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
-  const QRect& r = opt.rect.adjusted(kCellPad, kCellPad, -kCellPad, -kCellPad);
-  const quint32 height = r.height() / 2;
+  CRowBuilder row(opt.rect, kCellPad, kInnerGap);
+  layout.rectIcon = row.takeLeft(row.height());
+  layout.rectSetup = row.takeLeftButton(fmSearch.height());
+  layout.rectVisible = row.takeButton(fmSearch.height());
+  layout.rectWptIcon = row.takeButton(fmSearch.height());
+  layout.rectLineEdit = row.nameSlice(CRowBuilder::buttonSize(fmSearch.height()));
+  layout.rectStatus = row.statusSlice(fmStatus.height());
 
-  const QRect rectIcon(r.left(), r.top(), r.height(), r.height());
-  const QRect rectSetup(rectIcon.right() + kMargin, r.top(), height, height);
-  const QRect rectVisible(r.right() - fmSearch.height(), r.top(), height, height);
-  const QRect rectWptIcon(rectVisible.left() - height - kMargin, r.top(), height, height);
-  const QRect rectLineEdit(
-      rectSetup.right() + kMargin, r.top(),
-      r.width() - rectSetup.width() - rectIcon.width() - rectWptIcon.width() - rectVisible.width() - 4 * kMargin,
-      height + 4 * kMargin);
-  const QRect rectStatus(
-      rectSetup.right() + kMargin, r.bottom() - fmStatus.height(),
-      r.width() - rectSetup.width() - rectIcon.width() - rectWptIcon.width() - rectVisible.width() - 4 * kMargin,
-      fmStatus.height());
-
-  return {fontSearch, fontStatus, rectIcon, rectSetup, rectLineEdit, rectStatus, rectWptIcon, rectVisible};
+  return layout;
 }
 
 CWksItemDelegate::GeoSearchErrorLayout CWksItemDelegate::getRectanglesGeoSearchError(
     const QStyleOptionViewItem& opt) const {
-  const QFont font = opt.font;
+  GeoSearchErrorLayout layout;
+  layout.font = opt.font;
 
   const QRect& r = opt.rect.adjusted(kCellPad, kCellPad, -kCellPad, -kCellPad);
-  // clang-format off
-  const QRect rectIcon(r.left(), r.top(), r.height(), r.height());
-  const QRect& rectName = r.adjusted(rectIcon.width() + kMargin,0,0,0);
-  // clang-format on
+  layout.rectIcon = QRect(r.left(), r.top(), r.height(), r.height());
+  layout.rectName = r.adjusted(layout.rectIcon.width() + kMargin, 0, 0, 0);
 
-  return {font, rectIcon, rectName};
+  return layout;
 }
 
 void CWksItemDelegate::drawProgressBar(QPainter* p, const QRect& rect, qreal progress) {
   quint32 width = qRound(rect.width() * progress / 100.0);
-  const QLine line(rect.left(), rect.bottom() - kProgressBarHeightHalf, rect.left() + width,
-                   rect.bottom() - kProgressBarHeightHalf);
+  const QLine line(rect.left(), rect.bottom() - kProgressBarBottomInset, rect.left() + width,
+                   rect.bottom() - kProgressBarBottomInset);
   p->setPen(QPen(Qt::white, 5, Qt::SolidLine, Qt::RoundCap));
   p->drawLine(line);
   p->setPen(QPen(Qt::darkGreen, 3, Qt::SolidLine, Qt::RoundCap));
@@ -309,8 +295,7 @@ QString CWksItemDelegate::distanceAscentDescentStatus(qreal distance, qreal asce
 }
 
 void CWksItemDelegate::drawRatingStars(qreal rating, QPainter* p, QIcon::Mode iconMode, QRect& rectStatus) const {
-  const qint32 N = qRound(rating);
-  if (rating != 0) {
+  if (const qint32 N = qRound(rating); N > 0) {
     QRect rectStar(rectStatus.left() + kMargin, rectStatus.top() + kMargin, rectStatus.height() - 2 * kMargin,
                    rectStatus.height() - 2 * kMargin);
     for (int i = 0; i < N; i++) {
@@ -391,7 +376,7 @@ void CWksItemDelegate::paintProject(QPainter* p, const QStyleOptionViewItem& opt
   const float opacityOfFocusBasedItems = item.getOpacityOfFocusBasedItems();
 
   if (layout.rectSave.isValid()) {
-    if (item.isOnDevice() == false) {
+    if (item.isOnDevice() == IWksItem::eTypeNone) {
       // draw save/ auto save button
       if (item.isChanged() && !item.isAutoSave()) {
         // show save button
@@ -463,20 +448,19 @@ void CWksItemDelegate::paintProject(QPainter* p, const QStyleOptionViewItem& opt
                                     itemStatusControl.prj.ascent, itemStatusControl.prj.descent);
 
     if (itemStatusControl.prj.gisStats) {
-      const IGisProject* const prj = dynamic_cast<IGisProject*>(&item);
-      const qint32 cntTrk = prj->getItemCountByType(IGisItem::eTypeTrk);
+      const qint32 cntTrk = project->getItemCountByType(IGisItem::eTypeTrk);
       if (cntTrk != 0) {
         status += QString("T: %1 ").arg(cntTrk);
       }
-      const qint32 cntWpt = prj->getItemCountByType(IGisItem::eTypeWpt);
+      const qint32 cntWpt = project->getItemCountByType(IGisItem::eTypeWpt);
       if (cntWpt != 0) {
         status += QString("W: %1 ").arg(cntWpt);
       }
-      const qint32 cntRte = prj->getItemCountByType(IGisItem::eTypeRte);
+      const qint32 cntRte = project->getItemCountByType(IGisItem::eTypeRte);
       if (cntRte != 0) {
         status += QString("R: %1 ").arg(cntRte);
       }
-      const qint32 cntArea = prj->getItemCountByType(IGisItem::eTypeOvl);
+      const qint32 cntArea = project->getItemCountByType(IGisItem::eTypeOvl);
       if (cntArea != 0) {
         status += QString("A: %1 ").arg(cntArea);
       }
@@ -579,7 +563,7 @@ void CWksItemDelegate::paintItem(QPainter* p, const QStyleOptionViewItem& opt, c
         }
 
         qreal ele = wpt->getElevation();
-        if (ele != NOFLOAT && ele != NOFLOAT && itemStatusControl.wpt.elevation) {
+        if (ele != NOFLOAT && itemStatusControl.wpt.elevation) {
           QString unit, val;
           IUnit::self().meter2elevation(ele, val, unit);
           status += QString("%1%2 ").arg(val, unit);
@@ -714,7 +698,7 @@ bool CWksItemDelegate::mousePressProject(QMouseEvent* me, const QStyleOptionView
     emit sigUpdateCanvas();
     return true;
   } else if (layout.rectSave.contains(me->pos())) {
-    if (item.isOnDevice() == false) {
+    if (item.isOnDevice() == IWksItem::eTypeNone) {
       if (item.isAutoSave()) {
         item.setAutoSave(false);
       } else {
@@ -837,7 +821,7 @@ bool CWksItemDelegate::helpEventProject(const QPoint& pos, const QPoint& posGlob
     }
     return true;
   } else if (layout.rectSave.contains(pos)) {
-    if (item.isOnDevice() == false) {
+    if (item.isOnDevice() == IWksItem::eTypeNone) {
       if (item.isChanged() && !item.isAutoSave()) {
         QToolTip::showText(posGlobal, toRichText(tr("Save project.")), view, {}, 3000);
       } else {
@@ -901,7 +885,8 @@ bool CWksItemDelegate::helpEventItem(const QPoint& pos, const QPoint& posGlobal,
     QToolTip::showText(posGlobal, item.getInfo(IWksItem::eFeatureShowName), view);
     return true;
   } else if (layout.rectStatus.contains(pos)) {
-    if (itemStatusControl.prj.flags == 0) {
+    if (itemStatusControl.trk.flags == 0 && itemStatusControl.wpt.flags == 0 && itemStatusControl.rte.flags == 0 &&
+        itemStatusControl.area.flags == 0) {
       QToolTip::showText(
           posGlobal,
           toRichText(

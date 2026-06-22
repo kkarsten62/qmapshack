@@ -44,14 +44,13 @@ class CDemVRT : public IDem {
  private:
   using IDem::drawTile;
   void drawElevationShadeScale(QPainter& p) const;
-  void drawTile(const qint32 x, const qint32 y, const qint32 w, const qint32 h,
-                const qreal o1, const qreal o2, QPainter& p) const;
 
   mutable QMutex mutex;
 
   QString filename;
   /// instance of GDAL dataset
-  GDALDataset* dataset;
+  GDALDataset* srcDataset = nullptr;
+  GDALDataset* dataset = nullptr;
 
   QPointF ref1;
   QPointF ref2;

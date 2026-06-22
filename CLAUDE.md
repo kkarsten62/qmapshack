@@ -202,3 +202,4 @@ Do not add `Co-Authored-By` lines to commit messages.
 `animations_t` is defined after `getAnimations()` in the private section. The forward
 declaration `struct animations_t;` before `getAnimations()` is required — do not remove it.
 
+

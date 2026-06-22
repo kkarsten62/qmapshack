@@ -22,6 +22,7 @@
 #include <QPainter>
 #include <QTextDocument>
 #include <QToolTip>
+#include <utility>
 
 #include "gis/IDBItem.h"
 #include "helpers/CDraw.h"
@@ -61,8 +62,7 @@ void CDBItemDelegate::setStatusItemsControl(const item_status_ctrl_t& settings) 
 }
 
 IDBItem* CDBItemDelegate::indexToItem(const QModelIndex& index) const {
-  IDBItem* item = dynamic_cast<IDBItem*>(treeWidget->itemFromIndex(index));
-  return item;
+  return dynamic_cast<IDBItem*>(treeWidget->itemFromIndex(index));
 }
 
 void CDBItemDelegate::drawCheckStateButton(QPainter* p, const QStyleOptionViewItem& opt, const QRect& rect,
@@ -78,6 +78,15 @@ void CDBItemDelegate::drawCheckStateButton(QPainter* p, const QStyleOptionViewIt
       CDraw::drawToolButton(p, opt, rect, QIcon(":/icons/32x32/ToWksChecked.png"), true, true);
       break;
   }
+}
+
+std::pair<QPalette::ColorGroup, QPalette::ColorRole> CDBItemDelegate::resolveColorState(
+    const QStyleOptionViewItem& opt) {
+  const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
+  const bool hasFocus = (opt.state & QStyle::State_HasFocus) != 0;
+  const QPalette::ColorRole colorRole = (isSelected && hasFocus) ? QPalette::HighlightedText : QPalette::WindowText;
+  const QPalette::ColorGroup colorGroup = hasFocus ? QPalette::Active : QPalette::Inactive;
+  return {colorGroup, colorRole};
 }
 
 void CDBItemDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const {}
@@ -119,59 +128,57 @@ QSize CDBItemDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelInd
 
 CDBItemDelegate::ItemLayout CDBItemDelegate::getRectanglesFolder(const QStyleOptionViewItem& opt,
                                                                  const IDBItem& item) const {
-  const QFont fontName = opt.font;
-  const QFontMetrics fmName(fontName);
+  ItemLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizeFolder);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - itemStatusControl.statusSizeFolder);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
   row.markStatusColumn();
 
-  QRect rectButton;
   if (item.type() > IDBItem::eTypeGroup || item.type() == IDBItem::eTypeLostFound) {
-    rectButton = row.takeButton(fmName.height());
+    layout.rectButton = row.takeButton(fmName.height());
   }
 
-  const QRect rectName = row.nameSlice(fmName.height());
+  layout.rectName = row.nameSlice(fmName.height());
 
-  QRect rectStatus;
   if (itemStatusControl.statusSizeFolder != kFontSizeInvalid) {
-    rectStatus = row.fullStatusSlice(fmStatus.height());
+    layout.rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
-  return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton};
+  return layout;
 }
 
 CDBItemDelegate::ItemLayout CDBItemDelegate::getRectanglesItem(const QStyleOptionViewItem& opt,
                                                                const IDBItem& item) const {
-  const QFont fontName = opt.font;
-  const QFontMetrics fmName(fontName);
+  ItemLayout layout;
+  layout.fontName = opt.font;
+  const QFontMetrics fmName(layout.fontName);
 
-  QFont fontStatus = opt.font;
-  fontStatus.setPointSize(fontStatus.pointSize() - itemStatusControl.statusSizeItem);
-  const QFontMetrics fmStatus(fontStatus);
+  layout.fontStatus = opt.font;
+  layout.fontStatus.setPointSize(layout.fontStatus.pointSize() - itemStatusControl.statusSizeItem);
+  const QFontMetrics fmStatus(layout.fontStatus);
 
   CRowBuilder row(opt.rect, kCellPad, kInnerGap);
-  const QRect rectIcon = row.takeLeft(row.height());
+  layout.rectIcon = row.takeLeft(row.height());
   row.markStatusColumn();
 
-  QRect rectButton;
   // Items inside the lost-and-found folder have no load/unload button.
   if (!(item.parent() && item.parent()->type() == IDBItem::eTypeLostFound)) {
-    rectButton = row.takeButton(fmName.height());
+    layout.rectButton = row.takeButton(fmName.height());
   }
 
-  const QRect rectName = row.nameSlice(fmName.height());
+  layout.rectName = row.nameSlice(fmName.height());
 
-  QRect rectStatus;
   if (itemStatusControl.statusSizeItem != kFontSizeInvalid) {
-    rectStatus = row.fullStatusSlice(fmStatus.height());
+    layout.rectStatus = row.fullStatusSlice(fmStatus.height());
   }
 
-  return {fontName, fontStatus, rectIcon, rectName, rectStatus, rectButton};
+  return layout;
 }
 
 void CDBItemDelegate::paint(QPainter* p, const QStyleOptionViewItem& opt, const QModelIndex& index) const {
@@ -212,11 +219,7 @@ void CDBItemDelegate::paintFolder(QPainter* p, const QStyleOptionViewItem& opt, 
     drawCheckStateButton(p, opt, layout.rectButton, item.getCheckState());
   }
 
-  const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
-  const bool hasFocus = (opt.state & QStyle::State_HasFocus) != 0;
-
-  const QPalette::ColorRole colorRole = (isSelected && hasFocus) ? QPalette::HighlightedText : QPalette::WindowText;
-  QPalette::ColorGroup colorGroup = hasFocus ? QPalette::Active : QPalette::Inactive;
+  auto [colorGroup, colorRole] = resolveColorState(opt);
 
   if (item.type() > IDBItem::eTypeGroup) {
     layout.fontName.setBold(item.getCheckState() != Qt::Unchecked);
@@ -275,11 +278,7 @@ void CDBItemDelegate::paintItem(QPainter* p, const QStyleOptionViewItem& opt, co
     drawCheckStateButton(p, opt, layout.rectButton, item.getCheckState());
   }
 
-  const bool isSelected = (opt.state & QStyle::State_Selected) != 0;
-  const bool hasFocus = (opt.state & QStyle::State_HasFocus) != 0;
-
-  const QPalette::ColorRole colorRole = (isSelected && hasFocus) ? QPalette::HighlightedText : QPalette::WindowText;
-  QPalette::ColorGroup colorGroup = hasFocus ? QPalette::Active : QPalette::Inactive;
+  auto [colorGroup, colorRole] = resolveColorState(opt);
 
   IDBItem* parent = dynamic_cast<IDBItem*>(item.parent());
 
@@ -321,7 +320,7 @@ void CDBItemDelegate::toggleCheckState(IDBItem& item) {
   emit treeWidget->itemChanged(&item, IDBItem::eColumn);
 
   if (item.type() == IDBItem::eTypeLostFound) {
-    // Lex lost-n-found: we need to update all child items, too.
+    // For lost-and-found: we need to update all child items, too.
     const int N = item.childCount();
     QWidget* viewport = treeWidget->viewport();
     for (int n = 0; n < N; n++) {
