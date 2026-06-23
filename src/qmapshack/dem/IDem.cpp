@@ -24,13 +24,20 @@
 #include "dem/CDemDraw.h"
 #include "dem/CDemPropSetup.h"
 
+// Read one sample from a row-major buffer of row width dx.
 template <typename T>
-inline T getValue(QVector<T>& data, int x, int y, int dx) {
+inline T getValue(const QVector<T>& data, int x, int y, int dx) {
   return data[x + y * dx];
 }
 
+// Fill w[0..8] with the row-major 3x3 neighborhood of data centered on (x, y):
+//   w[0] w[1] w[2]      (x-1,y-1) (x,y-1) (x+1,y-1)
+//   w[3] w[4] w[5]  i.e. (x-1,y)  (x,y)   (x+1,y)
+//   w[6] w[7] w[8]      (x-1,y+1) (x,y+1) (x+1,y+1)
+// Callers pass an (x, y) that is already offset into data's 1px border (see the @param
+// data docs on IDem::hillshading() et al.), so the -1/+1 neighbors are always in bounds.
 template <typename T>
-inline void fillWindow(QVector<T>& data, int x, int y, int stride, T* w) {
+inline void fillWindow(const QVector<T>& data, int x, int y, int stride, T* w) {
   w[0] = getValue(data, x - 1, y - 1, stride);
   w[1] = getValue(data, x, y - 1, stride);
   w[2] = getValue(data, x + 1, y - 1, stride);
@@ -40,29 +47,6 @@ inline void fillWindow(QVector<T>& data, int x, int y, int stride, T* w) {
   w[6] = getValue(data, x - 1, y + 1, stride);
   w[7] = getValue(data, x, y + 1, stride);
   w[8] = getValue(data, x + 1, y + 1, stride);
-}
-
-template <typename T>
-inline void fillWindow4x4(QVector<T>& data, qreal x, qreal y, int stride, T* w) {
-  x = qFloor(x);
-  y = qFloor(y);
-
-  w[0] = getValue(data, x - 1, y - 1, stride);
-  w[1] = getValue(data, x, y - 1, stride);
-  w[2] = getValue(data, x + 1, y - 1, stride);
-  w[3] = getValue(data, x + 2, y - 1, stride);
-  w[4] = getValue(data, x - 1, y, stride);
-  w[5] = getValue(data, x, y, stride);
-  w[6] = getValue(data, x + 1, y, stride);
-  w[7] = getValue(data, x + 2, y, stride);
-  w[8] = getValue(data, x - 1, y + 1, stride);
-  w[9] = getValue(data, x, y + 1, stride);
-  w[10] = getValue(data, x + 1, y + 1, stride);
-  w[11] = getValue(data, x + 2, y + 1, stride);
-  w[12] = getValue(data, x - 1, y + 2, stride);
-  w[13] = getValue(data, x, y + 2, stride);
-  w[14] = getValue(data, x + 1, y + 2, stride);
-  w[15] = getValue(data, x + 2, y + 2, stride);
 }
 
 const struct SlopePresets IDem::slopePresets[7]{
@@ -189,7 +173,7 @@ void IDem::initElevationShadeTable() {
 
   elevationShadeTable[0] = qRgba(75, 75, 75, 255);
   for (int i = 0; i < 254; i++) {
-    const QColor& color = QColor::fromHsv(240. * (253 - i) / 253, 255, 255);
+    const QColor color = QColor::fromHsv(240. * (253 - i) / 253, 255, 255);
     elevationShadeTable[i + 1] = color.rgb();
   }
   elevationShadeTable[255] = qRgba(180, 180, 180, 255);
@@ -207,19 +191,26 @@ int IDem::getFactorHillshading() const {
   if (factorHillshading == 1.0) {
     return 0;
   } else if (factorHillshading < 1) {
-    return -1.0 / factorHillshading;
+    return qRound(-1.0 / factorHillshading);
   } else {
-    return factorHillshading;
+    return qRound(factorHillshading);
   }
 }
 
-void IDem::hillshading(QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
+// Horn's method (the same algorithm GDAL's own "gdaldem hillshade" uses): dx/dy are a
+// Sobel-style gradient (hence the doubled middle terms), combined with a fixed light
+// source (azimuth 315° = NW, altitude 45° - only the z-factor/vertical exaggeration is
+// user-configurable, via factorHillshading) into cang, the cosine of the light's
+// incidence angle. cang is then remapped from its natural -1..1 range to the 1..254
+// output range, leaving 0 unused and 255 reserved to mark noData (transparent in graytable).
+void IDem::hillshading(const QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
                        quint32 h) const {
-#define ZFACT 0.125
-#define ZFACT_BY_ZFACT (ZFACT * ZFACT)
-#define SIN_ALT (qSin(45 * DEG_TO_RAD))
-#define ZFACT_COS_ALT (ZFACT * qCos(45 * DEG_TO_RAD))
-#define AZ (315 * DEG_TO_RAD)
+  constexpr qreal zFactor = 0.125;
+  constexpr qreal zFactorSquared = zFactor * zFactor;
+  constexpr qreal azimuth = 315 * DEG_TO_RAD;
+  const qreal sinAltitude = qSin(45 * DEG_TO_RAD);
+  const qreal zFactorCosAltitude = zFactor * qCos(45 * DEG_TO_RAD);
+
   for (unsigned int m = 0; m < h; m++) {
     unsigned char* scan = out.data() + (m + y) * stride + x;
     for (unsigned int n = 0; n < w; n++) {
@@ -237,8 +228,8 @@ void IDem::hillshading(QVector<float>& data, QVector<uchar>& out, quint32 x, qui
           ((win[6] + win[7] + win[7] + win[8]) - (win[0] + win[1] + win[1] + win[2])) / (yscale * factorHillshading);
       qreal aspect = qAtan2(dy, dx);
       qreal xx_plus_yy = dx * dx + dy * dy;
-      qreal cang =
-          (SIN_ALT - ZFACT_COS_ALT * qSqrt(xx_plus_yy) * qSin(aspect - AZ)) / qSqrt(1 + ZFACT_BY_ZFACT * xx_plus_yy);
+      qreal cang = (sinAltitude - zFactorCosAltitude * qSqrt(xx_plus_yy) * qSin(aspect - azimuth)) /
+                   qSqrt(1 + zFactorSquared * xx_plus_yy);
 
       if (cang <= 0.0) {
         cang = 1.0;
@@ -251,10 +242,10 @@ void IDem::hillshading(QVector<float>& data, QVector<uchar>& out, quint32 x, qui
   }
 }
 
-int IDem::getFactorSlopeShading() const { return factorSlopeShading * 100.; }
+int IDem::getFactorSlopeShading() const { return qRound(factorSlopeShading * 100.); }
 
-void IDem::slopeShading(QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
-                        quint32 h) const {
+void IDem::slopeShading(const QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride,
+                        quint32 w, quint32 h) const {
   for (unsigned int m = 0; m < h; m++) {
     unsigned char* scan = out.data() + (m + y) * stride + x;
     for (unsigned int n = 0; n < w; n++) {
@@ -281,6 +272,10 @@ void IDem::slopeShading(QVector<float>& data, QVector<uchar>& out, quint32 x, qu
   }
 }
 
+qreal IDem::bilinear(qreal a, qreal b, qreal c, qreal d, qreal x, qreal y) {
+  return a + x * (b - a) + y * (c - a) + x * y * (a - b - c + d);
+}
+
 qreal IDem::slopeOfWindowInterp(float* win2, winsize_e size, qreal x, qreal y) const {
   for (int i = 0; i < size; i++) {
     if (hasNoData && win2[i] == noData) {
@@ -297,32 +292,29 @@ qreal IDem::slopeOfWindowInterp(float* win2, winsize_e size, qreal x, qreal y) c
       break;
 
     case eWinsize4x4:
-      win[0] =
-          win2[0] + x * (win2[1] - win2[0]) + y * (win2[4] - win2[0]) + x * y * (win2[0] - win2[1] - win2[4] + win2[5]);
-      win[1] =
-          win2[1] + x * (win2[2] - win2[1]) + y * (win2[5] - win2[1]) + x * y * (win2[1] - win2[2] - win2[5] + win2[6]);
-      win[2] =
-          win2[2] + x * (win2[3] - win2[2]) + y * (win2[6] - win2[2]) + x * y * (win2[2] - win2[3] - win2[6] + win2[7]);
+      // win2 is a 4x4 grid (row-major, indices 0..15); slide a bilinearly-interpolated
+      // 2x2 sample over it at every one of the resulting 3x3 window's positions, so win
+      // ends up as the 3x3 neighborhood of the fractional point (x, y) would have, had
+      // the raster actually been sampled there instead of at the nearest pixel.
+      win[0] = bilinear(win2[0], win2[1], win2[4], win2[5], x, y);
+      win[1] = bilinear(win2[1], win2[2], win2[5], win2[6], x, y);
+      win[2] = bilinear(win2[2], win2[3], win2[6], win2[7], x, y);
 
-      win[3] =
-          win2[4] + x * (win2[5] - win2[4]) + y * (win2[8] - win2[4]) + x * y * (win2[4] - win2[5] - win2[8] + win2[9]);
-      win[4] = win2[5] + x * (win2[6] - win2[5]) + y * (win2[9] - win2[5]) +
-               x * y * (win2[5] - win2[6] - win2[9] + win2[10]);
-      win[5] = win2[6] + x * (win2[7] - win2[6]) + y * (win2[10] - win2[6]) +
-               x * y * (win2[6] - win2[7] - win2[10] + win2[11]);
+      win[3] = bilinear(win2[4], win2[5], win2[8], win2[9], x, y);
+      win[4] = bilinear(win2[5], win2[6], win2[9], win2[10], x, y);
+      win[5] = bilinear(win2[6], win2[7], win2[10], win2[11], x, y);
 
-      win[6] = win2[8] + x * (win2[9] - win2[8]) + y * (win2[12] - win2[8]) +
-               x * y * (win2[8] - win2[9] - win2[12] + win2[13]);
-      win[7] = win2[9] + x * (win2[10] - win2[9]) + y * (win2[13] - win2[9]) +
-               x * y * (win2[9] - win2[10] - win2[13] + win2[14]);
-      win[8] = win2[10] + x * (win2[11] - win2[10]) + y * (win2[14] - win2[10]) +
-               x * y * (win2[10] - win2[11] - win2[14] + win2[15]);
+      win[6] = bilinear(win2[8], win2[9], win2[12], win2[13], x, y);
+      win[7] = bilinear(win2[9], win2[10], win2[13], win2[14], x, y);
+      win[8] = bilinear(win2[10], win2[11], win2[14], win2[15], x, y);
       break;
 
     default:
       return NOFLOAT;
   }
 
+  // same Sobel-style gradient as hillshading(); 8 is the kernel's total weight (1+2+1 on
+  // each side), normalizing dx/dy back to an average per-unit-distance slope
   qreal dx = ((win[0] + win[3] + win[3] + win[6]) - (win[2] + win[5] + win[5] + win[8])) / (xscale);
   qreal dy = ((win[6] + win[7] + win[7] + win[8]) - (win[0] + win[1] + win[1] + win[2])) / (yscale);
   qreal k = dx * dx + dy * dy;
@@ -331,7 +323,7 @@ qreal IDem::slopeOfWindowInterp(float* win2, winsize_e size, qreal x, qreal y) c
   return slope;
 }
 
-void IDem::slopecolor(QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
+void IDem::slopecolor(const QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
                       quint32 h) const {
   for (unsigned int m = 0; m < h; m++) {
     unsigned char* scan = out.data() + (m + y) * stride + x;
@@ -364,64 +356,52 @@ void IDem::slopecolor(QVector<float>& data, QVector<uchar>& out, quint32 x, quin
   }
 }
 
-void IDem::elevationLimit(QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
-                          quint32 h) const {
+qreal IDem::maxElevationInWindow(const float* win) const {
+  qreal meters = -2.0;
+  for (unsigned int i = 0; i < eWinsize3x3; i++) {
+    if ((!hasNoData || win[i] != noData) && win[i] > meters) {
+      meters = win[i];
+    }
+  }
+
+  qreal elevation;  // elevation in the units set by the user
+  QString unit;     // result not used
+  IUnit::self().meter2elevation(meters, elevation, unit);
+  return elevation;
+}
+
+void IDem::elevationLimit(const QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride,
+                          quint32 w, quint32 h) const {
   for (unsigned int m = 0; m < h; m++) {
     unsigned char* scan = out.data() + (m + y) * stride + x;
     for (unsigned int n = 0; n < w; n++) {
       float win[eWinsize3x3];
       fillWindow(data, n + x + 1, m + y + 1, stride + 2, win);
 
-      // get maximum of window (_not_ mean)
-      //
-      qreal meters = -2.0;
-      for (unsigned int i = 0; i < eWinsize3x3; i++) {
-        if (win[i] != noData && win[i] > meters) {
-          meters = win[i];
-        }
-      }
-
-      qreal elevation;  // elevation in the units set by the user
-      QString unit;     // result not used
-      IUnit::self().meter2elevation(meters, elevation, unit);
-      if (elevation >= getElevationLimit()) {
-        scan[n] = 1;
-      } else {
-        scan[n] = 0;
-      }
+      const qreal elevation = maxElevationInWindow(win);
+      scan[n] = (elevation >= getElevationLimit()) ? 1 : 0;
     }
   }
 }
 
-void IDem::elevationShading(QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride, quint32 w,
-                            quint32 h) const {
+void IDem::elevationShading(const QVector<float>& data, QVector<uchar>& out, quint32 x, quint32 y, quint32 stride,
+                            quint32 w, quint32 h) const {
+  // clip set min and max values
+  const int limitLow = std::min(getElevationShadeLimitLow(), getElevationShadeLimitHi());
+  const int limitHi = std::max(getElevationShadeLimitLow(), getElevationShadeLimitHi());
+
   for (unsigned int m = 0; m < h; m++) {
     unsigned char* scan = out.data() + (m + y) * stride + x;
     for (unsigned int n = 0; n < w; n++) {
       float win[eWinsize3x3];
       fillWindow(data, n + x + 1, m + y + 1, stride + 2, win);
 
-      // get maximum of window (_not_ mean)
-      //
-      qreal meters = -2.0;
-      for (unsigned int i = 0; i < eWinsize3x3; i++) {
-        if (win[i] != noData && win[i] > meters) {
-          meters = win[i];
-        }
-      }
-
-      qreal elevation;  // elevation in the units set by the user
-      QString unit;     // result not used
-      IUnit::self().meter2elevation(meters, elevation, unit);
-
-      // calc shade of elevation based and  clip set min and max values
-      int limitLow = std::min(getElevationShadeLimitLow(), getElevationShadeLimitHi());
-      int limitHi = std::max(getElevationShadeLimitLow(), getElevationShadeLimitHi());
+      const qreal elevation = maxElevationInWindow(win);
 
       if (elevation < limitLow) {
         scan[n] = 0;
       } else if (elevation < limitHi) {
-        qreal relLimit = (elevation - limitLow) / (limitHi - limitLow);
+        const qreal relLimit = (elevation - limitLow) / (limitHi - limitLow);
         scan[n] = 1 + relLimit * 253;
       } else {
         scan[n] = 255;
@@ -431,5 +411,3 @@ void IDem::elevationShading(QVector<float>& data, QVector<uchar>& out, quint32 x
 }
 
 void IDem::slotShowElevationShadeScale(bool yes) { bShowElevationShadeScale = yes; }
-
-void IDem::drawTile(QImage& img, QPolygonF& l, QPainter& p) const { drawTileLQ(img, l, p, *dem, proj); }

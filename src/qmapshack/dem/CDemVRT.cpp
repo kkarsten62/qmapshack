@@ -24,70 +24,91 @@
 #include <gdalwarper.h>
 
 #include <QtWidgets>
+#include <algorithm>
 
 #include "CMainWindow.h"
 #include "dem/CDemDraw.h"
 #include "helpers/CDraw.h"
 #include "units/IUnit.h"
 
+int CDemVRT::progressCallback(double /*dfComplete*/, const char* /*message*/, void* pProgressArg) {
+  auto* drawCtx = reinterpret_cast<CDemDraw*>(pProgressArg);
+  return !drawCtx->needsRedraw();
+}
+
+bool CDemVRT::allReferencedFilesExist(GDALDataset* dataset, QString& missingFile) {
+  char** fileList = dataset->GetFileList();
+  bool allExist = true;
+  for (int n = 0; fileList != nullptr && fileList[n] != nullptr; ++n) {
+#if defined(Q_OS_WIN32)
+    missingFile = QString::fromLocal8Bit(fileList[n]);
+    if (QFileInfo::exists(missingFile)) {
+      continue;
+    }
+#endif  // defined(Q_OS_WIN32)
+    missingFile = QString::fromUtf8(fileList[n]);
+    if (QFileInfo::exists(missingFile)) {
+      continue;
+    }
+    allExist = false;
+    break;
+  }
+  CSLDestroy(fileList);
+  return allExist;
+}
+
+void CDemVRT::closeDataset(GDALDataset*& dataset) {
+  if (dataset != nullptr) {
+    GDALClose(dataset);
+    dataset = nullptr;
+  }
+}
+
 CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), filename(filename) {
   qDebug() << "------------------------------";
   qDebug() << "VRT: try to open" << filename;
 
-  dataset = (GDALDataset*)GDALOpen(filename.toUtf8(), GA_ReadOnly);
+  dataset = GDALDataset::FromHandle(GDALOpen(filename.toUtf8(), GA_ReadOnly));
   if (nullptr == dataset) {
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("Failed to load file:") % '\n' % filename);
     return;
   }
 
-  QString fileItem;
-  char** fileList = dataset->GetFileList();
-  int n = 0;
-  while (fileList[n] != nullptr) {
-#if defined(Q_OS_WIN32)
-    fileItem = QString::fromLocal8Bit(fileList[n]);
-    if (QFileInfo(fileItem).exists()) {
-      n++;
-      continue;
-    }
-#endif // defined(Q_OS_WIN32)
-    fileItem = QString::fromUtf8(fileList[n]);
-    if (QFileInfo(fileItem).exists()) {
-      n++;
-      continue;
-    }
-    n = -1;
-    break;
-  }
-  CSLDestroy(fileList);
-  if (n < 0) {
-    GDALClose(dataset);
-    dataset = nullptr;
-    QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
-                           tr("File does not exist:") % '\n' % fileItem % '\n' %
-                           tr("referenced by file:") % '\n' % filename);
+  QString missingFile;
+  if (!allReferencedFilesExist(dataset, missingFile)) {
+    closeDataset(dataset);
+    QMessageBox::warning(
+        CMainWindow::getBestWidgetForParent(), tr("Error..."),
+        tr("File does not exist:") % '\n' % missingFile % '\n' % tr("referenced by file:") % '\n' % filename);
     return;
   }
 
   if (dataset->GetRasterCount() != 1) {
-    GDALClose(dataset);
-    dataset = nullptr;
+    closeDataset(dataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
-                         tr("DEM must have one band with 16bit or 32bit data:") % '\n' % filename);
+                         tr("DEM must have exactly one raster band:") % '\n' % filename);
     return;
   }
 
   GDALRasterBand* pBand = dataset->GetRasterBand(1);
   if (nullptr == pBand) {
-    GDALClose(dataset);
-    dataset = nullptr;
+    closeDataset(dataset);
+    QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
+                         tr("DEM must have exactly one raster band:") % '\n' % filename);
+    return;
+  }
+
+  const GDALDataType bandType = pBand->GetRasterDataType();
+  if (bandType != GDT_Int16 && bandType != GDT_UInt16 && bandType != GDT_Int32 && bandType != GDT_UInt32 &&
+      bandType != GDT_Float32) {
+    closeDataset(dataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("DEM must have one band with 16bit or 32bit data:") % '\n' % filename);
     return;
   }
 
-  hasOverviews = pBand->GetOverviewCount() != 0;
+  const bool hasOverviews = pBand->GetOverviewCount() != 0;
   qDebug() << "has overviews" << hasOverviews;
 
   noData = pBand->GetNoDataValue(&hasNoData);
@@ -104,10 +125,7 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
 
     GDALWarpOptions* psOptions = GDALCreateWarpOptions();
     psOptions->pProgressArg = dem;
-    psOptions->pfnProgress = [](double dfc, const char* msg, void* arg) -> int {
-      auto dem = reinterpret_cast<CDemDraw*>(arg);
-      return !dem->needsRedraw();
-    };
+    psOptions->pfnProgress = &CDemVRT::progressCallback;
 
     dataset = GDALDataset::FromHandle(GDALAutoCreateWarpedVRT(
         GDALDataset::ToHandle(srcDataset), nullptr, targetSRS.exportToWkt().c_str(), GRA_Bilinear, 0.1, psOptions));
@@ -115,8 +133,7 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
     GDALDestroyWarpOptions(psOptions);
 
     if (dataset == nullptr) {
-      GDALClose(srcDataset);
-      srcDataset = nullptr;
+      closeDataset(srcDataset);
       QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                            tr("Failed to create Warp for:") % '\n' % filename);
       return;
@@ -143,10 +160,8 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   proj.init(dataset->GetProjectionRef(), "EPSG:4326");
 
   if (!proj.isValid()) {
-    GDALClose(dataset);
-    dataset = nullptr;
-    GDALClose(srcDataset);
-    srcDataset = nullptr;
+    closeDataset(dataset);
+    closeDataset(srcDataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("No georeference information found:") % '\n' % filename);
     return;
@@ -156,35 +171,47 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   ysize_px = dataset->GetRasterYSize();
 
   qreal adfGeoTransform[6];
-  dataset->GetGeoTransform(adfGeoTransform);
+  if (dataset->GetGeoTransform(adfGeoTransform) != CE_None) {
+    closeDataset(dataset);
+    closeDataset(srcDataset);
+    QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
+                         tr("No pixel-to-map transform found:") % '\n' % filename);
+    return;
+  }
 
   xscale = adfGeoTransform[1];
   yscale = adfGeoTransform[5];
 
-  trFwd.translate(adfGeoTransform[0], adfGeoTransform[3]);
-  trFwd.scale(adfGeoTransform[1], adfGeoTransform[5]);
-
-  if (adfGeoTransform[4] != 0.0) {
-    trFwd.rotate(qAtan(adfGeoTransform[2] / adfGeoTransform[4]));
-  }
+  // Build trFwd directly from GDAL's affine matrix instead of decomposing it into
+  // translate+scale+rotate: adfGeoTransform[2]/[4] is a general shear term, not
+  // necessarily a pure rotation, so there is no single angle that reproduces it via
+  // QTransform::rotate() (which, in addition, takes degrees - qAtan() returns radians).
+  trFwd = QTransform(adfGeoTransform[1], adfGeoTransform[4], adfGeoTransform[2], adfGeoTransform[5], adfGeoTransform[0],
+                     adfGeoTransform[3]);
 
   if (proj.isSrcLatLong()) {
     xscale *= 111120;
     yscale *= 111120;
-    // convert to RAD to match internal notations
+    // Scale every element of the homogeneous matrix by DEG_TO_RAD to convert trFwd's
+    // mapped output from degrees to radians. This works because QTransform::map() never
+    // reads m13/m23/m33 as long as the transform stays non-projective (true here, since
+    // trFwd is built only from translate/scale/shear) - so scaling the whole matrix
+    // scales the mapped point without having to touch dx/dy and the linear part separately.
     trFwd = trFwd * DEG_TO_RAD;
   }
 
   trInv = trFwd.inverted();
 
-  ref1 = trFwd.map(QPointF(0, 0));
-  ref2 = trFwd.map(QPointF(xsize_px, 0));
-  ref3 = trFwd.map(QPointF(xsize_px, ysize_px));
-  ref4 = trFwd.map(QPointF(0, ysize_px));
+  // use all four corners (not just the nominally adjacent pair) since a rotated or
+  // skewed geotransform can move any corner to the extreme
+  const QPointF c1 = trFwd.map(QPointF(0, 0));
+  const QPointF c2 = trFwd.map(QPointF(xsize_px, 0));
+  const QPointF c3 = trFwd.map(QPointF(xsize_px, ysize_px));
+  const QPointF c4 = trFwd.map(QPointF(0, ysize_px));
+  boundingBox = QRectF(QPointF(std::min({c1.x(), c2.x(), c3.x(), c4.x()}), std::min({c1.y(), c2.y(), c3.y(), c4.y()})),
+                       QPointF(std::max({c1.x(), c2.x(), c3.x(), c4.x()}), std::max({c1.y(), c2.y(), c3.y(), c4.y()})));
 
-  qDebug() << ref1 << ref2 << ref3 << ref4;
-  boundingBox = QRectF(ref1, ref3);
-
+  qDebug() << "bounding box" << boundingBox;
   qDebug() << "FF" << trFwd;
   qDebug() << "RR" << trInv;
 
@@ -195,35 +222,45 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
 
 CDemVRT::~CDemVRT() {
   threadPool.waitForDone();
-  GDALClose(dataset);
-  GDALClose(srcDataset);
+  QMutexLocker lock(&mutex);
+  closeDataset(dataset);
+  closeDataset(srcDataset);
 }
 
 void CDemVRT::slotNeedsRedraw() { threadPool.clear(); }
+
+bool CDemVRT::toRasterPixel(const QPointF& pos, QPointF& pixel) const {
+  QPointF pt = pos;
+  proj.transform(pt, PJ_INV);
+
+  if (!boundingBox.contains(pt)) {
+    return false;
+  }
+
+  pixel = trInv.map(pt);
+  return true;
+}
 
 qreal CDemVRT::getElevationAt(const QPointF& pos, bool checkScale) {
   if (!proj.isValid() || (checkScale && outOfScale)) {
     return NOFLOAT;
   }
 
-  float e[4];
-  QPointF pt = pos;
-
-  proj.transform(pt, PJ_INV);
-
-  if (!boundingBox.contains(pt)) {
+  QPointF pt;
+  if (!toRasterPixel(pos, pt)) {
     return NOFLOAT;
   }
-
-  pt = trInv.map(pt);
 
   qreal x = pt.x() - qFloor(pt.x());
   qreal y = pt.y() - qFloor(pt.y());
 
-  mutex.lock();
-  CPLErr err = dataset->RasterIO(GF_Read, qFloor(pt.x()), qFloor(pt.y()), 2, 2, &e, 2, 2, GDT_Float32, 1, 0, 0, 0, 0);
-  mutex.unlock();
-  if (err == CE_Failure) {
+  float e[4];
+  CPLErr err;
+  {
+    QMutexLocker lock(&mutex);
+    err = dataset->RasterIO(GF_Read, qFloor(pt.x()), qFloor(pt.y()), 2, 2, e, 2, 2, GDT_Float32, 1, 0, 0, 0, 0);
+  }
+  if (err != CE_None) {
     return NOFLOAT;
   }
 
@@ -231,14 +268,7 @@ qreal CDemVRT::getElevationAt(const QPointF& pos, bool checkScale) {
     return NOFLOAT;
   }
 
-  qreal b1 = e[0];
-  qreal b2 = e[1] - e[0];
-  qreal b3 = e[2] - e[0];
-  qreal b4 = e[0] - e[1] - e[2] + e[3];
-
-  qreal ele = b1 + b2 * x + b3 * y + b4 * x * y;
-
-  return ele;
+  return bilinear(e[0], e[1], e[2], e[3], x, y);
 }
 
 qreal CDemVRT::getSlopeAt(const QPointF& pos, bool checkScale) {
@@ -246,15 +276,10 @@ qreal CDemVRT::getSlopeAt(const QPointF& pos, bool checkScale) {
     return NOFLOAT;
   }
 
-  QPointF pt = pos;
-
-  proj.transform(pt, PJ_INV);
-
-  if (!boundingBox.contains(pt)) {
+  QPointF pt;
+  if (!toRasterPixel(pos, pt)) {
     return NOFLOAT;
   }
-
-  pt = trInv.map(pt);
 
   qreal x = pt.x() - qFloor(pt.x());
   qreal y = pt.y() - qFloor(pt.y());
@@ -263,21 +288,15 @@ qreal CDemVRT::getSlopeAt(const QPointF& pos, bool checkScale) {
   {
     QMutexLocker lock(&mutex);
 
-    CPLErr err = dataset->RasterIO(GF_Read, qFloor(pt.x()) - 1, qFloor(pt.y()) - 1, 4, 4, &win, 4, 4, GDT_Float32, 1, 0,
-                                   0, 0, 0);
+    CPLErr err =
+        dataset->RasterIO(GF_Read, qFloor(pt.x()) - 1, qFloor(pt.y()) - 1, 4, 4, win, 4, 4, GDT_Float32, 1, 0, 0, 0, 0);
     if (err != CE_None) {
       return NOFLOAT;
     }
   }
 
-  for (int i = 0; i < eWinsize4x4; i++) {
-    if (hasNoData && win[i] == noData) {
-      return NOFLOAT;
-    }
-  }
-
-  qreal slope = slopeOfWindowInterp(win, eWinsize4x4, x, y);
-  return slope;
+  // slopeOfWindowInterp() already returns NOFLOAT if any sample in win is noData
+  return slopeOfWindowInterp(win, eWinsize4x4, x, y);
 }
 
 void CDemVRT::draw(IDrawContext::buffer_t& buf) {
@@ -305,27 +324,24 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
     buf_scale_y = 1.0;
   }
 
-  // corners of the area we shall draw
-  QPointF pt1 = buf.ref1;
-  QPointF pt2 = buf.ref2;
-  QPointF pt3 = buf.ref3;
-  QPointF pt4 = buf.ref4;
-
-  proj.transform(pt1, PJ_INV);
-  proj.transform(pt2, PJ_INV);
-  proj.transform(pt3, PJ_INV);
-  proj.transform(pt4, PJ_INV);
-
-  pt1 = trInv.map(pt1);
-  pt2 = trInv.map(pt2);
-  pt3 = trInv.map(pt3);
-  pt4 = trInv.map(pt4);
+  // corners of the area we shall draw, converted from the canvas projection into the
+  // DEM's own pixel coordinate space
+  auto toDemPixel = [this](QPointF pt) {
+    proj.transform(pt, PJ_INV);
+    return trInv.map(pt);
+  };
+  const QPointF pt1 = toDemPixel(buf.ref1);
+  const QPointF pt2 = toDemPixel(buf.ref2);
+  const QPointF pt3 = toDemPixel(buf.ref3);
+  const QPointF pt4 = toDemPixel(buf.ref4);
 
   // bounds of the area to draw in the coordinate space of the DEM
-  qreal left = pt1.x() < pt4.x() ? pt1.x() : pt4.x();
-  qreal right = pt2.x() > pt3.x() ? pt2.x() : pt3.x();
-  qreal top = pt1.y() < pt2.y() ? pt1.y() : pt2.y();
-  qreal bottom = pt4.y() > pt3.y() ? pt4.y() : pt3.y();
+  // use all four corners (not just the nominally adjacent pair) since a rotated
+  // geotransform or a skewing reprojection can move any corner to the extreme
+  qreal left = std::min({pt1.x(), pt2.x(), pt3.x(), pt4.x()});
+  qreal right = std::max({pt1.x(), pt2.x(), pt3.x(), pt4.x()});
+  qreal top = std::min({pt1.y(), pt2.y(), pt3.y(), pt4.y()});
+  qreal bottom = std::max({pt1.y(), pt2.y(), pt3.y(), pt4.y()});
 
   if ((top > ysize_px) || (left > xsize_px) || (bottom < 0) || (right < 0)) {
     // current view is entirely outside the bounds of the DEM so there is nothing to draw
@@ -387,13 +403,9 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
 
     // by requesting a different size than the size of the buffer GDAL will automatically do scaling for us and use
     // overviews
-    CPLErr err = dataset->GetRasterBand(1)->ReadRaster(
-        data.data(), static_cast<size_t>(w_buf) * h_buf, x, y, w_dem, h_dem, w_buf, h_buf, GRIORA_Bilinear,
-        [](double dfc, const char* msg, void* arg) -> int {
-          auto dem = reinterpret_cast<CDemDraw*>(arg);
-          return !dem->needsRedraw();
-        },
-        dem);
+    CPLErr err =
+        dataset->GetRasterBand(1)->ReadRaster(data.data(), static_cast<size_t>(w_buf) * h_buf, x, y, w_dem, h_dem,
+                                              w_buf, h_buf, GRIORA_Bilinear, &CDemVRT::progressCallback, dem);
 
     if (err != CE_None) {
       return;
@@ -405,8 +417,12 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
 
   QVector<uchar> outbuf(w_used * h_used);
 
+  // pointer to one of IDem's per-pixel shading methods (hillshading(), slopeShading(), ...)
   using shadeFnPtr =
-      void (CDemVRT::*)(QVector<float>&, QVector<uchar>&, quint32, quint32, quint32, quint32, quint32) const;
+      void (CDemVRT::*)(const QVector<float>&, QVector<uchar>&, quint32, quint32, quint32, quint32, quint32) const;
+  // run shadeFn over outbuf in parallel on a 4x4 grid of chunks, blocking until either all
+  // chunks are done (true) or a fresher redraw makes the result moot (false, with whatever
+  // work was already queued left to finish in the background)
   auto computeShading = [=, this, &data, &outbuf](shadeFnPtr shadeFn) {
     // run the shadings in paralell on equal sized chunks
     quint32 n_x = 4;
@@ -426,11 +442,27 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
         quint32 h_chunk = (i == n_y - 1) ? (h_used - y_chunk) : step_h_buf;
 
         threadPool.start([=, this, &data, &outbuf]() {
-          std::invoke(shadeFn, this, data, outbuf, x_chunk, y_chunk, w_used, w_chunk, h_chunk);
+          (this->*shadeFn)(data, outbuf, x_chunk, y_chunk, w_used, w_chunk, h_chunk);
         });
       }
     }
     threadPool.waitForDone();
+    return true;
+  };
+
+  // compute one shading layer and paint it into dest at the given opacity; colorTable
+  // may be null (e.g. for the alpha-only slope shading layer)
+  auto drawShadingLayer = [=, &outbuf](shadeFnPtr shadeFn, QImage::Format format, const QVector<QRgb>* colorTable,
+                                       qreal opacity, QPainter& p, const QRectF& dest) {
+    if (!computeShading(shadeFn)) {
+      return false;
+    }
+    QImage img(outbuf.constData(), w_used, h_used, w_used, format);
+    if (colorTable != nullptr) {
+      img.setColorTable(*colorTable);
+    }
+    p.setOpacity(opacity);
+    p.drawImage(dest, img);
     return true;
   };
 
@@ -444,8 +476,7 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
   p.translate(-pp);
 
   qreal o1 = getOpacity() / 100.0;
-  qreal o2 = ((o1 + 0.4) >= 1.0) ? o1 : (o1 + 0.4);
-  p.setOpacity(o1);
+  qreal o2 = qMin(o1 + 0.4, 1.0);
 
   // compute the destination rect we will draw the shadings into
   QPointF top_left = trFwd.map(QPointF(left, top));
@@ -456,84 +487,72 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
   dem->convertRad2Px(bottom_right);
   QRectF dest(top_left, bottom_right);
 
-  if (doHillshading()) {
-    if (!computeShading(&CDemVRT::hillshading)) {
-      return;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, QImage::Format_Indexed8);
-    img.setColorTable(graytable);
-    p.drawImage(dest, img);
+  if (doHillshading() && !drawShadingLayer(&CDemVRT::hillshading, QImage::Format_Indexed8, &graytable, o1, p, dest)) {
+    return;
   }
-  if (doSlopeShading()) {
-    if (!computeShading(&CDemVRT::slopeShading)) {
-      return;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, QImage::Format_Alpha8);
-    p.drawImage(dest, img);
+  if (doSlopeShading() && !drawShadingLayer(&CDemVRT::slopeShading, QImage::Format_Alpha8, nullptr, o1, p, dest)) {
+    return;
   }
-  if (doSlopeColor()) {
-    if (!computeShading(&CDemVRT::slopecolor)) {
-      return;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, QImage::Format_Indexed8);
-    img.setColorTable(slopetable);
-    p.setOpacity(o2);
-    p.drawImage(dest, img);
-    p.setOpacity(o1);
+  if (doSlopeColor() && !drawShadingLayer(&CDemVRT::slopecolor, QImage::Format_Indexed8, &slopetable, o2, p, dest)) {
+    return;
   }
-  if (doElevationLimit()) {
-    if (!computeShading(&CDemVRT::elevationLimit)) {
-      return;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, QImage::Format_Indexed8);
-    img.setColorTable(elevationtable);
-    p.setOpacity(o2);
-    p.drawImage(dest, img);
-    p.setOpacity(o1);
+  if (doElevationLimit() &&
+      !drawShadingLayer(&CDemVRT::elevationLimit, QImage::Format_Indexed8, &elevationtable, o2, p, dest)) {
+    return;
   }
-  if (doElevationShading()) {
-    if (!computeShading(&CDemVRT::elevationShading)) {
-      return;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, QImage::Format_Indexed8);
-    img.setColorTable(elevationShadeTable);
-    p.drawImage(dest, img);
+  if (doElevationShading() &&
+      !drawShadingLayer(&CDemVRT::elevationShading, QImage::Format_Indexed8, &elevationShadeTable, o1, p, dest)) {
+    return;
   }
 
   drawElevationShadeScale(p);
 }
 
 void CDemVRT::drawElevationShadeScale(QPainter& p) const {
-  if (doElevationShading() && doShowElevationShadeScale()) {
-    p.save();
-
-    // heading and limits
-    p.setOpacity(1.0);
-    QRect visibleCanvasArea = CMainWindow::self().getVisibleCanvas()->rect();
-    qreal limitLow = std::min(getElevationShadeLimitLow(), getElevationShadeLimitHi());
-    qreal limitHi = std::max(getElevationShadeLimitLow(), getElevationShadeLimitHi());
-    CDraw::text(tr("Ele."), p, QPointF(visibleCanvasArea.width() - 70, 30), Qt::black);
-
-    // labels
-    int nmbOfLabels = 7;
-    int yOffset = 30;
-    for (int i = 0; i < nmbOfLabels; i++) {
-      qreal meter = i / (double)(nmbOfLabels - 1) * (limitHi - limitLow) + limitLow;
-      QString val, unit;
-      IUnit::self().meter2elevation(meter, val, unit);
-      CDraw::text(QString("%1 %2").arg(val, unit), p,
-                  QPointF(visibleCanvasArea.width() - 70, 50 + (nmbOfLabels - 1 - i) * yOffset), Qt::black);
-    }
-
-    // color bar
-    for (int i = yOffset + 10; i <= nmbOfLabels * yOffset; i++) {
-      qreal hue = 240 * (1 - (double)(i - yOffset - 10.) / (nmbOfLabels * yOffset - yOffset - 10));
-      const QColor& color = QColor::fromHsv(hue, 255, 255);
-      p.setPen(color);
-      p.drawLine(QPointF(visibleCanvasArea.width() - 30, yOffset + 10 + (nmbOfLabels * yOffset) - i),
-                 QPointF(visibleCanvasArea.width() - 15, yOffset + 10 + (nmbOfLabels * yOffset) - i));
-    }
-
-    p.restore();
+  if (!doElevationShading() || !doShowElevationShadeScale()) {
+    return;
   }
+
+  // legend layout, anchored to the top-right corner of the visible canvas
+  constexpr int kLabelCount = 7;        // number of elevation labels shown
+  constexpr int kRowHeight = 30;        // vertical spacing between label rows
+  constexpr int kTextRightMargin = 70;  // x offset of the heading/labels from the right edge
+  constexpr int kHeadingY = 30;         // y position of the "Ele." heading
+  constexpr int kFirstLabelY = 50;      // y position of the lowest-elevation label
+  constexpr int kBarTopGap = 10;        // vertical gap between the heading row and the color bar
+  constexpr int kBarLeftX = 30;         // x offset of the color bar's left edge from the right edge
+  constexpr int kBarRightX = 15;        // x offset of the color bar's right edge from the right edge
+  constexpr int kBarTop = kRowHeight + kBarTopGap;
+  constexpr int kBarBottom = kLabelCount * kRowHeight;
+
+  p.save();
+
+  // heading and limits
+  p.setOpacity(1.0);
+  QRect visibleCanvasArea = CMainWindow::self().getVisibleCanvas()->rect();
+  qreal limitLow = std::min(getElevationShadeLimitLow(), getElevationShadeLimitHi());
+  qreal limitHi = std::max(getElevationShadeLimitLow(), getElevationShadeLimitHi());
+  CDraw::text(tr("Ele."), p, QPointF(visibleCanvasArea.width() - kTextRightMargin, kHeadingY), Qt::black);
+
+  // labels, evenly spaced from limitLow (bottom) to limitHi (top)
+  for (int i = 0; i < kLabelCount; i++) {
+    qreal meter = i / (double)(kLabelCount - 1) * (limitHi - limitLow) + limitLow;
+    QString val, unit;
+    IUnit::self().meter2elevation(meter, val, unit);
+    CDraw::text(
+        QString("%1 %2").arg(val, unit), p,
+        QPointF(visibleCanvasArea.width() - kTextRightMargin, kFirstLabelY + (kLabelCount - 1 - i) * kRowHeight),
+        Qt::black);
+  }
+
+  // color bar, drawn one pixel row at a time with the hue interpolated from blue (low) to red (high)
+  for (int i = kBarTop; i <= kBarBottom; i++) {
+    qreal hue = 240 * (1 - (double)(i - kBarTop) / (kBarBottom - kBarTop));
+    const QColor color = QColor::fromHsv(hue, 255, 255);
+    p.setPen(color);
+    p.drawLine(QPointF(visibleCanvasArea.width() - kBarLeftX, kBarTop + kBarBottom - i),
+               QPointF(visibleCanvasArea.width() - kBarRightX, kBarTop + kBarBottom - i));
+  }
+
+  p.restore();
 }
