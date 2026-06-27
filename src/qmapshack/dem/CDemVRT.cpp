@@ -29,42 +29,11 @@
 #include "CMainWindow.h"
 #include "dem/CDemDraw.h"
 #include "helpers/CDraw.h"
+#include "helpers/CGdalVrtUtil.h"
 #include "units/IUnit.h"
 
-int CDemVRT::progressCallback(double /*dfComplete*/, const char* /*message*/, void* pProgressArg) {
-  auto* drawCtx = reinterpret_cast<CDemDraw*>(pProgressArg);
-  return !drawCtx->needsRedraw();
-}
-
-bool CDemVRT::allReferencedFilesExist(GDALDataset* dataset, QString& missingFile) {
-  char** fileList = dataset->GetFileList();
-  bool allExist = true;
-  for (int n = 0; fileList != nullptr && fileList[n] != nullptr; ++n) {
-#if defined(Q_OS_WIN32)
-    missingFile = QString::fromLocal8Bit(fileList[n]);
-    if (QFileInfo::exists(missingFile)) {
-      continue;
-    }
-#endif  // defined(Q_OS_WIN32)
-    missingFile = QString::fromUtf8(fileList[n]);
-    if (QFileInfo::exists(missingFile)) {
-      continue;
-    }
-    allExist = false;
-    break;
-  }
-  CSLDestroy(fileList);
-  return allExist;
-}
-
-void CDemVRT::closeDataset(GDALDataset*& dataset) {
-  if (dataset != nullptr) {
-    GDALClose(dataset);
-    dataset = nullptr;
-  }
-}
-
-CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), filename(filename) {
+CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOverviewAdvisory)
+    : IDem(parent), filename(filename), supportsOverviewAdvisory(supportsOverviewAdvisory) {
   qDebug() << "------------------------------";
   qDebug() << "VRT: try to open" << filename;
 
@@ -76,8 +45,8 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   }
 
   QString missingFile;
-  if (!allReferencedFilesExist(dataset, missingFile)) {
-    closeDataset(dataset);
+  if (!CGdalVrtUtil::allReferencedFilesExist(dataset, missingFile)) {
+    CGdalVrtUtil::closeDataset(dataset);
     QMessageBox::warning(
         CMainWindow::getBestWidgetForParent(), tr("Error..."),
         tr("File does not exist:") % '\n' % missingFile % '\n' % tr("referenced by file:") % '\n' % filename);
@@ -85,7 +54,7 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   }
 
   if (dataset->GetRasterCount() != 1) {
-    closeDataset(dataset);
+    CGdalVrtUtil::closeDataset(dataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("DEM must have exactly one raster band:") % '\n' % filename);
     return;
@@ -93,23 +62,48 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
 
   GDALRasterBand* pBand = dataset->GetRasterBand(1);
   if (nullptr == pBand) {
-    closeDataset(dataset);
+    CGdalVrtUtil::closeDataset(dataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("DEM must have exactly one raster band:") % '\n' % filename);
     return;
   }
 
+  // Float64 included despite being implausible for real-world elevation storage: some WCS
+  // servers' DescribeCoverage responses don't pin down a concrete bit width, and GDAL's WCS
+  // driver then defaults to double. Harmless to allow - every read below requests GDT_Float32
+  // from GDAL regardless of source type, so this check is purely a plausibility gate, not a
+  // requirement of the I/O path.
   const GDALDataType bandType = pBand->GetRasterDataType();
   if (bandType != GDT_Int16 && bandType != GDT_UInt16 && bandType != GDT_Int32 && bandType != GDT_UInt32 &&
-      bandType != GDT_Float32) {
-    closeDataset(dataset);
+      bandType != GDT_Float32 && bandType != GDT_Float64) {
+    CGdalVrtUtil::closeDataset(dataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
-                         tr("DEM must have one band with 16bit or 32bit data:") % '\n' % filename);
+                         tr("DEM must have one band with 16bit, 32bit or 64bit numeric data:") % '\n' % filename);
     return;
   }
 
-  const bool hasOverviews = pBand->GetOverviewCount() != 0;
-  qDebug() << "has overviews" << hasOverviews;
+  // dataset's own size before any reprojection below replaces it with a warped VRT;
+  // used to rescale weakestMaxFactor into the final dataset's pixel grid further down
+  const qint32 preWarpXSize = pBand->GetXSize();
+  const qint32 preWarpYSize = pBand->GetYSize();
+
+  // skipped entirely for remote sources (CDemWCS, supportsOverviewAdvisory == false): the
+  // per-file fallback inside collectOverviewFactors() calls GetFileList() then GDALOpen()
+  // on every referenced "file" - meaningless, and an extra request against the same
+  // remote endpoint, for a source with no local files to inspect. Safe to skip:
+  // overviewAdvice/overviewFactors are only ever consulted below/in draw() when
+  // supportsOverviewAdvisory is also true.
+  CGdalVrtUtil::overview_factors_t overviewFactors;
+  if (supportsOverviewAdvisory) {
+    qreal masterGeoTransform[6];
+    const qreal masterPixelSizeX =
+        (dataset->GetGeoTransform(masterGeoTransform) == CE_None) ? qAbs(masterGeoTransform[1]) : 0.0;
+    overviewFactors = CGdalVrtUtil::collectOverviewFactors(dataset, pBand, masterPixelSizeX);
+    qDebug() << "overview factors" << overviewFactors.factors;
+    // DEM data is always single-band continuous elevation, never categorical/palette
+    overviewAdvice =
+        CGdalVrtUtil::buildOverviewAdvice(dataset, pBand, filename, /*isCategorical=*/false, overviewFactors);
+  }
 
   noData = pBand->GetNoDataValue(&hasNoData);
   qDebug() << "no data:" << hasNoData << noData;
@@ -125,7 +119,7 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
 
     GDALWarpOptions* psOptions = GDALCreateWarpOptions();
     psOptions->pProgressArg = dem;
-    psOptions->pfnProgress = &CDemVRT::progressCallback;
+    psOptions->pfnProgress = &CGdalVrtUtil::progressCallback;
 
     dataset = GDALDataset::FromHandle(GDALAutoCreateWarpedVRT(
         GDALDataset::ToHandle(srcDataset), nullptr, targetSRS.exportToWkt().c_str(), GRA_Bilinear, 0.1, psOptions));
@@ -133,25 +127,19 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
     GDALDestroyWarpOptions(psOptions);
 
     if (dataset == nullptr) {
-      closeDataset(srcDataset);
+      CGdalVrtUtil::closeDataset(srcDataset);
       QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                            tr("Failed to create Warp for:") % '\n' % filename);
       return;
     }
 
-    if (hasOverviews) {
-      // to make GDAL take advantage of overviews in the original dataset we need to add "virtual overviews" with the
-      // same decimation factors to the WarpedVRT so first build a list of the overviews the original dataset
-      // contains...
-      QVector<qint32> overviews(pBand->GetOverviewCount());
-      for (int i = 0; i < overviews.size(); ++i) {
-        GDALRasterBand* overview = pBand->GetOverview(i);
-        qreal decimationFactor = (qreal)pBand->GetXSize() / overview->GetXSize();
-        overviews[i] = qRound(decimationFactor);
-      }
-      // ...and attach them as virtual overview
+    if (!overviewFactors.factors.isEmpty()) {
+      // attach them as virtual overviews so GDAL can serve a decimated read straight from
+      // whichever source file(s) actually have a matching level, instead of always warping
+      // at full resolution and only downsampling the output
       CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "YES");
-      dataset->BuildOverviews("NONE", overviews.size(), overviews.data(), 0, nullptr, nullptr, nullptr);
+      dataset->BuildOverviews("NONE", overviewFactors.factors.size(), overviewFactors.factors.data(), 0, nullptr,
+                              nullptr, nullptr);
       CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "NO");
     }
   }
@@ -160,8 +148,8 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   proj.init(dataset->GetProjectionRef(), "EPSG:4326");
 
   if (!proj.isValid()) {
-    closeDataset(dataset);
-    closeDataset(srcDataset);
+    CGdalVrtUtil::closeDataset(dataset);
+    CGdalVrtUtil::closeDataset(srcDataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("No georeference information found:") % '\n' % filename);
     return;
@@ -170,10 +158,23 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
   xsize_px = dataset->GetRasterXSize();
   ysize_px = dataset->GetRasterYSize();
 
+  if (supportsOverviewAdvisory) {
+    // a reprojection (the warp block above) can change the dataset's own pixel density -
+    // e.g. between a projected CRS in meters and a geographic CRS in degrees, or simply a
+    // different output resolution GDAL chose - so rescale weakestMaxFactor (collected
+    // pre-warp, in the original dataset's own pixel grid) into the current dataset's
+    // pixel grid, matching what draw()'s neededFactor (derived from the current
+    // xscale/yscale) is compared against. A no-op (ratio 1.0) whenever no warp happened,
+    // since the raster size is then unchanged.
+    const qreal warpScale =
+        qMax(static_cast<qreal>(xsize_px) / preWarpXSize, static_cast<qreal>(ysize_px) / preWarpYSize);
+    overviewAdvice.weakestMaxFactor = qMax(1, qRound(overviewAdvice.weakestMaxFactor * warpScale));
+  }
+
   qreal adfGeoTransform[6];
   if (dataset->GetGeoTransform(adfGeoTransform) != CE_None) {
-    closeDataset(dataset);
-    closeDataset(srcDataset);
+    CGdalVrtUtil::closeDataset(dataset);
+    CGdalVrtUtil::closeDataset(srcDataset);
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
                          tr("No pixel-to-map transform found:") % '\n' % filename);
     return;
@@ -223,8 +224,18 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent) : IDem(parent), file
 CDemVRT::~CDemVRT() {
   threadPool.waitForDone();
   QMutexLocker lock(&mutex);
-  closeDataset(dataset);
-  closeDataset(srcDataset);
+  CGdalVrtUtil::closeDataset(dataset);
+  CGdalVrtUtil::closeDataset(srcDataset);
+}
+
+void CDemVRT::saveConfig(QSettings& cfg) {
+  IDem::saveConfig(cfg);
+  cfg.setValue("suppressOverviewAdvisory", suppressOverviewAdvisory.load());
+}
+
+void CDemVRT::loadConfig(QSettings& cfg) {
+  IDem::loadConfig(cfg);
+  suppressOverviewAdvisory = cfg.value("suppressOverviewAdvisory", suppressOverviewAdvisory.load()).toBool();
 }
 
 void CDemVRT::slotNeedsRedraw() { threadPool.clear(); }
@@ -386,7 +397,10 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
     return;
   }
 
-  QVector<float> data(static_cast<qsizetype>(w_buf) * h_buf);
+  CGdalVrtUtil::read_deadline_t deadline{dem};
+  deadline.timer.start();
+
+  data.resize(static_cast<qsizetype>(w_buf) * h_buf);
   {
     QMutexLocker lock(&mutex);
 
@@ -403,11 +417,29 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
 
     // by requesting a different size than the size of the buffer GDAL will automatically do scaling for us and use
     // overviews
-    CPLErr err =
-        dataset->GetRasterBand(1)->ReadRaster(data.data(), static_cast<size_t>(w_buf) * h_buf, x, y, w_dem, h_dem,
-                                              w_buf, h_buf, GRIORA_Bilinear, &CDemVRT::progressCallback, dem);
+    CPLErr err = dataset->GetRasterBand(1)->ReadRaster(data.data(), static_cast<size_t>(w_buf) * h_buf, x, y, w_dem,
+                                                       h_dem, w_buf, h_buf, GRIORA_Bilinear,
+                                                       &CGdalVrtUtil::progressCallbackWithDeadline, &deadline);
 
     if (err != CE_None) {
+      if (deadline.timedOut) {
+        // unlike an abort caused by a fresher redraw already being queued, a timeout
+        // abort leaves nothing else asking for a follow-up redraw - without one, this
+        // layer would stay blank until some unrelated event (pan/zoom) happens to
+        // trigger a full redraw, even once the underlying slowness is fixed
+        dem->emitSigCanvasUpdate();
+
+        if (supportsOverviewAdvisory && !suppressOverviewAdvisory && !advisoryShownThisSession) {
+          // overviews missing entirely, or the weakest referenced file's deepest overview
+          // still isn't decimated enough for what this read needed (e.g. a mosaic of files
+          // with wildly inconsistent overview depths)
+          const qreal neededFactor = qMax(buf_scale_x, buf_scale_y);
+          if (overviewAdvice.overviewsMissing || neededFactor > overviewAdvice.weakestMaxFactor) {
+            advisoryShownThisSession = true;
+            dem->emitOverviewAdvisory(this);
+          }
+        }
+      }
       return;
     }
   }
@@ -415,15 +447,34 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
   quint32 w_used = w_buf - 2;
   quint32 h_used = h_buf - 2;
 
-  QVector<uchar> outbuf(w_used * h_used);
+  // resize and wire up only the buffers for layers that are actually enabled;
+  // computeShading() skips any layer whose shading_buffers_t entry is left null
+  shading_buffers_t buffers;
+  if (doHillshading()) {
+    hillshadeBuf.resize(w_used * h_used);
+    buffers.hillshade = &hillshadeBuf;
+  }
+  if (doSlopeShading()) {
+    slopeShadeBuf.resize(w_used * h_used);
+    buffers.slopeShade = &slopeShadeBuf;
+  }
+  if (doSlopeColor()) {
+    slopeColorBuf.resize(w_used * h_used);
+    buffers.slopeColor = &slopeColorBuf;
+  }
+  if (doElevationLimit()) {
+    elevationLimitBuf.resize(w_used * h_used);
+    buffers.elevationLimit = &elevationLimitBuf;
+  }
+  if (doElevationShading()) {
+    elevationShadeBuf.resize(w_used * h_used);
+    buffers.elevationShade = &elevationShadeBuf;
+  }
 
-  // pointer to one of IDem's per-pixel shading methods (hillshading(), slopeShading(), ...)
-  using shadeFnPtr =
-      void (CDemVRT::*)(const QVector<float>&, QVector<uchar>&, quint32, quint32, quint32, quint32, quint32) const;
-  // run shadeFn over outbuf in parallel on a 4x4 grid of chunks, blocking until either all
-  // chunks are done (true) or a fresher redraw makes the result moot (false, with whatever
-  // work was already queued left to finish in the background)
-  auto computeShading = [=, this, &data, &outbuf](shadeFnPtr shadeFn) {
+  // compute every enabled layer for the whole image in parallel on a 4x4 grid of chunks,
+  // blocking until either all chunks are done (true) or a fresher redraw makes the result
+  // moot (false, with whatever work was already queued left to finish in the background)
+  auto computeAllShading = [=, this]() {
     // run the shadings in paralell on equal sized chunks
     quint32 n_x = 4;
     quint32 n_y = 4;
@@ -441,30 +492,16 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
         quint32 w_chunk = (j == n_x - 1) ? (w_used - x_chunk) : step_w_buf;
         quint32 h_chunk = (i == n_y - 1) ? (h_used - y_chunk) : step_h_buf;
 
-        threadPool.start([=, this, &data, &outbuf]() {
-          (this->*shadeFn)(data, outbuf, x_chunk, y_chunk, w_used, w_chunk, h_chunk);
-        });
+        threadPool.start([=, this]() { computeShading(data, buffers, x_chunk, y_chunk, w_used, w_chunk, h_chunk); });
       }
     }
     threadPool.waitForDone();
     return true;
   };
 
-  // compute one shading layer and paint it into dest at the given opacity; colorTable
-  // may be null (e.g. for the alpha-only slope shading layer)
-  auto drawShadingLayer = [=, &outbuf](shadeFnPtr shadeFn, QImage::Format format, const QVector<QRgb>* colorTable,
-                                       qreal opacity, QPainter& p, const QRectF& dest) {
-    if (!computeShading(shadeFn)) {
-      return false;
-    }
-    QImage img(outbuf.constData(), w_used, h_used, w_used, format);
-    if (colorTable != nullptr) {
-      img.setColorTable(*colorTable);
-    }
-    p.setOpacity(opacity);
-    p.drawImage(dest, img);
-    return true;
-  };
+  if (!computeAllShading()) {
+    return;
+  }
 
   // get pixel offset of top left buffer corner
   QPointF pp = buf.ref1;
@@ -487,22 +524,32 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
   dem->convertRad2Px(bottom_right);
   QRectF dest(top_left, bottom_right);
 
-  if (doHillshading() && !drawShadingLayer(&CDemVRT::hillshading, QImage::Format_Indexed8, &graytable, o1, p, dest)) {
-    return;
+  // paint one already-computed layer into dest at the given opacity; colorTable may be
+  // null (e.g. for the alpha-only slope shading layer)
+  auto paintLayer = [&](const QVector<quint8>& layerBuf, QImage::Format format, const QVector<QRgb>* colorTable,
+                        qreal opacity) {
+    QImage img(layerBuf.constData(), w_used, h_used, w_used, format);
+    if (colorTable != nullptr) {
+      img.setColorTable(*colorTable);
+    }
+    p.setOpacity(opacity);
+    p.drawImage(dest, img);
+  };
+
+  if (doHillshading()) {
+    paintLayer(hillshadeBuf, QImage::Format_Indexed8, &graytable, o1);
   }
-  if (doSlopeShading() && !drawShadingLayer(&CDemVRT::slopeShading, QImage::Format_Alpha8, nullptr, o1, p, dest)) {
-    return;
+  if (doSlopeShading()) {
+    paintLayer(slopeShadeBuf, QImage::Format_Alpha8, nullptr, o1);
   }
-  if (doSlopeColor() && !drawShadingLayer(&CDemVRT::slopecolor, QImage::Format_Indexed8, &slopetable, o2, p, dest)) {
-    return;
+  if (doSlopeColor()) {
+    paintLayer(slopeColorBuf, QImage::Format_Indexed8, &slopetable, o2);
   }
-  if (doElevationLimit() &&
-      !drawShadingLayer(&CDemVRT::elevationLimit, QImage::Format_Indexed8, &elevationtable, o2, p, dest)) {
-    return;
+  if (doElevationLimit()) {
+    paintLayer(elevationLimitBuf, QImage::Format_Indexed8, &elevationtable, o2);
   }
-  if (doElevationShading() &&
-      !drawShadingLayer(&CDemVRT::elevationShading, QImage::Format_Indexed8, &elevationShadeTable, o1, p, dest)) {
-    return;
+  if (doElevationShading()) {
+    paintLayer(elevationShadeBuf, QImage::Format_Indexed8, &elevationShadeTable, o1);
   }
 
   drawElevationShadeScale(p);

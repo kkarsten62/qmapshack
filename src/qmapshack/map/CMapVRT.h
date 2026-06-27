@@ -19,11 +19,13 @@
 #ifndef CMAPVRT_H
 #define CMAPVRT_H
 
+#include <atomic>
+
+#include "helpers/CGdalVrtUtil.h"
 #include "map/IMap.h"
 
 class CMapDraw;
 class GDALDataset;
-class GDALRasterBand;
 class QPainter;
 
 /**
@@ -49,49 +51,25 @@ class CMapVRT : public IMap {
   CMapVRT(const QString& filename, CMapDraw* parent);
   virtual ~CMapVRT();
 
+  /// @brief Persist the overview-advisory-dialog suppression flag in addition to IMap::saveConfig().
+  void saveConfig(QSettings& cfg) override;
+
+  /// @brief Restore what saveConfig() persisted.
+  void loadConfig(QSettings& cfg) override;
+
   void draw(IDrawContext::buffer_t& buf) override;
 
+  /// @brief The path passed to the constructor; used by the overview advisory dialog.
+  const QString& getFilename() const { return filename; }
+
+  /// @brief Cached suggested-overview info for this file; used by the overview advisory dialog.
+  const CGdalVrtUtil::overview_advice_t& getOverviewAdvice() const { return overviewAdvice; }
+
+ public slots:
+  /// @brief Set by the overview advisory dialog's "don't show again for this file" checkbox.
+  void slotSetSuppressOverviewAdvisory(bool yes) { suppressOverviewAdvisory = yes; }
+
  private:
-  /**
-     @brief Check that every file GDAL reports as part of the dataset (e.g. the files a
-            VRT references) actually exists on disk.
-     @param dataset     the dataset to check
-     @param missingFile set to the first referenced file that could not be found; left
-                         unchanged if all files exist
-     @return false if a referenced file is missing
-   */
-  static bool allReferencedFilesExist(GDALDataset* dataset, QString& missingFile);
-
-  /**
-     @brief Collect virtual-overview decimation factors for dataset, in dataset's own pixel
-            scale.
-
-     Prefers dataset's own overview list. If dataset reports none - e.g. a gdalbuildvrt
-     mosaic whose <OverviewList> is stale, was never written because not every source had
-     overviews when the mosaic was built, or still has one source that lacks them - falls
-     back to the union of overview factors found across the individual files dataset depends
-     on, so one under-prepared source no longer disables overview-accelerated reads for the
-     whole mosaic. Each file's factors are converted via its own geotransform pixel size
-     rather than reused as raw pixel ratios, so sources of differing native resolution stay
-     consistent with dataset's own grid.
-     @param dataset    the (pre-warp) dataset to collect overview factors for
-     @param pBand      dataset's band 1
-     @param pixelSizeX the real-world size of one of dataset's own pixels along x; pass 0 if
-                       unknown to skip the per-file fallback entirely
-     @return sorted, de-duplicated decimation factors; empty if none are available anywhere
-   */
-  static QVector<qint32> collectOverviewFactors(GDALDataset* dataset, GDALRasterBand* pBand, qreal pixelSizeX);
-
-  /**
-     @brief GDAL progress callback aborting the read once a newer redraw has been
-            requested.
-     @param pProgressArg the CMapDraw passed in as progress callback context
-   */
-  static int progressCallback(double dfComplete, const char* message, void* pProgressArg);
-
-  /// Close a GDAL dataset and reset the pointer, tolerating a null dataset.
-  static void closeDataset(GDALDataset*& dataset);
-
   /// Close dataset and srcDataset (either may already be null, e.g. if construction
   /// failed before a warped VRT was needed) and show msg in an error dialog.
   void fail(const QString& msg);
@@ -106,6 +84,11 @@ class CMapVRT : public IMap {
     qreal bottom;
     qint32 bufWidth;
     qint32 bufHeight;
+    /// the clamped (>=1.0) decimation factor computeSourceWindow() used to size
+    /// bufWidth/bufHeight; exposed so draw() can reuse the exact same values for its
+    /// overview-advisory needed-factor check instead of recomputing them
+    qreal bufScaleX;
+    qreal bufScaleY;
   };
 
   /**
@@ -121,11 +104,14 @@ class CMapVRT : public IMap {
 
   /**
      @brief Read window from dataset into a QImage.
-     @param window the area/resolution to read, as computed by computeSourceWindow()
+     @param window  the area/resolution to read, as computed by computeSourceWindow()
+     @param deadline shared render-timeout budget for every ReadRaster() call this draw()
+                     makes (the multi-band loop reads one band per call); deadline.timedOut
+                     is set if any of them aborts due to the timeout
      @return Format_Indexed8 image for single-band palette/gray data, Format_ARGB32 for
              multi-band; a null QImage if the GDAL read failed or was aborted
    */
-  QImage readSourceImage(const sourceWindow_t& window);
+  QImage readSourceImage(const sourceWindow_t& window, CGdalVrtUtil::read_deadline_t& deadline);
 
   /**
      @brief Composite img onto p at the screen position/orientation matching window.
@@ -184,6 +170,20 @@ class CMapVRT : public IMap {
   QTransform trFwd;
   /// trFwd inverted: maps the dataset's CRS back to this map's pixel coordinates
   QTransform trInv;
+
+  /// suggested gdaladdo command(s), computed once at construction from the dataset's own
+  /// characteristics; reused (never re-derived) whenever draw() hits the render timeout
+  CGdalVrtUtil::overview_advice_t overviewAdvice;
+
+  /// persisted via saveConfig()/loadConfig(): true once the user checked "don't show
+  /// again" on the overview advisory dialog for this file. Written by
+  /// slotSetSuppressOverviewAdvisory()/loadConfig() (GUI thread), read by draw() (canvas
+  /// thread) - must be atomic to avoid a data race across that boundary.
+  std::atomic<bool> suppressOverviewAdvisory = false;
+
+  /// not persisted: true once the advisory has been shown for this loaded instance, so
+  /// panning/zooming a slow file doesn't reopen the dialog on every redraw
+  bool advisoryShownThisSession = false;
 };
 
 #endif  // CMAPVRT_H

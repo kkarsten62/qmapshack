@@ -24,6 +24,7 @@
 #include <atomic>
 
 #include "dem/IDem.h"
+#include "helpers/CGdalVrtUtil.h"
 
 class CDemDraw;
 class GDALDataset;
@@ -64,11 +65,27 @@ class CDemVRT : public IDem {
 
      @param filename path of a file GDAL can open as a single-band raster
      @param parent    the owning CDemDraw, forwarded to IDem
+     @param supportsOverviewAdvisory false for remote sources (CDemWCS): skips collecting
+                       overview-advisory info entirely, not just showing the dialog for
+                       it, since collectOverviewFactors()'s per-file fallback calls
+                       GetFileList() then GDALOpen() on every referenced "file" -
+                       meaningless for a source with no local files to inspect. Must be a
+                       constructor parameter, not a virtual method CDemWCS overrides: a
+                       virtual call made while CDemVRT's own constructor is still running
+                       always resolves to CDemVRT's own implementation, never a derived
+                       override, since the derived part of the object hasn't been
+                       constructed yet.
    */
-  CDemVRT(const QString& filename, CDemDraw* parent);
+  CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOverviewAdvisory = true);
 
   /// Waits for any in-flight threadPool work to finish, then closes the GDAL dataset(s).
   virtual ~CDemVRT();
+
+  /// @brief Persist the overview-advisory-dialog suppression flag in addition to IDem::saveConfig().
+  void saveConfig(QSettings& cfg) override;
+
+  /// @brief Restore what saveConfig() persisted.
+  void loadConfig(QSettings& cfg) override;
 
   /**
      @brief Render the requested view rectangle's hillshading/slope/elevation layers
@@ -104,6 +121,16 @@ class CDemVRT : public IDem {
    */
   qreal getSlopeAt(const QPointF& pos, bool checkScale) override;
 
+  /// @brief The path passed to the constructor; used by the overview advisory dialog.
+  const QString& getFilename() const { return filename; }
+
+  /// @brief Cached suggested-overview info for this file; used by the overview advisory dialog.
+  const CGdalVrtUtil::overview_advice_t& getOverviewAdvice() const { return overviewAdvice; }
+
+ public slots:
+  /// @brief Set by the overview advisory dialog's "don't show again for this file" checkbox.
+  void slotSetSuppressOverviewAdvisory(bool yes) { suppressOverviewAdvisory = yes; }
+
  private slots:
   /// Cancel any shading work still queued/running for a draw() call that is now stale.
   void slotNeedsRedraw();
@@ -120,32 +147,6 @@ class CDemVRT : public IDem {
      @return false if pos lies outside the DEM's bounding box
    */
   bool toRasterPixel(const QPointF& pos, QPointF& pixel) const;
-
-  /**
-     @brief Check that every file GDAL reports as part of the dataset (e.g. the files a
-            VRT references) actually exists on disk.
-     @param dataset     the dataset to check
-     @param missingFile set to the first referenced file that could not be found; left
-                         unchanged if all files exist
-     @return false if a referenced file is missing
-   */
-  static bool allReferencedFilesExist(GDALDataset* dataset, QString& missingFile);
-
-  /**
-     @brief GDAL progress callback aborting the read once a newer redraw has been
-            requested.
-     @param pProgressArg the CDemDraw passed in as progress callback context
-   */
-  static int progressCallback(double dfComplete, const char* message, void* pProgressArg);
-
-  /**
-     @brief Close a GDAL dataset and reset the pointer, tolerating a null dataset.
-
-     GDALClose() logs a CPL error when passed a null handle instead of just ignoring
-     it, so every call site needs this guard - which happens whenever no warped VRT
-     was needed (srcDataset stays null) or construction failed before dataset was set.
-   */
-  static void closeDataset(GDALDataset*& dataset);
 
   /// guards all access to dataset/srcDataset (see class-level @note)
   mutable QMutex mutex;
@@ -174,9 +175,46 @@ class CDemVRT : public IDem {
   /// queries outside dataset coverage before touching GDAL
   QRectF boundingBox;
 
+  /// false for remote sources (CDemWCS, via the constructor parameter of the same name) -
+  /// set once at construction, never changes, so draw() can read it directly instead of
+  /// through a virtual call (see the constructor's doc comment for why it has to be a
+  /// constructor parameter rather than a virtual method)
+  const bool supportsOverviewAdvisory;
+
+  /// suggested gdaladdo command(s), computed once at construction from the dataset's own
+  /// characteristics (skipped entirely when !supportsOverviewAdvisory); reused (never
+  /// re-derived) whenever draw() hits the render timeout
+  CGdalVrtUtil::overview_advice_t overviewAdvice;
+
+  /// persisted via saveConfig()/loadConfig(): true once the user checked "don't show
+  /// again" on the overview advisory dialog for this file. Written by
+  /// slotSetSuppressOverviewAdvisory()/loadConfig() (GUI thread), read by draw() (canvas
+  /// thread) - atomic for the same reason as outOfScale above.
+  std::atomic<bool> suppressOverviewAdvisory = false;
+
+  /// not persisted: true once the advisory has been shown for this loaded instance, so
+  /// panning/zooming a slow file doesn't reopen the dialog on every redraw
+  bool advisoryShownThisSession = false;
+
   /// runs the per-chunk shading work started by draw(); cancelled by slotNeedsRedraw()
   /// when a fresher redraw has been requested
   QThreadPool threadPool;
+
+  /// draw()'s read buffer for raw elevation samples; kept as a member (resized, not
+  /// reallocated, per draw()) so repeated redraws at a stable viewport size don't churn
+  /// the heap every frame; see CMapVRT::indexData/bandBuf for the same pattern. Only ever
+  /// touched from draw() (canvas thread), so no mutex is needed.
+  QVector<float> data;
+
+  /// draw()'s output buffers, one per shading layer (IDem::computeShading() computes every
+  /// enabled layer in a single pass, so they must all coexist until painted, unlike data
+  /// they can't share one buffer). Same reuse rationale as data; a layer that's never been
+  /// enabled simply stays empty.
+  QVector<quint8> hillshadeBuf;
+  QVector<quint8> slopeShadeBuf;
+  QVector<quint8> slopeColorBuf;
+  QVector<quint8> elevationLimitBuf;
+  QVector<quint8> elevationShadeBuf;
 };
 
 #endif  // CDEMVRT_H

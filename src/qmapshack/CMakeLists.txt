@@ -186,10 +186,12 @@ set( SRCS
     helpers/CDraw.cpp
     helpers/CElevationDialog.cpp
     gis/search/CSearch.cpp
+    helpers/CGdalVrtUtil.cpp
     helpers/CInputDialog.cpp
     helpers/CLimit.cpp
     helpers/CLinksDialog.cpp
     helpers/CMapIconSizesSetup.cpp
+    helpers/COverviewAdvisoryDialog.cpp
     helpers/CPhotoViewer.cpp
     helpers/CPositionDialog.cpp
     helpers/CProgressDialog.cpp
@@ -563,11 +565,13 @@ set( HDRS
     helpers/CDraw.h
     helpers/CElevationDialog.h
     helpers/CFileExt.h
+    helpers/CGdalVrtUtil.h
     gis/search/CSearch.h
     helpers/CInputDialog.h
     helpers/CLimit.h
     helpers/CLinksDialog.h
     helpers/CMapIconSizesSetup.h
+    helpers/COverviewAdvisoryDialog.h
     helpers/CPhotoViewer.h
     helpers/CPositionDialog.h
     helpers/CProgressDialog.h
@@ -864,6 +868,7 @@ set( UIS
     helpers/IInputDialog.ui
     helpers/ILinksDialog.ui
     helpers/IMapIconSizesSetup.ui
+    helpers/IOverviewAdvisoryDialog.ui
     helpers/IPositionDialog.ui
     helpers/IProgressDialog.ui
     helpers/ISelectCopyAction.ui
