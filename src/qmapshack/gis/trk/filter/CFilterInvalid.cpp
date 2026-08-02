@@ -20,6 +20,7 @@
 
 #include "canvas/CCanvas.h"
 #include "gis/trk/CGisItemTrk.h"
+#include "svgticon/CSvgtIcon.h"
 
 CFilterInvalid::CFilterInvalid(CGisItemTrk& trk, QWidget* parent)
     : QWidget(parent),
@@ -27,6 +28,7 @@ CFilterInvalid::CFilterInvalid(CGisItemTrk& trk, QWidget* parent)
 
 {
   setupUi(this);
+  CSvgtIcon::load(labelIcon, "://icons/PointHide.svgt");
 
   connect(toolApply, &QToolButton::clicked, this, &CFilterInvalid::slotApply);
 }

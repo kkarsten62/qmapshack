@@ -19,8 +19,6 @@
 #ifndef CMAPVRT_H
 #define CMAPVRT_H
 
-#include <atomic>
-
 #include "helpers/CGdalVrtUtil.h"
 #include "map/IMap.h"
 
@@ -65,9 +63,18 @@ class CMapVRT : public IMap {
   /// @brief Cached suggested-overview info for this file; used by the overview advisory dialog.
   const CGdalVrtUtil::overview_advice_t& getOverviewAdvice() const { return overviewAdvice; }
 
- public slots:
+  /// @brief Cached dimensions/pixel size for the overview advisory dialog's informational line.
+  const CGdalVrtUtil::raster_geometry_t& getRasterGeometry() const { return rasterGeometry; }
+
   /// @brief Set by the overview advisory dialog's "don't show again for this file" checkbox.
-  void slotSetSuppressOverviewAdvisory(bool yes) { suppressOverviewAdvisory = yes; }
+  void setSuppressOverviewAdvisory(bool yes) { advisoryState.suppress = yes; }
+  /// @brief Current "don't show again" state; seeds the dialog checkbox so an open+close round-trips.
+  bool suppressOverviewAdvisory() const { return advisoryState.suppress; }
+  /// @brief Set true while the advisory dialog is open; suppresses draw retries during that time.
+  void setAdvisoryOpen(bool yes) { advisoryState.open = yes; }
+
+  bool showsOverviewWarning() const override { return !advisoryState.suppress && overviewNeedsAttention; }
+  bool hasOverviewInfo() const override { return true; }
 
  private:
   /// Close dataset and srcDataset (either may already be null, e.g. if construction
@@ -174,16 +181,16 @@ class CMapVRT : public IMap {
   /// suggested gdaladdo command(s), computed once at construction from the dataset's own
   /// characteristics; reused (never re-derived) whenever draw() hits the render timeout
   CGdalVrtUtil::overview_advice_t overviewAdvice;
+  /// Cached overviewAdvice.needsAttention() - immutable after setup; polled per paint by the tree delegate.
+  bool overviewNeedsAttention = false;
 
-  /// persisted via saveConfig()/loadConfig(): true once the user checked "don't show
-  /// again" on the overview advisory dialog for this file. Written by
-  /// slotSetSuppressOverviewAdvisory()/loadConfig() (GUI thread), read by draw() (canvas
-  /// thread) - must be atomic to avoid a data race across that boundary.
-  std::atomic<bool> suppressOverviewAdvisory = false;
+  /// Suppression/session/open-dialog bookkeeping for the overview advisory; identical
+  /// shape shared with CDemVRT, see CGdalVrtUtil::overview_advisory_state_t.
+  CGdalVrtUtil::overview_advisory_state_t advisoryState;
 
-  /// not persisted: true once the advisory has been shown for this loaded instance, so
-  /// panning/zooming a slow file doesn't reopen the dialog on every redraw
-  bool advisoryShownThisSession = false;
+  /// Cached dimensions/pixel size, computed once at construction; used by the overview
+  /// advisory dialog's informational line.
+  CGdalVrtUtil::raster_geometry_t rasterGeometry;
 };
 
 #endif  // CMAPVRT_H

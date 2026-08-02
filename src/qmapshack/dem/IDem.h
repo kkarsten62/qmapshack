@@ -113,6 +113,23 @@ class IDem : public IDrawObject {
   bool activated() const { return isActivated; }
 
   /**
+     @brief True if this DEM's overview pyramid needs attention (missing or too shallow)
+            and that hasn't been suppressed for this file.
+
+     Always false except for CDemVRT, where it drives the proactive warning badge in
+     CMapItemDelegate - the same underlying advice used by the reactive advisory dialog
+     that fires on a render timeout, just queried ahead of any render.
+   */
+  virtual bool showsOverviewWarning() const { return false; }
+
+  /**
+     @brief True if this DEM has overview-pyramid info available to show on demand
+            (independent of showsOverviewWarning() - available whether or not there's
+            actually anything to fix). Always false except for CDemVRT.
+   */
+  virtual bool hasOverviewInfo() const { return false; }
+
+  /**
      @brief Get the dem's setup widget.
 
      As default an instance of CDemPropSetup is used. For other setups you have

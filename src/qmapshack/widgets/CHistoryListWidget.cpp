@@ -32,9 +32,9 @@ CHistoryListWidget::CHistoryListWidget(QWidget* parent) : QListWidget(parent) {
 
   menu = new QMenu(this);
 
-  actionCutHistoryBefore = menu->addAction(QIcon("://icons/32x32/CutHistoryBefore.png"), tr("Cut history before"), this,
+  actionCutHistoryBefore = menu->addAction(QIcon("://icons/CutHistoryBefore.svgt"), tr("Cut history before"), this,
                                            &CHistoryListWidget::slotCutHistoryBefore);
-  actionCutHistoryAfter = menu->addAction(QIcon("://icons/32x32/CutHistoryAfter.png"), tr("Cut history after"), this,
+  actionCutHistoryAfter = menu->addAction(QIcon("://icons/CutHistoryAfter.svgt"), tr("Cut history after"), this,
                                           &CHistoryListWidget::slotCutHistoryAfter);
 }
 
@@ -64,7 +64,9 @@ void CHistoryListWidget::setupHistory(IGisItem& gisItem) {
     str += event.comment;
 
     item->setText(str);
-    item->setIcon(QIcon(event.icon));
+    // event.icon already holds the ".svgt" after load; displayIconPath() is a redundant safety net
+    // for a raw PNG that somehow never went through the loader.
+    item->setIcon(QIcon(IGisItem::displayIconPath(event.icon)));
     if (event.data.isEmpty()) {
       item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
     }

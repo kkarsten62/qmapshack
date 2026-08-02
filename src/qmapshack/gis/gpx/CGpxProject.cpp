@@ -18,6 +18,7 @@
 
 #include "gis/gpx/CGpxProject.h"
 
+#include <QSet>
 #include <QtWidgets>
 
 #include "CMainWindow.h"
@@ -32,14 +33,14 @@
 #include "misc.h"
 
 CGpxProject::CGpxProject(const QString& filename, CGisListWks* parent) : IGisProject(eTypeGpx, filename, parent) {
-  icon = QPixmap("://icons/32x32/GpxProject.png");
+  icon = QIcon("://icons/GpxProject.svgt");
   blockUpdateItems(true);
   loadGpx(filename);
   blockUpdateItems(false);
 }
 
 CGpxProject::CGpxProject(const QString& filename, IDevice* parent) : IGisProject(eTypeGpx, filename, parent) {
-  icon = QPixmap("://icons/32x32/GpxProject.png");
+  icon = QIcon("://icons/GpxProject.svgt");
   blockUpdateItems(true);
   loadGpx(filename);
   blockUpdateItems(false);
@@ -47,7 +48,7 @@ CGpxProject::CGpxProject(const QString& filename, IDevice* parent) : IGisProject
 
 CGpxProject::CGpxProject(QFile& file, const QString& filename, IDevice* parent)
     : IGisProject(eTypeGpx, filename, parent) {
-  icon = QPixmap("://icons/32x32/GpxProject.png");
+  icon = QIcon("://icons/GpxProject.svgt");
   blockUpdateItems(true);
   loadGpx(file, filename, this);
   setName(QFileInfo(filename).completeBaseName().replace("_", " "));
@@ -58,7 +59,7 @@ CGpxProject::CGpxProject(QFile& file, const QString& filename, IDevice* parent)
 
 CGpxProject::CGpxProject(const QString& filename, const IGisProject* project, IDevice* parent)
     : IGisProject(eTypeGpx, filename, parent) {
-  icon = QPixmap("://icons/32x32/GpxProject.png");
+  icon = QIcon("://icons/GpxProject.svgt");
   *(IGisProject*)this = *project;
   blockUpdateItems(project->isNoUpdate());
 
@@ -128,6 +129,10 @@ void CGpxProject::loadGpx(QFile& file, const QString& filename, CGpxProject* pro
 
   // Read all attributes and find any registrations for actually known extensions.
   // This is used to properly detect valid .gpx files using uncommon namespaces.
+  QSet<QString> knownNamespaceUris = {gpx_ns, xsi_ns};
+  for (const namespace_decl_t& ns : extensionNamespaces()) {
+    knownNamespaceUris.insert(ns.uri);
+  }
   QDomNamedNodeMap attributes = xmlGpx.attributes();
   for (int i = 0; i < attributes.size(); ++i) {
     const QString xmlns("xmlns");
@@ -140,6 +145,10 @@ void CGpxProject::loadGpx(QFile& file, const QString& filename, CGpxProject* pro
         CKnownExtension::initGarminTPXv1(IUnit::self(), ns);
       } else if (att.value() == gpxdata_ns) {
         CKnownExtension::initClueTrustTPXv1(IUnit::self(), ns);
+      }
+
+      if (!knownNamespaceUris.contains(att.value())) {
+        project->extraNamespaces[ns] = att.value();
       }
     }
   }

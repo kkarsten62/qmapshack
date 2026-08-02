@@ -148,15 +148,15 @@ void CDemItem::updateIcon() {
     return;
   }
 
-  QPixmap img("://icons/48x48/Map.png");
+  QString iconPath = "://icons/Map.svgt";
   QFileInfo fi(filename);
   if (fi.suffix().toLower() == "vrt") {
-    img = QPixmap("://icons/48x48/MimeDemVRT.png");
+    iconPath = "://icons/MimeDemVRT.svgt";
   } else if (fi.suffix().toLower() == "wcs") {
-    img = QPixmap("://icons/48x48/MimeDemWCS.png");
+    iconPath = "://icons/MimeDemWCS.svgt";
   }
 
-  setIcon(0, QIcon(img));
+  setIcon(0, QIcon(iconPath));
 }
 
 bool CDemItem::isActivated() {
@@ -177,6 +177,9 @@ void CDemItem::deactivate() {
   QSettings cfg(file.fileName(), QSettings::IniFormat);
   demfile->saveConfig(cfg);
   configToShadowConfig(cfg);
+  // Record the deactivated intent: the DEM's own saveConfig() writes no isActive key,
+  // so without this a reload keeps the stale on-disk isActive=true and re-activates.
+  shadowConfig["isActive"] = false;
 
   // remove demfile setup dialog as child of this item
   showChildren(false);
@@ -207,6 +210,9 @@ bool CDemItem::activate() {
 
   // no demfile loaded? Bad.
   if (demfile.isNull()) {
+    // Present file that failed to load: clear the re-arm flag so it isn't retried
+    // (and re-warned) on every restart. The missing-drive case exits earlier via QFile::exists().
+    shadowConfig["isActive"] = false;
     setStatus(eStatus::Inactive);
     return false;
   }
@@ -215,6 +221,7 @@ bool CDemItem::activate() {
   // else delete all previous loaded DEMs and abort
   if (!demfile->activated()) {
     delete demfile;
+    shadowConfig["isActive"] = false;
     setStatus(eStatus::Inactive);
     return false;
   }
@@ -278,5 +285,28 @@ void CDemItem::slotScaleChanged(const QPointF& scale) {
     delegate->setColor(index, kColorOut);
   } else {
     delegate->setColor(index, kColorIn);
+  }
+}
+
+bool CDemItem::showsOverviewWarning() const {
+  if (status != eStatus::Active || demfile.isNull()) {
+    return false;
+  }
+  return demfile->showsOverviewWarning();
+}
+
+bool CDemItem::hasOverviewInfo() const {
+  if (status != eStatus::Active || demfile.isNull()) {
+    return false;
+  }
+  return demfile->hasOverviewInfo();
+}
+
+void CDemItem::triggerOverviewAdvisory() {
+  if (status != eStatus::Active || demfile.isNull()) {
+    return;
+  }
+  if (auto* vrt = dynamic_cast<CDemVRT*>(demfile.data())) {
+    dem->emitOverviewAdvisory(vrt);
   }
 }

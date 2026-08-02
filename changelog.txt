@@ -1,16 +1,24 @@
 V1.XX.X
+[QMS-585] Preserve extra XML namespaces in GPX files
 [QMS-902] Add HiDPI support
 [QMS-963] Add action to move a map to the top in map list
 [QMS-1105] Fix: Context menu shortcuts not shown (macOS)
 [QMS-1111] Add percentage values to track range
 [QMS-1115] Improve performance for high resolution DEMs
 [QMS-1117] Suggest track name when converting routes
+[QMS-1123] Build error on platform Linux Ubuntu 24.04.4
 [QMS-1125] Use GDAL's warp and scale API to draw *.vrt maps
 [QMS-1128] Enhance VRT handling for maps and DEM
 [QMS-1132] Add action to move a map to the top in map list (macOS)
+[QMS-1135] Add guidance to improve overviews for DEM and map VRT
+[QMS-1139] Reject non-UTF-8 encoded VRT files with a clear error message
 [QMS-1140] Fix: Broken TMS map zooming
 [QMS-1141] Fix: Unchecking database item does not remove it from map
 [QMS-1142] Fix: Zoom fails to show complete track
+[QMS-1149] Fix: Build error on platform Windows
+[QMS-1153] Force QMS executables to run using UTF-8 code page on Windows too
+[QMS-1163] Render UI icons as SVG for crisp HiDPI
+[QMS-1164] Support light and dark color schemes for UI icons
 
 V1.20.3
 [QMS-1059] Fix: F1 help browser does not open external links

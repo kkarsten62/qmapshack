@@ -66,15 +66,11 @@ class CDemVRT : public IDem {
      @param filename path of a file GDAL can open as a single-band raster
      @param parent    the owning CDemDraw, forwarded to IDem
      @param supportsOverviewAdvisory false for remote sources (CDemWCS): skips collecting
-                       overview-advisory info entirely, not just showing the dialog for
-                       it, since collectOverviewFactors()'s per-file fallback calls
-                       GetFileList() then GDALOpen() on every referenced "file" -
-                       meaningless for a source with no local files to inspect. Must be a
-                       constructor parameter, not a virtual method CDemWCS overrides: a
-                       virtual call made while CDemVRT's own constructor is still running
-                       always resolves to CDemVRT's own implementation, never a derived
-                       override, since the derived part of the object hasn't been
-                       constructed yet.
+                       overview-advisory info entirely, not just the dialog - the
+                       per-file fallback would otherwise GDALOpen() every referenced
+                       "file", pointless for a source with no local files. Passed to
+                       the constructor rather than a virtual method: virtual calls
+                       during construction never reach a derived override.
    */
   CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOverviewAdvisory = true);
 
@@ -127,9 +123,20 @@ class CDemVRT : public IDem {
   /// @brief Cached suggested-overview info for this file; used by the overview advisory dialog.
   const CGdalVrtUtil::overview_advice_t& getOverviewAdvice() const { return overviewAdvice; }
 
- public slots:
+  /// @brief Cached dimensions/pixel size for the overview advisory dialog's informational line.
+  const CGdalVrtUtil::raster_geometry_t& getRasterGeometry() const { return rasterGeometry; }
+
   /// @brief Set by the overview advisory dialog's "don't show again for this file" checkbox.
-  void slotSetSuppressOverviewAdvisory(bool yes) { suppressOverviewAdvisory = yes; }
+  void setSuppressOverviewAdvisory(bool yes) { advisoryState.suppress = yes; }
+  /// @brief Current "don't show again" state; seeds the dialog checkbox so an open+close round-trips.
+  bool suppressOverviewAdvisory() const { return advisoryState.suppress; }
+  /// @brief Set true while the advisory dialog is open; suppresses draw retries during that time.
+  void setAdvisoryOpen(bool yes) { advisoryState.open = yes; }
+
+  bool showsOverviewWarning() const override {
+    return supportsOverviewAdvisory && !advisoryState.suppress && overviewNeedsAttention;
+  }
+  bool hasOverviewInfo() const override { return supportsOverviewAdvisory; }
 
  private slots:
   /// Cancel any shading work still queued/running for a draw() call that is now stale.
@@ -175,26 +182,23 @@ class CDemVRT : public IDem {
   /// queries outside dataset coverage before touching GDAL
   QRectF boundingBox;
 
-  /// false for remote sources (CDemWCS, via the constructor parameter of the same name) -
-  /// set once at construction, never changes, so draw() can read it directly instead of
-  /// through a virtual call (see the constructor's doc comment for why it has to be a
-  /// constructor parameter rather than a virtual method)
+  /// False for remote sources (CDemWCS) - set once at construction; see the
+  /// constructor's doc comment for why this can't be a virtual method instead.
   const bool supportsOverviewAdvisory;
 
-  /// suggested gdaladdo command(s), computed once at construction from the dataset's own
-  /// characteristics (skipped entirely when !supportsOverviewAdvisory); reused (never
-  /// re-derived) whenever draw() hits the render timeout
+  /// Suggested gdaladdo command(s), computed once at construction (skipped when
+  /// !supportsOverviewAdvisory); reused whenever draw() hits the render timeout.
   CGdalVrtUtil::overview_advice_t overviewAdvice;
+  /// Cached overviewAdvice.needsAttention() - immutable after setup; polled per paint by the tree delegate.
+  bool overviewNeedsAttention = false;
 
-  /// persisted via saveConfig()/loadConfig(): true once the user checked "don't show
-  /// again" on the overview advisory dialog for this file. Written by
-  /// slotSetSuppressOverviewAdvisory()/loadConfig() (GUI thread), read by draw() (canvas
-  /// thread) - atomic for the same reason as outOfScale above.
-  std::atomic<bool> suppressOverviewAdvisory = false;
+  /// Suppression/session/open-dialog bookkeeping for the overview advisory; identical
+  /// shape shared with CMapVRT, see CGdalVrtUtil::overview_advisory_state_t.
+  CGdalVrtUtil::overview_advisory_state_t advisoryState;
 
-  /// not persisted: true once the advisory has been shown for this loaded instance, so
-  /// panning/zooming a slow file doesn't reopen the dialog on every redraw
-  bool advisoryShownThisSession = false;
+  /// Cached dimensions/pixel size, computed once at construction; used by the overview
+  /// advisory dialog's informational line.
+  CGdalVrtUtil::raster_geometry_t rasterGeometry;
 
   /// runs the per-chunk shading work started by draw(); cancelled by slotNeedsRedraw()
   /// when a fresher redraw has been requested

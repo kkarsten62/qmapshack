@@ -119,19 +119,19 @@ if (APPLE)
 endif(APPLE)
 
 if(WIN32)
-    set(QT_DEV_PATH   "C:\\Qt\\5.12.11\\msvc2017_64" CACHE PATH "Path to directory containing Qt6 include and lib, e.g. C:\\Qt\\5.12.10\\msvc2017_64")
-    set(GDAL_DEV_PATH "C:\\GDAL" CACHE PATH "Path to directory containing GDAL include and lib, e.g. M:\\lib\\gdal")
-    set(PROJ_DEV_PATH "C:\\PROJ8" CACHE PATH "Path to directory containing PROJ include and lib, e.g. M:\\lib\\PROJ8")
+    set(QT_DEV_PATH   "C:\\Qt\\6.8.0\\msvc2022_64" CACHE PATH "Path to directory containing Qt6 include and lib, e.g. C:\\Qt\\6.8.0\\msvc2022_64")
+    set(GDAL_DEV_PATH "C:\\GDAL" CACHE PATH "Path to directory containing GDAL include and lib, e.g. M:\\lib\\GDAL")
+    set(PROJ_DEV_PATH "C:\\PROJ" CACHE PATH "Path to directory containing PROJ include and lib, e.g. M:\\lib\\PROJ")
     set(ROUTINO_DEV_PATH "C:\\routino" CACHE PATH "Path to directory containing routino include and lib, e.g. M:\\lib\\routino")
-    set(QuaZip-Qt6_DIR "C:\\quazip" CACHE PATH "Path to directory containing quazip cmake config files, e.g. M:\\lib2017\\QUAZIP_1\\lib\\cmake\\QuaZip-Qt5-1.1")
+    set(QuaZip-Qt6_DIR "C:\\quazip" CACHE PATH "Path to directory containing quazip cmake config files, e.g. M:\\lib2022\\QUAZIP\\lib\\cmake\\QuaZip-Qt6-1.5")
     set(JPEG_DEV_PATH "C:\\JPEG" CACHE PATH "Path to directory containing JPEG include and lib, e.g. M:\\lib\\JPEG")
     set(CMAKE_PREFIX_PATH ${QT_DEV_PATH})
     if(POLICY CMP0074)
         #policy for <PackageName>_ROOT variables - see https://cmake.org/cmake/help/latest/policy/CMP0074.html
         cmake_policy(SET CMP0074 NEW)
     endif()	
-    set(ZLIB_ROOT "C:\\zlib" CACHE PATH "Path to directory containing ZLIB, e.g. M:\\lib2017\\zlib")
-    set(ZLIB_LIBRARY "C:\\zlib\\lib\\zlibwapi.lib" CACHE FILEPATH "Path to directory containing ZLIB library, e.g. M:\\lib2017\\zlib\\lib\\zlibwapi.lib")
+    set(ZLIB_ROOT "C:\\zlib" CACHE PATH "Path to directory containing ZLIB, e.g. M:\\lib2022\\zlib")
+    set(ZLIB_LIBRARY "C:\\zlib\\lib\\zlibwapi.lib" CACHE FILEPATH "Path to directory containing ZLIB library, e.g. M:\\lib2022\\zlib\\lib\\zlibwapi.lib")
 endif(WIN32)
 
 if(MSVC)
@@ -141,7 +141,10 @@ if(MSVC)
     set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /LTCG")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_compile_options(/MP)
+    add_compile_options(/MP /utf-8)
+    # Add manifest to run exe with code page UTF-8
+    set(MANIFEST "${CMAKE_SOURCE_DIR}/msvc_64/codepage.UTF8.manifest")
+    add_link_options(/MANIFESTINPUT:${MANIFEST})
 endif(MSVC)
 
 if(UNIX)
@@ -182,6 +185,8 @@ endif()
 
 
 find_package(Qt6Widgets             REQUIRED)
+find_package(Qt6Svg                 REQUIRED)
+find_package(Qt6SvgWidgets          REQUIRED)
 find_package(Qt6Xml                 REQUIRED)
 find_package(Qt6Sql                 REQUIRED)
 find_package(Qt6LinguistTools       REQUIRED)
@@ -202,8 +207,20 @@ qt_standard_project_setup(
     I18N_TRANSLATED_LANGUAGES ca cs de es fr it nl ru
 )
 
-if(${PROJ_VERSION} VERSION_LESS 8.0.0)
-    message( SEND_ERROR "You need at least PROJ 8.0.0 or newer.")
+# Minimum dependency versions (see issue #1123). The floor is the newest release
+# available on Nov 6, 2024 (GDAL 3.10.0's date): GDAL 3.10 is a hard requirement -
+# CDemVRT uses OGRSpatialReference::exportToWkt() (GDAL 3.9) and
+# GDALRasterBand::ReadRaster() (GDAL 3.10). PROJ 9.4 predates that date and is
+# required for consistency. Qt stays at 6.8 (6.9/6.10 are newer than the cutoff, so
+# not required). Routino has no configure-time release version - only its API
+# version in routino.h - so its 3.4 floor is left to the existing runtime API check
+# (CRouterRoutino.cpp).
+if(${GDAL_VERSION} VERSION_LESS 3.10.0)
+    message( SEND_ERROR "You need at least GDAL 3.10.0 or newer.")
+endif()
+
+if(${PROJ_VERSION} VERSION_LESS 9.4.0)
+    message( SEND_ERROR "You need at least PROJ 9.4.0 or newer.")
 endif()
 
 if(USE_QT6DBus)
@@ -250,6 +267,12 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 ###############################################################################################
 # Now we are ready to compile all sub-projects
 ###############################################################################################
+# Defines the icon_hygiene target the apps depend on; must precede them.
+add_subdirectory(src/icons)
+
+# Defines the svgticonengine target both apps link; must precede them.
+add_subdirectory(src/common/svgticon)
+
 if(BUILD_QMAPSHACK)
 add_subdirectory(src/qmapshack)
 endif(BUILD_QMAPSHACK)

@@ -417,6 +417,32 @@ class IGisItem : public IWksItem {
    */
   static QString removeHtml(const QString& str);
   /**
+     @brief On-disk path for a history event's icon: always the portable 48x48 PNG.
+
+     History icons persist as a 48x48 PNG, permanently and by design. The PNG is always present and
+     readable by any build -- including older ones and ones without the themable icon engine, where
+     a ".svgt"/".svg" path renders blank. The live in-memory form is the themable ".svgt"
+     (displayIconPath()); this converts it back to the PNG at save time. Any icons/<name>.{png,svg,svgt}
+     maps to the PNG; an unknown path passes through, so a stray ".svg"/".svgt" from an old build heals
+     to PNG on the next save.
+
+     @param path the in-memory icon path
+     @return the 48x48 PNG path to persist, or path unchanged when no PNG is registered for it
+   */
+  static QString savedIconPath(const QString& path);
+
+  /**
+     @brief In-memory and drawing path for a history event's icon: the themable ".svgt".
+
+     The counterpart to savedIconPath(). Applied on load, so history events live as ".svgt" in memory
+     and follow the light/dark theme; savedIconPath() converts back to the portable PNG on save. A PNG
+     from an old file and a ".svgt" created this session both normalise to the ".svgt".
+
+     @param path the stored path
+     @return the ".svgt" path, or path unchanged when no themable icon is registered for it
+   */
+  static QString displayIconPath(const QString& path);
+  /**
      @brief Create a HTML formatted text with comment, description and link section.
 
      Depending on the isReadOnly flag the section headers are links to trigger a function
@@ -478,7 +504,6 @@ class IGisItem : public IWksItem {
     QString name;
     QString label;
     QColor color;
-    QString bullet;
     QString line;
   };
 

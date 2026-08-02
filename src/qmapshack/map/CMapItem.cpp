@@ -148,16 +148,14 @@ void CMapItem::updateIcon() {
     return;
   }
 
-  static QHash<QString, QString> icons{
-      {"rmap", "://icons/48x48/MimeRMAP.png"}, {"jnx", "://icons/48x48/MimeJNX.png"},
-      {"vrt", "://icons/48x48/MimeVRT.png"},   {"img", "://icons/48x48/MimeIMG.png"},
-      {"map", "://icons/48x48/MimeMAP.png"},   {"wmts", "://icons/48x48/MimeWMTS.png"},
-      {"tms", "://icons/48x48/MimeTMS.png"},   {"gemf", "://icons/48x48/MimeGEMF.png"}};
+  static QHash<QString, QString> icons{{"rmap", "://icons/MimeRMAP.svgt"}, {"jnx", "://icons/MimeJNX.svgt"},
+                                       {"vrt", "://icons/MimeVRT.svgt"},   {"img", "://icons/MimeIMG.svgt"},
+                                       {"map", "://icons/MimeMAP.svgt"},   {"wmts", "://icons/MimeWMTS.svgt"},
+                                       {"tms", "://icons/MimeTMS.svgt"},   {"gemf", "://icons/MimeGEMF.svgt"}};
 
   const QString& suffix = QFileInfo(filename).suffix().toLower();
-  QPixmap img(icons.contains(suffix) ? icons[suffix] : "://icons/48x48/Map.png");
 
-  setIcon(/* col */ 0, QIcon(img));
+  setIcon(/* col */ 0, QIcon(icons.contains(suffix) ? icons[suffix] : "://icons/Map.svgt"));
 }
 
 bool CMapItem::isActivated() const {
@@ -178,6 +176,9 @@ void CMapItem::deactivate() {
   QSettings cfg(file.fileName(), QSettings::IniFormat);
   mapfile->saveConfig(cfg);
   configToShadowConfig(cfg);
+  // Record the deactivated intent: the map's own saveConfig() writes no isActive key,
+  // so without this a reload keeps the stale on-disk isActive=true and re-activates.
+  shadowConfig["isActive"] = false;
 
   // remove mapfile setup dialog as child of this item
   showChildren(false);
@@ -220,6 +221,9 @@ bool CMapItem::activate() {
 
   // no mapfiles loaded? Bad.
   if (mapfile.isNull()) {
+    // Present file that failed to load: clear the re-arm flag so it isn't retried
+    // (and re-warned) on every restart. The missing-drive case exits earlier via QFile::exists().
+    shadowConfig["isActive"] = false;
     setStatus(IMapItem::eStatus::Inactive);
     return false;
   }
@@ -228,6 +232,7 @@ bool CMapItem::activate() {
   // else delete all previous loaded maps and abort
   if (!mapfile->activated()) {
     delete mapfile;
+    shadowConfig["isActive"] = false;
     setStatus(IMapItem::eStatus::Inactive);
     return false;
   }
@@ -283,5 +288,28 @@ void CMapItem::slotScaleChanged(const QPointF& scale) {
     delegate->setColor(index, kColorOut);
   } else {
     delegate->setColor(index, kColorIn);
+  }
+}
+
+bool CMapItem::showsOverviewWarning() const {
+  if (status != eStatus::Active || mapfile.isNull()) {
+    return false;
+  }
+  return mapfile->showsOverviewWarning();
+}
+
+bool CMapItem::hasOverviewInfo() const {
+  if (status != eStatus::Active || mapfile.isNull()) {
+    return false;
+  }
+  return mapfile->hasOverviewInfo();
+}
+
+void CMapItem::triggerOverviewAdvisory() {
+  if (status != eStatus::Active || mapfile.isNull()) {
+    return;
+  }
+  if (auto* vrt = dynamic_cast<CMapVRT*>(mapfile.data())) {
+    map->emitOverviewAdvisory(vrt);
   }
 }

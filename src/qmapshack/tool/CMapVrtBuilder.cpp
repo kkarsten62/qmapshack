@@ -23,9 +23,11 @@
 #include "CMainWindow.h"
 #include "helpers/CSettings.h"
 #include "misc.h"
+#include "svgticon/CSvgtIcon.h"
 
 CMapVrtBuilder::CMapVrtBuilder(QWidget* parent) : IToolShell(parent) {
   setupUi(this);
+  CSvgtIcon::load(label_7, "://icons/Help.svgt");
   setTextBrowser(textBrowser);
   setObjectName(tr("Build GDAL VRT"));
 
@@ -88,7 +90,7 @@ void CMapVrtBuilder::slotSelectSourceFiles() {
 
   listWidget->clear();
   for (const QString& file : files) {
-    new QListWidgetItem(QIcon("://icons/32x32/Map.png"), file, listWidget);
+    new QListWidgetItem(QIcon("://icons/Map.svgt"), file, listWidget);
   }
 
   enableStartButton();

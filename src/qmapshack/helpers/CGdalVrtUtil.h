@@ -22,22 +22,33 @@
 #include <QElapsedTimer>
 #include <QString>
 #include <QVector>
+#include <atomic>
+#include <limits>
 
 class GDALDataset;
 class GDALRasterBand;
 class IDrawContext;
 
 /**
-   @brief GDAL helpers shared by the warped-VRT-backed map/DEM classes (CMapVRT, CDemVRT).
+   @brief GDAL helpers shared by CMapVRT and CDemVRT.
 
-   These operate purely on GDAL types and the IDrawContext interface both classes' draw
-   contexts (CMapDraw/CDemDraw) already implement, with no knowledge of maps or DEMs
-   specifically: both classes need the exact same answer to the exact same low-level
-   question (does a referenced file exist, what overview factors are available, ...), so
-   the logic lives here once instead of being kept in sync by hand in two places.
+   Both need the same answers from GDAL (does a referenced file exist, what overview
+   levels are available, ...), so the logic lives here once.
  */
 class CGdalVrtUtil {
  public:
+  /// @brief Approximate meters per degree of latitude/longitude at the equator; used to
+  ///        convert a geographic (lat/long) CRS's geotransform pixel size into real
+  ///        meters. Shared by CDemVRT/CMapVRT wherever they need real-world pixel size
+  ///        from a dataset that may be in either a projected or a geographic CRS.
+  static constexpr qreal kMetersPerDegree = 111120;
+
+  /// @brief Convert one geotransform scale element to real meters.
+  /// @param scale        e.g. adfGeoTransform[1]/[5] - degrees/pixel if isSrcLatLong,
+  ///                     meters/pixel otherwise
+  /// @param isSrcLatLong CProj::isSrcLatLong() for the same dataset
+  static qreal toMeters(qreal scale, bool isSrcLatLong) { return isSrcLatLong ? scale * kMetersPerDegree : scale; }
+
   /**
      @brief Check that every file GDAL reports as part of the dataset (e.g. the files a
             VRT references) actually exists on disk.
@@ -48,59 +59,33 @@ class CGdalVrtUtil {
    */
   static bool allReferencedFilesExist(GDALDataset* dataset, QString& missingFile);
 
-  /// @brief One referenced file's own overview levels; see overview_factors_t::perFileInfo.
+  /**
+     @brief Check that a VRT file's bytes are valid UTF-8.
+
+     GDAL passes a VRT's <SourceFilename> bytes to the OS verbatim - it ignores the XML
+     encoding declaration - so a non-UTF-8 (e.g. legacy Latin-1) VRT resolves to broken
+     paths. Rejecting it up front gives a clear message instead of a garbled
+     "file does not exist". Returns true if the file cannot be read; the caller's
+     GDALOpen() then reports that failure itself.
+   */
+  static bool isFileUtf8(const QString& filename);
+
+  /**
+     @brief One referenced source file's own overview state; see overview_advice_t::perFileInfo.
+   */
   struct file_overview_info_t {
     QString path;
-    /// this file's own overview decimation factors, in the dataset's pixel scale, sorted
-    /// ascending; empty if it has none
-    QVector<qint32> factors;
-  };
-
-  /// @brief Result of collectOverviewFactors() - the three pieces always travel and get
-  ///        consumed together (see buildOverviewAdvice()), so they're one struct rather
-  ///        than a return value plus two out-params.
-  struct overview_factors_t {
-    /// sorted, de-duplicated decimation factors; empty if none are available anywhere
-    QVector<qint32> factors;
-    /// the *weakest* file's own deepest overview factor (in dataset's pixel scale) - i.e.
-    /// the most decimation any single read can get from overviews alone in the worst
-    /// case. A file contributing no usable overviews counts as 1 (native resolution
-    /// only), so one under-prepared file in an otherwise well-prepared mosaic still pulls
-    /// this down correctly. 1 if dataset itself reports no overviews and the per-file
-    /// fallback found nothing either.
-    qint32 weakestMaxFactor = 1;
-    /// one entry per referenced file (or a single entry for dataset itself, if it reports
-    /// its own overviews directly) - the breakdown the advisory dialog tables, so the
-    /// user can see which specific file is the weak link
-    QVector<file_overview_info_t> perFileInfo;
+    QVector<qint32> overviewSizes; /**< This file's own overview pixel widths, sorted descending (finest
+                                        first, coarsest last); empty if none, or unchecked. */
+    bool sufficient = false;       /**< True if the coarsest entry above already meets the suggested target -
+                                        see CGdalVrtUtil.cpp's meetsTarget(). Meaningless when checked is false. */
+    bool checked = true;           /**< False if never probed - the container's own overview already covers it. */
   };
 
   /**
-     @brief Collect virtual-overview decimation factors for dataset, in dataset's own pixel
-            scale.
+     @brief Close a GDAL dataset and reset the pointer; tolerates a null dataset.
 
-     Prefers dataset's own overview list. If dataset reports none - e.g. a gdalbuildvrt
-     mosaic whose <OverviewList> is stale, was never written because not every source had
-     overviews when the mosaic was built, or still has one source that lacks them - falls
-     back to the union of overview factors found across the individual files dataset depends
-     on, so one under-prepared source no longer disables overview-accelerated reads for the
-     whole mosaic. Each file's factors are converted via its own geotransform pixel size
-     rather than reused as raw pixel ratios, so sources of differing native resolution stay
-     consistent with dataset's own grid.
-     @param dataset    the (pre-warp) dataset to collect overview factors for
-     @param pBand      dataset's band 1
-     @param pixelSizeX the real-world size of one of dataset's own pixels along x; pass 0 if
-                       unknown to skip the per-file fallback entirely
-     @return see overview_factors_t
-   */
-  static overview_factors_t collectOverviewFactors(GDALDataset* dataset, GDALRasterBand* pBand, qreal pixelSizeX);
-
-  /**
-     @brief Close a GDAL dataset and reset the pointer, tolerating a null dataset.
-
-     GDALClose() logs a CPL error when passed a null handle instead of just ignoring
-     it, so every call site needs this guard - which happens whenever no warped VRT
-     was needed (srcDataset stays null) or construction failed before dataset was set.
+     GDALClose() logs an error on a null handle, so every call site needs this guard.
    */
   static void closeDataset(GDALDataset*& dataset);
 
@@ -112,72 +97,135 @@ class CGdalVrtUtil {
   static int progressCallback(double dfComplete, const char* message, void* pProgressArg);
 
   /**
-     @brief Advisory info on whether/how to add overviews to a slow-reading dataset.
-
-     Both commands always add `-ro` (never alter the original file(s)) and
-     `--config COMPRESS_OVERVIEW DEFLATE` (safe, lossless). vrtCommand and filesCommand
-     are mutually exclusive with the single-file case: a plain (non-container) file only
-     ever fills filesCommand, targeting itself. They are filled in whenever there is
-     anything sensible to suggest at all (see buildOverviewAdvice()), regardless of
-     overviewsMissing - callers decide whether to act on them per-draw(), since whether
-     the *existing* overviews are deep enough depends on what that particular read needed.
+     @brief Dataset dimensions/pixel size, purely for the informational line
+            CVrtAdvisoryDialog shows above the overview tables - not used by the
+            overview-advisory logic above.
    */
-  struct overview_advice_t {
-    /// true if neither the dataset nor any file it references has overviews yet - always
-    /// the "fixable by adding overviews" case
-    bool overviewsMissing = false;
-    /// the weakest referenced file's own deepest overview factor (see
-    /// overview_factors_t::weakestMaxFactor); even when overviewsMissing is false, a
-    /// draw() that needs more decimation than this is still hitting an inadequately
-    /// prepared file and the advisory still applies
-    qint32 weakestMaxFactor = 1;
-    /// per-file breakdown (overview_factors_t::perFileInfo), sorted weakest-first; only
-    /// meaningful (and only worth tabling in the dialog) when overviewsMissing is false -
-    /// if it's true every entry is trivially maxFactor == 1
-    QVector<file_overview_info_t> perFileInfo;
-    /// gdaladdo command targeting the container file itself (e.g. a .vrt mosaic); empty
-    /// if filename is not itself a multi-file container
-    QString vrtCommand;
-    /// gdaladdo command(s) targeting the distinct underlying source file(s): a single
-    /// command if filename is a plain file, one full standalone command per line (no
-    /// shell loop construct, so it pastes/runs unmodified in any shell on any OS) if it
-    /// is a multi-file container
-    QString filesCommand;
-    /// rough *uncompressed* size of the overview pyramid these commands would add, in
-    /// bytes; an infinite decimation pyramid sums to 1/3 of the base layer's own size
-    /// (1/4 + 1/16 + 1/64 + ... converges to 1/3), and truncating it at suggestOverviewLevels()'s
-    /// stopping point changes that negligibly for any raster with more than a couple of
-    /// levels. Actual on-disk size is usually smaller thanks to DEFLATE compression -
-    /// this is the size before that, a safe upper bound to warn the user with.
-    qint64 estimatedOverviewBytes = 0;
+  struct raster_geometry_t {
+    qint32 xsizePx = 0;   /**< Source raster width in pixels (pre-warp - matches gdalinfo). */
+    qint32 ysizePx = 0;   /**< Source raster height in pixels (pre-warp). */
+    qreal pixelSizeX = 0; /**< Real-world size of one source pixel along x, in meters. Exact for a
+                              projected (meter) CRS - equals gdalinfo. For a geographic (lat/long)
+                              CRS it is the kMetersPerDegree approximation (degrees have no single
+                              meter equivalent). */
+    qreal pixelSizeY = 0; /**< Same as pixelSizeX, along y. */
   };
 
   /**
-     @brief Build the suggested overview command(s) for filename.
-     @param dataset      the (pre-warp) dataset, as just opened from filename
-     @param band         dataset's band 1
-     @param filename     the path passed to CDemVRT's/CMapVRT's constructor
-     @param isCategorical true for single-band palette/gray data (selects nearest
-                          neighbour decimation instead of average, to avoid blending
-                          index values)
-     @param overviewFactors collectOverviewFactors()'s result for dataset; an empty
-                          overviewFactors.factors means overviews are missing anywhere in
-                          the dataset
-     @return advice with overviewsMissing/weakestMaxFactor/perFileInfo set accordingly and
-             the relevant command(s) filled in whenever there is anything sensible to suggest
+     @brief Source-file raster geometry for the advisory dialog: the pre-warp dataset's own
+            size and pixel resolution, matching gdalinfo. Reads the source's own geotransform
+            and CRS, so a projected (meter) CRS gives exact meters; a geographic CRS gives the
+            kMetersPerDegree approximation. Returns a zero-initialised geometry if the dataset
+            has no geotransform.
+     @param source the ORIGINAL (pre-warp) dataset - srcDataset if a warp was created,
+                   otherwise the dataset itself
    */
-  static overview_advice_t buildOverviewAdvice(GDALDataset* dataset, GDALRasterBand* band, const QString& filename,
-                                               bool isCategorical, overview_factors_t overviewFactors);
+  static raster_geometry_t sourceGeometry(GDALDataset* source);
+
+  /**
+     @brief The current overview situation and what's needed to fix slow rendering.
+
+     Built by buildOverviewAdvice(); used by draw() (fire the advisory) and
+     CVrtAdvisoryDialog (show the situation/fix tables).
+   */
+  struct overview_advice_t {
+    QVector<qint32> containerOverviewSizes;    /**< The container's own verified overview pixel widths, sorted
+                                                    descending (finest first, coarsest last); empty if none or
+                                                    unverified. */
+    bool containerHasOwnOvr = false;           /**< True only if containerSufficient's verdict came from a real .ovr
+                                                    file (found via GetFileList()); false if verified indirectly
+                                                    instead, or the container has no usable overview. Meaningful only
+                                                    when perFileInfo is non-empty. */
+    bool containerSufficient = false;          /**< True if the container's own (verified) overview already meets
+                                                    suggestedLevels' target everywhere - decided directly from pixel
+                                                    sizes, see CGdalVrtUtil.cpp's meetsTarget(). */
+    QVector<file_overview_info_t> perFileInfo; /**< One entry per referenced source file, weakest-first; empty
+                                                    when containerSufficient alone already meets suggestedLevels'
+                                                    target - see file_overview_info_t::checked. */
+    QVector<qint32> suggestedLevels;           /**< Target overview levels (from suggestOverviewLevels()) - what the fix
+                                                    will build and what a rebuilt <OverviewList> will declare. */
+    bool isPaletteIndexed = false;             /**< True for single-band palette/gray data: selects nearest-neighbour
+                                                    resampling instead of average, to avoid blending palette index values. */
+    qint64 diskUsageBytes = 0;                 /**< Total on-disk footprint (sub-files + overviews). Real summed size
+                                                    when fully qualified; sub-files x 1 2/3 when overviews are shallow,
+                                                    missing or absent - see diskUsageIsEstimate. */
+    bool diskUsageIsEstimate = false;          /**< True when diskUsageBytes is the sub-files x 1 2/3 projection
+                                                    (overviews not yet fully built), false when it is the real total. */
+
+    /// @brief Subfile count above which reading gets inefficient regardless of overviews.
+    static constexpr qint32 kMaxSubfileCount = 50;
+
+    /// @brief True if overviews need fixing (old needsAttention() logic). Subfile count
+    ///        is a separate, additive concern - see hasTooManySubfiles().
+    bool needsOverviewFix() const {
+      if (suggestedLevels.isEmpty() || containerSufficient) {
+        return false;
+      }
+      if (perFileInfo.isEmpty()) {
+        return true;  // nothing - neither the container nor any source file - backs this raster
+      }
+      for (const file_overview_info_t& info : perFileInfo) {
+        if (info.checked && !info.sufficient) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /// @brief True if more than kMaxSubfileCount source files are referenced.
+    bool hasTooManySubfiles() const { return perFileInfo.size() > kMaxSubfileCount; }
+
+    /// @brief Drives the tree badge; true if either problem needs attention.
+    bool needsAttention() const { return needsOverviewFix() || hasTooManySubfiles(); }
+  };
+
+  /**
+     @brief Build advisory info: what already speeds up a read today, and what
+            gdaladdo/<OverviewList> work would close the gap to suggestedLevels.
+
+     A read can be sped up by two independent, additive sources:
+     - the container's own overview (covers the whole extent, however it's backed)
+     - the individual source file for whichever region is being read (GDAL checks
+       this per source, regardless of what the container declares)
+     Whichever gives more decimation for a region wins; neither shadows the other.
+
+     dataset is always a VRT (CMapVRT/CDemVRT only ever open a .vrt file directly), so
+     its own overview claim always needs verifying - its <OverviewList> can be stale or
+     hand-edited with nothing behind it:
+     - trusted immediately if a real .ovr file is listed (cheap, no GDALOpen)
+     - otherwise trusted only if every source file individually has its own overview
+
+     If the container's own verified level already meets suggestedLevels' target,
+     source files are never probed individually - keeps a healthy, well-backed mosaic
+     as cheap to check as before. Only a container that falls short triggers a full
+     per-source probe, to find the true weakest link.
+     @param dataset      the (pre-warp) dataset, as just opened from the file
+     @param band         dataset's band 1
+     @param isPaletteIndexed true for single-band palette/gray data (nearest-neighbour
+                          decimation instead of average, to avoid blending index
+                          values)
+     @param suggestedLevels suggestOverviewLevels()'s result for dataset's size
+     @return advice ready for CVrtAdvisoryDialog
+   */
+  static overview_advice_t buildOverviewAdvice(GDALDataset* dataset, GDALRasterBand* band, bool isPaletteIndexed,
+                                               const QVector<qint32>& suggestedLevels);
 
   /**
      @brief Suggest gdaladdo overview decimation levels for a raster of the given size.
 
-     Doubles from 2 until the smallest overview would be about one tile (256px) across,
-     the standard "stop once an overview is about as small as a single tile" heuristic.
+     Doubles from 2 until the overview would be smaller than the primary screen's longest
+     dimension — overviews smaller than the screen are never useful (they would be upscaled).
+     Falls back to 1920px if no screen is available.
+     @param maxFactor hard cap on the deepest level, regardless of screen size. DEM data
+                      stays numerically meaningful at any decimation (it's just smoother
+                      terrain), so CDemVRT leaves this unbounded. Map imagery doesn't: past
+                      roughly 10-20x, a downsampled map is just a pixel mishmash, however
+                      large or high-resolution the source is - CMapVRT caps it accordingly.
      @return sorted decimation factors, e.g. {2, 4, 8, 16}; empty if the raster is
-             already smaller than one tile
+             already smaller than the screen
    */
-  static QVector<qint32> suggestOverviewLevels(qint32 xsize, qint32 ysize);
+  static QVector<qint32> suggestOverviewLevels(qint32 xsize, qint32 ysize,
+                                               qint32 maxFactor = std::numeric_limits<qint32>::max());
 
   /**
      @brief Per-draw() state for progressCallbackWithDeadline(): one read_deadline_t is
@@ -185,15 +233,11 @@ class CGdalVrtUtil {
             read doesn't get a fresh budget per band.
    */
   struct read_deadline_t {
-    /// the owning CDemDraw/CMapDraw; same role as progressCallback()'s pProgressArg
-    IDrawContext* drawCtx;
-    /// started once, right before the first ReadRaster() call of the draw()
-    QElapsedTimer timer;
-    /// render timeout budget for the whole draw() call
-    qint64 timeoutMs = 10000;
-    /// set by progressCallbackWithDeadline() once timer exceeds timeoutMs; distinguishes
-    /// a timeout abort from the ordinary "a fresher redraw superseded this one" abort
-    bool timedOut = false;
+    IDrawContext* drawCtx;   /**< The owning CDemDraw/CMapDraw; same role as progressCallback()'s pProgressArg. */
+    QElapsedTimer timer;     /**< Started once, right before the first ReadRaster() call of the draw(). */
+    qint64 timeoutMs = 5000; /**< Render timeout budget for the whole draw() call. 5s is deliberate. */
+    bool timedOut = false;   /**< Set by progressCallbackWithDeadline() once timer exceeds timeoutMs;
+                                  distinguishes a timeout abort from an ordinary superseded-redraw abort. */
   };
 
   /**
@@ -203,6 +247,60 @@ class CGdalVrtUtil {
      @param pProgressArg a read_deadline_t*, with timer already started by the caller
    */
   static int progressCallbackWithDeadline(double dfComplete, const char* message, void* pProgressArg);
+
+  /**
+     @brief Per-instance overview-advisory session bookkeeping, identical for CDemVRT and
+            CMapVRT; see handleRenderTimeout().
+   */
+  struct overview_advisory_state_t {
+    std::atomic<bool> suppress = false; /**< Persisted via saveConfig()/loadConfig(): true once the user checked
+                                             "don't show again" for this file. Written on the GUI thread, read by
+                                             draw() on the canvas thread - atomic for that reason. */
+    bool shownThisSession = false;      /**< Not persisted: true once the advisory has been shown for this loaded
+                                             instance, so panning/zooming a slow file doesn't reopen the dialog on
+                                             every redraw. Only ever touched by draw() (canvas thread). */
+    std::atomic<bool> open = false;     /**< True (GUI thread) while the advisory dialog is open; draw() (canvas
+                                             thread) skips emitSigCanvasUpdate() retries while set, so the render
+                                             thread doesn't busy-loop. */
+  };
+
+  /**
+     @brief Decide what draw() should do after a render-timeout abort: show the overview
+            advisory once per loaded instance, or ask for a plain redraw retry otherwise.
+
+     Shared by CDemVRT::draw()/CMapVRT::draw() - identical policy, only the concrete
+     drawCtx/source types differ. A template rather than a virtual call: DrawCtxT's
+     emitOverviewAdvisory() overload is resolved per source type at compile time
+     (CDemDraw::emitOverviewAdvisory(QPointer<CDemVRT>) vs.
+     CMapDraw::emitOverviewAdvisory(QPointer<CMapVRT>) - there is no common base call).
+
+     `eligible` is the source's showsOverviewWarning() (== !suppress &&
+     overviewAdvice.needsAttention()), so a timeout only raises the dialog when there is
+     actually something to fix - a render that is slow for an unrelated reason no longer
+     pops it. It fires at most once per loaded instance (shownThisSession), and the user
+     can permanently suppress it via the dialog's checkbox.
+     @param drawCtx owning CDemDraw/CMapDraw - taken by value (not DrawCtxT*) since
+                    CDemVRT::dem is a raw CDemDraw* but CMapVRT::map is a QPointer<CMapDraw>;
+                    both support operator->(), so a template parameter deduced from
+                    whichever was passed works for either without forcing one shape.
+     @param source  the CDemVRT/CMapVRT that just timed out
+     @param eligible source's showsOverviewWarning() - only true when overviews actually
+                    need attention and the file isn't suppressed, see above
+     @param state   source's overview_advisory_state_t
+   */
+  template <class DrawCtxT, class SourceT>
+  static void handleRenderTimeout(DrawCtxT drawCtx, SourceT* source, bool eligible, overview_advisory_state_t& state) {
+    if (eligible && !state.shownThisSession) {
+      // Intentionally no emitSigCanvasUpdate() here: the dialog is about to ask the user
+      // to clarify the situation, so retrying the canvas update now serves no purpose.
+      // Once the dialog is closed, normal panning/zooming resumes and updates whatever
+      // still needs it.
+      state.shownThisSession = true;
+      drawCtx->emitOverviewAdvisory(source);
+    } else if (!state.open) {
+      drawCtx->emitSigCanvasUpdate();
+    }
+  }
 };
 
 #endif  // CGDALVRTUTIL_H

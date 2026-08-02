@@ -20,6 +20,7 @@
 
 #include "canvas/CCanvas.h"
 #include "gis/trk/CGisItemTrk.h"
+#include "svgticon/CSvgtIcon.h"
 
 CFilterSubPt2Pt::CFilterSubPt2Pt(CGisItemTrk& trk, QWidget* parent)
     : QWidget(parent),
@@ -27,6 +28,7 @@ CFilterSubPt2Pt::CFilterSubPt2Pt(CGisItemTrk& trk, QWidget* parent)
 
 {
   setupUi(this);
+  CSvgtIcon::load(label_3, "://icons/FilterSubPt2Pt.svgt");
 
   connect(toolApply, &QToolButton::clicked, this, &CFilterSubPt2Pt::slotApply);
 }

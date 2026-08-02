@@ -21,95 +21,104 @@
 #include <gdal.h>
 #include <gdal_priv.h>
 
+#include <QDebug>
+#include <QFile>
 #include <QFileInfo>
-#include <QSet>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QStringConverter>
 #include <QStringList>
 #include <algorithm>
 
 #include "canvas/IDrawContext.h"
 
 bool CGdalVrtUtil::allReferencedFilesExist(GDALDataset* dataset, QString& missingFile) {
-  char** fileList = dataset->GetFileList();
   bool allExist = true;
-  for (qint32 n = 0; fileList != nullptr && fileList[n] != nullptr; ++n) {
-#if defined(Q_OS_WIN32)
-    missingFile = QString::fromLocal8Bit(fileList[n]);
-    if (QFileInfo::exists(missingFile)) {
-      continue;
-    }
-#endif  // defined(Q_OS_WIN32)
+  char** fileList = dataset->GetFileList();
+  if (fileList == nullptr) {
+    return allExist;
+  }
+  for (qint32 n = 0; fileList[n] != nullptr; ++n) {
     missingFile = QString::fromUtf8(fileList[n]);
-    if (QFileInfo::exists(missingFile)) {
-      continue;
+    if (!QFileInfo::exists(missingFile)) {
+      allExist = false;
+      break;
     }
-    allExist = false;
-    break;
   }
   CSLDestroy(fileList);
   return allExist;
 }
 
-CGdalVrtUtil::overview_factors_t CGdalVrtUtil::collectOverviewFactors(GDALDataset* dataset, GDALRasterBand* pBand,
-                                                                      qreal pixelSizeX) {
-  QSet<qint32> factors;
-  overview_factors_t result;
-  result.weakestMaxFactor = 1;
-
-  if (pBand->GetOverviewCount() != 0) {
-    QVector<qint32> fileFactors;
-    for (qint32 i = 0; i < pBand->GetOverviewCount(); ++i) {
-      const qint32 factor = qRound((qreal)pBand->GetXSize() / pBand->GetOverview(i)->GetXSize());
-      factors << factor;
-      fileFactors << factor;
-    }
-    std::sort(fileFactors.begin(), fileFactors.end());
-    result.weakestMaxFactor = fileFactors.isEmpty() ? 1 : fileFactors.last();
-    result.perFileInfo << file_overview_info_t{QString::fromUtf8(dataset->GetDescription()), fileFactors};
-  } else if (pixelSizeX > 0) {
-    // GDAL's own GetFileList() includes the dataset's own path (e.g. a VRT mosaic lists
-    // itself first, before its referenced tiles) - skip that entry, it's the container,
-    // not an independent source file, and (lacking its own overviews, or it wouldn't be
-    // here) would otherwise drag the weakest-file tracking down to "none" unconditionally
-    const QString ownPath = QString::fromUtf8(dataset->GetDescription());
-    char** fileList = dataset->GetFileList();
-    bool firstFile = true;
-    for (qint32 n = 0; fileList != nullptr && fileList[n] != nullptr; ++n) {
-      const QString file = QString::fromUtf8(fileList[n]);
-      if (file == ownPath) {
-        continue;
-      }
-
-      // a file contributing no usable overviews can only ever be read at native
-      // resolution - the weakest possible case, not something to silently skip
-      QVector<qint32> fileFactors;
-
-      GDALDatasetUniquePtr subDataset(GDALDataset::FromHandle(GDALOpen(fileList[n], GA_ReadOnly)));
-      GDALRasterBand* subBand = subDataset ? subDataset->GetRasterBand(1) : nullptr;
-      qreal subGeoTransform[6];
-      if (subBand != nullptr && subBand->GetOverviewCount() != 0 &&
-          subDataset->GetGeoTransform(subGeoTransform) == CE_None) {
-        const qreal subPixelSizeX = qAbs(subGeoTransform[1]);
-        for (qint32 i = 0; i < subBand->GetOverviewCount(); ++i) {
-          const qreal overviewPixelSizeX = subPixelSizeX * subBand->GetXSize() / subBand->GetOverview(i)->GetXSize();
-          const qint32 factor = qRound(overviewPixelSizeX / pixelSizeX);
-          factors << factor;
-          fileFactors << factor;
-        }
-      }
-      std::sort(fileFactors.begin(), fileFactors.end());
-
-      const qint32 fileMaxFactor = fileFactors.isEmpty() ? 1 : fileFactors.last();
-      result.weakestMaxFactor = firstFile ? fileMaxFactor : qMin(result.weakestMaxFactor, fileMaxFactor);
-      firstFile = false;
-      result.perFileInfo << file_overview_info_t{file, fileFactors};
-    }
-    CSLDestroy(fileList);
+bool CGdalVrtUtil::isFileUtf8(const QString& filename) {
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly)) {
+    return true;  // unreadable: let GDALOpen() surface the failure
   }
+  QStringDecoder decoder(QStringConverter::Utf8);
+  // Materialize into a QString: the decode is lazy and only sets hasError() once consumed.
+  const QString decoded = decoder(file.readAll());
+  Q_UNUSED(decoded)
+  return !decoder.hasError();
+}
 
-  result.factors = QVector<qint32>(factors.begin(), factors.end());
-  std::sort(result.factors.begin(), result.factors.end());
+namespace {
+/// @brief This dataset's own overview pixel widths, sorted descending (finest/largest
+///        first, coarsest/smallest last); empty if it reports none.
+QVector<qint32> ownOverviewSizes(GDALRasterBand* band) {
+  QVector<qint32> result;
+  for (qint32 i = 0; i < band->GetOverviewCount(); ++i) {
+    result << band->GetOverview(i)->GetXSize();
+  }
+  std::sort(result.begin(), result.end(), std::greater<qint32>());
   return result;
 }
+
+/// @brief True if the coarsest of `sizes` already reduces a raster of width `xsize` by at
+///        least `targetFactor`. `requiredSize` mirrors gdaladdo's own ceiling-division
+///        overview sizing, so a freshly-built overview at exactly `targetFactor` passes.
+bool meetsTarget(qint32 xsize, const QVector<qint32>& sizes, qint32 targetFactor) {
+  if (sizes.isEmpty()) {
+    return targetFactor <= 1;
+  }
+  const qint32 requiredSize = (xsize + targetFactor - 1) / targetFactor;
+  return sizes.last() <= requiredSize;
+}
+
+/// @brief True if `file` (a GetFileList() entry) is a real source raster - i.e. not the
+///        container itself (`ownPath`) and not one of its sidecars (.ovr/.aux.xml/.aux).
+bool isSourceFile(const QString& file, const QString& ownPath) {
+  return file != ownPath && !file.endsWith(".ovr", Qt::CaseInsensitive) &&
+         !file.endsWith(".aux.xml", Qt::CaseInsensitive) && !file.endsWith(".aux", Qt::CaseInsensitive);
+}
+
+/// @brief One referenced source file's own width and overview pixel sizes (see
+///        ownOverviewSizes()). All zero/empty if the file can't be opened.
+struct probed_source_t {
+  qint32 xsize = 0;
+  QVector<qint32> sizes;
+};
+
+/// @brief Open a path read-only. GDAL filenames are UTF-8.
+GDALDatasetUniquePtr openReadOnly(const QString& path) {
+  return GDALDatasetUniquePtr(GDALDataset::FromHandle(GDALOpen(path.toUtf8().constData(), GA_ReadOnly)));
+}
+
+/// @brief Open path and probe its own overview sizes (native to path's own pixel grid -
+///        no rescaling into the container's pixel grid is needed; GDAL matches overviews
+///        to the requested read resolution itself, gdalwarp's "-ovr AUTO"). Also records
+///        the source's own width (for meetsTarget()).
+probed_source_t probeSource(const QString& path) {
+  GDALDatasetUniquePtr sub = openReadOnly(path);
+  GDALRasterBand* subBand = sub ? sub->GetRasterBand(1) : nullptr;
+  if (subBand == nullptr) {
+    return {};
+  }
+  probed_source_t probed;
+  probed.xsize = subBand->GetXSize();
+  probed.sizes = ownOverviewSizes(subBand);
+  return probed;
+}
+}  // namespace
 
 void CGdalVrtUtil::closeDataset(GDALDataset*& dataset) {
   if (dataset != nullptr) {
@@ -123,10 +132,27 @@ int CGdalVrtUtil::progressCallback(double /*dfComplete*/, const char* /*message*
   return !drawCtx->needsRedraw();
 }
 
-QVector<qint32> CGdalVrtUtil::suggestOverviewLevels(qint32 xsize, qint32 ysize) {
+CGdalVrtUtil::raster_geometry_t CGdalVrtUtil::sourceGeometry(GDALDataset* source) {
+  raster_geometry_t geom;
+  qreal gt[6];
+  if (source == nullptr || source->GetGeoTransform(gt) != CE_None) {
+    return geom;
+  }
+  const OGRSpatialReference* srs = source->GetSpatialRef();
+  const bool latLong = (srs != nullptr) && srs->IsGeographic();
+  geom.xsizePx = source->GetRasterXSize();
+  geom.ysizePx = source->GetRasterYSize();
+  geom.pixelSizeX = toMeters(qAbs(gt[1]), latLong);
+  geom.pixelSizeY = toMeters(qAbs(gt[5]), latLong);
+  return geom;
+}
+
+QVector<qint32> CGdalVrtUtil::suggestOverviewLevels(qint32 xsize, qint32 ysize, qint32 maxFactor) {
+  const QScreen* screen = QGuiApplication::primaryScreen();
+  const qint32 screenSize = screen ? qMax(screen->size().width(), screen->size().height()) : 1920;
   QVector<qint32> levels;
   qint32 factor = 2;
-  while (qMax(xsize, ysize) / factor > 256) {
+  while (qMax(xsize, ysize) / factor > screenSize && factor <= maxFactor) {
     levels << factor;
     factor *= 2;
   }
@@ -134,68 +160,151 @@ QVector<qint32> CGdalVrtUtil::suggestOverviewLevels(qint32 xsize, qint32 ysize) 
 }
 
 CGdalVrtUtil::overview_advice_t CGdalVrtUtil::buildOverviewAdvice(GDALDataset* dataset, GDALRasterBand* band,
-                                                                  const QString& filename, bool isCategorical,
-                                                                  overview_factors_t overviewFactors) {
-  overview_advice_t advice;
-  advice.overviewsMissing = overviewFactors.factors.isEmpty();
-  advice.weakestMaxFactor = overviewFactors.weakestMaxFactor;
+                                                                  bool isPaletteIndexed,
+                                                                  const QVector<qint32>& suggestedLevels) {
+  overview_advice_t result;
+  result.suggestedLevels = suggestedLevels;
+  result.isPaletteIndexed = isPaletteIndexed;
+  const qint32 targetFactor = suggestedLevels.isEmpty() ? 1 : suggestedLevels.last();
+  qDebug() << "OVR: GetOverviewCount =" << band->GetOverviewCount() << "targetFactor =" << targetFactor;
 
-  const qint64 basePixels = static_cast<qint64>(band->GetXSize()) * band->GetYSize();
-  const qint64 bytesPerPixel = GDALGetDataTypeSizeBytes(band->GetRasterDataType()) * dataset->GetRasterCount();
-  // an infinite decimation pyramid (1/4 + 1/16 + 1/64 + ...) sums to 1/3 of the base
-  // layer; truncating it at suggestOverviewLevels()'s stopping point changes this
-  // negligibly once there are more than a couple of levels
-  advice.estimatedOverviewBytes = basePixels * bytesPerPixel / 3;
+  // Step 1: the container's own claim. dataset is always a VRT here (CMapVRT/CDemVRT
+  // only ever open a .vrt file directly; every other raster format goes through its
+  // own IMap/IDem class instead), and GDAL will report GetOverviewCount() > 0 purely
+  // from a declared <OverviewList>, even with nothing behind it (a stale or
+  // hand-edited declaration). Trust it immediately only if a real .ovr file is listed
+  // (cheap, no GDALOpen); otherwise defer to step 3, once every source has been
+  // probed anyway.
+  // containerVerified only ever becomes true via the physical-.ovr-file check below, so
+  // it doubles as "the container has its own .ovr file" - step 3 further down is the
+  // only other way containerOverviewSizes/containerSufficient get trusted, and that path never
+  // involves a file on disk.
+  const QString ownPath = QString::fromUtf8(dataset->GetDescription());
 
-  auto maxFactor = [](const file_overview_info_t& info) { return info.factors.isEmpty() ? 1 : info.factors.last(); };
-  std::sort(overviewFactors.perFileInfo.begin(), overviewFactors.perFileInfo.end(),
-            [&](const file_overview_info_t& a, const file_overview_info_t& b) { return maxFactor(a) < maxFactor(b); });
-  advice.perFileInfo = std::move(overviewFactors.perFileInfo);
-
-  const QVector<qint32> levels = suggestOverviewLevels(band->GetXSize(), band->GetYSize());
-  if (levels.isEmpty()) {
-    // already smaller than one tile - nothing sensible to suggest
-    return advice;
+  // One GetFileList() pass for the whole function: the .vrt, its own .ovr (if any), and each
+  // source's main file - all as absolute paths. Reused by every step below.
+  QStringList files;
+  {
+    char** fileList = dataset->GetFileList();
+    for (qint32 n = 0; fileList != nullptr && fileList[n] != nullptr; ++n) {
+      files << QString::fromUtf8(fileList[n]);
+    }
+    CSLDestroy(fileList);
   }
 
-  const QString resampleAlg = isCategorical ? "nearest" : "average";
-  QStringList levelArgs;
-  for (qint32 level : levels) {
-    levelArgs << QString::number(level);
-  }
-
-  auto gdaladdoCommand = [&](const QString& path) {
-    return QString("gdaladdo -ro -r %1 --config COMPRESS_OVERVIEW DEFLATE \"%2\" %3")
-        .arg(resampleAlg, path, levelArgs.join(' '));
-  };
-
-  // collectOverviewFactors() already enumerated dataset's referenced files (to inspect
-  // their overviews) and left the result in advice.perFileInfo above - reuse that instead
-  // of calling GetFileList() a second time
-  QStringList sourceFiles;
-  for (const file_overview_info_t& info : advice.perFileInfo) {
-    if (info.path != filename && !sourceFiles.contains(info.path)) {
-      sourceFiles << info.path;
+  const qint32 containerXSize = band->GetXSize();
+  QVector<qint32> rawContainerSizes;
+  bool containerVerified = false;
+  if (band->GetOverviewCount() != 0) {
+    rawContainerSizes = ownOverviewSizes(band);
+    for (const QString& file : files) {
+      // the container's own .ovr - distinct from a source's sidecar (isSourceFile excludes both)
+      if (file != ownPath && file.endsWith(".ovr", Qt::CaseInsensitive)) {
+        containerVerified = true;
+        break;
+      }
     }
   }
+  result.containerOverviewSizes = containerVerified ? rawContainerSizes : QVector<qint32>{};
+  result.containerHasOwnOvr = containerVerified;
+  result.containerSufficient = containerVerified && meetsTarget(containerXSize, rawContainerSizes, targetFactor);
+  qDebug() << "OVR: step 1: rawContainerSizes =" << rawContainerSizes << "hasOwnOvr =" << containerVerified
+           << "sufficient =" << result.containerSufficient;
 
-  if (sourceFiles.isEmpty()) {
-    // filename is a plain file, not a multi-file container - one command targeting itself
-    advice.filesCommand = gdaladdoCommand(filename);
+  if (result.containerSufficient) {
+    // Step 2: the container alone already meets the target, so source files are moot
+    // for read speed - skip opening them. Still list them (no GDALOpen needed) so the
+    // dialog can show them as "not checked" instead of omitting them.
+    for (const QString& file : files) {
+      if (!isSourceFile(file, ownPath)) {
+        continue;
+      }
+      result.perFileInfo << file_overview_info_t{file, {}, /*sufficient=*/false, /*checked=*/false};
+    }
+    qDebug() << "OVR: step 2: container already sufficient - not probing" << result.perFileInfo.size()
+             << "source file(s)";
   } else {
-    advice.vrtCommand = gdaladdoCommand(filename);
-
-    // one standalone command per line rather than a shell for-loop: pastes and runs
-    // unmodified in bash/zsh/sh, cmd.exe and PowerShell alike, with no platform-specific
-    // loop syntax to get right
-    QStringList commands;
-    for (const QString& file : sourceFiles) {
-      commands << gdaladdoCommand(file);
+    // Step 3: the container falls short (or is unverified) - probe every source file in
+    // full, so perFileInfo reflects every file's true state, not just the first
+    // bottleneck.
+    bool allSourcesHaveOverviews = true;
+    bool sawAnySource = false;
+    for (const QString& file : files) {
+      if (!isSourceFile(file, ownPath)) {
+        continue;
+      }
+      sawAnySource = true;
+      const probed_source_t probed = probeSource(file);
+      if (probed.sizes.isEmpty()) {
+        allSourcesHaveOverviews = false;
+      }
+      const bool sufficient = meetsTarget(probed.xsize, probed.sizes, targetFactor);
+      result.perFileInfo << file_overview_info_t{file, probed.sizes, sufficient, /*checked=*/true};
     }
-    advice.filesCommand = commands.join('\n');
+    for (const file_overview_info_t& info : result.perFileInfo) {
+      qDebug() << "OVR:  " << QFileInfo(info.path).fileName() << "checked:" << info.checked
+               << "sufficient:" << info.sufficient << "sizes:" << info.overviewSizes;
+    }
+
+    // An unverified VRT-level claim becomes trustworthy once every source turns out to
+    // have its own overview, matching how gdalbuildvrt derives a composite. Otherwise
+    // it was stale/hand-edited, and stays discarded.
+    const bool fallbackTrusted =
+        !containerVerified && sawAnySource && allSourcesHaveOverviews && !rawContainerSizes.isEmpty();
+    if (fallbackTrusted) {
+      result.containerOverviewSizes = rawContainerSizes;
+      result.containerSufficient = meetsTarget(containerXSize, rawContainerSizes, targetFactor);
+    }
+    qDebug() << "OVR: step 3: sawAnySource =" << sawAnySource << "allSourcesHaveOverviews =" << allSourcesHaveOverviews
+             << "fallbackTrusted =" << fallbackTrusted;
   }
 
-  return advice;
+  // Disk-usage figure = the dataset's real on-disk footprint, matching `du`. GetFileList()
+  // returns absolute paths for the .vrt, its own .ovr, and each source's MAIN file - but
+  // NOT the source-level .ovr/.aux.xml sidecars, so those are added per source.
+  qint64 subfileBytes = 0;   // sum of source main files only
+  qint64 allFilesBytes = 0;  // every file belonging to the dataset (sub-files + overviews)
+  for (const QString& file : files) {
+    allFilesBytes += QFileInfo(file).size();
+    if (isSourceFile(file, ownPath)) {
+      subfileBytes += QFileInfo(file).size();
+      for (const QString& suffix : {QStringLiteral(".ovr"), QStringLiteral(".aux.xml")}) {
+        const QString side = file + suffix;
+        if (QFileInfo::exists(side)) {
+          allFilesBytes += QFileInfo(side).size();
+        }
+      }
+    }
+  }
+
+  // Shallow, missing or no overviews: estimate the fully-built footprint from the base
+  // (sub-files x 1 2/3). Fully qualified: the real total is already on disk.
+  if (result.needsOverviewFix()) {
+    result.diskUsageBytes = subfileBytes * 5 / 3;
+    result.diskUsageIsEstimate = true;
+  } else {
+    result.diskUsageBytes = allFilesBytes;
+    result.diskUsageIsEstimate = false;
+  }
+
+  // sort weakest-first: the dialog's table leads with the bottleneck. A raw pixel size
+  // isn't comparable across files of different native resolution, so this is a 3-way
+  // partition (insufficient, sufficient, unchecked) rather than a fine-grained ranking -
+  // good enough for "which rows need a look first", not meant to rank severity.
+  auto sortKey = [](const file_overview_info_t& info) {
+    if (!info.checked) {
+      return 2;
+    }
+    return info.sufficient ? 1 : 0;
+  };
+  std::sort(result.perFileInfo.begin(), result.perFileInfo.end(),
+            [&](const file_overview_info_t& a, const file_overview_info_t& b) { return sortKey(a) < sortKey(b); });
+
+  qDebug() << "OVR: pre-warp result: containerSufficient =" << result.containerSufficient
+           << "containerHasOwnOvr =" << result.containerHasOwnOvr << "subfileCount =" << result.perFileInfo.size()
+           << "tooManySubfiles =" << result.hasTooManySubfiles();
+
+  return result;
 }
 
 int CGdalVrtUtil::progressCallbackWithDeadline(double /*dfComplete*/, const char* /*message*/, void* pProgressArg) {

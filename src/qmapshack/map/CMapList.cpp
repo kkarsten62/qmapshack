@@ -25,6 +25,7 @@
 #include "map/CMapItem.h"
 #include "map/CMapItemDelegate.h"
 #include "misc.h"
+#include "svgticon/CSvgtIcon.h"
 
 CMapTreeWidget::CMapTreeWidget(QWidget* parent) : QTreeWidget(parent) {
   CMapItemDelegate* delegate = new CMapItemDelegate(this);
@@ -99,6 +100,7 @@ void CMapTreeWidget::dropEvent(QDropEvent* e) {
 
 CMapList::CMapList(CCanvas* parent) : QWidget(parent), canvas(parent) {
   setupUi(this);
+  CSvgtIcon::load(labelIcon, "://icons/Help.svgt");
   lineFilter->addAction(actionClearFilter, QLineEdit::TrailingPosition);
 
   connect(treeWidget, &CMapTreeWidget::customContextMenuRequested, this, &CMapList::slotContextMenu);
@@ -113,6 +115,7 @@ CMapList::CMapList(CCanvas* parent) : QWidget(parent), canvas(parent) {
   connect(actionMoveEnd, &QAction::triggered, this, &CMapList::slotMoveEnd);
   connect(actionRemove, &QAction::triggered, this, &CMapList::slotRemove);
   connect(actionReloadMaps, &QAction::triggered, this, &CMapList::slotReloadMaps);
+  connect(actionOverviewInfo, &QAction::triggered, this, &CMapList::slotOverviewInfo);
   connect(labelHelpFillMapList, &QLabel::linkActivated, &CMainWindow::self(),
           static_cast<void (CMainWindow::*)(const QString&)>(&CMainWindow::slotLinkActivated));
   connect(lineFilter, &QLineEdit::textChanged, this, &CMapList::slotFilter);
@@ -124,6 +127,8 @@ CMapList::CMapList(CCanvas* parent) : QWidget(parent), canvas(parent) {
   menu->addAction(actionMoveEnd);
   menu->addSeparator();
   menu->addAction(actionRemove);
+  menu->addSeparator();
+  menu->addAction(actionOverviewInfo);
   menu->addSeparator();
   menu->addAction(actionReloadMaps);
   menu->addAction(CMainWindow::self().getMapSetupAction());
@@ -278,9 +283,17 @@ void CMapList::slotContextMenu(const QPoint& point) {
   actionMoveDown->setEnabled(itemIsSelected && (treeWidget->itemBelow(item) != 0));
   actionMoveEnd->setEnabled(itemIsSelected && (treeWidget->itemBelow(item) != 0));
   actionRemove->setVisible(itemIsSelected && item->getStatus() == IMapItem::eStatus::Missing);
+  actionOverviewInfo->setVisible(itemIsSelected && item->hasOverviewInfo());
 
   QPoint p = treeWidget->mapToGlobal(point);
   menu->exec(p);
+}
+
+void CMapList::slotOverviewInfo() {
+  CMapItem* item = dynamic_cast<CMapItem*>(treeWidget->currentItem());
+  if (item != nullptr) {
+    item->triggerOverviewAdvisory();
+  }
 }
 
 static void saveResource(const QString& name, QDir& dir) {
@@ -330,7 +343,7 @@ void CMapList::slotReloadMaps() {
 }
 
 void CMapList::slotFilter(const QString& str) {
-  actionClearFilter->setIcon(str.isEmpty() ? QIcon("://icons/32x32/Filter.png") : QIcon("://icons/32x32/Cancel.png"));
+  actionClearFilter->setIcon(str.isEmpty() ? QIcon("://icons/Filter.svgt") : QIcon("://icons/Cancel.svgt"));
 
   const int N = treeWidget->topLevelItemCount();
 

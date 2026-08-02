@@ -20,6 +20,7 @@
 
 #include "canvas/CCanvas.h"
 #include "gis/trk/CGisItemTrk.h"
+#include "svgticon/CSvgtIcon.h"
 
 CFilterReset::CFilterReset(CGisItemTrk& trk, QWidget* parent)
     : QWidget(parent),
@@ -27,6 +28,7 @@ CFilterReset::CFilterReset(CGisItemTrk& trk, QWidget* parent)
 
 {
   setupUi(this);
+  CSvgtIcon::load(label_3, "://icons/PointHide.svgt");
 
   connect(toolApply, &QToolButton::clicked, this, &CFilterReset::slotApply);
 }

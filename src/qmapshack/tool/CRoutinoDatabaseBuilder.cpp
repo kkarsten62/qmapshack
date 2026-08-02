@@ -23,9 +23,11 @@
 #include "CMainWindow.h"
 #include "helpers/CSettings.h"
 #include "setup/IAppSetup.h"
+#include "svgticon/CSvgtIcon.h"
 
 CRoutinoDatabaseBuilder::CRoutinoDatabaseBuilder(QWidget* parent) : IToolShell(parent) {
   setupUi(this);
+  CSvgtIcon::load(label_4, "://icons/Help.svgt");
   setTextBrowser(textBrowser);
 
   setObjectName(tr("Create Routino Database"));
@@ -67,7 +69,7 @@ void CRoutinoDatabaseBuilder::slotSelectSourceFiles() {
 
   listWidget->clear();
   for (const QString& file : files) {
-    new QListWidgetItem(QIcon("://icons/32x32/Map.png"), file, listWidget);
+    new QListWidgetItem(QIcon("://icons/Map.svgt"), file, listWidget);
   }
 
   enabelStartButton();
@@ -165,8 +167,7 @@ void CRoutinoDatabaseBuilder::finished(int exitCode, QProcess::ExitStatus status
       first = false;
       args << "--parse-only";
     } else {
-      args << "--parse-only"
-           << "--append";
+      args << "--parse-only" << "--append";
     }
 
     args << sourceFiles.first();

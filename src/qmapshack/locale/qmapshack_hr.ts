@@ -220,12 +220,12 @@ rijevoz</translation>
         <translation>&lt;h2&gt;Podaci o Elevaciji&lt;/h2&gt;&lt;p&gt;Podaci o elevaciji (Digitalni Elevacijski Model - DEM) koriste se u raznim funkcijama QMapShacka i potpuno su neovisni o kartama. Međutim, primjenjuju se ista načela kao i za karte. DEM podaci uvijek moraju biti definirani jednom datotekom koju QMapShack prepoznaje. Ova datoteka mora biti smještena u jednu od registriranih DEM mapa (&lt;a href=&apos;DemFolders&apos;&gt;Datoteka-&gt;Postavi DEM staze&lt;/a&gt;). QMapShack će je pronaći i prikazati na popisu. Popis DEM datoteka možeš ponovno učitati desnim klikom na DEM popis i odabirom opcije &apos;Ponovno učitavanje DEM&apos; iz izbornika.&lt;/p&gt;&lt;p&gt;Slično rasterskim kartama, DEM datoteke moraju biti omotane datotekom *.vrt da bi se prepoznale. Datoteka *.vrt može referencirati jednu ili više drugih datoteka. Ponovno, možeš koristiti ugrađeni VRT Graditelj programa QMapShack (&lt;a href=&apos;VrtBuilder&apos;&gt;Alat-&gt;VRT Graditelj&lt;/a&gt;) za izradu takve datoteke.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../canvas/CCanvas.cpp" line="1083"/>
+        <location filename="../canvas/CCanvas.cpp" line="1114"/>
         <source>Map Projection...</source>
         <translation>Projekcija Karte...</translation>
     </message>
     <message>
-        <location filename="../canvas/CCanvas.cpp" line="1084"/>
+        <location filename="../canvas/CCanvas.cpp" line="1115"/>
         <source>Failed to setup map projection. Please configure a valid projection.</source>
         <translation>Postavljanje projekcije karte nije uspjelo. Konfigurirajte valjanu projekciju.</translation>
     </message>
@@ -255,7 +255,7 @@ rijevoz</translation>
         <translation>&lt;h2&gt;Rutiranje&lt;/h2&gt;&lt;p&gt;QMapShack podržava online usluge rutiranja. Ali ako zaista želiš iskoristiti mogućnosti rutiranja, potrebna ti je baza podataka za rutiranje pohranjena lokalno. Dostupna su dva offline programa za rutiranje.&lt;/p&gt;&lt;h3&gt;Routino&lt;/h3&gt;&lt;p&gt;Za Routino moraš stvoriti podatke za rutirnje iz datoteka baze podataka Open Street Map. QMapShack ima ugrađeni alat za stvaranje Routino baze podataka (&lt;a href=&apos;CreateRoutino&apos;&gt;Alat-&gt;Stvori Routino bazu&lt;/a&gt;).&lt;/p&gt;&lt;h3&gt;BRouter&lt;/h3&gt;&lt;p&gt;Druga je mogućnost korištenje lokalne instalacije BRoutera s lokalnom bazom podataka za rutiranje. Koristi &lt;a href=&apos;BRouterSetup&apos;&gt;BRouter instalaciju&lt;/a&gt; za preuzimanje i instalaciju svih potrebnih podataka.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../canvas/CCanvas.cpp" line="1034"/>
+        <location filename="../canvas/CCanvas.cpp" line="1065"/>
         <source>Setup Map Background</source>
         <translation>Postavi Pozadinu Karte</translation>
     </message>
@@ -563,9 +563,9 @@ Da bi riješio ovaj sukob, možeš stvoriti i spremiti klon, nametnuti svoju ver
         <location filename="../dem/CDemVRT.cpp" line="58"/>
         <location filename="../dem/CDemVRT.cpp" line="66"/>
         <location filename="../dem/CDemVRT.cpp" line="80"/>
-        <location filename="../dem/CDemVRT.cpp" line="131"/>
-        <location filename="../dem/CDemVRT.cpp" line="153"/>
-        <location filename="../dem/CDemVRT.cpp" line="178"/>
+        <location filename="../dem/CDemVRT.cpp" line="123"/>
+        <location filename="../dem/CDemVRT.cpp" line="135"/>
+        <location filename="../dem/CDemVRT.cpp" line="160"/>
         <source>Error...</source>
         <translation>Pogreška...</translation>
     </message>
@@ -596,22 +596,22 @@ Da bi riješio ovaj sukob, možeš stvoriti i spremiti klon, nametnuti svoju ver
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../dem/CDemVRT.cpp" line="132"/>
+        <location filename="../dem/CDemVRT.cpp" line="124"/>
         <source>Failed to create Warp for:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../dem/CDemVRT.cpp" line="154"/>
+        <location filename="../dem/CDemVRT.cpp" line="136"/>
         <source>No georeference information found:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../dem/CDemVRT.cpp" line="179"/>
+        <location filename="../dem/CDemVRT.cpp" line="161"/>
         <source>No pixel-to-map transform found:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../dem/CDemVRT.cpp" line="582"/>
+        <location filename="../dem/CDemVRT.cpp" line="551"/>
         <source>Ele.</source>
         <translation>Ele.</translation>
     </message>
@@ -4604,42 +4604,47 @@ Vrati na interne tipove.</translation>
 <context>
     <name>CMapItemDelegate</name>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="221"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="227"/>
         <source>inactive</source>
         <translation type="unfinished">neaktivno</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="224"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="230"/>
         <source>active</source>
         <translation type="unfinished">aktivno</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="227"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="233"/>
         <source>missing</source>
         <translation type="unfinished">nedostaje</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="231"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="237"/>
         <source>-</source>
         <translation type="unfinished">-</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="319"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="338"/>
+        <source>This file can be slow to draw on the map. Click here to see how to speed it up.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../map/CMapItemDelegate.cpp" line="341"/>
         <source>Deactivate %1</source>
         <translation type="unfinished">Deaktiviraj %1</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="319"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="341"/>
         <source>Activate %1</source>
         <translation type="unfinished">Aktiviraj %1</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="323"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="345"/>
         <source>%1 is not visible at current scale</source>
         <translation type="unfinished">%1 nije vidljivo u trenutnoj skali</translation>
     </message>
     <message>
-        <location filename="../map/CMapItemDelegate.cpp" line="324"/>
+        <location filename="../map/CMapItemDelegate.cpp" line="346"/>
         <source>%1 is visible at current scale</source>
         <translation type="unfinished">%1 je vidljivo u trenutnoj skali</translation>
     </message>
@@ -4647,7 +4652,7 @@ Vrati na interne tipove.</translation>
 <context>
     <name>CMapList</name>
     <message>
-        <location filename="../map/CMapList.cpp" line="299"/>
+        <location filename="../map/CMapList.cpp" line="314"/>
         <source>Where do you want to store maps?</source>
         <translation>Gdje želiš pohraniti karte?</translation>
     </message>
@@ -4742,19 +4747,19 @@ Vrati na interne tipove.</translation>
 <context>
     <name>CMapTMS</name>
     <message>
-        <location filename="../map/CMapTMS.cpp" line="57"/>
-        <location filename="../map/CMapTMS.cpp" line="66"/>
-        <location filename="../map/CMapTMS.cpp" line="98"/>
+        <location filename="../map/CMapTMS.cpp" line="81"/>
+        <location filename="../map/CMapTMS.cpp" line="90"/>
+        <location filename="../map/CMapTMS.cpp" line="122"/>
         <source>Error...</source>
         <translation>Pogreška...</translation>
     </message>
     <message>
-        <location filename="../map/CMapTMS.cpp" line="57"/>
+        <location filename="../map/CMapTMS.cpp" line="81"/>
         <source>Failed to open %1</source>
         <translation>Nije uspjelo otvaranje %1</translation>
     </message>
     <message>
-        <location filename="../map/CMapTMS.cpp" line="67"/>
+        <location filename="../map/CMapTMS.cpp" line="91"/>
         <source>Failed to read: %1
 line %2, column %3:
  %4</source>
@@ -4763,12 +4768,12 @@ red %2, kolona %3:
 %4</translation>
     </message>
     <message>
-        <location filename="../map/CMapTMS.cpp" line="99"/>
+        <location filename="../map/CMapTMS.cpp" line="123"/>
         <source>Malformed TMS file. The layer numbers do not index the available layers. Layer numbers start from index 0.</source>
         <translation>Neispravno oblikovana TMS datoteka. Brojevi slojeva ne indeksiraju dostupne slojeve. Brojevi slojeva počinju od indeksa 0.</translation>
     </message>
     <message>
-        <location filename="../map/CMapTMS.cpp" line="117"/>
+        <location filename="../map/CMapTMS.cpp" line="142"/>
         <source>Layer %1</source>
         <translation>Sloj %1</translation>
     </message>
@@ -4776,48 +4781,58 @@ red %2, kolona %3:
 <context>
     <name>CMapVRT</name>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="278"/>
+        <location filename="../map/CMapVRT.cpp" line="272"/>
         <source>Error...</source>
         <translation>Pogreška...</translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="39"/>
-        <location filename="../map/CMapVRT.cpp" line="54"/>
+        <location filename="../map/CMapVRT.cpp" line="46"/>
+        <location filename="../map/CMapVRT.cpp" line="64"/>
         <source>Failed to load file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="45"/>
+        <location filename="../map/CMapVRT.cpp" line="52"/>
         <source>File does not exist:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="45"/>
+        <location filename="../map/CMapVRT.cpp" line="52"/>
         <source>referenced by file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="69"/>
+        <location filename="../map/CMapVRT.cpp" line="59"/>
+        <source>File has no raster bands:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../map/CMapVRT.cpp" line="73"/>
+        <source>Palette band has no color table:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../map/CMapVRT.cpp" line="85"/>
         <source>File must be 8 bit palette or gray indexed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="150"/>
+        <location filename="../map/CMapVRT.cpp" line="163"/>
         <source>Failed to create Warp for:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="172"/>
+        <location filename="../map/CMapVRT.cpp" line="175"/>
         <source>No georeference information found:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="180"/>
+        <location filename="../map/CMapVRT.cpp" line="183"/>
         <source>Raster has an invalid (zero) size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../map/CMapVRT.cpp" line="199"/>
+        <location filename="../map/CMapVRT.cpp" line="189"/>
         <source>No pixel-to-map transform found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5130,49 +5145,20 @@ Unknown structure.</source>
 <context>
     <name>COverviewAdvisoryDialog</name>
     <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="39"/>
-        <source>&lt;h3&gt;Rendering is slow&lt;/h3&gt;This file has no overviews (pyramids) built yet, so every redraw has to decode the data at full resolution:&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Building overviews once fixes this. Run one of the commands below in a terminal. This adds roughly &lt;b&gt;%2&lt;/b&gt; of disk space (uncompressed estimate - actual size will likely be smaller thanks to compression); make sure that&apos;s available first.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="47"/>
-        <source>&lt;h3&gt;Rendering is slow&lt;/h3&gt;This file has overviews, but at least one of its source files&apos; overviews isn&apos;t deep enough for the current view, so some redraws still have to decode much of the data at a finer resolution than necessary:&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Building deeper overviews once fixes this. Run one of the commands below in a terminal. This adds roughly &lt;b&gt;%2&lt;/b&gt; of disk space (uncompressed estimate - actual size will likely be smaller thanks to compression); make sure that&apos;s available first.&lt;br&gt;&lt;br&gt;&lt;i&gt;Note: since this file already has some overviews, the commands below add the new levels alongside the existing ones rather than replacing them, which can leave a mixed set of decimation levels. For a clean rebuild instead, run &lt;code&gt;gdaladdo -clean&lt;/code&gt; on the affected file first.&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="64"/>
         <source>File</source>
-        <translation type="unfinished">Datoteka</translation>
+        <translation type="obsolete">Datoteka</translation>
     </message>
     <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="64"/>
-        <source>Overview factors</source>
-        <translation type="unfinished"></translation>
+        <source>Action</source>
+        <translation type="obsolete">Akcija</translation>
     </message>
     <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="74"/>
+        <source>Close</source>
+        <translation type="obsolete">Zatvori</translation>
+    </message>
+    <message>
         <source>none</source>
-        <translation type="unfinished">nijedan</translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="84"/>
-        <source>&lt;p&gt;...and %1 more file(s) not shown.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="96"/>
-        <source>Option 1: build overviews on the VRT file:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="97"/>
-        <source>Option 2: build overviews on the underlying source file(s):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/COverviewAdvisoryDialog.cpp" line="99"/>
-        <source>Build overviews on the underlying source file(s):</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">nijedan</translation>
     </message>
 </context>
 <context>
@@ -8277,6 +8263,63 @@ Za konfiguraciju trebaš znati IP adresu svog Android uređaja ili naziv hosta k
     </message>
 </context>
 <context>
+    <name>CShell</name>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="46"/>
+        <source>Execution of external program `%1` failed: </source>
+        <translation type="unfinished">Izvršavanje vanjskog programa `%1` nije uspjelo: </translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="49"/>
+        <source>Process cannot be started.
+</source>
+        <translation type="unfinished">Proces se ne može pokrenuti.
+</translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="50"/>
+        <source>Make sure the required packages are installed, `%1` exists and is executable.
+</source>
+        <translation type="unfinished">Provjeri jesu li potrebni paketi instalirani, postoji li `%1` i je li izvršna datoteka.
+</translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="59"/>
+        <source>External process crashed.
+</source>
+        <translation type="unfinished">Vanjski proces se srušio.
+</translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="63"/>
+        <source>An unknown error occurred.
+</source>
+        <translation type="unfinished">Došlo je do nepoznate pogreške.
+</translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="141"/>
+        <source>!!! failed !!!
+</source>
+        <translation type="unfinished">!!! neuspješno !!!
+</translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="154"/>
+        <source>
+Canceled by user&apos;s request.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../common/shell/CShell.cpp" line="177"/>
+        <source>!!! done !!!
+</source>
+        <translation type="unfinished">!!! gotovo !!!
+</translation>
+    </message>
+</context>
+<context>
     <name>CSlfProject</name>
     <message>
         <location filename="../gis/slf/CSlfProject.cpp" line="37"/>
@@ -8689,6 +8732,301 @@ red %2, kolona %3:
         <location filename="../gis/tnv/serialization.cpp" line="649"/>
         <source>Failed to read data.</source>
         <translation>Nije uspjelo čitanje podataka.</translation>
+    </message>
+</context>
+<context>
+    <name>CVrtAdvisoryDialog</name>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="44"/>
+        <source>Fix overviews</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="45"/>
+        <source>Later</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="62"/>
+        <source>%1 × %2 px  ·  %3/px × %4/px  ·  %5 × %6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="71"/>
+        <source>⚠ This file references %1 source files. Reading gets inefficient past %2 - consider combining them into fewer files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="78"/>
+        <source>Combine files...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="94"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="118"/>
+        <source>File</source>
+        <translation type="unfinished">Datoteka</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="94"/>
+        <source>Existing overview sizes (px)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="94"/>
+        <source>Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="118"/>
+        <source>New overview levels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="118"/>
+        <source>Action</source>
+        <translation type="unfinished">Akcija</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="124"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="341"/>
+        <source>Clean + rebuild</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="124"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="343"/>
+        <source>Build new</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="139"/>
+        <source>Update &lt;OverviewList&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="139"/>
+        <source>Add &lt;OverviewList&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="188"/>
+        <source>%1 file(s) will have new overviews built</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="191"/>
+        <source>%1 file(s) will have existing overviews cleaned and rebuilt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="198"/>
+        <source>Estimated disk usage: %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="198"/>
+        <source>Disk usage: %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="230"/>
+        <source>Overview info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="232"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="420"/>
+        <source>Close</source>
+        <translation type="unfinished">Zatvori</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="242"/>
+        <source>none</source>
+        <translation type="unfinished">nijedan</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="263"/>
+        <source>✓ covered by .ovr</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="267"/>
+        <source>✗ None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="271"/>
+        <source>⚠ Shallow (coarsest %1px)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="274"/>
+        <source>✓ OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="282"/>
+        <source> (own .ovr)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="282"/>
+        <source> (via &lt;OverviewList&gt;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="320"/>
+        <source>gdaladdo not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="321"/>
+        <source>Could not locate gdaladdo. Make sure the GDAL tools are installed and on PATH.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="334"/>
+        <source>The following operations will be performed:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="356"/>
+        <source>Update &amp;lt;OverviewList&amp;gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="358"/>
+        <source>Add &amp;lt;OverviewList&amp;gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="363"/>
+        <source>Confirm fix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="406"/>
+        <source>Removed %1.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="428"/>
+        <source>GDAL tools not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="429"/>
+        <source>Could not locate gdal_translate/gdalbuildvrt. Make sure the GDAL tools are installed and on PATH.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="439"/>
+        <source>Could not read the raster layout of %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Odustani</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="438"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="452"/>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="486"/>
+        <source>Combine failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="452"/>
+        <source>No data found in %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="465"/>
+        <source>This will split %1 into %2 compressed GeoTIFF(s) in %3, then rewrite %1 to reference them. The current file will be backed up as %4.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="469"/>
+        <source>%1 grid cell(s) contained no data and will be skipped.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="472"/>
+        <source>Confirm combine</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="486"/>
+        <source>Could not back up %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="536"/>
+        <source>Abort</source>
+        <translation type="unfinished">Prekid</translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="537"/>
+        <source>An operation is in progress.
+
+Abort and remove any partially written files?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="585"/>
+        <source>Rebuilt %1&apos;s &lt;OverviewList&gt; from its source files.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="587"/>
+        <source>Failed to update %1.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="606"/>
+        <source>Restored %1 from backup.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="608"/>
+        <source>Failed to restore %1 from backup - %2 is still available for manual recovery.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="610"/>
+        <source>Restore failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="611"/>
+        <source>Combine failed and %1 could not be automatically restored from its backup.
+
+Rename %2 back to %1 yourself to recover the original file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="622"/>
+        <source>Combined %1 source file(s) into %2 tile(s); %3 rewritten.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="630"/>
+        <source>Combine finished</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/CVrtAdvisoryDialog.cpp" line="631"/>
+        <source>%1 has been rewritten to reference %2 merged tile(s).
+
+The %3 original source file(s) are still in %4 - delete them yourself once you&apos;ve confirmed the merged file works as expected.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -12226,129 +12564,141 @@ na temelju elevacije.</translation>
     <name>IDemsList</name>
     <message>
         <location filename="../dem/IDemList.ui" line="14"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="164"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="171"/>
         <source>Form</source>
         <translation>Forma</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="35"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="200"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="211"/>
         <source>Filter: Start to type and the list will be reduced to matching items.</source>
         <translation>Filter: Počni tipkati i popis će se smanjiti na odgovarajuće stavke.</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="38"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="202"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="213"/>
         <source>start typing...</source>
         <translation>počni tipkati...</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="131"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="204"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="215"/>
         <source>To add files with elevation data use &lt;a href=&apos;DemFolders&apos;&gt;File-&gt;Setup DEM Paths&lt;/a&gt;.</source>
         <translation>Za dodavanje datoteka s podacima o elevaciji upotrijebi &lt;a href=&apos;DemFolders&apos;&gt;Datoteka-&gt;Postavi DEM Staze&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="144"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="205"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="216"/>
         <source>Use the buttons to activate a DEM. Use drag-n-drop to move the DEM in the draw order. </source>
         <translation>Pomoću gumba aktiviraj DEM. Pomoću funkcije &quot;povuci i ispusti&quot; pomiči DEM redoslijedom crtanja. </translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="165"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="165"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="172"/>
         <source>Move to Top</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="168"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="167"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="174"/>
         <source>Hide DEM behind others</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="171"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="170"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="177"/>
         <source>Shift+Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="183"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="172"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="179"/>
         <source>Move Up</source>
         <translation>Pomakni gore</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="186"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="174"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="181"/>
         <source>Hide DEM behind previous one</source>
         <translation>Sakrij DEM iza prethodnog</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="189"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="177"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="184"/>
         <source>Shift+Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="201"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="179"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="186"/>
         <source>Move Down</source>
         <translation>Pomakni dolje</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="204"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="181"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="188"/>
         <source>Show DEM on top of next one</source>
         <translation>Prikaži DEM iznad sljedećg</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="207"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="184"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="191"/>
         <source>Shift+Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="219"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="186"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="193"/>
         <source>Move to Bottom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="222"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="188"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="195"/>
         <source>Show DEM on top of others</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="225"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="191"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="198"/>
         <source>Shift+End</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="237"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="193"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="200"/>
         <source>Reload DEM</source>
         <translation>Ponovo učitaj DEM</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="249"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="194"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="201"/>
         <source>Clear Filter</source>
         <translation>Očisti Filter</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="261"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="195"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="202"/>
         <source>Remove</source>
         <translation>Ukloniti</translation>
     </message>
     <message>
         <location filename="../dem/IDemList.ui" line="264"/>
-        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="197"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="204"/>
         <source>Remove DEM from list</source>
         <translation>Ukloni DEM iz popisa</translation>
+    </message>
+    <message>
+        <location filename="../dem/IDemList.ui" line="276"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="206"/>
+        <source>Overview Info...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../dem/IDemList.ui" line="279"/>
+        <location filename="../../../build/src/qmapshack/ui_IDemList.h" line="208"/>
+        <source>Show overview pyramid info for this file</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14565,60 +14915,60 @@ na temelju elevacije.</translation>
 <context>
     <name>IGisProject</name>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="172"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="177"/>
         <source>Save project?</source>
         <translation>Spremi projekt?</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="173"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="178"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;The project was changed. Save before closing it?</source>
         <translation>&lt;h3&gt;%1&lt;/h3&gt;Projekt je promijenjen. Želiš li ga spremiti prije zatvaranja?</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="362"/>
-        <location filename="../gis/prj/IGisProject.cpp" line="410"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="367"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="415"/>
         <source>Save &quot;%1&quot; to...</source>
         <translation>Spremi &quot;%1&quot; u...</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="474"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="479"/>
         <source>&lt;br/&gt;
 Filename: %1</source>
         <translation>&lt;br/&gt;
 Naziv datoteke: %1</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="478"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="483"/>
         <source>Keywords: </source>
         <translation type="unfinished">Ključne riječi: </translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="482"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="487"/>
         <source>Waypoints: %1</source>
         <translation>Putne točke: %1</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="485"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="490"/>
         <source>Tracks: %1</source>
         <translation>Tragovi: %1</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="488"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="493"/>
         <source>Routes: %1</source>
         <translation>Rute: %1</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="491"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="496"/>
         <source>Areas: %1</source>
         <translation>Područja: %1</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="595"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="600"/>
         <source>Are you sure you want to delete &apos;%1&apos; from project &apos;%2&apos;?</source>
         <translation>Jesi li siguran da želiš izbrisati &apos;%1&apos; iz projekta &apos;%2&apos;?</translation>
     </message>
     <message>
-        <location filename="../gis/prj/IGisProject.cpp" line="596"/>
+        <location filename="../gis/prj/IGisProject.cpp" line="601"/>
         <source>Delete...</source>
         <translation>Izbriši...</translation>
     </message>
@@ -15643,127 +15993,139 @@ Naziv datoteke: %1</translation>
     <name>IMapList</name>
     <message>
         <location filename="../map/IMapList.ui" line="14"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="162"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="169"/>
         <source>Form</source>
         <translation>Forma</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="116"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="202"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="213"/>
         <source>To add maps use &lt;a href=&apos;MapFolders&apos;&gt;File-&gt;Setup Map Paths&lt;/a&gt;.</source>
         <translation>Za dodavanje karata koristi &lt;a href=&apos;MapFolders&apos;&gt;Datoteka-&gt;Postavi Staze Karte&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="35"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="198"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="209"/>
         <source>Filter: Start to type and the list will be reduced to matching items.</source>
         <translation>Filter: Počni tipkati i popis će se smanjiti na odgovarajuće stavke.</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="38"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="200"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="211"/>
         <source>start typing...</source>
         <translation>počni tipkati...</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="129"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="203"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="214"/>
         <source>Use the buttons to activate a map. Use drag-n-drop to move the map in the draw order. </source>
         <translation>Pomoću gumba aktiviraj kartu. Pomoću funkcije &quot;povuci i ispusti&quot; pomiči kartu redoslijedom crtanja. </translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="153"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="165"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="172"/>
         <source>Hide map behind others</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="168"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="170"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="177"/>
         <source>Move Up</source>
         <translation>Pomakni gore</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="171"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="172"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="179"/>
         <source>Hide map behind previous map</source>
         <translation>Sakrij kartu iza prethodne karte</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="174"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="175"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="182"/>
         <source>Shift+Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="186"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="177"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="184"/>
         <source>Move Down</source>
         <translation>Pomakni dolje</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="189"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="179"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="186"/>
         <source>Show map on top of next map</source>
         <translation>Prikaži kartu iznad sljedeće karte</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="192"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="182"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="189"/>
         <source>Shift+Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="207"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="186"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="193"/>
         <source>Show map on top of others</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="222"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="191"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="198"/>
         <source>Reload Maps</source>
         <translation>Ponovo učitaj Karte</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="234"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="192"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="199"/>
         <source>Clear Filter</source>
         <translation>Očisti Filter</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="246"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="193"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="200"/>
         <source>Remove</source>
         <translation>Ukloniti</translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="249"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="195"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="202"/>
         <source>Remove map from list</source>
         <translation>Ukloni kartu iz popisa</translation>
     </message>
     <message>
+        <location filename="../map/IMapList.ui" line="261"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="204"/>
+        <source>Overview Info...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../map/IMapList.ui" line="264"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="206"/>
+        <source>Show overview pyramid info for this file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../map/IMapList.ui" line="150"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="163"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="170"/>
         <source>Move to Top</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="156"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="168"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="175"/>
         <source>Shift+Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="204"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="184"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="191"/>
         <source>Move to Bottom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../map/IMapList.ui" line="210"/>
-        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="189"/>
+        <location filename="../../../build/src/qmapshack/ui_IMapList.h" line="196"/>
         <source>Shift+End</source>
         <translation type="unfinished"></translation>
     </message>
@@ -16211,34 +16573,8 @@ Any modifications done will be discarded.</source>
 <context>
     <name>IOverviewAdvisoryDialog</name>
     <message>
-        <location filename="../helpers/IOverviewAdvisoryDialog.ui" line="14"/>
-        <location filename="../../../build/src/qmapshack/ui_IOverviewAdvisoryDialog.h" line="104"/>
-        <source>Slow rendering...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/IOverviewAdvisoryDialog.ui" line="20"/>
-        <location filename="../../../build/src/qmapshack/ui_IOverviewAdvisoryDialog.h" line="105"/>
         <source>TextLabel</source>
-        <translation type="unfinished">Tekst oznaka</translation>
-    </message>
-    <message>
-        <location filename="../helpers/IOverviewAdvisoryDialog.ui" line="40"/>
-        <location filename="../../../build/src/qmapshack/ui_IOverviewAdvisoryDialog.h" line="107"/>
-        <source>Build overviews on the VRT file:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/IOverviewAdvisoryDialog.ui" line="63"/>
-        <location filename="../../../build/src/qmapshack/ui_IOverviewAdvisoryDialog.h" line="108"/>
-        <source>Build overviews on the underlying source file(s):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../helpers/IOverviewAdvisoryDialog.ui" line="86"/>
-        <location filename="../../../build/src/qmapshack/ui_IOverviewAdvisoryDialog.h" line="109"/>
-        <source>Don&apos;t show this again for this file</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Tekst oznaka</translation>
     </message>
 </context>
 <context>
@@ -20353,6 +20689,33 @@ Ili jednostavno upišite novo vrijeme/datum.</translation>
         <location filename="../../../build/src/qmapshack/ui_IUnitsSetup.h" line="142"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; For some GUI elements changing the units will not take effect until you restart QMapShack.</source>
         <translation>&lt;b&gt;Napomena:&lt;/b&gt; Za neke elemente grafičkog korisničkog sučelja promjena jedinica neće stupiti na snagu dok ponovno ne pokrenete QMapShack.</translation>
+    </message>
+</context>
+<context>
+    <name>IVrtAdvisoryDialog</name>
+    <message>
+        <location filename="../helpers/IVrtAdvisoryDialog.ui" line="14"/>
+        <location filename="../../../build/src/qmapshack/ui_IVrtAdvisoryDialog.h" line="108"/>
+        <source>Slow rendering — overview pyramids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/IVrtAdvisoryDialog.ui" line="46"/>
+        <location filename="../../../build/src/qmapshack/ui_IVrtAdvisoryDialog.h" line="111"/>
+        <source>&lt;b&gt;Current overview situation:&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/IVrtAdvisoryDialog.ui" line="60"/>
+        <location filename="../../../build/src/qmapshack/ui_IVrtAdvisoryDialog.h" line="112"/>
+        <source>&lt;b&gt;After fix:&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../helpers/IVrtAdvisoryDialog.ui" line="84"/>
+        <location filename="../../../build/src/qmapshack/ui_IVrtAdvisoryDialog.h" line="114"/>
+        <source>Don&apos;t show this again for this file</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

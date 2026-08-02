@@ -191,7 +191,6 @@ set( SRCS
     helpers/CLimit.cpp
     helpers/CLinksDialog.cpp
     helpers/CMapIconSizesSetup.cpp
-    helpers/COverviewAdvisoryDialog.cpp
     helpers/CPhotoViewer.cpp
     helpers/CPositionDialog.cpp
     helpers/CProgressDialog.cpp
@@ -203,6 +202,8 @@ set( SRCS
     helpers/CToolBarConfig.cpp
     helpers/CToolBarSetupDialog.cpp
     helpers/CValue.cpp
+    helpers/CVrtAdvisoryDialog.cpp
+    helpers/CVrtCombiner.cpp
     helpers/CWptIconDialog.cpp
     helpers/CWptIconManager.cpp
     main.cpp
@@ -358,6 +359,9 @@ set( SRCS
     ../common/help/CHelpSearch.cpp
     ../common/gis/GeoMath.cpp
     ../common/gis/proj_x.cpp
+    ../common/shell/CShell.cpp
+    ../common/shell/CShellCmd.cpp
+    ../common/svgticon/CSvgtIcon.cpp
 )
 
 
@@ -571,7 +575,6 @@ set( HDRS
     helpers/CLimit.h
     helpers/CLinksDialog.h
     helpers/CMapIconSizesSetup.h
-    helpers/COverviewAdvisoryDialog.h
     helpers/CPhotoViewer.h
     helpers/CPositionDialog.h
     helpers/CProgressDialog.h
@@ -585,6 +588,8 @@ set( HDRS
     helpers/CToolBarConfig.h
     helpers/CToolBarSetupDialog.h
     helpers/CValue.h
+    helpers/CVrtAdvisoryDialog.h
+    helpers/CVrtCombiner.h
     helpers/CWebPage.h
     helpers/CWptIconDialog.h
     helpers/CWptIconManager.h
@@ -746,6 +751,9 @@ set( HDRS
     ../common/help/CHelpSearch.h
     ../common/gis/GeoMath.h
     ../common/gis/proj_x.h
+    ../common/shell/CShell.h
+    ../common/shell/CShellCmd.h
+    ../common/svgticon/CSvgtIcon.h
 )
 
 
@@ -868,13 +876,13 @@ set( UIS
     helpers/IInputDialog.ui
     helpers/ILinksDialog.ui
     helpers/IMapIconSizesSetup.ui
-    helpers/IOverviewAdvisoryDialog.ui
     helpers/IPositionDialog.ui
     helpers/IProgressDialog.ui
     helpers/ISelectCopyAction.ui
     helpers/ISelectProjectDialog.ui
     helpers/ITimeDialog.ui
     helpers/IToolBarSetupDialog.ui
+    helpers/IVrtAdvisoryDialog.ui
     helpers/IWptIconDialog.ui
     map/IMapList.ui
     map/IMapPathSetup.ui
@@ -966,6 +974,11 @@ if(WIN32)
 endif()
 add_executable(${APPLICATION_NAME} WIN32 ${MAININP} ${ICON})
 
+# Repair any edited UI icon SVG before rcc embeds it (target defined in src/icons).
+add_dependencies(${APPLICATION_NAME} icon_hygiene)
+
+target_link_libraries(${APPLICATION_NAME} svgticonengine)
+
 ###############################################################################################
 # Translation related stuff
 ###############################################################################################
@@ -1038,6 +1051,18 @@ endif(Qt6DBus_FOUND)
 
 target_link_libraries(${APPLICATION_NAME}
     Qt6::Widgets
+    # Nothing includes a QtSvg header: QIcon(":/x.svg") is served by the qsvg image plugin and
+    # the qsvgicon icon engine, both loaded at runtime. Linking the module is what makes
+    # windeployqt/macdeployqt detect and ship those plugins. Linux distros package them anyway.
+    # Drop the link and both plugins go missing: icons render blank. The failure that actually
+    # ships is the half one -- imageformats/qsvg without iconengines/qsvgicon falls back to one
+    # raster at natural size, so icons go blurry, not blank. Nobody reports blurry, and the HiDPI
+    # payoff is gone. Verify qsvgicon is deployed, not just qsvg.
+    Qt6::Svg
+    # QSvgWidget renders an SVG in paintEvent() at the painter's dpr, so a screen move needs no
+    # hook. It is the only dpr-aware way to show a static icon: QLabel takes a QPixmap, which is
+    # one raster frozen at dpr 1 whatever the source format.
+    Qt6::SvgWidgets
     Qt6::Xml
     Qt6::Sql
     Qt6::PrintSupport

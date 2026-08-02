@@ -17,18 +17,12 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="labelIcon">
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="../../resources.qrc">:/icons/48x48/EnergyCycling.png</pixmap>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+      <widget class="QSvgWidget" name="widgetIcon">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -51,7 +45,7 @@
        </property>
        <property name="icon">
         <iconset resource="../../resources.qrc">
-         <normaloff>:/icons/32x32/Help.png</normaloff>:/icons/32x32/Help.png</iconset>
+         <normaloff>:/icons/Help.svgt</normaloff>:/icons/Help.svgt</iconset>
        </property>
       </widget>
      </item>
@@ -418,6 +412,10 @@
          <property name="toolTip">
           <string/>
          </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_19">
          <property name="text">
           <string>Total Weight:</string>
          </property>
@@ -829,6 +827,10 @@
 &lt;p&gt;The higher the pedal cadence, the lower the pedal force.&lt;/p&gt;
 &lt;p&gt;The calculation is based on an even force distribution over the crank rotation without force peaks. &lt;/p&gt;</string>
          </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QLabel" name="label_17">
          <property name="text">
           <string notr="true">-</string>
          </property>
@@ -902,6 +904,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QSvgWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QSvgWidget</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>pushHelp</tabstop>
   <tabstop>spinDriverWeight</tabstop>

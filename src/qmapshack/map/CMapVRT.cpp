@@ -30,9 +30,21 @@
 #include "helpers/CGdalVrtUtil.h"
 #include "map/CMapDraw.h"
 
+// Unlike DEM data (still numerically meaningful however far it's decimated - just
+// smoother terrain), a map image downsampled past roughly 10-20x becomes an unreadable
+// pixel mishmash, however large or high-resolution the source is. Caps
+// suggestOverviewLevels()'s screen-size-based stopping rule, which alone would keep
+// doubling far past that point for a large enough source (e.g. all of Bavaria at 1m/px).
+constexpr qint32 kMaxMapOverviewFactor = 16;
+
 CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibility, parent), filename(filename) {
   qDebug() << "------------------------------";
   qDebug() << "VRT: try to open" << filename;
+
+  if (!CGdalVrtUtil::isFileUtf8(filename)) {
+    fail(tr("File is not UTF-8 encoded and cannot be loaded. Convert it to UTF-8 first:") % '\n' % filename);
+    return;
+  }
 
   dataset = GDALDataset::FromHandle(GDALOpen(filename.toUtf8(), GA_ReadOnly));
   if (nullptr == dataset) {
@@ -48,15 +60,24 @@ CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibili
 
   // ------- setup color table ---------
   rasterBandCount = dataset->GetRasterCount();
+  if (rasterBandCount == 0) {
+    fail(tr("File has no raster bands:") % '\n' % filename);
+    return;
+  }
   GDALRasterBand* pBand = dataset->GetRasterBand(1);
+  if (nullptr == pBand) {
+    fail(tr("Failed to load file:") % '\n' % filename);
+    return;
+  }
   if (rasterBandCount == 1) {
-    if (nullptr == pBand) {
-      fail(tr("Failed to load file:") % '\n' % filename);
-      return;
-    }
-
     if (pBand->GetColorInterpretation() == GCI_PaletteIndex) {
       GDALColorTable* pct = pBand->GetColorTable();
+      if (pct == nullptr) {
+        // A band can report palette interpretation yet carry no table (hand-edited VRT,
+        // some drivers) - dereferencing it below would crash.
+        fail(tr("Palette band has no color table:") % '\n' % filename);
+        return;
+      }
       for (qint32 i = 0; i < pct->GetColorEntryCount(); ++i) {
         const GDALColorEntry& e = *pct->GetColorEntry(i);
         colortable << qRgba(e.c1, e.c2, e.c3, e.c4);
@@ -79,22 +100,19 @@ CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibili
     }
   }
 
-  // dataset's own size before any reprojection below replaces it with a warped VRT; used
-  // to rescale weakestMaxFactor into the final dataset's pixel grid further down. 0 if
-  // pBand is null, which skips that rescale the same way it skips overviewAdvice itself.
-  const qint32 preWarpXSize = (pBand != nullptr) ? pBand->GetXSize() : 0;
-  const qint32 preWarpYSize = (pBand != nullptr) ? pBand->GetYSize() : 0;
+  const QVector<qint32> suggestedLevels =
+      CGdalVrtUtil::suggestOverviewLevels(pBand->GetXSize(), pBand->GetYSize(), kMaxMapOverviewFactor);
 
-  qreal masterGeoTransform[6];
-  const qreal masterPixelSizeX =
-      (pBand != nullptr && dataset->GetGeoTransform(masterGeoTransform) == CE_None) ? qAbs(masterGeoTransform[1]) : 0.0;
-  const CGdalVrtUtil::overview_factors_t overviewFactors =
-      (pBand != nullptr) ? CGdalVrtUtil::collectOverviewFactors(dataset, pBand, masterPixelSizeX)
-                         : CGdalVrtUtil::overview_factors_t();
-  qDebug() << "overview factors" << overviewFactors.factors;
-  // single band palette/gray data is categorical (see resampleAlg above)
-  if (pBand != nullptr) {
-    overviewAdvice = CGdalVrtUtil::buildOverviewAdvice(dataset, pBand, filename, rasterBandCount == 1, overviewFactors);
+  // single band palette/gray data is categorical (see resampleAlg below).
+  // buildOverviewAdvice() logs its own "OVR: ..." diagnostics as it goes.
+  overviewAdvice = CGdalVrtUtil::buildOverviewAdvice(dataset, pBand, rasterBandCount == 1, suggestedLevels);
+  // Cache the immutable attention verdict once: showsOverviewWarning() is polled per
+  // paint/hover/scroll by the tree delegate, and needsAttention() walks every source file.
+  overviewNeedsAttention = overviewAdvice.needsAttention();
+  if (overviewNeedsAttention) {
+    qDebug() << "OVR: assessment: needs attention - advisory will fire on slow render";
+  } else {
+    qDebug() << "OVR: assessment: OK";
   }
 
   // single band palette/gray data is categorical: nearest neighbour avoids blending index
@@ -153,16 +171,6 @@ CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibili
 
     // pick up the synthetic alpha band (if any) so draw() reads/composites it like any other band
     rasterBandCount = dataset->GetRasterCount();
-
-    if (!overviewFactors.factors.isEmpty()) {
-      // attach them as virtual overviews so GDAL can serve a decimated read straight from
-      // whichever source file(s) actually have a matching level, instead of always warping
-      // at full resolution and only downsampling the output
-      CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "YES");
-      dataset->BuildOverviews("NONE", overviewFactors.factors.size(), overviewFactors.factors.data(), 0, nullptr,
-                              nullptr, nullptr);
-      CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "NO");
-    }
   }
 
   // ------- setup projection ---------------
@@ -179,19 +187,6 @@ CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibili
   if (xsize_px <= 0 || ysize_px <= 0) {
     fail(tr("Raster has an invalid (zero) size:") % '\n' % filename);
     return;
-  }
-
-  if (preWarpXSize > 0 && preWarpYSize > 0) {
-    // a reprojection (the warp block above) can change the dataset's own pixel density -
-    // e.g. between a projected CRS in meters and a geographic CRS in degrees, or simply a
-    // different output resolution GDAL chose - so rescale weakestMaxFactor (collected
-    // pre-warp, in the original dataset's own pixel grid) into the current dataset's
-    // pixel grid, matching what draw()'s neededFactor (derived from the current
-    // xscale/yscale) is compared against. A no-op (ratio 1.0) whenever no warp happened,
-    // since the raster size is then unchanged.
-    const qreal warpScale =
-        qMax(static_cast<qreal>(xsize_px) / preWarpXSize, static_cast<qreal>(ysize_px) / preWarpYSize);
-    overviewAdvice.weakestMaxFactor = qMax(1, qRound(overviewAdvice.weakestMaxFactor * warpScale));
   }
 
   qreal adfGeoTransform[6];
@@ -218,6 +213,10 @@ CMapVRT::CMapVRT(const QString& filename, CMapDraw* parent) : IMap(eFeatVisibili
     // scales the mapped point without having to touch dx/dy and the linear part separately.
     trFwd = trFwd * DEG_TO_RAD;
   }
+
+  // The dialog's resolution/size line mirrors gdalinfo, so it comes from the pre-warp
+  // source (srcDataset when warped, else dataset) - not the warped grid above.
+  rasterGeometry = CGdalVrtUtil::sourceGeometry(srcDataset != nullptr ? srcDataset : dataset);
 
   trInv = trFwd.inverted();
 
@@ -264,12 +263,12 @@ CMapVRT::~CMapVRT() {
 
 void CMapVRT::saveConfig(QSettings& cfg) {
   IMap::saveConfig(cfg);
-  cfg.setValue("suppressOverviewAdvisory", suppressOverviewAdvisory.load());
+  cfg.setValue("suppressOverviewAdvisory", advisoryState.suppress.load());
 }
 
 void CMapVRT::loadConfig(QSettings& cfg) {
   IMap::loadConfig(cfg);
-  suppressOverviewAdvisory = cfg.value("suppressOverviewAdvisory", suppressOverviewAdvisory.load()).toBool();
+  advisoryState.suppress = cfg.value("suppressOverviewAdvisory", advisoryState.suppress.load()).toBool();
 }
 
 void CMapVRT::fail(const QString& msg) {
@@ -487,24 +486,7 @@ void CMapVRT::draw(IDrawContext::buffer_t& buf) /* override */
     if (!img.isNull()) {
       drawSourceImage(p, window, img);
     } else if (deadline.timedOut) {
-      // unlike an abort caused by a fresher redraw already being queued, a timeout abort
-      // leaves nothing else asking for a follow-up redraw - without one, this layer would
-      // stay blank until some unrelated event (pan/zoom) happens to trigger a full
-      // redraw, even once the underlying slowness is fixed
-      map->emitSigCanvasUpdate();
-
-      if (!suppressOverviewAdvisory && !advisoryShownThisSession) {
-        // overviews missing entirely, or the weakest referenced file's deepest overview
-        // still isn't decimated enough for what this read needed (e.g. a mosaic of files
-        // with wildly inconsistent overview depths) - reuse computeSourceWindow()'s own
-        // (already-clamped) decimation factors rather than recomputing them, so this
-        // matches exactly what the read itself just asked for
-        const qreal neededFactor = qMax(window.bufScaleX, window.bufScaleY);
-        if (overviewAdvice.overviewsMissing || neededFactor > overviewAdvice.weakestMaxFactor) {
-          advisoryShownThisSession = true;
-          map->emitOverviewAdvisory(this);
-        }
-      }
+      CGdalVrtUtil::handleRenderTimeout(map, this, showsOverviewWarning(), advisoryState);
     }
   }
 

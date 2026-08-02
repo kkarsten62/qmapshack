@@ -72,6 +72,29 @@ class IMapItem {
    */
   bool isOutOfScale() const { return outOfScale; }
 
+  /**
+   * @brief True if the item's active data source has an overview pyramid that needs
+   *        attention (missing or too shallow), driving the warning badge in
+   *        CMapItemDelegate. Always false while the item isn't Active - there is no
+   *        loaded data source to ask.
+   */
+  virtual bool showsOverviewWarning() const { return false; }
+
+  /**
+   * @brief True if the item's active data source has overview-pyramid info available to
+   *        show on demand (independent of showsOverviewWarning()), driving the "Overview
+   *        Info..." context-menu entry. Always false while the item isn't Active.
+   */
+  virtual bool hasOverviewInfo() const { return false; }
+
+  /**
+   * @brief Open the overview advisory dialog for this item's active data source. No-op
+   *        unless hasOverviewInfo() is true; shows an informational read-only view when
+   *        showsOverviewWarning() is false, the full advisory view (with whichever fix
+   *        actions apply) otherwise.
+   */
+  virtual void triggerOverviewAdvisory() {}
+
  protected:
   /**
    * @brief Status of the map item

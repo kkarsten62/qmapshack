@@ -37,6 +37,13 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
   qDebug() << "------------------------------";
   qDebug() << "VRT: try to open" << filename;
 
+  if (!CGdalVrtUtil::isFileUtf8(filename)) {
+    QMessageBox::warning(
+        CMainWindow::getBestWidgetForParent(), tr("Error..."),
+        tr("File is not UTF-8 encoded and cannot be loaded. Convert it to UTF-8 first:") % '\n' % filename);
+    return;
+  }
+
   dataset = GDALDataset::FromHandle(GDALOpen(filename.toUtf8(), GA_ReadOnly));
   if (nullptr == dataset) {
     QMessageBox::warning(CMainWindow::getBestWidgetForParent(), tr("Error..."),
@@ -82,27 +89,19 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
     return;
   }
 
-  // dataset's own size before any reprojection below replaces it with a warped VRT;
-  // used to rescale weakestMaxFactor into the final dataset's pixel grid further down
-  const qint32 preWarpXSize = pBand->GetXSize();
-  const qint32 preWarpYSize = pBand->GetYSize();
-
-  // skipped entirely for remote sources (CDemWCS, supportsOverviewAdvisory == false): the
-  // per-file fallback inside collectOverviewFactors() calls GetFileList() then GDALOpen()
-  // on every referenced "file" - meaningless, and an extra request against the same
-  // remote endpoint, for a source with no local files to inspect. Safe to skip:
-  // overviewAdvice/overviewFactors are only ever consulted below/in draw() when
-  // supportsOverviewAdvisory is also true.
-  CGdalVrtUtil::overview_factors_t overviewFactors;
+  // Skipped for remote sources (CDemWCS): the per-file fallback would GDALOpen() every
+  // referenced "file" against the same remote endpoint - pointless with no local files.
+  // Safe to skip: overviewAdvice is only read below/in draw() when
+  // supportsOverviewAdvisory is true.
   if (supportsOverviewAdvisory) {
-    qreal masterGeoTransform[6];
-    const qreal masterPixelSizeX =
-        (dataset->GetGeoTransform(masterGeoTransform) == CE_None) ? qAbs(masterGeoTransform[1]) : 0.0;
-    overviewFactors = CGdalVrtUtil::collectOverviewFactors(dataset, pBand, masterPixelSizeX);
-    qDebug() << "overview factors" << overviewFactors.factors;
-    // DEM data is always single-band continuous elevation, never categorical/palette
-    overviewAdvice =
-        CGdalVrtUtil::buildOverviewAdvice(dataset, pBand, filename, /*isCategorical=*/false, overviewFactors);
+    const QVector<qint32> suggestedLevels = CGdalVrtUtil::suggestOverviewLevels(pBand->GetXSize(), pBand->GetYSize());
+
+    // DEM data is always single-band continuous elevation, never categorical/palette.
+    // buildOverviewAdvice() logs its own "OVR: ..." diagnostics as it goes.
+    overviewAdvice = CGdalVrtUtil::buildOverviewAdvice(dataset, pBand, /*isPaletteIndexed=*/false, suggestedLevels);
+    // Cache the immutable attention verdict once: showsOverviewWarning() is polled per
+    // paint/hover/scroll by the tree delegate, and needsAttention() walks every source file.
+    overviewNeedsAttention = overviewAdvice.needsAttention();
   }
 
   noData = pBand->GetNoDataValue(&hasNoData);
@@ -132,16 +131,6 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
                            tr("Failed to create Warp for:") % '\n' % filename);
       return;
     }
-
-    if (!overviewFactors.factors.isEmpty()) {
-      // attach them as virtual overviews so GDAL can serve a decimated read straight from
-      // whichever source file(s) actually have a matching level, instead of always warping
-      // at full resolution and only downsampling the output
-      CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "YES");
-      dataset->BuildOverviews("NONE", overviewFactors.factors.size(), overviewFactors.factors.data(), 0, nullptr,
-                              nullptr, nullptr);
-      CPLSetConfigOption("VRT_VIRTUAL_OVERVIEWS", "NO");
-    }
   }
 
   // ------- setup projection ---------------
@@ -159,16 +148,16 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
   ysize_px = dataset->GetRasterYSize();
 
   if (supportsOverviewAdvisory) {
-    // a reprojection (the warp block above) can change the dataset's own pixel density -
-    // e.g. between a projected CRS in meters and a geographic CRS in degrees, or simply a
-    // different output resolution GDAL chose - so rescale weakestMaxFactor (collected
-    // pre-warp, in the original dataset's own pixel grid) into the current dataset's
-    // pixel grid, matching what draw()'s neededFactor (derived from the current
-    // xscale/yscale) is compared against. A no-op (ratio 1.0) whenever no warp happened,
-    // since the raster size is then unchanged.
-    const qreal warpScale =
-        qMax(static_cast<qreal>(xsize_px) / preWarpXSize, static_cast<qreal>(ysize_px) / preWarpYSize);
-    overviewAdvice.weakestMaxFactor = qMax(1, qRound(overviewAdvice.weakestMaxFactor * warpScale));
+    // overviewAdvice's factors stay in the dataset's pre-warp pixel grid - the same
+    // grid suggestedLevels was computed from above - so needsAttention() compares
+    // like with like regardless of any reprojection below. A warped VRT can change the
+    // dataset's own pixel density (e.g. meters vs degrees), but that only matters for
+    // draw()'s own decimation math, not for this real/discrete overview-factor advice.
+    if (overviewNeedsAttention) {
+      qDebug() << "OVR: assessment: needs attention - advisory will fire on slow render";
+    } else {
+      qDebug() << "OVR: assessment: OK";
+    }
   }
 
   qreal adfGeoTransform[6];
@@ -180,8 +169,8 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
     return;
   }
 
-  xscale = adfGeoTransform[1];
-  yscale = adfGeoTransform[5];
+  xscale = CGdalVrtUtil::toMeters(adfGeoTransform[1], proj.isSrcLatLong());
+  yscale = CGdalVrtUtil::toMeters(adfGeoTransform[5], proj.isSrcLatLong());
 
   // Build trFwd directly from GDAL's affine matrix instead of decomposing it into
   // translate+scale+rotate: adfGeoTransform[2]/[4] is a general shear term, not
@@ -191,8 +180,6 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
                      adfGeoTransform[3]);
 
   if (proj.isSrcLatLong()) {
-    xscale *= 111120;
-    yscale *= 111120;
     // Scale every element of the homogeneous matrix by DEG_TO_RAD to convert trFwd's
     // mapped output from degrees to radians. This works because QTransform::map() never
     // reads m13/m23/m33 as long as the transform stays non-projective (true here, since
@@ -200,6 +187,10 @@ CDemVRT::CDemVRT(const QString& filename, CDemDraw* parent, bool supportsOvervie
     // scales the mapped point without having to touch dx/dy and the linear part separately.
     trFwd = trFwd * DEG_TO_RAD;
   }
+
+  // The dialog's resolution/size line mirrors gdalinfo, so it comes from the pre-warp
+  // source (srcDataset when warped, else dataset) - not the warped grid above.
+  rasterGeometry = CGdalVrtUtil::sourceGeometry(srcDataset != nullptr ? srcDataset : dataset);
 
   trInv = trFwd.inverted();
 
@@ -230,12 +221,12 @@ CDemVRT::~CDemVRT() {
 
 void CDemVRT::saveConfig(QSettings& cfg) {
   IDem::saveConfig(cfg);
-  cfg.setValue("suppressOverviewAdvisory", suppressOverviewAdvisory.load());
+  cfg.setValue("suppressOverviewAdvisory", advisoryState.suppress.load());
 }
 
 void CDemVRT::loadConfig(QSettings& cfg) {
   IDem::loadConfig(cfg);
-  suppressOverviewAdvisory = cfg.value("suppressOverviewAdvisory", suppressOverviewAdvisory.load()).toBool();
+  advisoryState.suppress = cfg.value("suppressOverviewAdvisory", advisoryState.suppress.load()).toBool();
 }
 
 void CDemVRT::slotNeedsRedraw() { threadPool.clear(); }
@@ -423,22 +414,7 @@ void CDemVRT::draw(IDrawContext::buffer_t& buf) {
 
     if (err != CE_None) {
       if (deadline.timedOut) {
-        // unlike an abort caused by a fresher redraw already being queued, a timeout
-        // abort leaves nothing else asking for a follow-up redraw - without one, this
-        // layer would stay blank until some unrelated event (pan/zoom) happens to
-        // trigger a full redraw, even once the underlying slowness is fixed
-        dem->emitSigCanvasUpdate();
-
-        if (supportsOverviewAdvisory && !suppressOverviewAdvisory && !advisoryShownThisSession) {
-          // overviews missing entirely, or the weakest referenced file's deepest overview
-          // still isn't decimated enough for what this read needed (e.g. a mosaic of files
-          // with wildly inconsistent overview depths)
-          const qreal neededFactor = qMax(buf_scale_x, buf_scale_y);
-          if (overviewAdvice.overviewsMissing || neededFactor > overviewAdvice.weakestMaxFactor) {
-            advisoryShownThisSession = true;
-            dem->emitOverviewAdvisory(this);
-          }
-        }
+        CGdalVrtUtil::handleRenderTimeout(dem, this, showsOverviewWarning(), advisoryState);
       }
       return;
     }

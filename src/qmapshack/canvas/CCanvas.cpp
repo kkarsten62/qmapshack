@@ -34,8 +34,8 @@
 #include "grid/CGrid.h"
 #include "grid/CGridSetup.h"
 #include "helpers/CDraw.h"
-#include "helpers/COverviewAdvisoryDialog.h"
 #include "helpers/CSettings.h"
+#include "helpers/CVrtAdvisoryDialog.h"
 #include "helpers/CWptIconManager.h"
 #include "map/CMapDraw.h"
 #include "map/CMapVRT.h"
@@ -861,23 +861,54 @@ void CCanvas::slotToolTip() {
 }
 
 template <class T>
-void CCanvas::showOverviewAdvisory(QPointer<T> source) {
+CVrtAdvisoryDialog* CCanvas::showOverviewAdvisory(QPointer<T> source) {
   if (source.isNull()) {
-    return;
+    return nullptr;
   }
 
-  auto* dlg = new COverviewAdvisoryDialog(source->getFilename(), source->getOverviewAdvice(), this);
+  const QString filename = source->getFilename();
+  // Keyed on filename, not a flag on source: a reload destroys and recreates the
+  // CDemVRT/CMapVRT instance, which would reset any per-instance guard and let a second
+  // dialog open for the same file while the first one (now orphaned) is still showing.
+  // CCanvas already parents every dialog it opens (see below), so its own child list
+  // doubles as the registry - no separate bookkeeping needed.
+  for (CVrtAdvisoryDialog* open : findChildren<CVrtAdvisoryDialog*>(Qt::FindDirectChildrenOnly)) {
+    if (open->filename() == filename) {
+      open->raise();
+      open->activateWindow();
+      return nullptr;
+    }
+  }
+
+  source->setAdvisoryOpen(true);
+
+  auto* dlg = new CVrtAdvisoryDialog(filename, source->getOverviewAdvice(), source->getRasterGeometry(), this);
+  // Reflect the current suppress state so closing the dialog (e.g. after just opening
+  // "Overview Info...") writes back the same value instead of silently clearing it.
+  dlg->setSuppressChecked(source->suppressOverviewAdvisory());
   connect(dlg, &QDialog::finished, this, [dlg, source]() {
     if (source) {
-      source->slotSetSuppressOverviewAdvisory(dlg->suppressChecked());
+      source->setSuppressOverviewAdvisory(dlg->suppressChecked());
+      source->setAdvisoryOpen(false);
     }
   });
   dlg->show();
+  return dlg;
 }
 
-void CCanvas::slotShowDemOverviewAdvisory(QPointer<CDemVRT> source) { showOverviewAdvisory(source); }
+void CCanvas::slotShowDemOverviewAdvisory(QPointer<CDemVRT> source) {
+  if (auto* dlg = showOverviewAdvisory(source)) {
+    connect(dlg, &CVrtAdvisoryDialog::sigContainerRebuilt, this,
+            []() { CDemDraw::setupDemPath(CDemDraw::getDemPaths()); });
+  }
+}
 
-void CCanvas::slotShowMapOverviewAdvisory(QPointer<CMapVRT> source) { showOverviewAdvisory(source); }
+void CCanvas::slotShowMapOverviewAdvisory(QPointer<CMapVRT> source) {
+  if (auto* dlg = showOverviewAdvisory(source)) {
+    connect(dlg, &CVrtAdvisoryDialog::sigContainerRebuilt, this,
+            []() { CMapDraw::setupMapPath(CMapDraw::getMapPaths()); });
+  }
+}
 
 void CCanvas::slotCheckTrackOnFocus() {
   const IGisItem::key_t& key = CGisItemTrk::getKeyUserFocus();

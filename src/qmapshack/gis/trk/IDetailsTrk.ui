@@ -264,9 +264,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="labelTainted">
+           <widget class="QSvgWidget" name="labelTainted">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -280,21 +280,12 @@
             <property name="toolTip">
              <string>The track was imported to QMapShack and was changed. It does not show the original data anymore. Please see history for changes. </string>
             </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap resource="../../resources.qrc">:/icons/32x32/Tainted.png</pixmap>
-            </property>
-            <property name="scaledContents">
-             <bool>true</bool>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="labelNogo">
+           <widget class="QSvgWidget" name="labelNogo">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -307,15 +298,6 @@
             </property>
             <property name="toolTip">
              <string>This Track is a NoGo-Line</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap resource="../../resources.qrc">:/icons/32x32/NoGo.png</pixmap>
-            </property>
-            <property name="scaledContents">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -335,8 +317,8 @@
             </property>
             <property name="icon">
              <iconset resource="../../resources.qrc">
-              <normaloff>:/icons/32x32/UnLock.png</normaloff>
-              <normalon>:/icons/32x32/Lock.png</normalon>:/icons/32x32/UnLock.png</iconset>
+              <normaloff>:/icons/UnLock.svgt</normaloff>
+              <normalon>:/icons/Lock.svgt</normalon>:/icons/UnLock.svgt</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -453,7 +435,7 @@
             </property>
             <property name="icon">
              <iconset resource="../../resources.qrc">
-              <normaloff>:/icons/48x48/EnergyCycling.png</normaloff>:/icons/48x48/EnergyCycling.png</iconset>
+              <normaloff>:/icons/EnergyCycling.svgt</normaloff>:/icons/EnergyCycling.svgt</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -694,7 +676,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/ArrowUser.png</normaloff>:/icons/32x32/ArrowUser.png</iconset>
+                   <normaloff>:/icons/ArrowUser.svgt</normaloff>:/icons/ArrowUser.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -723,7 +705,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/ArrowDef.png</normaloff>:/icons/32x32/ArrowDef.png</iconset>
+                   <normaloff>:/icons/ArrowDef.svgt</normaloff>:/icons/ArrowDef.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -788,7 +770,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/LimitUsr.png</normaloff>:/icons/32x32/LimitUsr.png</iconset>
+                   <normaloff>:/icons/LimitUsr.svgt</normaloff>:/icons/LimitUsr.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -814,7 +796,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/Limit.png</normaloff>:/icons/32x32/Limit.png</iconset>
+                   <normaloff>:/icons/Limit.svgt</normaloff>:/icons/Limit.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -843,7 +825,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/LimitSys.png</normaloff>:/icons/32x32/LimitSys.png</iconset>
+                   <normaloff>:/icons/LimitSys.svgt</normaloff>:/icons/LimitSys.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -913,7 +895,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/LineWidthUser.png</normaloff>:/icons/32x32/LineWidthUser.png</iconset>
+                   <normaloff>:/icons/LineWidthUser.svgt</normaloff>:/icons/LineWidthUser.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -942,7 +924,7 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../../resources.qrc">
-                   <normaloff>:/icons/32x32/LineWidthDef.png</normaloff>:/icons/32x32/LineWidthDef.png</iconset>
+                   <normaloff>:/icons/LineWidthDef.svgt</normaloff>:/icons/LineWidthDef.svgt</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
@@ -1287,7 +1269,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitUsr.png</normaloff>:/icons/32x32/LimitUsr.png</iconset>
+               <normaloff>:/icons/LimitUsr.svgt</normaloff>:/icons/LimitUsr.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1316,7 +1298,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/Limit.png</normaloff>:/icons/32x32/Limit.png</iconset>
+               <normaloff>:/icons/Limit.svgt</normaloff>:/icons/Limit.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1348,7 +1330,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitSys.png</normaloff>:/icons/32x32/LimitSys.png</iconset>
+               <normaloff>:/icons/LimitSys.svgt</normaloff>:/icons/LimitSys.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1384,7 +1366,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitUsr.png</normaloff>:/icons/32x32/LimitUsr.png</iconset>
+               <normaloff>:/icons/LimitUsr.svgt</normaloff>:/icons/LimitUsr.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1413,7 +1395,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/Limit.png</normaloff>:/icons/32x32/Limit.png</iconset>
+               <normaloff>:/icons/Limit.svgt</normaloff>:/icons/Limit.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1445,7 +1427,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitSys.png</normaloff>:/icons/32x32/LimitSys.png</iconset>
+               <normaloff>:/icons/LimitSys.svgt</normaloff>:/icons/LimitSys.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1481,7 +1463,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitUsr.png</normaloff>:/icons/32x32/LimitUsr.png</iconset>
+               <normaloff>:/icons/LimitUsr.svgt</normaloff>:/icons/LimitUsr.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1510,7 +1492,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/Limit.png</normaloff>:/icons/32x32/Limit.png</iconset>
+               <normaloff>:/icons/Limit.svgt</normaloff>:/icons/Limit.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1542,7 +1524,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/LimitSys.png</normaloff>:/icons/32x32/LimitSys.png</iconset>
+               <normaloff>:/icons/LimitSys.svgt</normaloff>:/icons/LimitSys.svgt</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -1594,7 +1576,7 @@
              </property>
              <property name="icon">
               <iconset resource="../../resources.qrc">
-               <normaloff>:/icons/32x32/Activity.png</normaloff>:/icons/32x32/Activity.png</iconset>
+               <normaloff>:/icons/Activity.svgt</normaloff>:/icons/Activity.svgt</iconset>
              </property>
             </widget>
            </item>
@@ -1780,6 +1762,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QSvgWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QSvgWidget</header>
+  </customwidget>
   <customwidget>
    <class>CTableTrk</class>
    <extends>QTreeWidget</extends>
