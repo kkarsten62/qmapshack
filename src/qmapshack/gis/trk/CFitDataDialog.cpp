@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "helpers/CSettings.h"
 #include "helpers/CDraw.h"
 #include "gis/db/macros.h"
+#include "svgticon/CSvgtIcon.h"
 
 #include <QSqlQuery>
 #include <QSqlError>
@@ -32,6 +33,7 @@ CFitDataDialog::CFitDataDialog(QWidget* parent, CGisItemTrk& trk) :
                                                                     , trk(trk)
                                                                     , laps(trk.getFitData().getLaps()) {
   setupUi(this);
+  CSvgtIcon::load(widgetIcon, "://icons/FitProject.svgt");
 
   checkShowTrkptInfo->setChecked(trk.getFitData().getIsTrkptInfo());
 

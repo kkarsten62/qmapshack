@@ -21,12 +21,14 @@
 #include "gis/trk/CHeartRateZonesDialog.h"
 #include "gis/trk/CKnownExtension.h"
 #include "helpers/CSettings.h"
+#include "svgticon/CSvgtIcon.h"
 
 CHeartRateZonesDialog::CHeartRateZonesDialog(QWidget *parent, const CGisItemTrk &trk) :
     QDialog(parent)
     , trk(trk)
 {
     setupUi(this);
+    CSvgtIcon::load(widgetIcon, "://icons/HeartRate.svgt");
 
     SETTINGS;
     maxHr = cfg.value("TrackDetails/HeartRateZones/maxHeartRate", 180).toInt();
