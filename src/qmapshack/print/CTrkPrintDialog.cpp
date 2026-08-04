@@ -57,7 +57,7 @@ CTrkPrintDialog::CTrkPrintDialog(QWidget *parent, CGisItemTrk &trk) :
     const QList<CCanvas*>& list = CMainWindow::self().getCanvas();
     for(CCanvas* canvas : list)
     {
-        comboCanvasList->addItem(canvas->objectName(), QVariant::fromValue<CCanvas*>(canvas));
+        comboCanvasList->addItem(canvas->getName(), QVariant::fromValue<CCanvas*>(canvas));
     }
 // Set previous canvas
     if(!canvasName.isEmpty() && comboCanvasList->findText(canvasName) != -1)
