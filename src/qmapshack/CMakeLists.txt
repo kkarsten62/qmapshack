@@ -197,6 +197,8 @@ set( SRCS
     helpers/CRowBuilder.cpp
     helpers/CSelectCopyAction.cpp
     helpers/CSelectProjectDialog.cpp
+    helpers/CShortcutConfig.cpp
+    helpers/CShortcutSetupDialog.cpp
     helpers/CThread.cpp
     helpers/CTimeDialog.cpp
     helpers/CToolBarConfig.cpp
@@ -361,6 +363,8 @@ set( SRCS
     ../common/gis/proj_x.cpp
     ../common/shell/CShell.cpp
     ../common/shell/CShellCmd.cpp
+    ../common/theme/CQmsStyle.cpp
+    ../common/theme/CUiTheme.cpp
     ../common/svgticon/CSvgtIcon.cpp
 )
 
@@ -582,6 +586,8 @@ set( HDRS
     helpers/CSelectCopyAction.h
     helpers/CSelectProjectDialog.h
     helpers/CSettings.h
+    helpers/CShortcutConfig.h
+    helpers/CShortcutSetupDialog.h
     helpers/CThread.h
     helpers/CTryMutexLocker.h
     helpers/CTimeDialog.h
@@ -753,6 +759,8 @@ set( HDRS
     ../common/gis/proj_x.h
     ../common/shell/CShell.h
     ../common/shell/CShellCmd.h
+    ../common/theme/CQmsStyle.h
+    ../common/theme/CUiTheme.h
     ../common/svgticon/CSvgtIcon.h
 )
 
@@ -880,6 +888,7 @@ set( UIS
     helpers/IProgressDialog.ui
     helpers/ISelectCopyAction.ui
     helpers/ISelectProjectDialog.ui
+    helpers/IShortcutSetupDialog.ui
     helpers/ITimeDialog.ui
     helpers/IToolBarSetupDialog.ui
     helpers/IVrtAdvisoryDialog.ui
@@ -995,10 +1004,10 @@ set( TRANSLATIONS
     locale/${APPLICATION_NAME}_de.ts
     locale/${APPLICATION_NAME}_es.ts
     locale/${APPLICATION_NAME}_fr.ts
+    locale/${APPLICATION_NAME}_hr.ts
     locale/${APPLICATION_NAME}_it.ts
     locale/${APPLICATION_NAME}_nl.ts
     locale/${APPLICATION_NAME}_ru.ts
-    locale/${APPLICATION_NAME}_hr.ts
 )
 
 if(${UPDATE_TRANSLATIONS})
