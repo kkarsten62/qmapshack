@@ -23,10 +23,15 @@
 #include "helpers/CSettings.h"
 #include "items/CItemCutMap.h"
 #include "setup/IAppSetup.h"
+#include "theme/CUiTheme.h"
 
 CToolCutMap::CToolCutMap(QWidget* parent) : IToolGui(parent) {
   setupUi(this);
   setObjectName(tr("Cut Map"));
+
+  for (QLabel* label : {labelNoGdalwarp, labelNoGdaladdo}) {
+    CUiTheme::markLabel(label, CUiTheme::Role::eError);
+  }
 
   labelHelp->setText(
       tr("Paper maps usually have a border you don't want to have. To combine "
@@ -137,8 +142,7 @@ void CToolCutMap::buildCmd(QList<CShellCmd>& cmds, const IItem* iitem) {
   if (context->getRasterBandCount() == 1) {
     if (!context->getNoData()) {
       // --- use no data value for destination, too ---
-      args << "-dstnodata"
-           << "255";
+      args << "-dstnodata" << "255";
     }
   } else if (context->getRasterBandCount() == 3) {
     // --- add alpha channel to files with just RGB ---

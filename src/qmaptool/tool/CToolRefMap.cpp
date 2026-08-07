@@ -26,10 +26,15 @@
 #include "overlay/refmap/COverlayRefMapPoint.h"
 #include "setup/IAppSetup.h"
 #include "shell/CShell.h"
+#include "theme/CUiTheme.h"
 
 CToolRefMap::CToolRefMap(QWidget* parent) : IToolGui(parent) {
   setupUi(this);
   setObjectName(tr("Reference Map"));
+
+  for (QLabel* label : {labelNoGdalwarp, labelNoGdalTranslate, labelNoGdaladdo}) {
+    CUiTheme::markLabel(label, CUiTheme::Role::eError);
+  }
 
   labelHelp->setText(
       tr("A scan of a paper map can be converted to a referenced raster map if "
@@ -169,8 +174,7 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem* iitem) {
   if (context->getRasterBandCount() == 1) {
     if (!context->getNoData()) {
       // --- use no data value for destination, too ---
-      args << "-dstnodata"
-           << "255";
+      args << "-dstnodata" << "255";
     }
   } else if (context->getRasterBandCount() == 3) {
     // --- add alpha channel to files with just RGB ---
@@ -188,10 +192,7 @@ void CToolRefMap::buildCmd(QList<CShellCmd>& cmds, const IItem* iitem) {
 
   args = groupGDALParameters->getArgs();
   if (args.isEmpty()) {
-    args << "-co"
-         << "tiled=yes"
-         << "-co"
-         << "compress=deflate";
+    args << "-co" << "tiled=yes" << "-co" << "compress=deflate";
   }
   args << tmpname2 << outFilename;
   cmds << CShellCmd(IAppSetup::self().getGdaltranslate(), args);

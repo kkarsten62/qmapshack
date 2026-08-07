@@ -47,6 +47,8 @@
 #include "helpers/CMapIconSizesSetup.h"
 #include "helpers/CProgressDialog.h"
 #include "helpers/CSettings.h"
+#include "helpers/CShortcutConfig.h"
+#include "helpers/CShortcutSetupDialog.h"
 #include "helpers/CToolBarConfig.h"
 #include "helpers/CToolBarSetupDialog.h"
 #include "helpers/CWptIconDialog.h"
@@ -211,6 +213,7 @@ CMainWindow::CMainWindow() : id(QRandomGenerator::global()->generate()) {
   connect(actionSetupWorkspace, &QAction::triggered, this, &CMainWindow::slotSetupWorkspace);
   connect(actionSetupCoordFormat, &QAction::triggered, this, &CMainWindow::slotSetupCoordFormat);
   connect(actionSetupToolbar, &QAction::triggered, this, &CMainWindow::slotSetupToolbar);
+  connect(actionSetupShortcuts, &QAction::triggered, this, &CMainWindow::slotSetupShortcuts);
   connect(actionImportDatabase, &QAction::triggered, this, &CMainWindow::slotImportDatabase);
   connect(actionSaveGISData, &QAction::triggered, widgetGisWorkspace, &CGisWorkspace::slotSaveAll);
   connect(actionLoadGISData, &QAction::triggered, this, &CMainWindow::slotLoadGISData);
@@ -343,6 +346,17 @@ CMainWindow::CMainWindow() : id(QRandomGenerator::global()->generate()) {
     connect(dock, &QDockWidget::topLevelChanged, this, &CMainWindow::slotDockFloating);
   }
 
+#if defined(Q_OS_MAC)
+  if (QString::compare(qApp->style()->name(), "macOS", Qt::CaseInsensitive) == 0) {
+    // we must get rid of style sheet file due to dark mode awareness:
+    // adjust toolbar height and icon size of default style "macOS"
+    // to toolbar height and icon size of style "Fusion" instead
+    toolBar->setFixedHeight(38);
+    toolBar->setIconSize(QSize(24, 24));
+    toolBar->setStyleSheet("QToolBar { spacing: 2px; }");
+  }
+#endif  // defined(Q_OS_MAC)
+
   QAction* actionToggleToolBar = toolBar->toggleViewAction();
   actionToggleToolBar->setObjectName("actionToggleToolBar");
   actionToggleToolBar->setIcon(QIcon(":/icons/ToolBar.svgt"));
@@ -462,7 +476,8 @@ CMainWindow::CMainWindow() : id(QRandomGenerator::global()->generate()) {
                       actionFullScreen,
                       actionStartQMapTool,
                       actionRenameView,
-                      actionLinkMapViews};
+                      actionLinkMapViews,
+                      actionSetupShortcuts};
 
   QAction* separator1 = new QAction("---------------", this);
   separator1->setSeparator(true);
@@ -493,6 +508,9 @@ CMainWindow::CMainWindow() : id(QRandomGenerator::global()->generate()) {
 
   toolBarConfig = new CToolBarConfig(this, toolBar, availableActions, defaultActions);
   toolBarConfig->loadSettings();
+
+  shortcutConfig = new CShortcutConfig(this, availableActions);
+  shortcutConfig->loadSettings();
 
   geoSearchConfig = new CGeoSearchConfig(this);
   connect(geoSearchConfig, &CGeoSearchConfig::sigConfigChanged, this, &CMainWindow::slotGeoSearchConfigChanged);
@@ -766,7 +784,7 @@ void CMainWindow::addWidgetToTab(QWidget* w) {
   }
 }
 
-CCanvas* CMainWindow::getVisibleCanvas() const { 
+CCanvas* CMainWindow::getVisibleCanvas() const {
   int n = tabMaps->currentIndex();
   CMapList* mapList = dynamic_cast<CMapList*>(tabMaps->widget(n));
   n = mapList != nullptr ? getTabIndexForCanvasKey(mapList->getCanvasKey()) : -1;
@@ -1236,6 +1254,17 @@ void CMainWindow::slotSetupToolbar() {
   dlg.exec();
 }
 
+void CMainWindow::slotSetupShortcuts() {
+  CShortcutSetupDialog dlg(this, shortcutConfig);
+  if (dlg.exec() == QDialog::Accepted) {
+    for (QAction* const& action : shortcutConfig->configurableActions()) {
+      if (!action->shortcuts().isEmpty()) {
+        addAction(action);
+      }
+    }
+  }
+}
+
 void CMainWindow::slotImportDatabase() {
   CImportDatabase* widget = new CImportDatabase(this);
   addWidgetToTab(widget);
@@ -1321,10 +1350,10 @@ void CMainWindow::slotLoadView() {
   for (int i = 0; i < tabWidget->count(); i++) {
     CCanvas* canvas = dynamic_cast<CCanvas*>(tabWidget->widget(i));
     if (canvas && canvas->getKey() == key) {
-      QMessageBox::information(
-          this, tr("Can not add view..."),
-          tr("The view is already loaded as '%1'. You have to close it before loading it again.").arg(canvas->getName()),
-          QMessageBox::Abort);
+      QMessageBox::information(this, tr("Can not add view..."),
+                               tr("The view is already loaded as '%1'. You have to close it before loading it again.")
+                                   .arg(canvas->getName()),
+                               QMessageBox::Abort);
       return;
     }
   }

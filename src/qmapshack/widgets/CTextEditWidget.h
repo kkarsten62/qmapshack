@@ -40,31 +40,40 @@ class CTextEditWidget : public QDialog, private Ui::ITextEditWidget {
   bool event(QEvent* event) override;
 
  private slots:
-  void textBold();
-  void textUnderline();
-  void textItalic();
-  void textStyle(int styleIndex);
-  void textColor();
-  void textAlign(QAction* a);
-  void resetFont();
-  void resetLayout();
+  void slotTextBold();
+  void slotTextUnderline();
+  void slotTextItalic();
+  void slotTextStyle(int styleIndex);
+  void slotTextColor();
+  void slotTextAlign(QAction* a);
+  void slotResetFont();
 
-  void currentCharFormatChanged(const QTextCharFormat& format);
-  void cursorPositionChanged();
-  void selectionChanged();
-  void clipboardDataChanged();
+  /// @brief Drop the text colour so it follows the palette again.
+  void slotResetColor();
+  void slotResetLayout();
 
-  void customContextMenuRequested();
-  void pasteMode(QAction* action);
-  void deleteSelected();
+  void slotCurrentCharFormatChanged(const QTextCharFormat& format);
+  void slotCursorPositionChanged();
+  void slotSelectionChanged();
+  void slotClipboardDataChanged();
 
-  void textEditScrolled();
+  void slotCustomContextMenuRequested();
+  void slotPasteMode(QAction* action);
+  void slotDeleteSelected();
 
-  void insertFromTemplate();
+  void slotTextEditScrolled();
+
+  void slotInsertFromTemplate();
 
  private:
+  /// @brief Apply @p format to the selection, or to the word under the cursor if there is none.
   void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
   void fontChanged(const QFont& f);
+
+  /// @brief The colour @p fmt sets explicitly, or an invalid colour when it sets none.
+  static QColor explicitColor(const QTextCharFormat& fmt);
+
+  /// @brief Update the colour button's swatch. An invalid @p c means "no colour set".
   void colorChanged(const QColor& c);
   void alignmentChanged(Qt::Alignment a);
   void updateSelectionWindow();
