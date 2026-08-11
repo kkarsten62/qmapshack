@@ -178,6 +178,7 @@ set( SRCS
     helpers/CElevationDialog.cpp
     gis/search/CSearch.cpp
     helpers/CGdalVrtUtil.cpp
+    helpers/CGdalZip.cpp
     helpers/CInputDialog.cpp
     helpers/CLimit.cpp
     helpers/CLinksDialog.cpp
@@ -190,6 +191,7 @@ set( SRCS
     helpers/CSelectProjectDialog.cpp
     helpers/CShortcutConfig.cpp
     helpers/CShortcutSetupDialog.cpp
+    helpers/CSmoothingSpline.cpp
     helpers/CThread.cpp
     helpers/CTimeDialog.cpp
     helpers/CToolBarConfig.cpp
@@ -560,6 +562,7 @@ set( HDRS
     helpers/CElevationDialog.h
     helpers/CFileExt.h
     helpers/CGdalVrtUtil.h
+    helpers/CGdalZip.h
     gis/search/CSearch.h
     helpers/CInputDialog.h
     helpers/CLimit.h
@@ -574,6 +577,7 @@ set( HDRS
     helpers/CSettings.h
     helpers/CShortcutConfig.h
     helpers/CShortcutSetupDialog.h
+    helpers/CSmoothingSpline.h
     helpers/CThread.h
     helpers/CTryMutexLocker.h
     helpers/CTimeDialog.h
@@ -1064,8 +1068,6 @@ target_link_libraries(${APPLICATION_NAME} PRIVATE
     GDAL::GDAL
     PROJ::proj
     ROUTINO::ROUTINO
-    ALGLIB::ALGLIB
-    QuaZip::QuaZip
     GarminFit
 )
 
