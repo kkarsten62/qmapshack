@@ -20,8 +20,6 @@
 #ifndef CGISITEMTRK_H
 #define CGISITEMTRK_H
 
-#include <interpolation.h>
-
 #include <QDebug>
 #include <QPen>
 #include <QPointer>
@@ -40,6 +38,7 @@
 #include "gis/trk/filter/CFilterSpeedCycle.h"
 #include "gis/trk/filter/CFilterSpeedHike.h"
 #include "helpers/CLimit.h"
+#include "helpers/CSmoothingSpline.h"
 #include "helpers/CValue.h"
 
 using std::numeric_limits;
@@ -938,9 +937,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   struct interpolate_t {
     bool valid = false;
     quality_e Q = eQualityCoarse;
-    alglib::ae_int_t m = 0;
-    alglib::spline1dinterpolant p;
-    alglib::spline1dfitreport rep;
+    qint32 m = 0;  ///< node count the spline was fitted with
+    CSmoothingSpline spline;
   };
 
   interpolate_t interp;

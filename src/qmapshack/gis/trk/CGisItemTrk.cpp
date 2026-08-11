@@ -49,6 +49,9 @@
 #define MIN_DIST_FOCUS 200
 #define BULLET_SIZE 7.0
 
+/// Curvature weight of the elevation smoothing spline; larger flattens the profile further.
+constexpr qreal kElevationSmoothing = 2.065e-10;
+
 /** @brief Render a trackpoint bullet once, at the painter's resolution
 
    Blitting this per point is 4.2x cheaper than an ellipse per point (235ns vs 995ns measured,
@@ -1125,6 +1128,8 @@ void CGisItemTrk::deriveSecondaryData() {
   updateVisuals(eVisualAll, "deriveSecondaryData()");
 
   energyCycling.compute();
+
+  updateVisuals(eVisualAll, "deriveSecondaryData()");
 
   //    qDebug() << "--------------" << getName() << "------------------";
   //    qDebug() << "allValidFlags" << Qt::hex << allValidFlags;
@@ -2725,18 +2730,20 @@ void CGisItemTrk::setMouseClickFocusVisuals(const CTrackData::trkpt_t* pt) {
 }
 
 void CGisItemTrk::setupInterpolation(bool on, qint32 q) {
-  interp.valid = on;
+  interp.valid = false;
   interp.Q = (quality_e)q;
+  interp.spline.reset();
 
   if (!on) {
     updateVisuals(eVisualPlot, "setupInterpolation()");
     return;
   }
 
-  const qint32 N = getNumberOfVisiblePoints();
-  alglib::real_1d_array x, y;
-  x.setlength(N);
-  y.setlength(N);
+  const qint32 numVisible = getNumberOfVisiblePoints();
+  QVector<qreal> x;
+  QVector<qreal> y;
+  x.reserve(numVisible);
+  y.reserve(numVisible);
 
   for (const CTrackData::trkpt_t& trkpt : trk) {
     if (trkpt.isHidden()) {
@@ -2747,33 +2754,22 @@ void CGisItemTrk::setupInterpolation(bool on, qint32 q) {
       continue;
     }
 
-    x[trkpt.idxVisible] = trkpt.distance;
-    y[trkpt.idxVisible] = trkpt.ele;
+    x << trkpt.distance;
+    y << trkpt.ele;
   }
 
-  //interp.m = interp.Q * N / 10; //KKA: changed
-  interp.m = N; //KKA: new
-  qreal lambdans = qPow(10, interp.Q * -1); //KKA: new
-  try {
-    //alglib::spline1dfit(x, y, interp.m, 0.00001, interp.p, interp.rep); //KKA: changed
-      alglib::spline1dfit(x, y, interp.m, lambdans, interp.p, interp.rep); //KKA: new
-    interp.valid = true;
-  } catch (const alglib::ap_error& e) {
-    qWarning() << "Error from alglib: " << e.msg.c_str();
-  }
+  interp.m = qMax(qint32(interp.Q * x.size() / 10), CSmoothingSpline::minNodes);
+  interp.valid = interp.spline.fit(x, y, interp.m, kElevationSmoothing);
 
   updateVisuals(eVisualPlot, "setupInterpolation()");
 }
 
 qreal CGisItemTrk::getElevationInterpolated(qreal d) {
-  try {
-    return alglib::spline1dcalc(interp.p, d);
-  } catch (const alglib::ap_error& e) {
-    qWarning() << "Error from alglib: " << e.msg.c_str();
-    interp.valid = false;
+  if (!interp.valid) {
+    return NOFLOAT;
   }
 
-  return NOFLOAT;
+  return interp.spline.eval(d);
 }
 
 void CGisItemTrk::getMouseRange(int& idx1, int& idx2, bool total) const {
