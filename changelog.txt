@@ -9,6 +9,7 @@ V1.XX.X
 [QMS-1123] Build error on platform Linux Ubuntu 24.04.4
 [QMS-1125] Use GDAL's warp and scale API to draw *.vrt maps
 [QMS-1128] Enhance VRT handling for maps and DEM
+[QMS-1130] Improve performance of IMG renderer + Fix: patterned areas shifting when panning
 [QMS-1132] Add action to move a map to the top in map list (macOS)
 [QMS-1135] Add guidance to improve overviews for DEM and map VRT
 [QMS-1139] Reject non-UTF-8 encoded VRT files with a clear error message
@@ -21,6 +22,7 @@ V1.XX.X
 [QMS-1164] Support light and dark color schemes for UI icons
 [QMS-1165] Unify UI icon style and improve dark mode legibility
 [QMS-1166] Allow configuring custom keyboard shortcuts
+[QMS-1169] Fix: Map viewport keeps the previous size after leaving fullscreen
 [QMS-1171] Fix: Formatted text is rendered badly in dark theme
 [QMS-1173] Fix: QMS on macOS is not dark mode aware
 [QMS-1177] Show "style" option in QMS usage
@@ -30,6 +32,10 @@ V1.XX.X
 [QMS-1186] Fix: Windows executables are no longer UTF-8 aware
 [QMS-1190] Drop the alglib dependency in favour of an own elevation smoothing spline
 [QMS-1193] Drop the QuaZip dependency in favour of GDAL's /vsizip/ filesystem
+[QMS-1195] Extend .gitattributes file by additional file types
+[QMS-1197] Fix: Splash screen not floating on Sway
+[QMS-1199] Fix: Map tooltip showing up after mouse left the canvas
+[QMS-1201] Fix: Checked state of tool buttons and menu items lost while the window is inactive
 
 V1.20.3
 [QMS-1059] Fix: F1 help browser does not open external links

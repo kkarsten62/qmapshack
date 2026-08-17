@@ -30,9 +30,10 @@
 class CMapDraw;
 class CFileExt;
 class IGarminStrTbl;
+class BLContext;
 
-typedef QVector<CGarminPolygon> polytype_t;
-typedef QVector<CGarminPoint> pointtype_t;
+using polytype_t = QVector<CGarminPolygon>;
+using pointtype_t = QVector<CGarminPoint>;
 
 class CMapIMG : public IMap {
   Q_OBJECT
@@ -161,24 +162,27 @@ class CMapIMG : public IMap {
   void processPrimaryMapData();
   void readFile(CFileExt& file, quint32 offset, quint32 size, QByteArray& data);
   void loadVisibleData(bool fast, polytype_t& polygons, polytype_t& polylines, pointtype_t& points, pointtype_t& pois,
-                       unsigned level, const QRectF& viewport, QPainter& p);
+                       unsigned level, const QRectF& viewport, BLContext& ctx);
   void loadSubDiv(CFileExt& file, const subdiv_desc_t& subdiv, IGarminStrTbl* strtbl, const QByteArray& rgndata,
                   bool fast, const QRectF& viewport, polytype_t& polylines, polytype_t& polygons, pointtype_t& points,
                   pointtype_t& pois);
   bool intersectsWithExistingLabel(const QRect& rect) const;
   void addLabel(const CGarminPoint& pt, const QRect& rect, const CGarminTyp::point_property& property, bool isDay);
-  void drawPolygons(QPainter& p, polytype_t& lines);
-  void drawPolylines(QPainter& p, polytype_t& lines, const QPointF& scale);
-  void drawPoints(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois);
-  void drawPois(QPainter& p, pointtype_t& pts, QVector<QRectF>& rectPois);
-  void drawLabels(QPainter& p, const QVector<strlbl_t>& lbls);
-  void drawText(QPainter& p);
+  void drawPolygons(BLContext& ctx, polytype_t& lines);
+  void drawPolylines(BLContext& ctx, polytype_t& lines, const QPointF& scale);
+  void drawPoints(BLContext& ctx, pointtype_t& pts, QVector<QRectF>& rectPois);
+  void drawPois(BLContext& ctx, pointtype_t& pts, QVector<QRectF>& rectPois);
+  // Text and labels are rendered through Blend2D as well: glyph outlines come from
+  // QRawFont (cmap-only mapping, no complex shaping) and are filled in the shared context.
+  void drawLabels(BLContext& ctx, const QVector<strlbl_t>& lbls);
+  void drawText(BLContext& ctx);
 
-  void drawLine(QPainter& p, CGarminPolygon& l, const CGarminTyp::polyline_property& property, const QFont& font, const QPointF& scale);
-  void drawLine(QPainter& p, const CGarminPolygon& l);
+  void drawLine(BLContext& ctx, CGarminPolygon& l, bool stroke, int lineWidth,
+                const CGarminTyp::polyline_property& property, const QFont& font, const QPointF& scale);
+  void drawLine(BLContext& ctx, const CGarminPolygon& l);
 
-  void collectText(const CGarminPolygon& item, const QPolygonF& line, const QFont& font,
-                   qint32 lineWidth, const QColor& color);
+  void collectText(const CGarminPolygon& item, const QPolygonF& line, const QFont& font, qint32 lineWidth,
+                   const QColor& color);
 
   void getInfoPoints(const pointtype_t& points, const QPoint& pt, QMultiMap<QString, QString>& dict) const;
   void getInfoPolylines(const QPoint& pt, QMultiMap<QString, QString>& dict) const;
@@ -427,11 +431,7 @@ class CMapIMG : public IMap {
     bool useBaseMap;
 
     bool operator==(const map_level_t& ml) const {
-      if (ml.bits != bits || ml.level != level || ml.useBaseMap != useBaseMap) {
-        return false;
-      } else {
-        return true;
-      }
+      return ml.bits == bits && ml.level == level && ml.useBaseMap == useBaseMap;
     }
 
     static bool GreaterThan(const map_level_t& ml1, const map_level_t& ml2) { return ml1.bits < ml2.bits; }
