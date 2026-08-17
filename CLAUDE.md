@@ -76,8 +76,14 @@ Target-scoped CMake. Nothing is set at directory scope except the MSVC options b
   directory on Windows, where `CAppSetupWin` resolves `HELPPATH` against it. Six cache variables
   survive so a packager can override them. `HTML_INSTALL_DIR` is `share/doc/HTML`, not
   `CMAKE_INSTALL_DOCDIR` — changing it moves the installed help.
-- **`CMAKE_RUNTIME_OUTPUT_DIRECTORY` pins the four per-config variables too**, or a multi-config
-  generator appends `Release/` and the macOS and Windows packaging scripts stop finding the binaries.
+- **`CMAKE_RUNTIME_OUTPUT_DIRECTORY` is set, the four per-config variables are deliberately not.**
+  They are the only thing a multi-config generator consults for its `$<CONFIG>` suffix, so pinning
+  them collapses every configuration into one `bin`, which leaves a `.pdb` from the previous
+  configuration beside a mismatched `.exe` and makes the build report the other config's binary as
+  up to date. `msvc_64/CopyFilesGis.bat` reads `bin\Release\` and wants the suffix. Single-config
+  generators resolve the per-config variable to the same path as the plain one, so Linux and the
+  macOS release path (`build-QMS.sh` uses `Unix Makefiles`; its Xcode branch is marked BROKEN and
+  exits before bundling) are flat whatever the build type.
 - **`ConfigureChecks.cmake` probes through the C++ compiler.** The project enables no C language, so
   `check_include_file` / `check_symbol_exists` hard-fail; use the `_cxx` variants.
 - **`CMAKE_AUTOUIC` is OFF** — the `.ui` files are listed explicitly and go through `qt_wrap_ui`.
@@ -213,6 +219,21 @@ preview curve.
   `idxVisible` leaves holes for points without elevation.
 - Below ~80 nodes the basis, not the penalty, limits the curve. That is where the quality setting
   changes the result.
+
+### IGarminStrTbl label cache (the `get`/`decode` split)
+
+Profiling (Tracy) showed label decoding (`strtbl.get`) was the single largest slice of
+`loadVisibleData` — an `mmap` (via `CFileExt::data()`) plus a codepage decode **per labelled object,
+re-done every frame** even though label content is immutable. To fix that, `IGarminStrTbl::get()` is a
+**non-virtual** cache wrapper over a bounded LRU `QCache<quint64, QStringList>` (key `(type << 32) |
+offset`); on a miss it delegates to the protected pure-virtual **`decode()`** (the per-coding work,
+implemented by `CGarminStrTbl6/8/Utf8`). Do not re-merge `get`/`decode` or make `get` virtual again —
+the split exists so the cache lives in exactly one place. The cap (`labelCacheMaxEntries`) bounds
+memory when panning huge gmapsupp files; a hit needs no `mmap` at all, which also shrinks the
+per-subfile `CFileExt::free()` `munmap` loop. The cache is touched only from the draw thread
+(`get()` ← `loadSubDiv` ← `loadVisibleData` ← `draw`, all serialized), so it needs no lock.
+Tracy zones: `strtbl.get` = wrapper (hits+misses), `strtbl.decode` = misses only — compare their call
+counts to read the hit rate.
 
 ---
 
@@ -387,6 +408,12 @@ palette.
   so the running one cannot be the base. That is what preserves `-style` / `QT_STYLE_OVERRIDE`.
 - **Paint the menu tint before delegating to the base**, or it dims the text it marks; `CE_MenuItem`
   fills the row only when selected. Checked rows also go bold, so the cue is not colour alone.
+- **Resolve a cue's colour through `cueColorGroup()`, never the palette's current group.** The
+  current group turns `Inactive` while the window is not the active one, and KDE's
+  `[ColorEffects:Inactive] ChangeSelectionColor` mutes `Highlight` to near the button face there
+  (measured `#1b4155` on `#292c30`), so a cue drawn with the one-argument `color()` overload
+  disappears whenever the app loses focus. A cue marks state, not focus, so `Active` is pinned and
+  only the disabled dimming is kept.
 - **Never fill a checked button with `Highlight`** — `ink` drops to ~1.3:1 on it. A border over the
   untouched face keeps ~4.9:1.
 - **Menus resist style sheets:** Qt ignores `QMenu::item:checked`, and `QMenu::indicator` needs an
@@ -460,6 +487,26 @@ divides the scale by `pixelRatio`.
 Test HiDPI paths on a normal screen with `QT_SCALE_FACTOR=2 build/bin/qmapshack`, adding
 `QT_SCALE_FACTOR_ROUNDING_POLICY=PassThrough` for fractional factors like 1.5.
 
+### Applying a new viewport size
+
+A draw thread holds a reference to its buffer with the mutex unlocked, so the buffers cannot be
+rebuilt while it runs and a resize has to be deferred. `CCanvas::slotUpdateDrawContextViewport()` is
+the only path that applies size and pixel ratio, and three rules keep it honest:
+
+- **Never pass a size captured earlier.** It reads `size()`/`devicePixelRatio()` at apply time. A
+  retry runs long after the event that scheduled it, and a queued resize event for an intermediate
+  geometry is delivered *after* the synchronously sent event for the final one — the Windows
+  fullscreen → maximized sequence does exactly that.
+- **All or nothing** (`canResize()` before `resize()`). A partially applied resize leaves the layers
+  with different viewports, which shows as map content no longer matching the GIS overlay.
+- **`paintEvent()` reconciles.** A context left behind would never be noticed otherwise: a canvas
+  shown again at an unchanged geometry gets no resize event, so the divergence would survive panning,
+  zooming and view switches until the user drags a splitter.
+
+Retries come from `timerViewport` and from each context's `finished`. `print()` is the one caller
+that changes the size to something other than the canvas' own, so it must `waitForDrawContexts()`
+before *and* after — its second `draw()` pass restarts the threads.
+
 ---
 
 ## Icons
@@ -504,6 +551,16 @@ before doing anything. Only a commit carrying LF blobs fixes it.
 
 When the local branch is a strict ancestor of the incoming one and the only dirt is that CR churn,
 the merge is a fast-forward blocked by nothing real: `git reset --hard <remote>/<branch>`.
+
+The same trap runs the other way for `*.bat`/`*.cmd` (`text eol=crlf`): a blob committed with CRLF
+before the attribute existed reports permanently modified, because git normalises the working-tree
+copy to LF and compares against the CRLF blob. `git checkout` and `git stash` — including
+`rebase --autostash`, which leaves a half-built `.git/rebase-merge/` behind when it fails — cannot
+clear it. To rebase without committing anything, put `<path> -text` in `.git/info/attributes`
+(local, untracked, beats the tracked `.gitattributes`), rebase, delete it, then
+`rm <path> && git checkout -- <path>` so the file is re-materialised with the attribute's endings.
+`git ls-files --eol '*.bat'` lists the offenders: `i/crlf` is a blob still awaiting
+`git add --renormalize`. `msvc_64/build_routino.bat` is one.
 
 ### Nothing that stores an icon path may be pruned
 
