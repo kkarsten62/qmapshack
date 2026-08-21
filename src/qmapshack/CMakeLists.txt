@@ -182,6 +182,7 @@ set( SRCS
     helpers/CElevationDialog.cpp
     gis/search/CSearch.cpp
     helpers/CGdalVrtUtil.cpp
+    helpers/COverviewAdvisory.cpp
     helpers/CGdalZip.cpp
     helpers/CInputDialog.cpp
     helpers/CLimit.cpp
@@ -571,6 +572,7 @@ set( HDRS
     helpers/CElevationDialog.h
     helpers/CFileExt.h
     helpers/CGdalVrtUtil.h
+    helpers/COverviewAdvisory.h
     helpers/CGdalZip.h
     gis/search/CSearch.h
     helpers/CInputDialog.h
