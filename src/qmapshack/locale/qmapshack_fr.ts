@@ -3218,7 +3218,7 @@ Il est possible de personnaliser ces deux paramètres. Il est conseillé de choi
     <name>CGisSummarySetup</name>
     <message>
         <location filename="../gis/summary/CGisSummarySetup.cpp" line="36"/>
-        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, coping the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
+        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, copying the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9091,12 +9091,12 @@ The %3 original source file(s) are still in %4 - delete them yourself once you&a
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="858"/>
-        <source>Disable automatic synchonization with GPS device.</source>
+        <source>Disable automatic synchronization with GPS device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="861"/>
-        <source>Enable automatic synchonization with GPS device.</source>
+        <source>Enable automatic synchronization with GPS device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

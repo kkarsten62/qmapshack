@@ -119,9 +119,15 @@ void CMapItem::loadConfig(QSettings& cfg, bool triggerActivation) {
     setStatus(IMapItem::eStatus::Inactive);
     if (triggerActivation) {
       // Evil hack: If you activate the map directly Qt will crash internally.
+      // The owner has to be watched as well as the item: CMapDraw is destroyed with its canvas,
+      // while the CMapList holding this item only gets a deleteLater(), so a canvas closed within
+      // the delay leaves the item alive with a dangling map.
       QPointer<CMapItem> self(this);
-      QTimer::singleShot(100, this, [self, active]() {
-        if (!self.isNull()) self->activate(active);
+      QPointer<CMapDraw> owner(map);
+      QTimer::singleShot(100, this, [self, owner, active]() {
+        if (!self.isNull() && !owner.isNull()) {
+          self->activate(active);
+        }
       });
     }
   }
@@ -195,6 +201,11 @@ void CMapItem::deactivate() {
 bool CMapItem::activate() {
   QMutexLocker lock(&mutexActiveMaps);
 
+  // Activating an already active map has to take the setup widget out of the tree first. It belongs
+  // to the map file object, and setItemWidget() registered it with the view: deleting it while the
+  // view still holds it leaves a dangling index widget, which the next layout hides. deactivate()
+  // does this; activate() has to as well, or a second activation corrupts the view.
+  showChildren(false);
   delete mapfile;
 
   // load map by suffix

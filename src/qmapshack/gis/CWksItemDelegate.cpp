@@ -855,10 +855,10 @@ bool CWksItemDelegate::helpEventProject(const QPoint& pos, const QPoint& posGlob
     return true;
   } else if (layout.rectAutoSyncDev.contains(pos)) {
     if (item.isAutoSyncToDev()) {
-      QToolTip::showText(posGlobal, toRichText(tr("Disable automatic synchonization with GPS device.")), view, {},
+      QToolTip::showText(posGlobal, toRichText(tr("Disable automatic synchronization with GPS device.")), view, {},
                          3000);
     } else {
-      QToolTip::showText(posGlobal, toRichText(tr("Enable automatic synchonization with GPS device.")), view, {}, 3000);
+      QToolTip::showText(posGlobal, toRichText(tr("Enable automatic synchronization with GPS device.")), view, {}, 3000);
     }
     return true;
   } else if (layout.rectActiveProject.contains(pos)) {
@@ -899,7 +899,7 @@ bool CWksItemDelegate::helpEventItem(const QPoint& pos, const QPoint& posGlobal,
   const auto& layout = getRectanglesItem(opt, item);
 
   if (layout.rectName.contains(pos)) {
-    QToolTip::showText(posGlobal, item.getInfo(IWksItem::eFeatureShowName), view);
+    QToolTip::showText(posGlobal, item.getInfo(IWksItem::eFeatureShowName | IWksItem::eFeatureShowIcon), view);
     return true;
   } else if (layout.rectStatus.contains(pos)) {
     if (itemStatusControl.trk.flags == 0 && itemStatusControl.wpt.flags == 0 && itemStatusControl.rte.flags == 0 &&
@@ -911,7 +911,7 @@ bool CWksItemDelegate::helpEventItem(const QPoint& pos, const QPoint& posGlobal,
                  "setup. See menu->Workspace->Setup Workspace")),
           view, {}, 5000);
     } else {
-      QToolTip::showText(posGlobal, item.getInfo(IWksItem::eFeatureShowName), view);
+      QToolTip::showText(posGlobal, item.getInfo(IWksItem::eFeatureShowName | IWksItem::eFeatureShowIcon), view);
     }
     return true;
   } else if (layout.rectChanged.contains(pos)) {

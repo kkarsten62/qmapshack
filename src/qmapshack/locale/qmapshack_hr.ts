@@ -3217,7 +3217,7 @@ Možeš izmijeniti oba parametra kako biste prilagodili ponašanje filtera. Za u
     <name>CGisSummarySetup</name>
     <message>
         <location filename="../gis/summary/CGisSummarySetup.cpp" line="36"/>
-        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, coping the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
+        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, copying the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
         <translation>&lt;b&gt;O čemu se radi?&lt;/b&gt;&lt;br/&gt;Prilikom korištenja baze podataka, GIS stavke mogu se referencirati iz nekoliko projekata. Uobičajeni slučaj upotrebe je pohranjivanje podataka o turi u vlastitu mapu projekta. Dodatno, stavke se kopiraju (referenciraju) u mape koje sažimaju stavke određenog vremenskog razdoblja, npr. mjesečno, godišnje, ukupno. To možeš učiniti ručno učitavanjem sažetih projekata u radni prostor, kopiranjem stavki i spremanjem promjena. Ili možeš koristiti ovaj dijalog za definiranje mapa projekata u bazi podataka kao sažetih mapa i kopiranje stavki povlačenjem u područje za povlačenje i ispuštanje.</translation>
     </message>
     <message>
@@ -9109,12 +9109,12 @@ The %3 original source file(s) are still in %4 - delete them yourself once you&a
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="858"/>
-        <source>Disable automatic synchonization with GPS device.</source>
+        <source>Disable automatic synchronization with GPS device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="861"/>
-        <source>Enable automatic synchonization with GPS device.</source>
+        <source>Enable automatic synchronization with GPS device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
