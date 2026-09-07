@@ -1,3 +1,15 @@
+V1.21.1
+[QMS-1212] Update macOS build scripts
+[QMS-1215] Support MBTiles maps via GDAL's VRT driver on macOS
+[QMS-1221] Fix: Crash on exit leaves the workspace empty
+[QMS-1223] Fix: Crash when a map view is closed right after it was opened
+[QMS-1224] Fix: --locale switches the strings but not date and number formats
+[QMS-1227] Fix: Crash after activating a map that is already active
+[QMS-1229] Fix: Invalid and/or inaccurate elevation shading
+[QMS-1230] Fix: Configured DEM and MAPS are not preserved after a restart
+[QMS-1234] Reduce the minimum window size of the track details page
+[QMS-1237] Fix: Track information in the database view is empty for newly saved tracks
+
 V1.21.0
 [QMS-585] Preserve extra XML namespaces in GPX files
 [QMS-902] Add HiDPI support

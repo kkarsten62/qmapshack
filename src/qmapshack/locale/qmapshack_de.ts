@@ -3233,7 +3233,7 @@ Sie könne beide Parameter ändern, um den Filter anzupassen. Für den Abstand s
     <name>CGisSummarySetup</name>
     <message>
         <location filename="../gis/summary/CGisSummarySetup.cpp" line="36"/>
-        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, coping the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
+        <source>&lt;b&gt;What is this about?&lt;/b&gt;&lt;br/&gt;When using the database GIS items can be referenced by several projects. A common use-case is to store tour data in it&apos;s own project folder. Additionally the items are copied (referenced) into folders summarizing items of a certain time span, e.g. monthly, yearly, total. You can do this manually by loading the summary projects into the workspace, copying the items and saving the changes. Or you use this dialog to define project folders in the database as summary folders and copy the items by dragging them into the drag-n-drop area.</source>
         <translation>&lt;b&gt;Worum geht es?&lt;/b&gt;&lt;br/&gt;Wenn man eine Datenbank benutzt, können GIS Element in mehreren Projekten referenziert werden. Das wird üblicherweise dann gebraucht, wenn man Tourdaten in einem eigenen Projekt abspeichert und zudem die Elemente in einen anderen Ordner kopiert (referenziert), um alle Daten zu sammeln, z.B. nach Monat, Jahr oder gesamt. Man kann das selber machen, indem man die Sammelprojekte in den Arbeitsplatz lädt, die Elemente hineinkopiert und die Änderung speichert. Oder Sie benutzen diesen Dialog, um Projekte in der Datenbank anzugeben, in die Elemente kopiert werden, wenn sie über &quot;drag-n-drop&quot; auf die Sammelablage verschoben werden.</translation>
     </message>
     <message>
@@ -9325,12 +9325,12 @@ Die %3 ursprünglichen Quelldatei(en) befinden sich weiterhin in %4 - löschen S
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="858"/>
-        <source>Disable automatic synchonization with GPS device.</source>
+        <source>Disable automatic synchronization with GPS device.</source>
         <translation>Automatische Synchronization mit dem GPS Gerät ausschalten.</translation>
     </message>
     <message>
         <location filename="../gis/CWksItemDelegate.cpp" line="861"/>
-        <source>Enable automatic synchonization with GPS device.</source>
+        <source>Enable automatic synchronization with GPS device.</source>
         <translation>Automatische Synchronization mit dem GPS Gerät anschalten.</translation>
     </message>
     <message>
