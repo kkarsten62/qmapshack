@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source $QMSDEVDIR/qmapshack/MacOSX/config.sh   # check for important paramters
+source $QMSDEVDIR/qmapshack/MacOSX/config.sh   # check for important parameters
 
 # Directories for QMS
 SRC_RESOURCES_DIR=$SRC_OSX_DIR/resources
@@ -55,7 +55,7 @@ function buildIcon {
     sips -z 256 256   $SRC_RESOURCES_DIR/$APP_NAME.png --out $BUILD_BIN_DIR/$APP_NAME.iconset/icon_256x256.png
     sips -z 512 512   $SRC_RESOURCES_DIR/$APP_NAME.png --out $BUILD_BIN_DIR/$APP_NAME.iconset/icon_256x256@2x.png
     sips -z 512 512   $SRC_RESOURCES_DIR/$APP_NAME.png --out $BUILD_BIN_DIR/$APP_NAME.iconset/icon_512x512.png
-    cp -v            $SRC_RESOURCES_DIR/$APP_NAME.png       $BUILD_BIN_DIR/$APP_NAME.iconset/icon_512x512@2x.png
+    cp -v             $SRC_RESOURCES_DIR/$APP_NAME.png       $BUILD_BIN_DIR/$APP_NAME.iconset/icon_512x512@2x.png
     iconutil -c icns -o $BUILD_BIN_DIR/$APP_NAME.icns $BUILD_BIN_DIR/$APP_NAME.iconset
     # rm -r $BUILD_BIN_DIR/$APP_NAME.iconset
 }
@@ -212,7 +212,7 @@ function adjustLinking {
         fi
         # echo "--- Adjusting libs with references to $PACKAGES_PATH ---"
         adjustLinkDyLib $F
-        
+
     done
 
     adjustLinkQt $BUILD_BUNDLE_APP_FILE "Qt"
@@ -233,7 +233,7 @@ function adjustLinking {
 function adjustLinkDyLib {
     echo "adjustLinkDyLib >>> Adjusting dylibs of `basename $1`"
     F=$1 # file
-    
+
     # exclude symlinks
     if [ -L "$F" ]; then
         return
@@ -244,7 +244,7 @@ function adjustLinkDyLib {
         LIB=`basename $P`
         # 1. adjust libraries from the package path
         case "$P" in
-           "$PACKAGES_PATH"*) 
+           "$PACKAGES_PATH"*)
              PREL="@executable_path/../Frameworks/$LIB"
              echo "Changing $LIB to reference $PREL"
              sudo install_name_tool -change $P $PREL $F
@@ -267,7 +267,7 @@ function adjustLinkExtTool {
     for P in `otoolrecursive $1`
     do
 
-        LIB=${P##*/}    
+        LIB=${P##*/}
         LIB=${LIB%%:}
         PREL="@executable_path/../Frameworks/$LIB"
 
@@ -281,7 +281,7 @@ function adjustLinkExtTool {
                 echo "cp -v $P ../Frameworks/"
                 ;;
         esac
-   
+
         echo "install_name_tool -change $P $PREL `basename $1`"
         install_name_tool -change $P $PREL $1
     done
@@ -306,7 +306,7 @@ function adjustLinkQt {
                 ;;
         esac
 
-        LIB=${P##*/}    
+        LIB=${P##*/}
         LIB=${LIB%%:}
         PREL="@executable_path/../Frameworks/$LIB"
 
@@ -378,13 +378,13 @@ function checkLibraries {
 	DIR=${BUILD_BUNDLE_APP_FILE%/*}
 
     echo "--------------------"
-    echo "das File: $F"
+    echo "File: $F"
     echo "--------------------"
 
 	for P in `otool -L $F | awk '{print $1}'`
     do
         #echo $P
-        
+
     	if [[ "$P" == "@executable_path"* ]]; then
     		FREL=${P##@executable_path}
     		LIB=${DIR}${FREL}
@@ -396,7 +396,7 @@ function checkLibraries {
     	if [[ "$P" == "/"* && "$P" != "/System/Library/"* && "$P" != "/usr/lib/"* && "$P" != *":" ]]; then
     		echo "external library: $P"
     	fi
-        
+
     done
 }
 
@@ -412,15 +412,15 @@ function printLinking {
 function extractVersion {
     # Version CMakeList.txt
 
-    # set(APPLICATION_VERSION_MAJOR "1")
-    # set(APPLICATION_VERSION_MINOR "3")
-    # set(APPLICATION_VERSION_PATCH "0.libroutino")
+    # Example: set(APPLICATION_VERSION_MAJOR "1")
+    # Example: set(APPLICATION_VERSION_MINOR "3")
+    # Example: set(APPLICATION_VERSION_PATCH "0.libroutino")
     MAJOR_VERSION=$(sed -E -n 's/.*_VERSION_MAJOR.*([[:digit:]]+).*/\1/p' $QMS_SRC_DIR/src/$APP_NAME_LOWER/CMakeLists.txt)
     MINOR_VERSION=$(sed -E -n 's/.*_VERSION_MINOR.*([[:digit:]]+).*/\1/p' $QMS_SRC_DIR/src/$APP_NAME_LOWER/CMakeLists.txt)
     PATCH_VERSION=$(sed -E -n 's/.*_VERSION_PATCH.*([[:digit:]]+).*/\1/p' $QMS_SRC_DIR/src/$APP_NAME_LOWER/CMakeLists.txt)
 
     if [ -z "$MAJOR_VERSION" ]; then
-         # project(QMapShack VERSION 1.11.0)
+        # Example: project(QMapShack VERSION 1.11.0)
         MAJOR_VERSION=$(sed -E -n 's/.*QMapShack VERSION.*([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+).*/\1/p' $QMS_SRC_DIR/CMakeLists.txt)
         MINOR_VERSION=$(sed -E -n 's/.*QMapShack VERSION.*([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+).*/\2/p' $QMS_SRC_DIR/CMakeLists.txt)
         PATCH_VERSION=$(sed -E -n 's/.*QMapShack VERSION.*([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+).*/\3/p' $QMS_SRC_DIR/CMakeLists.txt)

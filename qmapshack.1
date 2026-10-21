@@ -2,22 +2,7 @@
 .SH NAME
 QMapShack \- GPS mapping (GeoTiff and vector) and GPSr management
 .SH SYNOPSIS
-\fBqmapshack\fP [\options\fP]
-[
-.B \-d
-|
-.B \-\-debug
-]
-[
-.B \-h
-|
-.B \-\-help
-]
-[
-.B \-n
-|
-.B \-\-no-splash
-]
+\fBqmapshack\fP [\fIoptions\fP]
 [
 .IR files ...
 ]
@@ -32,15 +17,42 @@ Main features:
   \- Handle data project-oriented.
 .SH OPTIONS
 .TP
-\fB\-d\fR, \fB\-\-debug\fR
-Run with debugging output.
-.TP
 \fB\-h\fR, \fB\-\-help\fR
-Displays the help message.
+Displays help on commandline options.
 .TP
-\fB\-n\fR, \fB\-\-no-splash\fR
-Start without splash screen.
+\fB\-\-help\-all\fR
+Displays help, including generic Qt options.
 .TP
+\fB\-v\fR, \fB\-\-version\fR
+Displays version information.
+.TP
+\fB\-n\fR, \fB\-\-no\-splash\fR
+Do not show splash screen.
+.TP
+\fB\-d\fR, \fB\-\-debug\fR
+Print debug output to console.
+.TP
+\fB\-f\fR, \fB\-\-logfile\fR
+Print debug output to logfile.
+.TP
+\fB\-c\fR, \fB\-\-config\fR \fIfile\fR
+File with QMapShack configuration.
+.TP
+\fB\-l\fR, \fB\-\-locale\fR \fIcode\fR
+Application locale.
+.TP
+\fB\-\-font\-family\fR \fIname\fR
+Application font family.
+.TP
+\fB\-\-font\-size\fR \fIsize\fR
+Application font size.
+.TP
+\fB\-\-style\fR \fIname\fR
+Qt style. Default on macOS and Windows: Fusion, elsewhere Qt's choice. \fB\-\-help\fR lists the styles this installation provides.
+.SH ARGUMENTS
+.TP
+.I files
+Files for future use.
 .SH SEE ALSO
 <https://github.com/Maproom/qmapshack/wiki/DocMain>.
 .SH AUTHOR

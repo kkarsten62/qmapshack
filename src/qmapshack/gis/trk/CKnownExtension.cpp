@@ -20,6 +20,7 @@
 
 #include <QStringBuilder>
 
+#include "gis/trk/surface/CSurface.h"
 #include "units/IUnit.h"
 
 const QString CKnownExtension::internalSlope = "ql:slope";
@@ -28,8 +29,13 @@ const QString CKnownExtension::internalSpeedTime = "ql:speedtime";
 const QString CKnownExtension::internalEle = "ql:ele";
 const QString CKnownExtension::internalProgress = "ql:progress";
 const QString CKnownExtension::internalTerrainSlope = "ql:terrainslope";
+const QString CKnownExtension::internalSurface = "ql:surface";
+const QString CKnownExtension::internalWayType = "ql:waytype";
+
+// KKA start
 const QString CKnownExtension::internalEnergyPower = "ql:energypower"; //KKA: new
 const QString CKnownExtension::internalEnergyTorque = "ql:energytorque"; //KKA: new
+// KKA end
 
 QHash<QString, CKnownExtension> CKnownExtension::knownExtensions;
 QSet<QString> CKnownExtension::registeredNS;
@@ -166,6 +172,16 @@ void CKnownExtension::initGarminFit(const IUnit& units, const QString& ns) {
 }
 
 void CKnownExtension::init(const IUnit& units) {
+  QList<category_t> surfaces;
+  for (qint32 i = 0; i < CSurface::eClassCount; i++) {
+    surfaces << category_t{CSurface::classColor(CSurface::class_e(i)), CSurface::className(CSurface::class_e(i))};
+  }
+  QList<category_t> wayTypes;
+  for (qint32 i = 0; i < CSurface::eWayCount; i++) {
+    wayTypes << category_t{CSurface::wayTypeColor(CSurface::waytype_e(i)),
+                           CSurface::wayTypeName(CSurface::waytype_e(i))};
+  }
+
   knownExtensions = {
       {internalSlope,
        {tr("Slope", "extShortName"), tr("Slope*"), -1, -90., 90., 1.,
@@ -193,9 +209,19 @@ void CKnownExtension::init(const IUnit& units) {
 
       {internalTerrainSlope,
        {tr("Terr. Slope", "extShortName"), tr("Terrain Slope*", "extLongName"), -1, 0, 90., 1., "°",
-        "://icons/CSrcSlope.svgt", true, false, getExtensionValueFunc(internalTerrainSlope)}}, //KKA: changed
+        "://icons/CSrcSlope.svgt", true, false, getExtensionValueFunc(internalTerrainSlope)}},
 
-  //KKA: new start
+      {internalSurface,
+       {tr("Surface", "extShortName"), tr("Surface*", "extLongName"), -1, 0., CSurface::eClassCount - 1, 1., "",
+        "://icons/CSrcSurface.svgt", true, true,
+        [](const CTrackData::trkpt_t& p) { return p.surfaceClass < 0 ? NOFLOAT : qreal(p.surfaceClass); }, surfaces}},
+
+      {internalWayType,
+       {tr("Way Type", "extShortName"), tr("Way Type*", "extLongName"), -1, 0., CSurface::eWayCount - 1, 1., "",
+        "://icons/CSrcWayType.svgt", true, true,
+        [](const CTrackData::trkpt_t& p) { return p.surfaceWay < 0 ? NOFLOAT : qreal(p.surfaceWay); }, wayTypes}},
+
+  // KKA start
       {internalEnergyPower,
        {tr("Power*", "extShortName"), tr("Power*", "extLongName"), -1, 0, 10000., 1., "Watt",
         "://icons/32x32/CSrcPower.png", true, false, getExtensionValueFunc(internalEnergyPower)}},
@@ -204,7 +230,7 @@ void CKnownExtension::init(const IUnit& units) {
        {tr("Torque*", "extShortName"), tr("Torque*", "extLongName"), -1, 0, 10000., 1., "Nm",
         "://icons/32x32/CSrcTorque.png", true, false, getExtensionValueFunc(internalEnergyTorque)}}
   };
-  //KKA: new end
+  //KKA end
 
   initGarminTPXv1(units, "gpxtpx");
   initGarminTPXv1(units, "tp1");
@@ -236,6 +262,9 @@ QString CKnownExtension::toString(qreal value, bool withName, const QString& key
   QString str;
   if (key == CKnownExtension::internalProgress) {
     return str;
+  } else if (isCategorical()) {
+    const qint32 idx = value == NOFLOAT ? -1 : qRound(value);
+    str = (idx >= 0 && idx < categories.size()) ? categories[idx].name : "-";
   } else if (key.contains("speed")) {
     QString v, u;
     IUnit::self().meter2speed(value, v, u);

@@ -24,6 +24,7 @@
 #include <QPen>
 #include <QPointer>
 #include <functional>
+#include <memory>
 
 #include "gis/IGisItem.h"
 #include "gis/IGisLine.h"
@@ -37,6 +38,7 @@
 
 #include "gis/trk/filter/CFilterSpeedCycle.h"
 #include "gis/trk/filter/CFilterSpeedHike.h"
+#include "gis/trk/surface/CSurfaceTrk.h"
 #include "helpers/CLimit.h"
 #include "helpers/CSmoothingSpline.h"
 #include "helpers/CValue.h"
@@ -118,6 +120,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @param project  The project this track belongs to
    */
   CGisItemTrk(CTrackData& trkdata, IGisProject* project);
+
   //KKA start
   CGisItemTrk(CTrackData& trkdata, CFitData& fitData, IGisProject* project);
   //KKA end
@@ -187,10 +190,14 @@ class CGisItemTrk : public IGisItem, public IGisLine {
 
   CEnergyCycling& getEnergyCycling() { return energyCycling; }
 
+  /** @brief surfaces and way types from the surface databases (see CSurfaceTrk) */
+  const CSurfaceTrk& getSurface() const { return *surface; }
+
   //KKA start
   const CEnergyCycling& getEnergyCycling() const { return energyCycling; }
   CFitData& getFitData() { return fitData; }
   //KKA end
+
 
   /// returns "true" when trk has no time-related invalid points
   bool isTrkTimeValid() const { return (allValidFlags & CTrackData::trkpt_t::eInvalidTime) == 0; }
@@ -279,9 +286,11 @@ class CGisItemTrk : public IGisItem, public IGisLine {
       @{
    */
  public:
+
   //KKA start
   void doUpdateExtremaAndExtensions(); //KKA: new
   //KKA end
+
   static const struct ColorizeSource unknownColorizeSource;
 
   /** @brief Set the colorize source to the source specified.
@@ -312,6 +321,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
  private:
   void drawColorized(QPainter& p) const;
   void drawColorizedByActivity(QPainter& p) const;
+  void drawColorizedByCategory(QPainter& p) const;
   void setPen(QPainter& p, QPen& pen, trkact_t act) const;
   /**@}*/
 
@@ -702,6 +712,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   QHash<QString, limits_t> extrema;
   void updateExtremaAndExtensions();
 
+  friend class CSurfaceTrk;
+  /** @brief a surface analysis finished or the surface databases changed */
+  void updateSurface();
+
   enum limit_type_e { eLimitTypeMin, eLimitTypeMax };
   void drawLimitLabels(limit_type_e type, const QString& label, const QPointF& pos, QPainter& p,
                        const QFontMetricsF& fm, QList<QRectF>& blockedAreas);
@@ -757,6 +771,7 @@ class CGisItemTrk : public IGisItem, public IGisLine {
      @return
    */
   const CTrackData& getTrackData() const { return trk; }
+
   //KKA start  
   CTrackData& getTrackData() { return trk; } //KKA: new for EnergyCycling, add power and torque to extensions
   //KKA end
@@ -813,6 +828,8 @@ class CGisItemTrk : public IGisItem, public IGisLine {
   qreal totalElapsedSecondsMoving = 0;
   quint32 numberOfAttachedWpt = 0;
   CEnergyCycling energyCycling{*this};
+
+  std::unique_ptr<CSurfaceTrk> surface = std::make_unique<CSurfaceTrk>(*this);
 
   //KKA start
   CFitDataV1 fitDataV1; //To be used to read the old data structure based on FIT API version 1

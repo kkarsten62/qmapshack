@@ -144,6 +144,16 @@ set( SRCS
     gis/trk/CTrkToAreaDialog.cpp
     gis/trk/CTrkToRteDialog.cpp
     gis/trk/CTrackData.cpp
+    gis/trk/surface/CPbfReader.cpp
+    gis/trk/surface/CSurface.cpp
+    gis/trk/surface/CSurfaceAnalyzer.cpp
+    gis/trk/surface/CSurfaceBar.cpp
+    gis/trk/surface/CSurfaceDb.cpp
+    gis/trk/surface/CSurfaceDbBuilder.cpp
+    gis/trk/surface/CSurfaceDbManager.cpp
+    gis/trk/surface/CSurfaceDbSet.cpp
+    gis/trk/surface/CSurfaceTrk.cpp
+    gis/trk/surface/CSurfaceWidget.cpp
     gis/trk/filter/CFilterChangeStartPoint.cpp
     gis/trk/filter/CFilterDelete.cpp
     gis/trk/filter/CFilterDeleteExtension.cpp
@@ -278,6 +288,7 @@ set( SRCS
     poi/CPoiDraw.cpp
     poi/CPoiFileItem.cpp
     poi/CPoiFilePOI.cpp
+    poi/CPoiFilePOIQuery.cpp
     poi/CPoiFilePOI_TagMap.cpp
     poi/CPoiIconCategory.cpp
     poi/CPoiItemPOI.cpp
@@ -325,6 +336,7 @@ set( SRCS
     tool/CImportDatabase.cpp
     tool/CMapVrtBuilder.cpp
     tool/CRoutinoDatabaseBuilder.cpp
+    tool/CSurfaceDatabaseBuilder.cpp
     tool/IToolShell.cpp
     units/CCoordFormatSetup.cpp
     units/CTimeZoneSetup.cpp
@@ -535,6 +547,16 @@ set( HDRS
     gis/trk/CTrkToAreaDialog.h
     gis/trk/CTrkToRteDialog.h
     gis/trk/CTrackData.h
+    gis/trk/surface/CPbfReader.h
+    gis/trk/surface/CSurface.h
+    gis/trk/surface/CSurfaceAnalyzer.h
+    gis/trk/surface/CSurfaceBar.h
+    gis/trk/surface/CSurfaceDb.h
+    gis/trk/surface/CSurfaceDbBuilder.h
+    gis/trk/surface/CSurfaceDbManager.h
+    gis/trk/surface/CSurfaceDbSet.h
+    gis/trk/surface/CSurfaceTrk.h
+    gis/trk/surface/CSurfaceWidget.h
     gis/trk/filter/CFilterChangeStartPoint.h
     gis/trk/filter/CFilterDelete.h
     gis/trk/filter/CFilterDeleteExtension.h
@@ -678,6 +700,7 @@ set( HDRS
     poi/CPoiDraw.h
     poi/CPoiFileItem.h
     poi/CPoiFilePOI.h
+    poi/CPoiFilePOIQuery.h
     poi/CPoiIconCategory.h
     poi/CPoiItemPOI.h
     poi/CPoiList.h
@@ -725,6 +748,7 @@ set( HDRS
     tool/CImportDatabase.h
     tool/CMapVrtBuilder.h
     tool/CRoutinoDatabaseBuilder.h
+    tool/CSurfaceDatabaseBuilder.h
     tool/IToolShell.h
     units/CCoordFormatSetup.h
     units/CTimeZoneSetup.h
@@ -1066,6 +1090,7 @@ target_link_libraries(${APPLICATION_NAME} PRIVATE
     qms_options
     svgticonengine
     Qt6::Widgets
+    Qt6::Concurrent
     # Nothing includes a QtSvg header: QIcon(":/x.svg") is served by the qsvg image plugin and
     # the qsvgicon icon engine, both loaded at runtime. Linking the module is what makes
     # windeployqt/macdeployqt detect and ship those plugins. Linux distros package them anyway.
@@ -1119,4 +1144,11 @@ if(WIN32)
         NO_UNSUPPORTED_PLATFORM_ERROR
     )
     install(SCRIPT ${deploy_script_${APPLICATION_NAME}})
+endif()
+
+###############################################################################################
+# Unit tests
+###############################################################################################
+if(BUILD_TESTING)
+    add_subdirectory(gis/trk/surface/test)
 endif()

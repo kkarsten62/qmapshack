@@ -36,6 +36,28 @@ class IAppSetup : public QObject {
   void initLogHandler();
   void processArguments();
 
+  /**
+     @brief Export a `--locale` option to the environment
+
+     Desktop integrations translate their own contributions to the GUI - on KDE the standard button
+     labels - through catalogs they pick by `LANGUAGE`, and they load them while the platform plugin
+     comes up, inside the `QApplication` constructor. So this has to run before it, from `main()`, or
+     `--locale` leaves those strings in the desktop's language.
+
+     @param argc the argument count as passed to `main()`
+     @param argv the argument list as passed to `main()`
+   */
+  static void exportLocaleEnv(int argc, char** argv);
+
+  /**
+     @brief Export the platform's preferred Qt style to the environment
+
+     Sets `QT_STYLE_OVERRIDE` to `defaultStyle()` unless the user already set it. Qt ranks a `-style`
+     argument above the variable, so an explicit choice still wins. This has to run before
+     `QApplication` is created, which is when Qt picks the style.
+   */
+  void exportStyleEnv();
+
   virtual QString defaultCachePath() = 0;
   virtual QString userDataPath(QString subdir = 0) = 0;
   virtual QString logDir() = 0;
@@ -151,12 +173,28 @@ class IAppSetup : public QObject {
   void sigSetupChanged();
 
  protected:
+  /**
+     @brief The Qt style this platform prefers over Qt's default
+
+     @return the style name, or an empty string to keep Qt's choice
+   */
+  virtual QString defaultStyle() { return {}; }
+
   static IAppSetup* pSelf;
 
   IAppSetup(QObject* parent) : QObject(parent) { pSelf = this; }
 
   void prepareGdal(QString gdalDataDir, QString gdalPluginsDir, QString projDataDir);
-  void prepareTranslator(QString translationPath, QString translationPrefix);
+  /**
+     @brief Install the Qt and application translators for the effective locale
+
+     The application catalog decides: without one for the locale Qt's catalog is not loaded either.
+
+     @param appPath the directory holding the application's `.qm` files
+     @param appPrefix the application catalog prefix including the trailing underscore
+     @param qtPath the directory holding Qt's `.qm` files
+   */
+  void prepareTranslators(const QString& appPath, const QString& appPrefix, const QString& qtPath);
   void prepareToolPaths();
 
   QString path(QString path, QString subdir, bool mkdir, QString debugName);

@@ -4,11 +4,11 @@ QMapTool - Creating Raster Maps
 .br
 
 .SH "SYNOPSIS"
-\fBqmaptool\fR\fB [ -d \fR| \fB--debug \fR] [ \fB-h \fR| \fB--help \fR] [ \fB-n \fR| \fB--no-splash \fR]
+\fBqmaptool\fR [\fIoptions\fR]
 .br
 
 .SH "DESCRIPTION"
-A tool to process and referecne scanned paper maps
+A tool to process and reference scanned paper maps
 .br
 
 Main features:
@@ -21,21 +21,39 @@ Main features:
 .br
 
 .SH "OPTIONS"
-\fB-d\fR, \fB--debug\fR
-.br
-       Run with debugging output.
-.br
-
-\fB-h\fR, \fB--help\fR
-.br
-       Displays the help message.
-.br
-
-\fB-n, --no-splash\fR
-.br
-       Start without splash screen.
-.br
-
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Displays help on commandline options.
+.TP
+\fB\-\-help\-all\fR
+Displays help, including generic Qt options.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Displays version information.
+.TP
+\fB\-n\fR, \fB\-\-no\-splash\fR
+Do not show splash screen.
+.TP
+\fB\-d\fR, \fB\-\-debug\fR
+Print debug output to console.
+.TP
+\fB\-f\fR, \fB\-\-logfile\fR
+Print debug output to logfile.
+.TP
+\fB\-c\fR, \fB\-\-config\fR \fIfile\fR
+File with QMapTool configuration.
+.TP
+\fB\-l\fR, \fB\-\-locale\fR \fIcode\fR
+Application locale.
+.TP
+\fB\-\-font\-family\fR \fIname\fR
+Application font family.
+.TP
+\fB\-\-font\-size\fR \fIsize\fR
+Application font size.
+.TP
+\fB\-\-style\fR \fIname\fR
+Qt style. Default on macOS and Windows: Fusion, elsewhere Qt's choice. \fB\-\-help\fR lists the styles this installation provides.
 .SH "SEE ALSO"
 https://github.com/Maproom/qmapshack/wiki/DocMain
 .br
