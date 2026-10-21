@@ -135,16 +135,16 @@ void CFit2Project::decodeFile(const QString& filename) {
   //   segment.pts.last().desc = QString("Seg=%1 #=%2 Last").arg(i).arg(segment.pts.count());
   // }
 
-  //KKA start
+  // KKA start
   //new CGisItemTrk(track, this);
   fitData.setSessionComment(track.name);
   new CGisItemTrk(track, fitData, this);
-  //KKA end
+  // KKA end
 
   track = CTrackData();
-  //KKA start
+  // KKA start
   fitData = CFitData();
-  //KKA end
+  // KKA end
 }
 
 void CFit2Project::OnMesg(fit::Mesg& mesg) {
@@ -161,7 +161,7 @@ void CFit2Project::OnMesg(fit::Mesg& mesg) {
 }
 
 void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
-//KKA start
+// KKA start
   if (mesg.IsManufacturerValid()) {
     manufacturer = mesg.GetManufacturer();
     fitData.setIsValid(true);
@@ -169,7 +169,7 @@ void CFit2Project::OnMesg(fit::FileIdMesg& mesg) {
   if (mesg.IsProductValid()) {
     product = mesg.GetProduct();
   }
-//KKA end
+// KKA end
 }
 
 void CFit2Project::OnMesg(fit::DeviceInfoMesg& mesg) {
@@ -231,7 +231,7 @@ void CFit2Project::OnMesg(fit::ActivityMesg& mesg) {
 }
 
 void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
-  //KKA start
+  // KKA start
   //2026-02-27 To check if this is needed
   //if (recordType == eRecordType::Course) {
   //  return;
@@ -355,7 +355,7 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
     session.energy = mesg.GetTotalCalories(); // uint16, kcal
   }
   fitData.setLap(fitData.getNoOfLaps(), session); //Set the session always at the end of laps list
-  //KKA end
+  // KKA end
   /*
   QString comment = "<div><b>Device Activity Statistics:</b><br/>";
   QString val, unit;
@@ -413,7 +413,7 @@ void CFit2Project::OnMesg(fit::SessionMesg& mesg) {
 }
 
 void CFit2Project::OnMesg(fit::LapMesg& mesg) {
-  //KKA start
+  // KKA start
   //2026-02-27 To check if this is needed
   //if (recordType == eRecordType::Course) {
   //  return;
@@ -549,9 +549,9 @@ void CFit2Project::OnMesg(fit::CourseMesg& mesg) {
   if (mesg.IsNameValid()) {
     track.name = QString::fromStdWString(mesg.GetName());
   }
-  //KKA start
+  // KKA start
   fitData.setIsValid(false);
-  //KKA end
+  // KKA end
 }
 
 constexpr int kNumKnownSymbols = 26;

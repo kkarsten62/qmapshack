@@ -772,9 +772,10 @@ class CGisItemTrk : public IGisItem, public IGisLine {
    */
   const CTrackData& getTrackData() const { return trk; }
 
-  //KKA start  
+  //KKA start
   CTrackData& getTrackData() { return trk; } //KKA: new for EnergyCycling, add power and torque to extensions
   //KKA end
+
   void updateFromDB(quint64 id, QSqlDatabase& db) override;
 
  private:

@@ -1,3 +1,4 @@
+.qtcreator/
 CMakeLists.txt.user
 .mypy_cache
 *build*

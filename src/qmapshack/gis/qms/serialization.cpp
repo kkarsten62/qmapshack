@@ -29,11 +29,11 @@
 #include "helpers/CThread.h"
 #include "helpers/CValue.h"
 
-//KKA start
+// KKA start
 //#define VER_TRK quint8(7) //The official trk version
 //#define VER_TRK quint8(100) //100 = FitData version 1 based on old FIT API
 #define VER_TRK quint8(101) //101 = FitData version 2 based on new FIT API from May 2025
-//KKA end
+// KKA end
 
 #define VER_WPT quint8(4)
 #define VER_RTE quint8(4)
@@ -55,7 +55,7 @@
 #define VER_ITEM quint8(3)
 #define VER_CVALUE quint8(1)
 #define VER_CLIMIT quint8(1)
-#define VER_ENERGYCYCLE quint8(3) //KKA changed, version 2 cranklength added, version 3 createExtensions added
+#define VER_ENERGYCYCLE quint8(3) // KKA changed, version 2 cranklength added, version 3 createExtensions added
 
 // KKA start
 //#define VER_FITDATA quint8(1) //FIT data based on FIT API version 1
@@ -485,7 +485,7 @@ QDataStream& operator>>(QDataStream& stream, CLimit& l) {
   return stream;
 }
 
-//KKA start
+// KKA start
 QDataStream& operator<<(QDataStream& stream, const CEnergyCycling::energy_set_t& e) {
   stream << VER_ENERGYCYCLE << e.driverWeight << e.bikeWeight << e.airDensity << e.windSpeedIndex << e.windSpeed
          << e.windPositionIndex << e.frontalArea << e.windDragCoeff << e.groundIndex << e.rollingCoeff << e.pedalCadence
@@ -506,9 +506,9 @@ QDataStream& operator>>(QDataStream& stream, CEnergyCycling::energy_set_t& e) {
   }
   return stream;
 }
-//KKA end
+// KKA end
 
-//KKA start
+// KKA start
 //FIT version 1
 QDataStream& operator>>(QDataStream& stream, CFitDataV1& f) //Read
 {
@@ -569,7 +569,7 @@ QDataStream& operator>>(QDataStream& stream, CFitData::lap_t& l) //Read
       >> l.work >> l.energy;
   return stream;
 }
-//KKA end
+// KKA end
 
 // ---------------- main objects ---------------------------------
 
@@ -602,9 +602,9 @@ QDataStream& CGisItemTrk::operator>>(QDataStream& stream) const {
 
   out << energyCycling.getEnergyTrkSet();
 
-  //KKA start
+  // KKA start
   out << fitData;
-  //KKA end
+  // KKA end
 
   out << trk.segs;
 
@@ -687,14 +687,14 @@ QDataStream& CGisItemTrk::operator<<(QDataStream& stream) {
     energyCycling.setEnergyTrkSet(set, false);
   }
 
-  //KKA start
+  // KKA start
   if(version == 100) //Read from old FIT version 1
   {
     in >> fitDataV1;
   } else if (version == 101) { //Read from new FIT version 2 from May 2025
     in >> fitData;
   }
-  //KKA end
+  // KKA end
 
   trk.segs.clear();
   in >> trk.segs;

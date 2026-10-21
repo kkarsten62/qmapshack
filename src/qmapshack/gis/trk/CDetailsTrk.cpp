@@ -812,7 +812,7 @@ void CDetailsTrk::slotSetEnergyCycling() {
   }
 }
 
-//KKA start
+// KKA start
 void CDetailsTrk::slotHeartRateZones()
 {
   CHeartRateZonesDialog heartRateZonesDialog(this, trk);
@@ -839,7 +839,7 @@ void CDetailsTrk::slotFitData()
     //trk.updateVisuals(CGisItemTrk::eVisualDetails, "CDetailsTrk::slotSetEnergyCycling()");
     trk.updateHistory(CGisItemTrk::eVisualDetails);
   }
-//KKA end
+// KKA end
 }
 
 void CDetailsTrk::setupGraph(CPlot* plot, const CLimit& limit, const QString& source, QDoubleSpinBox* spinMin,
