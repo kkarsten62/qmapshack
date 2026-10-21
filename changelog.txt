@@ -1,3 +1,19 @@
+V1.XX.X
+[QMS-1242] Fix: Qt's strings are translated for languages QMapShack is not translated to
+[QMS-1243] Fix: Windows build breaks when clang-format sorts the Win32 includes
+[QMS-1244] Document all command line options in the man pages
+[QMS-1261] Display hours always as two digits in log output
+[QMS-1263] Folder msvc_64 maintenance
+[QMS-1268] Fix: Crash when opening a copy of a QMS project
+[QMS-1269] Use Qt style Fusion by default on macOS and Windows
+[QMS-1274] Pass QMS look-and-feel to internally called QMT
+[QMS-1276] macOS build scripts maintenance
+[QMS-1278] More macOS build scripts maintenance
+[QMS-1280] Show surfaces and way types of tracks from OpenStreetMap data
+[QMS-1281] Support Mapsforge POI files of version 3 and 4
+[QMS-1289] Include standalone tool qms_surfacedb into QMapShack.app on macOS
+[QMS-1291] Fix: CMake problem with the dev version on Arch Linux
+
 V1.21.1
 [QMS-1212] Update macOS build scripts
 [QMS-1215] Support MBTiles maps via GDAL's VRT driver on macOS

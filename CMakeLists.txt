@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.20.0)
 # Define project name and version tags
 ###############################################################################################
 # this is not only the QMS version it will be the package version, too.
-project(QMapShack VERSION 1.21.1 LANGUAGES CXX)
+project(QMapShack VERSION 1.21.1 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # CMAKE_CXX_EXTENSIONS is left at its default ON: the UNIX warning set asks for -fms-extensions,
@@ -71,6 +71,7 @@ option(BUILD_FOR_LOCAL_SYSTEM "Build for local system ONLY (resulting binary mig
 # Off by default on purpose: only a build that is deliberately refreshing the catalogs may run
 # lupdate and rewrite the tracked .ts files.
 option(UPDATE_TRANSLATIONS "Update translation files" OFF)
+option(BUILD_TESTING "Build the unit tests (run them with ctest)" OFF)
 option(UPDATE_TRANSLATIONS_PURGE_OBSOLETE "Remove obsolete translations" OFF)
 
 
@@ -168,6 +169,7 @@ qms_add_flag_if_supported(-Woverloaded-virtual)
 ###############################################################################################
 # Core5Compat provides QTextCodec, which decodes the Garmin codepages QStringConverter cannot.
 find_package(Qt6 6.8 REQUIRED COMPONENTS
+    Concurrent
     Core
     Core5Compat
     Help
@@ -215,6 +217,11 @@ endif()
 
 if(USE_QT6DBus)
     find_package(Qt6 REQUIRED COMPONENTS DBus)
+endif()
+
+if(BUILD_TESTING)
+    find_package(Qt6 REQUIRED COMPONENTS Test)
+    enable_testing()
 endif()
 
 # Everything included. Let's finetune the mess a bit more
@@ -301,6 +308,7 @@ add_subdirectory(src/common/svgticon)
 
 if(BUILD_QMAPSHACK)
 add_subdirectory(src/qmapshack)
+add_subdirectory(src/qms_surfacedb)
 endif(BUILD_QMAPSHACK)
 
 if(BUILD_QMAPTOOL)
@@ -318,6 +326,7 @@ if(BUILD_QMAPSHACK)
     install( FILES        src/icons/48x48/QMapShack.png     DESTINATION     ${DATA_INSTALL_PREFIX}/pixmaps )
     install( DIRECTORY    src/icons/qmapshack/hicolor       DESTINATION     ${ICON_INSTALL_DIR} )
     install( FILES        qmapshack.1                       DESTINATION     ${MAN_INSTALL_DIR}/man1  )
+    install( FILES        qms_surfacedb.1                   DESTINATION     ${MAN_INSTALL_DIR}/man1  )
     install( FILES        src/qmapshack/doc/QMSHelp.qhc     DESTINATION     ${HTML_INSTALL_DIR})
     install( FILES        src/qmapshack/doc/QMSHelp.qch     DESTINATION     ${HTML_INSTALL_DIR})
 endif(BUILD_QMAPSHACK)
